@@ -1,0 +1,52 @@
+<!-- Smoking cessation data from Lu & Ades (2006), Table 1. -->
+<network description="Smoking cessation rates">
+	<treatments>
+		<treatment id="A">No Contact</treatment>
+		<treatment id="B">Self-help</treatment>
+		<treatment id="C">Individual Counseling</treatment>
+		<treatment id="D">Group Counseling</treatment>
+	</treatments>
+	<studies>
+		<study id="1">
+			<measurement treatment="A" responders="9" sample="140" />
+			<measurement treatment="C" responders="23" sample="140" />
+			<measurement treatment="D" responders="10" sample="138" />
+		</study>
+		<study id="2">
+			<measurement treatment="B" responders="11" sample="78" />
+			<measurement treatment="C" responders="12" sample="85" />
+			<measurement treatment="D" responders="29" sample="170" />
+		</study>
+		<study id="3">
+			<measurement treatment="A" responders="79" sample="702" />
+			<measurement treatment="B" responders="77" sample="694" />
+		</study>
+		<study id="4">
+			<measurement treatment="A" responders="18" sample="671" />
+			<measurement treatment="B" responders="21" sample="535" />
+		</study>
+		<!-- NOT INPUT: 5 -->
+		<study id="6">
+			<measurement treatment="A" responders="75" sample="731" />
+			<measurement treatment="C" responders="363" sample="714" />
+		</study>
+		<!-- NOT INPUT: 7-19 -->
+		<study id="20">
+			<measurement treatment="A" responders="0" sample="20" />
+			<measurement treatment="D" responders="9" sample="20" />
+		</study>
+		<study id="21">
+			<measurement treatment="B" responders="20" sample="49" />
+			<measurement treatment="C" responders="16" sample="43" />
+		</study>
+		<study id="22">
+			<measurement treatment="B" responders="7" sample="66" />
+			<measurement treatment="D" responders="32" sample="127" />
+		</study>
+		<study id="23">
+			<measurement treatment="C" responders="12" sample="76" />
+			<measurement treatment="D" responders="20" sample="74" />
+		</study>
+		<!-- NOT INPUT: 24 -->
+	</studies>
+</network>
