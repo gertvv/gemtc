@@ -30,9 +30,20 @@ class SpanningTreeEnumeratorTest extends ShouldMatchersForJUnit {
 
 		val ts = Set[Graph[String]](t1, t2, t3, t4)
 
-		val found = Set[Graph[String]]() ++
-			SpanningTreeEnumerator.treeEnumerator(g, "A")
+		val found = SpanningTreeEnumerator.treeEnumerator(g, "A").toList
+		(Set[Graph[String]]() ++ found).size should be (found.size)
+		(Set[Graph[String]]() ++ found) should be (ts)
+	}
 
-		found should be (ts)
+	@Test def testEnumerateUndirected() {
+		val g = new UndirectedGraph[String](Set[(String, String)](
+				("A", "B"), ("A", "C"), ("A", "D"),
+				("B", "C"), ("B", "D"),
+				("C", "D")
+			))
+
+		val found = SpanningTreeEnumerator.treeEnumerator(g, "A").toList
+		(Set[Graph[String]]() ++ found).size should be (found.size)
+		found.size should be (16)
 	}
 }

@@ -11,12 +11,16 @@ object SpanningTreeEnumerator {
 	/**
 	 * Enumerate all spanning trees of the undirected graph g.
 	 */
-	def treeEnumerator[T](g: UndirectedGraph[T]): Iterable[Graph[T]] = null
+	def treeEnumerator[T <% Ordered[T]](g: UndirectedGraph[T])
+	:Iterable[Graph[T]] =
+	g.vertexSet.find(_ => true) match {
+			case None => Nil
+			case Some(r) => treeEnumerator(g, r)
+	}
 
 	private def grow[T](g: Graph[T], t: Graph[T], f: List[(T, T)],
 			l: Option[Graph[T]],
 			complete: Graph[T] => Boolean): List[Graph[T]] = {
-		println("G = " + g + "; T = " + t + "; F = " + f)
 		if (complete(t)) List(t)
 		else if (f.isEmpty) Nil
 		else {
