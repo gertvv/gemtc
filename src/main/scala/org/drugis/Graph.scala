@@ -7,9 +7,13 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 	def union(other: Graph[T]) =
 		if (other canEqual this) new Graph[T](edgeSet ++ other.edgeSet)
 		else throw new IllegalArgumentException
+
 	def intersection(other: Graph[T]) = 
 		if (other canEqual this) new Graph[T](edgeSet ** other.edgeSet)
 		else throw new IllegalArgumentException
+
+	def add(e: (T, T)): Graph[T] = new Graph[T](edgeSet + e)
+	def remove(e: (T, T)): Graph[T] = new Graph[T](edgeSet - e)
 
 	def edgeVector: List[(T, T)] =
 		edgeSet.toList.sort((a, b) =>
@@ -23,6 +27,9 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 	def containsEdge(e: (T, T)): Boolean = {
 		edgeSet.contains(e)
 	}
+
+	def edgesFrom(v: T): Set[(T, T)] = edgeSet.filter(e => e._1 == v)
+	def edgesTo(v: T): Set[(T, T)] = edgeSet.filter(e => e._2 == v)
 
 	override def equals(other: Any) = other match {
 		case that: Graph[_] => 
@@ -53,8 +60,22 @@ extends Graph[T](edges.map(e => UndirectedGraph.order(e))) {
 			new UndirectedGraph[T](edgeSet ** other.edgeSet)
 		else throw new IllegalArgumentException
 
+	override def add(e: (T, T)): UndirectedGraph[T] =
+		new UndirectedGraph[T](edgeSet + UndirectedGraph.order(e))
+
+	override def remove(e: (T, T)): UndirectedGraph[T] =
+		new UndirectedGraph[T](edgeSet - UndirectedGraph.order(e))
+
 	override def containsEdge(e: (T, T)): Boolean =
 		super.containsEdge(UndirectedGraph.order(e))
+
+	override def edgesFrom(v: T): Set[(T, T)] =
+		super.edgesFrom(v) ++ super.edgesTo(v).map(invert)
+
+	override def edgesTo(v: T): Set[(T, T)] =
+		super.edgesTo(v) ++ super.edgesFrom(v).map(invert)
+
+	private def invert(e: (T, T)) = (e._2, e._1)
 
 	override def equals(other: Any) = other match {
 		case that: UndirectedGraph[_] =>

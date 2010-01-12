@@ -68,6 +68,42 @@ class GraphTest extends ShouldMatchersForJUnit {
 		g1 should not be (g3)
 		assert(g1.canEqual(g3))
 	}
+
+	@Test def testAdd() {
+		val g1 = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C")))
+		val e = ("A", "C")
+		val g2 = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+
+		g1.add(e) should be (g2)
+	}
+
+	@Test def testRemove() {
+		val g1 = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C")))
+		val e = ("A", "C")
+		val g2 = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+
+		g2.remove(e) should be (g1)
+	}
+
+	@Test def testEdgesFrom() {
+		val g = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+		val es = Set[(String, String)](("A", "B"), ("A", "C"))
+
+		g.edgesFrom("A") should be (es)
+	}
+
+	@Test def testEdgesTo() {
+		val g = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+		val es = Set[(String, String)](("A", "B"))
+
+		g.edgesTo("B") should be (es)
+	}
 }
 
 class UndirectedGraphTest extends ShouldMatchersForJUnit {
@@ -140,5 +176,41 @@ class UndirectedGraphTest extends ShouldMatchersForJUnit {
 	@Test def testOrderEdge() {
 		UndirectedGraph.order(("A", "B")) should be (("A", "B"))
 		UndirectedGraph.order(("B", "A")) should be (("A", "B"))
+	}
+
+	@Test def testAdd() {
+		val g1 = new UndirectedGraph[String](
+			Set[(String, String)](("A", "B"), ("B", "C")))
+		val g2 = new UndirectedGraph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+
+		g1.add(("A", "C")) should be (g2)
+		g1.add(("C", "A")) should be (g2)
+	}
+
+	@Test def testRemove() {
+		val g1 = new UndirectedGraph[String](
+			Set[(String, String)](("A", "B"), ("B", "C")))
+		val g2 = new UndirectedGraph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+
+		g2.remove(("A", "C")) should be (g1)
+		g2.remove(("C", "A")) should be (g1)
+	}
+
+	@Test def testEdgesFrom() {
+		val g = new UndirectedGraph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+		val es = Set[(String, String)](("B", "A"), ("B", "C"))
+
+		g.edgesFrom("B") should be (es)
+	}
+
+	@Test def testEdgesTo() {
+		val g = new UndirectedGraph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+		val es = Set[(String, String)](("A", "B"), ("C", "B"))
+
+		g.edgesTo("B") should be (es)
 	}
 }
