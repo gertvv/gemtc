@@ -28,8 +28,11 @@ class SpanningTreeEnumeratorTest extends ShouldMatchersForJUnit {
 				("A", "C"), ("C", "B"), ("B", "D")
 			))
 
-		val ts = List[Graph[String]](t1, t2, t3, t4)
+		val ts = Set[Graph[String]](t1, t2, t3, t4)
 
-		SpanningTreeEnumerator.treeEnumerator(g, "A").toList should be (ts)
+		val found = Set[Graph[String]]() ++
+			SpanningTreeEnumerator.treeEnumerator(g, "A")
+
+		found should be (ts)
 	}
 }

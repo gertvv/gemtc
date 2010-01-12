@@ -45,6 +45,8 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 	private def vertices(edges: Set[(T, T)]): Set[T] = {
 		edges.flatMap(e => List(e._1, e._2))
 	}
+
+	override def toString = edgeSet.toString
 }
 
 class UndirectedGraph[T <% Ordered[T]](edges: Set[(T, T)])
