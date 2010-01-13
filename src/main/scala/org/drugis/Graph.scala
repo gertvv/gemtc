@@ -42,11 +42,13 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 
 	override def hashCode = edgeSet.hashCode
 
-	private def vertices(edges: Set[(T, T)]): Set[T] = {
+	protected def vertices(edges: Set[(T, T)]): Set[T] = {
 		edges.flatMap(e => List(e._1, e._2))
 	}
 
 	override def toString = edgeSet.toString
+
+	def directedGraph: Graph[T] = this
 }
 
 class UndirectedGraph[T <% Ordered[T]](edges: Set[(T, T)])
@@ -87,10 +89,20 @@ extends Graph[T](edges.map(e => UndirectedGraph.order(e))) {
 	}
 
 	override def canEqual(other: Any) = other.isInstanceOf[UndirectedGraph[_]]
+
+	override def directedGraph: Graph[T] = 
+		new Graph[T](
+			edgeSet.map(e => Set(e, invert(e))).reduceLeft((a, b) => a ++ b)
+		)
 }
 
 object UndirectedGraph {
 	def order[T <% Ordered[T]](e: (T, T)): (T, T) = 
 		if (e._1 <= e._2) e
 		else (e._2, e._1)
+}
+
+class Tree[T <% Ordered[T]](edges: Set[(T, T)], val root: T)
+extends Graph[T](edges) {
+	override val vertexSet = vertices(edges) + root
 }

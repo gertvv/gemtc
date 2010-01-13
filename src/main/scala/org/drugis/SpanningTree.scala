@@ -4,9 +4,16 @@ object SpanningTreeEnumerator {
 	/**
 	 * Enumerate all spanning trees of g rooted at r.
 	 */
-	def treeEnumerator[T <% Ordered[T]](g: Graph[T], r: T): Iterable[Graph[T]] = 
-		grow(g, new Graph[T](Set[(T, T)]()), g.edgesFrom(r).toList,
-			None, (t : Graph[T]) => t.vertexSet == g.vertexSet)
+	def treeEnumerator[T <% Ordered[T]](g: Graph[T], r: T)
+	: Iterable[Graph[T]] =  {
+		println(g.directedGraph)
+		grow(g.directedGraph, // algorithm requires a directed graph
+			new Graph[T](Set[(T, T)]()), // the result tree so far
+			g.edgesFrom(r).toList, // the fringe of nodes
+			None, // the last found tree
+			(t : Graph[T]) => t.vertexSet == g.vertexSet // complete(t)
+		)
+	}
 
 	/**
 	 * Enumerate all spanning trees of the undirected graph g.
@@ -18,6 +25,9 @@ object SpanningTreeEnumerator {
 			case Some(r) => treeEnumerator(g, r)
 	}
 
+	/**
+	 * Enumerate all spanning trees of g (root: r) containing t (root: r)
+	 */
 	private def grow[T](g: Graph[T], t: Graph[T], f: List[(T, T)],
 			l: Option[Graph[T]],
 			complete: Graph[T] => Boolean): List[Graph[T]] = {
@@ -35,12 +45,15 @@ object SpanningTreeEnumerator {
 		}
 	}
 
+	/**
+	 * Enumerate all spanning trees in g that contain t + e
+	 */
 	private def deepen[T](g: Graph[T], t: Graph[T], f: List[(T, T)], e: (T, T),
 			l: Option[Graph[T]],
 			complete: Graph[T] => Boolean): List[Graph[T]] = {
 		val v = e._2
 		val t1 = t.add(e)
-		val f1 = (g.edgesFrom(v).filter(x => !t1.vertexSet.contains(x._2) && !f.contains(x)).toList ::: f).filter(x => x._2 != v)
+		val f1 = (g.edgesFrom(v).filter(x => !t1.vertexSet.contains(x._2) && !f.contains(x)).toList ::: f).filter(x => x._2 != v || !t1.vertexSet.contains(x._1))
 		grow(g, t1, f1, l, complete)
 	}
 
