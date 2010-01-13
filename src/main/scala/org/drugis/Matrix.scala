@@ -105,4 +105,13 @@ class Matrix[T](_elements: List[List[T]]) {
 	}
 
 	override def toString = elements.toString
+
+	override def equals(other: Any) = other match {
+		case that: Matrix[_] =>
+			(that canEqual this) &&
+			this.elements == that.elements
+		case _ => false
+	}
+
+	def canEqual(other: Any) = other.isInstanceOf[Matrix[_]]
 }
