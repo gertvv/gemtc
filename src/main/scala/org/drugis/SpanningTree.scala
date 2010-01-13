@@ -5,15 +5,13 @@ object SpanningTreeEnumerator {
 	 * Enumerate all spanning trees of g rooted at r.
 	 */
 	def treeEnumerator[T <% Ordered[T]](g: Graph[T], r: T)
-	: Iterable[Graph[T]] =  {
-		println(g.directedGraph)
+	: Iterable[Graph[T]] = 
 		grow(g.directedGraph, // algorithm requires a directed graph
 			new Graph[T](Set[(T, T)]()), // the result tree so far
 			g.edgesFrom(r).toList, // the fringe of nodes
 			None, // the last found tree
 			(t : Graph[T]) => t.vertexSet == g.vertexSet // complete(t)
 		)
-	}
 
 	/**
 	 * Enumerate all spanning trees of the undirected graph g.
@@ -61,7 +59,7 @@ object SpanningTreeEnumerator {
 	l match {
 		case None => throw new IllegalStateException
 		case Some(t) =>
-			g.edgesTo(v).map(x => x._1).exists(w => descendent(t, v, w))
+			!g.edgesTo(v).map(x => x._1).exists(w => !descendent(t, v, w))
 	}
 
 	/**
