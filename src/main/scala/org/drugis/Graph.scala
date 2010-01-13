@@ -15,6 +15,8 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 	def add(e: (T, T)): Graph[T] = new Graph[T](edgeSet + e)
 	def remove(e: (T, T)): Graph[T] = new Graph[T](edgeSet - e)
 
+	def remove(es: Set[(T, T)]): Graph[T] = new Graph[T](edgeSet -- es)
+
 	def edgeVector: List[(T, T)] =
 		edgeSet.toList.sort((a, b) =>
 			if (a._1 == b._1) a._2 < b._2
@@ -52,7 +54,7 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 }
 
 class UndirectedGraph[T <% Ordered[T]](edges: Set[(T, T)])
-extends Graph[T](edges.map(e => UndirectedGraph.order(e))) {
+extends Graph[T](UndirectedGraph.order(edges)) {
 
 	override def union(other: Graph[T]): UndirectedGraph[T] =
 		if ((this canEqual other) && (other canEqual this))
@@ -69,6 +71,9 @@ extends Graph[T](edges.map(e => UndirectedGraph.order(e))) {
 
 	override def remove(e: (T, T)): UndirectedGraph[T] =
 		new UndirectedGraph[T](edgeSet - UndirectedGraph.order(e))
+
+	override def remove(es: Set[(T, T)]): UndirectedGraph[T] =
+		new UndirectedGraph[T](edgeSet -- UndirectedGraph.order(es))
 
 	override def containsEdge(e: (T, T)): Boolean =
 		super.containsEdge(UndirectedGraph.order(e))
@@ -100,6 +105,9 @@ object UndirectedGraph {
 	def order[T <% Ordered[T]](e: (T, T)): (T, T) = 
 		if (e._1 <= e._2) e
 		else (e._2, e._1)
+
+	def order[T <% Ordered[T]](es: Set[(T, T)]): Set[(T, T)] =
+		es.map(e => order(e))
 }
 
 class Tree[T <% Ordered[T]](edges: Set[(T, T)], val root: T)

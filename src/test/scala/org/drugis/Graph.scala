@@ -89,6 +89,16 @@ class GraphTest extends ShouldMatchersForJUnit {
 		g2.remove(e) should be (g1)
 	}
 
+	@Test def testRemoveSet() {
+		val g1 = new Graph[String](
+			Set[(String, String)](("B", "C")))
+		val e = Set[(String, String)](("A", "C"), ("A", "B"))
+		val g2 = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+
+		g2.remove(e) should be (g1)
+	}
+
 	@Test def testEdgesFrom() {
 		val g = new Graph[String](
 			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
@@ -196,6 +206,16 @@ class UndirectedGraphTest extends ShouldMatchersForJUnit {
 
 		g2.remove(("A", "C")) should be (g1)
 		g2.remove(("C", "A")) should be (g1)
+	}
+
+	@Test def testRemoveSet() {
+		val g1 = new UndirectedGraph[String](
+			Set[(String, String)](("B", "C")))
+		val g2 = new UndirectedGraph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+
+		g2.remove(Set(("A", "C"), ("B", "A"))) should be (g1)
+		g2.remove(Set(("C", "A"), ("A", "B"))) should be (g1)
 	}
 
 	@Test def testEdgesFrom() {
