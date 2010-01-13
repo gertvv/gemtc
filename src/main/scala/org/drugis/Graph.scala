@@ -103,7 +103,10 @@ extends Graph[T](UndirectedGraph.order(edges)) {
 	/**
 	 * Give the fundamental cycles that belong with spanning tree st.
 	 */
-	def fundamentalCycles(st: Tree[T]): Set[UndirectedGraph[T]] = null
+	def fundamentalCycles(st: Tree[T]): Set[UndirectedGraph[T]] = {
+		for (e <- remove(st.edgeSet).edgeSet)
+		yield st.createCycle(e)
+	}
 }
 
 object UndirectedGraph {
