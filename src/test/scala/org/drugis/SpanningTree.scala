@@ -43,7 +43,6 @@ class SpanningTreeEnumeratorTest extends ShouldMatchersForJUnit {
 			))
 
 		val found = SpanningTreeEnumerator.treeEnumerator(g, "A").toList
-		println(found)
 		(Set[Graph[String]]() ++ found).size should be (found.size)
 		found.size should be (16)
 	}

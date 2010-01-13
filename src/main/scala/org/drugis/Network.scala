@@ -24,6 +24,23 @@ class Network(_treatments: Set[Treatment], _studies: Set[Study]) {
 		}
 	}
 
+	def evidenceMatrix(cycle: UndirectedGraph[Treatment])
+	: Matrix[Boolean] = {
+		new Matrix[Boolean](
+			{for {s <- supportingEvidence(cycle)} 
+			yield s.incidenceVector(cycle.edgeVector)}.toList)
+	}
+
+	def evidenceDimensionality(cycle: UndirectedGraph[Treatment]): Int = {
+		val m = Matrix.gaussElimGF2(evidenceMatrix(cycle))
+		val i = m.elements.findIndexOf(r => !r.contains(true))
+		if (i == -1) m.nRows
+		else i
+	}
+
+	def isInconsistency(cycle: UndirectedGraph[Treatment]): Boolean =
+		evidenceDimensionality(cycle) >= 3
+
 	val edgeVector: List[(Treatment, Treatment)] =
 		treatmentGraph.edgeVector
 }

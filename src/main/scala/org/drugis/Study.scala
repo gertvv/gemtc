@@ -1,8 +1,7 @@
 package org.drugis
 
-class Study(_id: String, treatments: Set[Treatment]) {
-	val id = _id
-	override def toString = "Study(" + _id + ") = " + treatments
+final class Study(val id: String, val treatments: Set[Treatment]) {
+	override def toString = "Study(" + id + ") = " + treatments
 
 	def treatmentGraph: UndirectedGraph[Treatment] = {
 		val tList = treatments.toList.sort((a, b) => (a < b))
@@ -15,6 +14,14 @@ class Study(_id: String, treatments: Set[Treatment]) {
 		}
 		new UndirectedGraph[Treatment](edgeSet)
 	}
+
+	override def equals(other: Any) = other match {
+		case that: Study =>
+			that.id == this.id && that.treatments == this.treatments
+		case _ => false
+	}
+
+	override def hashCode = id.hashCode
 }
 
 object Study {

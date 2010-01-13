@@ -15,6 +15,8 @@ final class Treatment(_id: String, _desc: String) extends Ordered[Treatment] {
 				id == that.id
 			case _ => false
 		}
+
+	override def hashCode = id.hashCode
 }
 
 object Treatment {
