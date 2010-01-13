@@ -158,4 +158,43 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.evidenceDimensionality(cycle) should be (3)
 		assert(network.isInconsistency(cycle))
 	}
+
+	@Test def testCountInconsistencies() {
+		val network = Network.fromXML(
+			<network>
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+					<treatment id="C"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A"/>
+						<measurement treatment="B"/>
+					</study>
+					<study id="2">
+						<measurement treatment="A"/>
+						<measurement treatment="B"/>
+						<measurement treatment="C"/>
+					</study>
+					<study id="3">
+						<measurement treatment="B"/>
+						<measurement treatment="C"/>
+					</study>
+				</studies>
+			</network>)
+
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+
+		val st = new Tree[Treatment](Set[(Treatment, Treatment)](
+			(a, b), (a, c)), a)
+
+		network.countInconsistencies(st) should be (1)
+	}
+
+	@Test def testCountInconsistencies2() {
+		fail()
+	}
 }

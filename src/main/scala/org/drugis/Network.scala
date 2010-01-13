@@ -43,6 +43,10 @@ class Network(_treatments: Set[Treatment], _studies: Set[Study]) {
 
 	val edgeVector: List[(Treatment, Treatment)] =
 		treatmentGraph.edgeVector
+
+	def countInconsistencies(st: Tree[Treatment]): Int =
+		{for {c <- treatmentGraph.fundamentalCycles(st);
+			if isInconsistency(c)} yield true}.size
 }
 
 object Network {
