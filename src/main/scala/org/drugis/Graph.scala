@@ -99,6 +99,11 @@ extends Graph[T](UndirectedGraph.order(edges)) {
 		new Graph[T](
 			edgeSet.map(e => Set(e, invert(e))).reduceLeft((a, b) => a ++ b)
 		)
+
+	/**
+	 * Give the fundamental cycles that belong with spanning tree st.
+	 */
+	def fundamentalCycles(st: Tree[T]): Set[UndirectedGraph[T]] = null
 }
 
 object UndirectedGraph {
@@ -113,4 +118,64 @@ object UndirectedGraph {
 class Tree[T <% Ordered[T]](edges: Set[(T, T)], val root: T)
 extends Graph[T](edges) {
 	override val vertexSet = vertices(edges) + root
+
+	/**
+	 * Given an edge e = (w, v) that is not in this tree and with
+	 * w and v in the set of vertices, give the cycle containing e.
+	 * Assume the graph to be undirected.
+	 */
+	def createCycle(e: (T, T)): UndirectedGraph[T] = {
+		require(!edgeSet.contains(e))
+		require(vertexSet.contains(e._1), vertexSet.contains(e._2))
+
+		val w = e._1
+		val v = e._2
+		val a = commonAncestor(w, v)
+
+		val c = new UndirectedGraph[T](
+			pathEdges(path(a, w)) ++ pathEdges(path(a, v)) + e)
+		if (c.edgeSet.size <= 1) new UndirectedGraph[T](Set[(T, T)]())
+		else c
+	}
+
+	private def pathEdges(p: List[T]): Set[(T, T)] = {
+		def aux(p: List[T]): List[(T, T)] = p match {
+			case Nil => Nil
+			case x :: Nil => Nil
+			case x :: l => (x, l.head) :: aux(l)
+		}
+		Set[(T, T)]() ++ aux(p)
+	}
+
+	/**
+	 * Find the path from w to v, given that they are on the same branch.
+	 */
+	def path(w: T, v: T): List[T] =  {
+		def aux(w: T, v: T): List[T] =
+			if (w == v) List(v)
+			else if (v == root) Nil
+			else {
+				val p = aux(w, edgesTo(v).toList.head._1)
+				if (p == Nil) Nil
+				else v :: p
+			}
+		aux(w, v).reverse
+	}
+
+	/**
+	 * Find the closest common ancestor of w and v.
+	 */
+	def commonAncestor(w: T, v: T): T = {
+		def aux(l1: List[T], l2: List[T]): Option[T] = {
+			if (l1.isEmpty || l2.isEmpty || l1.head != l2.head) None
+			else aux(l1.tail, l2.tail) match {
+				case None => Some(l1.head)
+				case x => x
+			}
+		}
+		aux(path(root, v), path(root, w)) match {
+			case None => throw new IllegalStateException
+			case Some(u) => u
+		}
+	}
 }

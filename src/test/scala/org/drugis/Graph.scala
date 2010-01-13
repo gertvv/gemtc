@@ -233,4 +233,65 @@ class UndirectedGraphTest extends ShouldMatchersForJUnit {
 
 		g.edgesTo("B") should be (es)
 	}
+
+	@Test def testFundamentalCycles() {
+		val g = new UndirectedGraph[String](
+			Set[(String, String)](
+				("A", "B"), ("A", "C"), ("A", "D"),
+				("B", "C"), ("B", "D"),
+				("C", "D")))
+
+		val t = new Tree[String](
+			Set[(String, String)](
+				("A", "B"), ("A", "C"), ("A", "D")), "A")
+		
+		val c1 = new UndirectedGraph[String](
+			Set[(String, String)](
+				("A", "B"), ("B", "C"), ("C", "A")))
+
+		val c2 = new UndirectedGraph[String](
+			Set[(String, String)](
+				("A", "C"), ("C", "D"), ("D", "A")))
+
+		val c3 = new UndirectedGraph[String](
+			Set[(String, String)](
+				("A", "B"), ("B", "D"), ("D", "A")))
+
+		g.fundamentalCycles(t) should be (Set(c1, c2, c3))
+	}
+}
+
+class TreeTest extends ShouldMatchersForJUnit {
+	@Test def testPath() {
+		val t = new Tree[String](Set[(String, String)](
+			("A", "B"), ("B", "C"), ("A", "D")), "A")
+
+		t.path("A", "C") should be (List[String]("A", "B", "C"))
+		t.path("B", "D") should be (Nil)
+	}
+
+	@Test def testCommonAncestor() {
+		val t = new Tree[String](Set[(String, String)](
+			("A", "B"), ("B", "C"), ("B", "D"), ("A", "E")), "A")
+
+		t.commonAncestor("C", "D") should be ("B")
+		t.commonAncestor("B", "D") should be ("B")
+		t.commonAncestor("E", "D") should be ("A")
+	}
+
+	@Test def testCreateCycle() {
+		val t = new Tree[String](Set[(String, String)](
+			("A", "B"), ("B", "C"), ("B", "D"), ("A", "E")), "A")
+
+		val c1 = new UndirectedGraph[String](Set[(String, String)](
+			("A", "B"), ("B", "C"), ("C", "E"), ("E", "A")))
+
+		val c2 = new UndirectedGraph[String](Set[(String, String)](
+			("B", "C"), ("C", "D"), ("D", "B")))
+
+		t.createCycle("E", "C") should be (c1)
+		t.createCycle("C", "E") should be (c1)
+		t.createCycle("C", "D") should be (c2)
+		t.createCycle("C", "B").edgeSet.size should be (0)
+	}
 }
