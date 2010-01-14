@@ -32,7 +32,7 @@ val network = Network.fromXML(xml)
 
 val top = new Treatment("A")
 
-for (st <- SpanningTreeEnumerator.treeEnumerator(network.treatmentGraph, top)) {
+for (st <- network.treeEnumerator(top)) {
 	println(st + " has ICDF = " + network.countInconsistencies(st))
 }
 
