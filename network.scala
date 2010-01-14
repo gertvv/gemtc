@@ -30,9 +30,11 @@ val xml = <network>
 
 val network = Network.fromXML(xml)
 
-for (st <- SpanningTreeEnumerator.treeEnumerator(network.treatmentGraph)) {
+val top = new Treatment("A")
+
+for (st <- SpanningTreeEnumerator.treeEnumerator(network.treatmentGraph, top)) {
 	println(st + " has ICDF = " + network.countInconsistencies(st))
 }
 
-val best = network.bestSpanningTree(new Treatment("A"))
+val best = network.bestSpanningTree(top)
 println("BEST: " + best + " has ICDF = " + network.countInconsistencies(best))
