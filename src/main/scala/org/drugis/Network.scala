@@ -46,7 +46,7 @@ class Network(_treatments: Set[Treatment], _studies: Set[Study]) {
 
 	def countInconsistencies(st: Tree[Treatment]): Int =
 		{for {c <- treatmentGraph.fundamentalCycles(st);
-			if isInconsistency(c)} yield true}.size
+			if isInconsistency(c)} yield c}.size
 }
 
 object Network {

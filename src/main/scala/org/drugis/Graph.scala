@@ -122,6 +122,8 @@ class Tree[T <% Ordered[T]](edges: Set[(T, T)], val root: T)
 extends Graph[T](edges) {
 	override val vertexSet = vertices(edges) + root
 
+	override def add(e: (T, T)): Tree[T] = new Tree[T](edgeSet + e, root)
+
 	/**
 	 * Given an edge e = (w, v) that is not in this tree and with
 	 * w and v in the set of vertices, give the cycle containing e.

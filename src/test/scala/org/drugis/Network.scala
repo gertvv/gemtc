@@ -195,6 +195,53 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testCountInconsistencies2() {
-		fail()
+		val network = Network.fromXML(<network>
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+				<treatment id="C"/>
+				<treatment id="D"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="D"/>
+					<measurement treatment="B"/>
+					<measurement treatment="C"/>
+				</study>
+				<study id="2">
+					<measurement treatment="A"/>
+					<measurement treatment="B"/>
+				</study>
+				<study id="3">
+					<measurement treatment="A"/>
+					<measurement treatment="C"/>
+				</study>
+				<study id="4">
+					<measurement treatment="A"/>
+					<measurement treatment="D"/>
+				</study>
+			</studies>
+		</network>)
+
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		network.countInconsistencies(
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (a, c), (a, d)), a)) should be (3)
+
+		network.countInconsistencies(
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a)) should be (2)
+
+		network.countInconsistencies(
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a)) should be (3)
+
+		network.countInconsistencies(
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, d), (d, c), (d, b)), a)) should be (2)
 	}
 }
