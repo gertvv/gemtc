@@ -47,6 +47,28 @@ class Network(_treatments: Set[Treatment], _studies: Set[Study]) {
 	def countInconsistencies(st: Tree[Treatment]): Int =
 		{for {c <- treatmentGraph.fundamentalCycles(st);
 			if isInconsistency(c)} yield c}.size
+
+	def treeEnumerator(top: Treatment) =
+		SpanningTreeEnumerator.treeEnumerator(treatmentGraph, top)
+
+	private def weight(a: Tree[Treatment]): Int = {
+		{for {c <- treatmentGraph.fundamentalCycles(a)} yield c.edgeSet.size
+		}.reduceLeft((a, b) => a + b)
+	}
+
+	private def compare(a: Tree[Treatment], b: Tree[Treatment]): Int = {
+		val icdf = countInconsistencies(a) - countInconsistencies(b)
+		if (icdf == 0) weight(b) - weight(a)
+		else icdf
+	}
+
+	private def better(a: Tree[Treatment], b: Tree[Treatment]): Boolean = {
+		compare(a, b) > 0
+	}
+
+	def bestSpanningTree(top: Treatment): Tree[Treatment] = {
+		treeEnumerator(top).reduceLeft((a, b) => if (better(a, b)) a else b)
+	}
 }
 
 object Network {
