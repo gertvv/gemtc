@@ -1,8 +1,6 @@
 package org.drugis
 
-class Network(_treatments: Set[Treatment], _studies: Set[Study]) {
-	val treatments = _treatments
-	val studies = _studies
+class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
 	override def toString = treatments.toString + studies.toString
 
 	val treatmentGraph: UndirectedGraph[Treatment] = {

@@ -1,6 +1,8 @@
 package org.drugis
 
-final class Study(val id: String, val treatments: Set[Treatment]) {
+final class Study(val id: String,
+		val measurements: Map[Treatment, Measurement]) {
+	val treatments = Set[Treatment]() ++ measurements.keySet
 	override def toString = "Study(" + id + ") = " + treatments
 
 	def treatmentGraph: UndirectedGraph[Treatment] = {
@@ -27,13 +29,17 @@ final class Study(val id: String, val treatments: Set[Treatment]) {
 object Study {
 	def fromXML(node: scala.xml.Node,
 			treatments: Map[String, Treatment]): Study =
-		new Study((node \ "@id").text, treatmentsFromXML(node \ "measurement",
+		new Study((node \ "@id").text, measurementsFromXML(node \ "measurement",
 			treatments))
+
+	private def measurementsFromXML(nodes: scala.xml.NodeSeq,
+			treatments: Map[String, Treatment]): Map[Treatment, Measurement] =
+		Map[Treatment, Measurement]() ++
+		{for {node <- nodes; val m = Measurement.fromXML(node, treatments)} yield (m.treatment, m)}
 
 	private def treatmentsFromXML(nodes: scala.xml.NodeSeq,
 			treatments: Map[String, Treatment]): Set[Treatment] = 
-		Set[Treatment]() ++ 
-		{for {node <- nodes} yield getTreatment(treatments, (node \ "@treatment").text)}
+		Set[Treatment]() ++ measurementsFromXML(nodes, treatments).keySet
 
 	private def getTreatment(treatments: Map[String, Treatment], id: String): Treatment = 
 		treatments.get(id) match {

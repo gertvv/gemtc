@@ -16,17 +16,17 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			</treatments>
 			<studies>
 				<study id="1">
-					<measurement treatment="A"/>
-					<measurement treatment="B"/>
+					<measurement treatment="A" responders="1" sample="100" />
+					<measurement treatment="B" responders="1" sample="100" />
 				</study>
 				<study id="2">
-					<measurement treatment="A"/>
-					<measurement treatment="B"/>
-					<measurement treatment="C"/>
+					<measurement treatment="A" responders="1" sample="100" />
+					<measurement treatment="B" responders="1" sample="100" />
+					<measurement treatment="C" responders="1" sample="100" />
 				</study>
 				<study id="3">
-					<measurement treatment="D"/>
-					<measurement treatment="B"/>
+					<measurement treatment="D" responders="1" sample="100" />
+					<measurement treatment="B" responders="1" sample="100" />
 				</study>
 			</studies>
 		</network>
@@ -34,16 +34,18 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	@Test def testFromXML() {
 		val network = Network.fromXML(networkXML)
 
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-		val d = new Treatment("D")
+		val a = new Measurement(new Treatment("A"), 1, 100)
+		val b = new Measurement(new Treatment("B"), 1, 100)
+		val c = new Measurement(new Treatment("C"), 1, 100)
+		val d = new Measurement(new Treatment("D"), 1, 100)
 
-		val s1 = new Study("1", Set[Treatment](a, b))
-		val s2 = new Study("2", Set[Treatment](a, b, c))
-		val s3 = new Study("3", Set[Treatment](b, d))
+		val s1 = new Study("1", Map((a.treatment, a), (b.treatment, b)))
+		val s2 = new Study("2", Map((a.treatment, a), (b.treatment, b), 
+			(c.treatment, c)))
+		val s3 = new Study("3", Map((b.treatment, b), (d.treatment, d)))
 
-		network.treatments should be (Set[Treatment](a, b, c, d))
+		network.treatments should be (Set[Treatment](
+			a.treatment, b.treatment, c.treatment, d.treatment))
 		network.studies should be (Set[Study](s1, s2, s3))
 	}
 
@@ -128,21 +130,21 @@ class NetworkTest extends ShouldMatchersForJUnit {
 				</treatments>
 				<studies>
 					<study id="1">
-						<measurement treatment="A"/>
-						<measurement treatment="B"/>
+						<measurement treatment="A" responders="1" sample="100" />
+						<measurement treatment="B" responders="1" sample="100" />
 					</study>
 					<study id="2">
-						<measurement treatment="A"/>
-						<measurement treatment="B"/>
-						<measurement treatment="C"/>
+						<measurement treatment="A" responders="1" sample="100" />
+						<measurement treatment="B" responders="1" sample="100" />
+						<measurement treatment="C" responders="1" sample="100" />
 					</study>
 					<study id="3">
-						<measurement treatment="B"/>
-						<measurement treatment="C"/>
+						<measurement treatment="B" responders="1" sample="100" />
+						<measurement treatment="C" responders="1" sample="100" />
 					</study>
 					<study id="4">
-						<measurement treatment="A"/>
-						<measurement treatment="C"/>
+						<measurement treatment="A" responders="1" sample="100" />
+						<measurement treatment="C" responders="1" sample="100" />
 					</study>
 				</studies>
 			</network>)
@@ -169,17 +171,17 @@ class NetworkTest extends ShouldMatchersForJUnit {
 				</treatments>
 				<studies>
 					<study id="1">
-						<measurement treatment="A"/>
-						<measurement treatment="B"/>
+						<measurement treatment="A" responders="1" sample="100" />
+						<measurement treatment="B" responders="1" sample="100" />
 					</study>
 					<study id="2">
-						<measurement treatment="A"/>
-						<measurement treatment="B"/>
-						<measurement treatment="C"/>
+						<measurement treatment="A" responders="1" sample="100" />
+						<measurement treatment="B" responders="1" sample="100" />
+						<measurement treatment="C" responders="1" sample="100" />
 					</study>
 					<study id="3">
-						<measurement treatment="B"/>
-						<measurement treatment="C"/>
+						<measurement treatment="B" responders="1" sample="100" />
+						<measurement treatment="C" responders="1" sample="100" />
 					</study>
 				</studies>
 			</network>)
@@ -204,21 +206,21 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			</treatments>
 			<studies>
 				<study id="1">
-					<measurement treatment="D"/>
-					<measurement treatment="B"/>
-					<measurement treatment="C"/>
+					<measurement treatment="D" responders="1" sample="100" />
+					<measurement treatment="B" responders="1" sample="100" />
+					<measurement treatment="C" responders="1" sample="100" />
 				</study>
 				<study id="2">
-					<measurement treatment="A"/>
-					<measurement treatment="B"/>
+					<measurement treatment="A" responders="1" sample="100" />
+					<measurement treatment="B" responders="1" sample="100" />
 				</study>
 				<study id="3">
-					<measurement treatment="A"/>
-					<measurement treatment="C"/>
+					<measurement treatment="A" responders="1" sample="100" />
+					<measurement treatment="C" responders="1" sample="100" />
 				</study>
 				<study id="4">
-					<measurement treatment="A"/>
-					<measurement treatment="D"/>
+					<measurement treatment="A" responders="1" sample="100" />
+					<measurement treatment="D" responders="1" sample="100" />
 				</study>
 			</studies>
 		</network>)
