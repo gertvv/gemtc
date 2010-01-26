@@ -43,8 +43,7 @@ class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
 		treatmentGraph.edgeVector
 
 	def countInconsistencies(st: Tree[Treatment]): Int =
-		{for {c <- treatmentGraph.fundamentalCycles(st);
-			if isInconsistency(c)} yield c}.size
+		inconsistencies(st).size
 
 	def inconsistencies(st: Tree[Treatment])
 	: Set[UndirectedGraph[Treatment]] = {

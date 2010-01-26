@@ -153,9 +153,18 @@ extends Graph[T](edges) {
 	}
 
 	/**
+	 * Find the cycle completed by (w, v)
+	 */
+	def cycle(w: T, v: T): List[T] = {
+		require(w != v)
+		val a = commonAncestor(w, v)
+		path(a, w) ++ path(a, v).reverse
+	}
+
+	/**
 	 * Find the path from w to v, given that they are on the same branch.
 	 */
-	def path(w: T, v: T): List[T] =  {
+	def path(w: T, v: T): List[T] = {
 		def aux(w: T, v: T): List[T] =
 			if (w == v) List(v)
 			else if (v == root) Nil
@@ -183,4 +192,15 @@ extends Graph[T](edges) {
 			case Some(u) => u
 		}
 	}
+}
+
+class FundamentalGraphBasis[T <% Ordered[T]](
+	val graph: UndirectedGraph[T],
+	val tree: Tree[T]) {
+	
+	require(tree.vertexSet == graph.vertexSet)
+
+	val treeEdges = tree.edgeSet
+	val backEdges = graph.remove(tree.edgeSet).edgeSet
+	val cycles = backEdges.map(e => tree.cycle(e._1, e._2))
 }
