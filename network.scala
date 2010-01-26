@@ -38,10 +38,20 @@ println("t <- c(" + data.map(a => treatmentMap(a._2.treatment)).mkString(", ") +
 println("r <- c(" + data.map(a => a._2.responders).mkString(", ") + ")")
 println("n <- c(" + data.map(a => a._2.sampleSize).mkString(", ") + ")")
 
-val toCover = network.inconsistencies(best).flatMap(a => a.edgeSet)
-// filter edges covered by two-arm studies away
-val covered = (
-for {study <- network.studies.filter(study => study.treatments.size == 2)
-} yield study.treatmentGraph.edgeSet).flatMap(a => a)
+def assignMultiArm(toCover: Set[(Treatment, Treatment)], studies: Set[Study]) =
+	Map[Study, Treatment]()
 
-println(toCover -- covered)
+def assignBaselines(network: Network, st: Tree[Treatment])
+: Map[Study, Treatment] = {
+	val toCover = network.inconsistencies(best).flatMap(a => a.edgeSet)
+	val twoArm = network.studies.filter(study => study.treatments.size == 2)
+	val multiArm = network.studies -- twoArm
+	val covered = twoArm.flatMap(study => study.treatmentGraph.edgeSet)
+
+	val twoArmMap = Map[Study, Treatment]() ++ twoArm.map(study => (study, study.treatments.toList.sort((a, b) => a < b).head))
+
+	val leftToCover = toCover -- covered
+	twoArmMap ++ assignMultiArm(leftToCover, multiArm)
+}
+
+println(assignBaselines(network, best))
