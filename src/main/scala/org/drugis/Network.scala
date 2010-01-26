@@ -46,6 +46,12 @@ class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
 		{for {c <- treatmentGraph.fundamentalCycles(st);
 			if isInconsistency(c)} yield c}.size
 
+	def inconsistencies(st: Tree[Treatment])
+	: Set[UndirectedGraph[Treatment]] = {
+		for {c <- treatmentGraph.fundamentalCycles(st);
+			if isInconsistency(c)} yield c
+	}
+
 	def treeEnumerator(top: Treatment) =
 		SpanningTreeEnumerator.treeEnumerator(treatmentGraph, top)
 
