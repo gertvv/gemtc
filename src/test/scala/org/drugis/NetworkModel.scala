@@ -136,7 +136,12 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testParameterizationFunctionalWithoutIncons() {
-		fail()
+		val model = NetworkModel(network, new Tree[Treatment](
+			Set((ta, tc), (tc, tb), (tb, td)), ta))
+		model.parameterization(tc, td) should be (Map(
+			(new BasicParameter(tc, tb), 1),
+			(new BasicParameter(tb, td), 1)
+		))
 	}
 }
 
@@ -144,7 +149,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 class BasicParameterTest extends ShouldMatchersForJUnit {
 	@Test def testToString() {
 		new BasicParameter(new Treatment("A"), new Treatment("B")
-			).toString should be ("d_A.B")
+			).toString should be ("d.A.B")
 	}
 
 	@Test def testEquals() {
@@ -158,7 +163,7 @@ class InconsistencyParameterTest extends ShouldMatchersForJUnit {
 		new InconsistencyParameter(
 				List(new Treatment("A"), new Treatment("B"),
 				new Treatment("C"), new Treatment("A"))
-			).toString should be ("w_A.B.C")
+			).toString should be ("w.A.B.C")
 	}
 
 	@Test def testEquals() {

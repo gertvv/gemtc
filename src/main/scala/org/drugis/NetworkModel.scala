@@ -6,7 +6,7 @@ trait NetworkModelParameter {
 
 final class BasicParameter(val base: Treatment, val subject: Treatment)
 extends NetworkModelParameter {
-	override def toString() = "d_" + base.id + "." + subject.id
+	override def toString() = "d." + base.id + "." + subject.id
 
 	override def equals(other: Any): Boolean = other match {
 		case p: BasicParameter => (p.base == base && p.subject == subject)
@@ -19,7 +19,7 @@ extends NetworkModelParameter {
 	private val cycleStr =
 		cycle.reverse.tail.reverse.map(t => t.id).mkString(".")
 
-	override def toString() = "w_" + cycleStr
+	override def toString() = "w." + cycleStr
 
 	override def equals(other: Any): Boolean = other match {
 		case p: InconsistencyParameter => (p.cycle == cycle)
@@ -69,17 +69,59 @@ class NetworkModel(
 		parameterEdges.map(e => parameterMap(e))
 
 	def parameterization(a: Treatment, b: Treatment)
+	: Map[NetworkModelParameter, Int] = param(a, b)
+
+	private def param(a: Treatment, b: Treatment)
 	: Map[NetworkModelParameter, Int] = {
-		if (basicParameterEdges contains (a, b)) param(a, b)
-		else if (basicParameterEdges contains (b, a)) negate(param(b, a))
-		else throw new Exception("Not Implemented")
+		if (basicParameterEdges contains (a, b)) basicParam(a, b)
+		else if (basicParameterEdges contains (b, a)) negate(basicParam(b, a))
+		else functionalParam(a, b)
 	}
 
-	private def param(a: Treatment, b: Treatment) =
+	private def functionalParam(a: Treatment, b: Treatment)
+	: Map[NetworkModelParameter, Int] = {
+		val r = basis.tree.commonAncestor(a, b)
+		add(add(negate(pathParam(basis.tree.path(r, a))),
+			pathParam(basis.tree.path(r, b))),
+			inconsParam(a, b))
+	}
+
+	private def inconsParam(a: Treatment, b: Treatment)
+	: Map[NetworkModelParameter, Int] = {
+		val edges = inconsistencyParameterEdges
+		if (edges contains (a, b)) basicParam(a, b)
+		else if (edges contains (b, a)) negate(basicParam(b, a))
+		else emptyParam()
+	}
+
+	private def pathParam(path: List[Treatment])
+	: Map[NetworkModelParameter, Int] = {
+		if (path.size < 2) emptyParam()
+		else add(param(path(0), path(1)), pathParam(path.tail))
+	}
+
+	private def basicParam(a: Treatment, b: Treatment) =
 		Map[NetworkModelParameter, Int]((parameterMap((a, b)), 1))
 
 	private def negate(p: Map[NetworkModelParameter, Int]) =
 		p.transform((a, b) => -b)
+
+	private def add(p: Map[NetworkModelParameter, Int],
+			q: Map[NetworkModelParameter, Int])
+	: Map[NetworkModelParameter, Int] = {
+		emptyParam() ++
+		(for {x <- (p.keySet ++ q.keySet)
+		} yield (x, getOrZero(p, x) + getOrZero(q, x)))
+	}
+
+	private def emptyParam() = Map[NetworkModelParameter, Int]()
+
+	private def getOrZero(p: Map[NetworkModelParameter, Int],
+			x: NetworkModelParameter): Int =
+	p.get(x) match {
+		case None => 0
+		case Some(d) => d
+	}
 
 	private def inconsistencyEdges: Set[(Treatment, Treatment)] = 
 		basis.backEdges.filter(
