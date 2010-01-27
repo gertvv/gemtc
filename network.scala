@@ -23,9 +23,7 @@ println()
 
 val model = NetworkModel(network, best)
 
-val s = model.data.map(a => model.studyMap(a._1))
-
-println("s <- c(" + s.mkString(", ") + ")")
+println("s <- c(" + model.data.map(a => model.studyMap(a._1)).mkString(", ") + ")")
 println("t <- c(" + model.data.map(a => model.treatmentMap(a._2.treatment)).mkString(", ") + ")")
 println("r <- c(" + model.data.map(a => a._2.responders).mkString(", ") + ")")
 println("n <- c(" + model.data.map(a => a._2.sampleSize).mkString(", ") + ")")
