@@ -36,3 +36,7 @@ modelOut.close()
 val scriptOut = new PrintStream(baseName + ".script")
 scriptOut.println(inconsModel.scriptText(baseName))
 scriptOut.close()
+
+val analysisOut = new PrintStream(baseName + ".analysis.R")
+analysisOut.println(inconsModel.analysisText(baseName))
+analysisOut.close()

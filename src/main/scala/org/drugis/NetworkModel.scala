@@ -247,6 +247,7 @@ abstract class JagsSyntaxModel(model: NetworkModel) {
 
 	def modelText: String
 	def scriptText(prefix: String): String
+	def analysisText(prefix: String): String
 }
 
 class JagsSyntaxInconsistencyModel(model: NetworkModel)
@@ -280,6 +281,17 @@ extends JagsSyntaxModel(model) {
 			"update 20000",
 			empty,
 			"monitors to '" + prefix + ".R'"
+		).mkString("\n")
+
+	override def analysisText(prefix: String): String =
+		List(
+			"source('" + prefix + ".R')",
+			"attach(trace)",
+			"data <- list()",
+			standardizeParameters("data"),
+			standardizeInconsistencies("data"),
+			standardizeVariances("data"),
+			"detach(trace)"
 		).mkString("\n")
 
 	private def monitors =
@@ -430,4 +442,22 @@ extends JagsSyntaxModel(model) {
 			"\t# Random effect variance",
 			basicVar("d")
 		) ++ combinedVars).mkString("\n")
+
+	private def standardizeParameters(frame: String) = 
+		(for {edge <- model.network.edgeVector
+			val p = new BasicParameter(edge._1, edge._2)
+			val e = expressParams(model.parameterization(edge._1, edge._2))
+		 } yield frame + "$" + p + " <- " + e).mkString("\n")
+
+	private def standardizeInconsistencies(frame: String) = 
+		(for {param <- model.parameterVector;
+			if (param.isInstanceOf[InconsistencyParameter])
+		} yield frame + "$" + param + " <- " + param).mkString("\n")
+			
+
+	private def standardizeVariances(frame: String) = 
+		List(
+			frame + "$var.d <- var.d",
+			frame + "$var.w <- var.w"
+		).mkString("\n")
 }

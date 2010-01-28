@@ -250,6 +250,18 @@ b <- c(2, 1, 1)"""
 			|
 			|monitors to 'jags.R'""".stripMargin
 
+	val analysisText =
+		"""	|source('jags.R')
+			|attach(trace)
+			|data <- list()
+			|data$d.A.B <- d.A.B
+			|data$d.A.C <- d.A.B + d.B.C + w.A.C.B
+			|data$d.B.C <- d.B.C
+			|data$w.A.C.B <- w.A.C.B
+			|data$var.d <- var.d
+			|data$var.w <- var.w
+			|detach(trace)""".stripMargin
+
 	def network = Network.fromXML(
 		<network description="Smoking cessation rates">
 			<treatments>
@@ -294,5 +306,9 @@ b <- c(2, 1, 1)"""
 
 	@Test def testScriptText() {
 		model.scriptText("jags") should be (scriptText)
+	}
+
+	@Test def testAnalysisText() {
+		model.analysisText("jags") should be (analysisText)
 	}
 }
