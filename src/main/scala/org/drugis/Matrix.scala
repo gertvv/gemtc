@@ -27,23 +27,26 @@ object Matrix {
 		def exchange(m: Matrix[Boolean], row: Int, col: Int)
 		: Matrix[Boolean] = {
 			if (m.elements(row)(col) == true) m
-			else m.exchangeRows(row, m.firstRowWithout(col, false))
+			else {
+				val idx = m.col(col).slice(row, m.nRows).indexOf(true)
+				m.exchangeRows(row, idx + row)
+			}
+		}
+
+		def addRows(m: Matrix[Boolean], addTo: Int, addThis: Int) = {
+			m.replaceRow(addTo,
+				m.elements(addTo).zip(m.elements(addThis))
+				.map(p => p._1 ^ p._2))
+		}
+
+		def eliminateRow(m: Matrix[Boolean], row: Int, col: Int, i: Int)
+		: Matrix[Boolean] = {
+			if (m.elements(i)(col) == false) m
+			else addRows(m, i, row)
 		}
 
 		def eliminate(m: Matrix[Boolean], row: Int, col: Int)
 		: Matrix[Boolean] = {
-			def addRows(m: Matrix[Boolean], addTo: Int, addThis: Int) = {
-				m.replaceRow(addTo,
-					m.elements(addTo).zip(m.elements(addThis))
-					.map(p => p._1 ^ p._2))
-			}
-
-			def eliminateRow(m: Matrix[Boolean], row: Int, col: Int, i: Int)
-			: Matrix[Boolean] = {
-				if (m.elements(i)(col) == false) m
-				else addRows(m, i, row)
-			}
-
 			// eliminate non-zero values in (i->nRows, col) by using (row, *)
 			def aux(m: Matrix[Boolean], row: Int, col: Int, i: Int)
 			: Matrix[Boolean] = {
@@ -62,13 +65,40 @@ object Matrix {
 		def forwardGauss(m: Matrix[Boolean], row: Int, col: Int)
 		: Matrix[Boolean] = {
 			if (col == m.nCols) m
-			else if (m.colOnly(col, false)) forwardGauss(m, row, col + 1)
+			else if (!m.col(col).slice(row, m.nRows).contains(true))
+				forwardGauss(m, row, col + 1)
 			else if (nonZeroRowsRemain(m, row))
 				forwardGauss(eliminate(m, row, col), row + 1, col + 1)
 			else m
 		}
 
-		forwardGauss(m, 0, 0)
+
+		def backPropagate(m: Matrix[Boolean], row: Int): Matrix[Boolean] = {
+			def aux(m: Matrix[Boolean], row: Int, col: Int, i: Int)
+			: Matrix[Boolean] = {
+				if (i < 0) m
+				else aux(eliminateRow(m, row, col, i),
+					row, col, i - 1)
+			}
+			aux(m, row, m.firstColWithout(row, false), row - 1)
+		}
+
+		def backwardGauss(m: Matrix[Boolean], row: Int)
+		: Matrix[Boolean] = {
+			if (row <= 0) m
+			else backwardGauss(backPropagate(m, row), row - 1)
+		}
+
+		def lastNonZeroRow(m: Matrix[Boolean]): Int = {
+			def aux(m: Matrix[Boolean], row: Int): Int = 
+				if (row == -1) -1
+				else if (m.rowContains(row, true)) row
+				else aux(m, row - 1)
+			aux(m, m.nRows - 1)
+		}
+
+		val fw = forwardGauss(m, 0, 0)
+		backwardGauss(fw, lastNonZeroRow(fw))
 	}
 }
 
@@ -79,6 +109,10 @@ class Matrix[T](_elements: List[List[T]]) {
 	val nRows: Int = elements.size
 	val nCols: Int = if (elements.isEmpty) 0 else elements.head.size
 	require(elements.forall(_.size == nCols))
+
+	def col(col: Int): List[T] = elements.map(r => r(col))
+
+	def row(row: Int): List[T] = elements(row)
 	
 	def rowContains(row: Int, obj: T): Boolean = 
 		_elements(row).contains(obj)
@@ -94,6 +128,9 @@ class Matrix[T](_elements: List[List[T]]) {
 
 	def firstRowWithout(col: Int, obj: T): Int =
 		_elements.findIndexOf(l => l(col) != obj)
+
+	def firstColWithout(row: Int, obj: T): Int =
+		_elements(row).findIndexOf(l => l != obj)
 
 	def exchangeRows(r1: Int, r2: Int): Matrix[T] = {
 		new Matrix(swap(elements, r1, r2))

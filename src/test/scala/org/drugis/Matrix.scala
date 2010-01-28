@@ -126,6 +126,17 @@ class MatrixTest extends ShouldMatchersForJUnit {
 
 	// test Gauss elimination on matrix that requires forward and backward pass
 	@Test def testGaussElimBackward() {
-		fail()
+		val matrix = new Matrix(List[List[Boolean]](
+			List[Boolean](true, true, false, false),
+			List[Boolean](true, true, false, true),
+			List[Boolean](false, true, true, true),
+			List[Boolean](false, false, true, false)))
+		val echelon = new Matrix(List[List[Boolean]](
+			List[Boolean](true, false, false, false),
+			List[Boolean](false, true, false, false),
+			List[Boolean](false, false, true, false),
+			List[Boolean](false, false, false, true)))
+
+		Matrix.gaussElimGF2(matrix) should be (echelon)
 	}
 }
