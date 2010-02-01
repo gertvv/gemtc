@@ -1,4 +1,4 @@
-package org.drugis
+package org.drugis.mtc
 
 object Matrix {
 	def swap[T](l: List[T], i: Int, j: Int): List[T] = {

@@ -1,4 +1,4 @@
-package org.drugis
+package org.drugis.mtc
 
 class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 	val edgeSet: Set[(T, T)] = edges

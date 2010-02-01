@@ -1,4 +1,4 @@
-package org.drugis
+package org.drugis.mtc
 
 final class Treatment(_id: String, _desc: String) extends Ordered[Treatment] {
 	val id: String = _id

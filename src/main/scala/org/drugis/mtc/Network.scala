@@ -1,4 +1,4 @@
-package org.drugis
+package org.drugis.mtc
 
 class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
 	override def toString = treatments.toString + studies.toString

@@ -1,4 +1,4 @@
-package org.drugis
+package org.drugis.mtc
 
 final class Study(val id: String,
 		val measurements: Map[Treatment, Measurement]) {

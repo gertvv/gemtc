@@ -1,4 +1,4 @@
-package org.drugis
+package org.drugis.mtc
 
 import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._

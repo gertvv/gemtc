@@ -1,4 +1,4 @@
-package org.drugis 
+package org.drugis.mtc 
 
 trait SearchProblem[State] {
 	def initialState: State
