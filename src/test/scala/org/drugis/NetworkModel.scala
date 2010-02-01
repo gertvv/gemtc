@@ -228,8 +228,8 @@ b <- c(2, 1, 1)"""
 	# 2x2 inv. covariance matrix for 3-arm trials
 	var.2[1, 1] <- var.d
 	var.2[1, 2] <- var.d / 2
-	var.2[2, 2] <- var.d
 	var.2[2, 1] <- var.d / 2
+	var.2[2, 2] <- var.d
 	tau.2 <- inverse(var.2)
 }"""
 

@@ -43,6 +43,11 @@
       <version>1.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>fr.iarc</groupId>
+      <artifactId>jags</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>
