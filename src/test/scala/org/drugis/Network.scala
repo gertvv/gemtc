@@ -109,7 +109,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 
 		val m1 = new Matrix[Boolean](List[List[Boolean]](
 			List[Boolean](true, false, false),
-			List[Boolean](true, true, true),
+			List[Boolean](true, true, true)
 		))
 		val m2 = m1.exchangeRows(0, 1)
 
