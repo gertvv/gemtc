@@ -226,10 +226,11 @@ b <- c(2, 1, 1)"""
 	tau.d <- 1 / var.d
 
 	# 2x2 inv. covariance matrix for 3-arm trials
-	tau.2[1, 1] <- tau.d
-	tau.2[1, 2] <- -tau.d / 2
-	tau.2[2, 1] <- -tau.d / 2
-	tau.2[2, 2] <- tau.d
+	var.2[1, 1] <- var.d
+	var.2[1, 2] <- var.d / 2
+	var.2[2, 2] <- var.d
+	var.2[2, 1] <- var.d / 2
+	tau.2 <- inverse(var.2)
 }"""
 
 	val scriptText =
