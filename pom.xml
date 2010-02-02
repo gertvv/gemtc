@@ -109,6 +109,15 @@
           </classpathContainers>
         </configuration>
       </plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<forkMode>once</forkMode>
+					<environmentVariables>
+						<LD_LIBRARY_PATH>${env.LD_LIBRARY_PATH}</LD_LIBRARY_PATH>
+					</environmentVariables>
+				</configuration>
+			</plugin>
     </plugins>
   </build>
   <reporting>

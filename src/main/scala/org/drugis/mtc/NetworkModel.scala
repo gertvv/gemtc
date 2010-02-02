@@ -68,6 +68,22 @@ class NetworkModel(
 	val parameterVector: List[NetworkModelParameter] = 
 		parameterEdges.map(e => parameterMap(e))
 
+	/**
+	 * Gives the list of Inconsistency parameters
+	 */
+	val inconsistencyParameters: List[InconsistencyParameter] =
+		for {param <- parameterVector;
+			if (param.isInstanceOf[InconsistencyParameter])
+		} yield param.asInstanceOf[InconsistencyParameter];
+
+	/**
+	 * Gives the list of Basic parameters
+	 */
+	val basicParameters: List[BasicParameter] =
+		for {param <- parameterVector;
+			if (param.isInstanceOf[BasicParameter])
+		} yield param.asInstanceOf[BasicParameter];
+
 	def parameterization(a: Treatment, b: Treatment)
 	: Map[NetworkModelParameter, Int] = param(a, b)
 
