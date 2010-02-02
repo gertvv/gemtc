@@ -46,4 +46,11 @@ object Study {
 			case Some(treatment) => treatment
 			case None => throw new IllegalStateException("Non-existent treatment ID referred to!")
 		}
+
+	private def measurementMap(ms: Array[Measurement]) =
+		Map[Treatment, Measurement]() ++ ms.map(m => (m.treatment, m))
+
+	def build(id: String, measurements: Array[Measurement]): Study = {
+		new Study(id, measurementMap(measurements));
+	}
 }

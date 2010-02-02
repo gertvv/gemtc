@@ -1,7 +1,7 @@
 package org.drugis.mtc
 
 class Measurement(val treatment: Treatment,
-		val responders: Int, val sampleSize: int) {
+		val responders: Int, val sampleSize: Int) {
 	
 }
 
