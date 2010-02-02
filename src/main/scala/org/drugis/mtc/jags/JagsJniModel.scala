@@ -5,6 +5,9 @@ import fr.iarc.jags.model.Model
 import fr.iarc.jags.model.Node
 import fr.iarc.jags.model.Monitor
 
+import org.apache.commons.math.stat.descriptive.moment.StandardDeviation
+import org.apache.commons.math.stat.descriptive.moment.Mean
+
 class EstimateImpl(val mean: Double, val sd: Double)
 extends Estimate {
 	def getMean = mean
@@ -198,7 +201,15 @@ extends InconsistencyModel {
 	}
 
 	private def calculateResults() {
+		paramEstimates = Map[NetworkModelParameter, EstimateImpl]() ++
+		(for {(p, m) <- paramMonitors
+		} yield (p, summary(m)))
+	}
 
+	private def summary(m: Monitor): EstimateImpl = {
+		var result = m.value(0)
+		new EstimateImpl((new Mean()).evaluate(result),
+			(new StandardDeviation()).evaluate(result))
 	}
 
 	private def paramEstimate(base: Treatment, subj: Treatment)

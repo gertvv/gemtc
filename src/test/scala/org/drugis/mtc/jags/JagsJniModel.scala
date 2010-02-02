@@ -53,6 +53,27 @@ class JagsJniInconsistencyModelTest extends ShouldMatchersForJUnit {
 		val m = model
 		m.run()
 		m.isReady should be (true)
+		val dAB = m.getRelativeEffect(ta, tb)
+		val dBC = m.getRelativeEffect(tb, tc)
+		val wACB = m.getInconsistency(
+			new InconsistencyParameter(List(ta, tc, tb, ta)))
+
+		// Values below obtained via a run through regular JAGS with 30k/20k
+		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
+		// for testing against WinBUGS results).
+		val f = 0.15
+		val mAB = 0.2555623
+		val sAB = 0.9644176
+		dAB.getMean should be (mAB plusOrMinus f * sAB)
+		dAB.getStandardDeviation should be(sAB plusOrMinus f * sAB)
+		val mBC = -0.6063327
+		val sBC = 0.9987635
+		dBC.getMean should be (mBC plusOrMinus f * sBC)
+		dBC.getStandardDeviation should be(sBC plusOrMinus f * sBC)
+		val mACB = 0.4334485
+		val sACB = 0.915094
+		wACB.getMean should be (mACB plusOrMinus f * sACB)
+		wACB.getStandardDeviation should be(sACB plusOrMinus f * sACB)
 	}
 
 	@Test def testInconsistencyFactors() {
