@@ -38,6 +38,7 @@ extends InconsistencyModel {
 		buildModel()
 		model.initialize(false)
 		model.update(3000)
+		model.stopAdapting()
 		attachMonitors()
 		model.update(2000)
 		calculateResults()
@@ -191,7 +192,9 @@ extends InconsistencyModel {
 		model.addDeterministicNode("ilogit", Array[Node](a))
 
 	private def attachMonitors() {
-
+		paramMonitors = Map[NetworkModelParameter, Monitor]() ++
+		(for {(p, n) <- paramNodes
+		} yield (p, model.addTraceMonitor(n)))
 	}
 
 	private def calculateResults() {
