@@ -1,4 +1,5 @@
-import org.drugis._
+import org.drugis.mtc._
+import org.drugis.mtc.jags._
 
 if (args.size != 1) {
 	println("Usage: network.scala <data-xml-file>")
