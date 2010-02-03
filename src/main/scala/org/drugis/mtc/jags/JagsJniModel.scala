@@ -76,7 +76,6 @@ extends InconsistencyModel {
 
 		paramNodes = buildParameterNodes
 		additionalNodes = buildAdditionalNodes
-		println(additionalNodes)
 
 		initializeVariance()
 		for (study <- proto.studyList) {
@@ -84,8 +83,6 @@ extends InconsistencyModel {
 			val effects = studyTreatmentEffects(study, baselines(study))
 			addStudyMeasurements(study, effects)
 		}
-
-		println("done building model")
 	}
 
 	private def buildBaselineEffects: Map[Study, Node] = 
@@ -107,7 +104,6 @@ extends InconsistencyModel {
 
 	private def param(s: Study, a: Treatment) = {
 		val p = new BasicParameter(base(s), a)
-		println("Retrieve " + p + " from " + additionalNodes)
 		additionalNodes(p)
 	}
 
