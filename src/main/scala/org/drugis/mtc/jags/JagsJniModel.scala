@@ -17,7 +17,7 @@ extends Estimate {
 }
 
 class JagsJniInconsistencyModel(proto: NetworkModel)
-extends InconsistencyModel {
+extends InconsistencyModel with ProgressObservable {
 	private var ready = false
 	private var model: Model = null
 
@@ -29,6 +29,10 @@ extends InconsistencyModel {
 	private var randomEffectVar: Node = null
 	private var inconsistencyVar: Node = null
 
+	private var burnInIter = 3000
+	private var simulationIter = 2000
+	private var reportingInterval = 100
+
 	def getRelativeEffect(base: Treatment, subj: Treatment): Estimate =
 		if (!isReady) throw new IllegalStateException("Model is not ready")
 		else paramEstimate(base, subj) match {
@@ -37,21 +41,34 @@ extends InconsistencyModel {
 				"Treatment(s) not found")
 		}
 
-	def addProgressListener(l: ProgressListener) {
-		throw new RuntimeException("Not Implemented")
-	}
-
 	def isReady = ready
 
 	def run() {
+		// construct model
+		notifyModelConstructionStarted()
 		buildModel()
 		model.initialize(false)
-		model.update(3000)
+		notifyModelConstructionFinished()
+
+		// burn-in iterations
+		notifyBurnInStarted()
+		for (i <- 0 until (burnInIter / reportingInterval)) {
+			model.update(reportingInterval)
+			notifyBurnInProgress((i + 1) * reportingInterval);
+		}
 		model.stopAdapting()
 		attachMonitors()
-		model.update(2000)
+		notifyBurnInFinished()
+
+		// simulation iterations
+		notifySimulationStarted()
+		for (i <- 0 until (simulationIter / reportingInterval)) {
+			model.update(reportingInterval)
+			notifySimulationProgress((i + 1) * reportingInterval);
+		}
 		calculateResults()
 		ready = true
+		notifySimulationFinished()
 	}
 
 	def getInconsistencyFactors: java.util.List[InconsistencyParameter] = {

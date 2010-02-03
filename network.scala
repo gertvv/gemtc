@@ -44,9 +44,15 @@ val analysisOut = new PrintStream(baseName + ".analysis.R")
 analysisOut.println(syntaxModel.analysisText(baseName))
 analysisOut.close()
 
+class ListenerImpl extends ProgressListener {
+	def update(mtc: MixedTreatmentComparison, evt: ProgressEvent) {
+		println(evt)
+	}
+}
 
 println("Running JAGS via JNI: ")
 val jniModel = (new JagsModelFactory()).getInconsistencyModel(network)
+jniModel.addProgressListener(new ListenerImpl())
 jniModel.run()
 val treatments = network.treatments.toList.sort((a, b) => a < b)
 for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
