@@ -22,22 +22,37 @@ val top = network.treatments.toList.sort((a, b) => a < b).first
 val best = network.bestSpanningTree(top)
 
 val model = NetworkModel(network, best)
-val inconsModel = new JagsSyntaxInconsistencyModel(model)
+val syntaxModel = new JagsSyntaxInconsistencyModel(model)
 
 import java.io.PrintStream
 
+println("Writing JAGS scripts: " + baseName + ".*")
+
 val dataOut = new PrintStream(baseName + ".data")
-dataOut.println(inconsModel.dataText)
+dataOut.println(syntaxModel.dataText)
 dataOut.close()
 
 val modelOut = new PrintStream(baseName + ".model")
-modelOut.println(inconsModel.modelText)
+modelOut.println(syntaxModel.modelText)
 modelOut.close()
 
 val scriptOut = new PrintStream(baseName + ".script")
-scriptOut.println(inconsModel.scriptText(baseName))
+scriptOut.println(syntaxModel.scriptText(baseName))
 scriptOut.close()
 
 val analysisOut = new PrintStream(baseName + ".analysis.R")
-analysisOut.println(inconsModel.analysisText(baseName))
+analysisOut.println(syntaxModel.analysisText(baseName))
 analysisOut.close()
+
+
+println("Running JAGS via JNI: ")
+val jniModel = (new JagsModelFactory()).getInconsistencyModel(network)
+jniModel.run()
+val treatments = network.treatments.toList.sort((a, b) => a < b)
+for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
+	println(treatments(i).id + " " + treatments(j).id + " " +
+		jniModel.getRelativeEffect(treatments(i), treatments(j)))
+}
+for (f <- jniModel.getInconsistencyFactors().toArray(Array[InconsistencyParameter]())) {
+	println(f + " " + jniModel.getInconsistency(f))
+}

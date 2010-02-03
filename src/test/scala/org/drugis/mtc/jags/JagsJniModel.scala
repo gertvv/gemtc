@@ -39,21 +39,25 @@ class JagsJniInconsistencyModelTest extends ShouldMatchersForJUnit {
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc)), ta)
 
-	def model = new JagsJniInconsistencyModel(
+	def makeModel = new JagsJniInconsistencyModel(
 		NetworkModel(network, spanningTree))
+
+	var model: InconsistencyModel = null 
 
 	@Before def setUp() {
 		JagsModelFactory.loadModules()
+		model = makeModel
 	}
 
 	@Test def testIsNotReady() {
 		model.isReady should be (false)
 	}
 
-	@Test def testRun() {
+	@Test def testIsReady() {
+		model.run()
+		model.isReady should be (true)
+
 		val m = model
-		m.run()
-		m.isReady should be (true)
 		val dAB = m.getRelativeEffect(ta, tb)
 		val dBC = m.getRelativeEffect(tb, tc)
 		val wACB = m.getInconsistency(
@@ -75,6 +79,14 @@ class JagsJniInconsistencyModelTest extends ShouldMatchersForJUnit {
 		val sACB = 0.753639001832770
 		wACB.getMean should be (mACB plusOrMinus f * sACB)
 		wACB.getStandardDeviation should be(sACB plusOrMinus f * sACB)
+
+		val dBA = m.getRelativeEffect(tb, ta)
+		dBA should not be (null)
+		val dAC = m.getRelativeEffect(ta, tc)
+		val mAC = 0.192677817983428
+		val sAC = 0.853568634052751
+		dAC.getMean should be (mAC plusOrMinus f * sAC)
+		dAC.getStandardDeviation should be(sAC plusOrMinus f * sAC)
 	}
 
 	@Test def testInconsistencyFactors() {

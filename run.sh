@@ -1,5 +1,7 @@
 #!/bin/bash
 
-scala -cp target/classes network.scala $1.xml
+. env.sh
+echo $LD_LIBRARY_PATH
+scala -cp target/*-jar-with-dependencies.jar -Djava.library.path=${LD_LIBRARY_PATH} network.scala $1.xml
 
-jags $1.script
+# jags $1.script

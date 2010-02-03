@@ -4,4 +4,4 @@
 JAGS_JNI="../jags-jni/src"
 JAGS_MODULES="/usr/local/lib/JAGS/modules-2.0.0"
 
-export LD_LIBRARY_PATH="${JAGS_JNI}:${JAGS_MODULES}:${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${JAGS_JNI}:${JAGS_MODULES}:"

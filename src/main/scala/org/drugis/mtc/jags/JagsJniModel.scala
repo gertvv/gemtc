@@ -12,6 +12,8 @@ class EstimateImpl(val mean: Double, val sd: Double)
 extends Estimate {
 	def getMean = mean
 	def getStandardDeviation = sd
+
+	override def toString = mean.toString + " (" + sd.toString + ")"
 }
 
 class JagsJniInconsistencyModel(proto: NetworkModel)
@@ -20,6 +22,7 @@ extends InconsistencyModel {
 	private var model: Model = null
 
 	private var paramNodes: Map[NetworkModelParameter, Node] = null
+	private var additionalNodes: Map[NetworkModelParameter, Node] = null
 	private var paramMonitors: Map[NetworkModelParameter, Monitor] = null
 	private var paramEstimates: Map[NetworkModelParameter, EstimateImpl] = null
 
@@ -72,6 +75,8 @@ extends InconsistencyModel {
 		val baselines = buildBaselineEffects
 
 		paramNodes = buildParameterNodes
+		additionalNodes = buildAdditionalNodes
+		println(additionalNodes)
 
 		initializeVariance()
 		for (study <- proto.studyList) {
@@ -98,6 +103,21 @@ extends InconsistencyModel {
 				case basic: BasicParameter => effectTau
 				case incon: InconsistencyParameter => inconsTau
 			}} yield (param, addNormal(addConstant(0), tau)))
+	}
+
+	private def param(s: Study, a: Treatment) = {
+		val p = new BasicParameter(base(s), a)
+		println("Retrieve " + p + " from " + additionalNodes)
+		additionalNodes(p)
+	}
+
+	private def buildAdditionalNodes: Map[NetworkModelParameter, Node] = {
+		val ts = proto.treatmentList
+		Map[NetworkModelParameter, Node]() ++
+		(for {i <- 0 until ts.size; j <- 0 until ts.size;
+			val p = new BasicParameter(ts(i), ts(j));
+			if (i != j)
+		} yield (p, express(ts(i), ts(j))))
 	}
 
 	private def addStudyMeasurements(s: Study, effects: Map[Treatment, Node]) {
@@ -132,22 +152,22 @@ extends InconsistencyModel {
 	: Map[Treatment, Node] = {
 		Map[Treatment, Node](
 			(base(s), null),
-			(subj(s), addNormal(express(s, subj(s)), randomEffectTau(1)))
+			(subj(s), addNormal(param(s, subj(s)), randomEffectTau(1)))
 		)
 	}
 
 	private def multiArmDeltas(s: Study, b: Node): Map[Treatment, Node] = {
 		val treatments = (s.treatments - base(s)).toList
 		val tau = randomEffectTau(treatments.size)
-		val paramVector = addVector(express(s, treatments))
+		val paramVector = addVector(param(s, treatments))
 		val effectVector = addMultiNormal(paramVector, tau)
 		Map[Treatment, Node]((base(s), null)) ++
 		(for {i <- 0 until treatments.size
 		} yield (treatments(i), addIndex(effectVector, i)))
 	}
 
-	private def express(s: Study, ts: List[Treatment]): List[Node] = {
-		for {t <- ts} yield express(s, t)
+	private def param(s: Study, ts: List[Treatment]): List[Node] = {
+		for {t <- ts} yield param(s, t)
 	}
 
 	private def base(study: Study) = proto.studyBaseline(study)
@@ -225,7 +245,9 @@ extends InconsistencyModel {
 
 	private def attachMonitors() {
 		paramMonitors = Map[NetworkModelParameter, Monitor]() ++
-		(for {(p, n) <- paramNodes
+		(for {(p, n) <- additionalNodes
+		} yield (p, model.addTraceMonitor(n))) ++
+		(for {(p, n) <- paramNodes; if p.isInstanceOf[InconsistencyParameter]
 		} yield (p, model.addTraceMonitor(n)))
 	}
 
@@ -266,10 +288,9 @@ extends InconsistencyModel {
 	def expressParams(params: Map[NetworkModelParameter, Int]): Node =
 		(for {(p, v) <- params} yield expressParam(p, v)).reduceLeft(addAdd)
 
-	def express(study: Study, effect: Treatment) = {
-		val base = proto.studyBaseline(study)
-		require(effect != base)
-		expressParams(proto.parameterization(base, effect))
+	def express(base: Treatment, subj: Treatment) = {
+		require(subj != base)
+		expressParams(proto.parameterization(base, subj))
 	}
 
 	private var randomEffectTauMap: Map[Int, Node] = null

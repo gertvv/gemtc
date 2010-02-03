@@ -12,6 +12,8 @@ extends NetworkModelParameter {
 		case p: BasicParameter => (p.base == base && p.subject == subject)
 		case _ => false
 	}
+
+	override def hashCode: Int = 31 * base.hashCode + subject.hashCode
 }
 
 final class InconsistencyParameter(val cycle: List[Treatment])
@@ -25,6 +27,8 @@ extends NetworkModelParameter {
 		case p: InconsistencyParameter => (p.cycle == cycle)
 		case _ => false
 	}
+
+	override def hashCode: Int = cycle.hashCode
 }
 
 /**
