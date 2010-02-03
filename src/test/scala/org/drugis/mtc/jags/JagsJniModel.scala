@@ -17,6 +17,7 @@ class JagsJniInconsistencyModelTest extends ShouldMatchersForJUnit {
 			</treatments>
 			<studies>
 				<study id="01">
+					<measurement treatment="A" responders="9" sample="140" />
 					<measurement treatment="B" responders="23" sample="140" />
 					<measurement treatment="C" responders="10" sample="138" />
 				</study>
@@ -62,16 +63,16 @@ class JagsJniInconsistencyModelTest extends ShouldMatchersForJUnit {
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
 		// for testing against WinBUGS results).
 		val f = 0.15
-		val mAB = 0.2555623
-		val sAB = 0.9644176
+		val mAB = 0.493260093404085
+		val sAB = 0.748945563653493
 		dAB.getMean should be (mAB plusOrMinus f * sAB)
 		dAB.getStandardDeviation should be(sAB plusOrMinus f * sAB)
-		val mBC = -0.6063327
-		val sBC = 0.9987635
+		val mBC = -0.515757678945450
+		val sBC = 0.938949102208760
 		dBC.getMean should be (mBC plusOrMinus f * sBC)
 		dBC.getStandardDeviation should be(sBC plusOrMinus f * sBC)
-		val mACB = 0.4334485
-		val sACB = 0.915094
+		val mACB = 0.215175403524793
+		val sACB = 0.753639001832770
 		wACB.getMean should be (mACB plusOrMinus f * sACB)
 		wACB.getStandardDeviation should be(sACB plusOrMinus f * sACB)
 	}

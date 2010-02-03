@@ -23,6 +23,9 @@ extends InconsistencyModel {
 	private var paramMonitors: Map[NetworkModelParameter, Monitor] = null
 	private var paramEstimates: Map[NetworkModelParameter, EstimateImpl] = null
 
+	private var randomEffectVar: Node = null
+	private var inconsistencyVar: Node = null
+
 	def getRelativeEffect(base: Treatment, subj: Treatment): Estimate =
 		if (!isReady) throw new IllegalStateException("Model is not ready")
 		else paramEstimate(base, subj) match {
@@ -70,10 +73,10 @@ extends InconsistencyModel {
 
 		paramNodes = buildParameterNodes
 
-		val tau = addTau(addVar()) // RE variance
+		initializeVariance()
 		for (study <- proto.studyList) {
 			// effects are the mu + delta for each treatment
-			val effects = studyTreatmentEffects(study, baselines(study), tau)
+			val effects = studyTreatmentEffects(study, baselines(study))
 			addStudyMeasurements(study, effects)
 		}
 
@@ -108,9 +111,9 @@ extends InconsistencyModel {
 	/**
 	 * Construct the effect estimate mu_study + delta_study_treatment
 	 */
-	private def studyTreatmentEffects(s: Study, b: Node, tau: Node)
+	private def studyTreatmentEffects(s: Study, b: Node)
 	: Map[Treatment, Node] = {
-		val delta = studyDeltas(s, b, tau)
+		val delta = studyDeltas(s, b)
 		Map[Treatment, Node]() ++
 		(for {t <- s.treatments} yield (t,
 			treatmentEffect(b, delta(t))))
@@ -119,18 +122,32 @@ extends InconsistencyModel {
 	/**
 	 * Construct the delta_study_treatment nodes (give null where delta = 0)
 	 */
-	private def studyDeltas(s: Study, b: Node, tau: Node)
+	private def studyDeltas(s: Study, b: Node)
 	: Map[Treatment, Node] = {
-		if (s.treatments.size == 2) twoArmDeltas(s, b, tau)
-		else multiArmDeltas(s, b, tau)
+		if (s.treatments.size == 2) twoArmDeltas(s, b)
+		else multiArmDeltas(s, b)
 	}
 
-	private def twoArmDeltas(s: Study, b: Node, tau: Node)
+	private def twoArmDeltas(s: Study, b: Node)
 	: Map[Treatment, Node] = {
 		Map[Treatment, Node](
 			(base(s), null),
-			(subj(s), addNormal(express(s, subj(s)), tau))
+			(subj(s), addNormal(express(s, subj(s)), randomEffectTau(1)))
 		)
+	}
+
+	private def multiArmDeltas(s: Study, b: Node): Map[Treatment, Node] = {
+		val treatments = (s.treatments - base(s)).toList
+		val tau = randomEffectTau(treatments.size)
+		val paramVector = addVector(express(s, treatments))
+		val effectVector = addMultiNormal(paramVector, tau)
+		Map[Treatment, Node]((base(s), null)) ++
+		(for {i <- 0 until treatments.size
+		} yield (treatments(i), addIndex(effectVector, i)))
+	}
+
+	private def express(s: Study, ts: List[Treatment]): List[Node] = {
+		for {t <- ts} yield express(s, t)
 	}
 
 	private def base(study: Study) = proto.studyBaseline(study)
@@ -139,9 +156,6 @@ extends InconsistencyModel {
 		require(study.treatments.size == 2)
 		(study.treatments - base(study)).toList.first
 	}
-
-	private def multiArmDeltas(s: Study, b: Node, tau: Node)
-	: Map[Treatment, Node] = throw new RuntimeException("Not Implemented")
 
 	/**
 	 * Give treatment effect mu_study + delta_study_treatment
@@ -158,6 +172,11 @@ extends InconsistencyModel {
 
 	private def addNormal(mean: Node, tau: Node): Node =
 		model.addStochasticNode("dnorm",
+			Array[Node](mean, tau),
+			null, null, null)
+
+	private def addMultiNormal(mean: Node, tau: Node): Node =
+		model.addStochasticNode("dmnorm",
 			Array[Node](mean, tau),
 			null, null, null)
 
@@ -193,6 +212,16 @@ extends InconsistencyModel {
 
 	private def addILogit(a: Node): Node =
 		model.addDeterministicNode("ilogit", Array[Node](a))
+
+	private def addMultiply(a: Double, b: Node): Node = {
+		model.addDeterministicNode("*", Array[Node](addConstant(a), b))
+	}
+
+	private def addVector(l: List[Node]): Node = 
+		model.addAggregateNode(Array(l.size), l.toArray, Array.make(l.size, 0))
+
+	private def addIndex(vector: Node, idx: Int): Node =
+		model.addAggregateNode(Array(1), Array(vector), Array(idx))
 
 	private def attachMonitors() {
 		paramMonitors = Map[NetworkModelParameter, Monitor]() ++
@@ -241,5 +270,46 @@ extends InconsistencyModel {
 		val base = proto.studyBaseline(study)
 		require(effect != base)
 		expressParams(proto.parameterization(base, effect))
+	}
+
+	private var randomEffectTauMap: Map[Int, Node] = null
+	private var halfRandomEffectVar: Node = null
+	private var inconsistencyTau: Node = null
+
+	private def randomEffectTau(dim: Int) = {
+		if (randomEffectTauMap.contains(dim)) randomEffectTauMap(dim)
+		else createRandomEffectTau(dim)
+	}
+
+	private def createRandomEffectTau(dim: Int) = {
+		require(dim > 0)
+		if (dim == 1) {
+			val tau = addTau(randomEffectVar)
+			randomEffectTauMap += ((dim, tau))
+			tau
+		} else {
+			val varMatrix = covarMatrix(
+				randomEffectVar, halfRandomEffectVar, dim)
+			val tauMatrix = model.addDeterministicNode(
+				"inverse", Array[Node](varMatrix));
+			randomEffectTauMap += ((dim, tauMatrix))
+			tauMatrix
+		}
+	}
+
+	private def covarMatrix(diag: Node, other: Node, dim: Int): Node = {
+		val nodes = (
+			for {i <- 0 until dim; j <- 0 until dim; 
+				val tau = if (i == j) diag else other
+			} yield tau).toArray
+		model.addAggregateNode(Array(dim, dim), nodes,
+					Array.make(dim * dim, 0));
+	}
+
+	private def initializeVariance() {
+		randomEffectTauMap = Map[Int, Node]()
+		randomEffectVar = addVar()
+		inconsistencyVar = addVar()
+		halfRandomEffectVar = addMultiply(0.5, randomEffectVar)
 	}
 }
