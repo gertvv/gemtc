@@ -47,4 +47,29 @@ public class ProgressEvent {
 		return d_type.toString() + 
 			(d_iter == null ? "" : "(" + d_iter.toString() + ")");
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof ProgressEvent) {
+			ProgressEvent other = (ProgressEvent) o;
+			return d_type == other.d_type && equal(d_iter, other.d_iter);
+		}
+		return false;
+	}
+
+	private boolean equal(Object o1, Object o2) {
+		if (o1 == null) {
+			return o2 == null;
+		}
+		return o1.equals(o2);
+	}
+
+	@Override
+	public int hashCode() {
+		int code = d_type.hashCode() * 31;
+		if (d_iter != null) {
+			code += d_iter.hashCode();
+		}
+		return code;
+	}
 }

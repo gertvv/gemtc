@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.drugis</groupId>
-  <artifactId>networkma</artifactId>
+  <artifactId>mtc</artifactId>
   <version>0.1-SNAPSHOT</version>
   <inceptionYear>2009</inceptionYear>
   <properties>
@@ -147,6 +147,18 @@
 					</environmentVariables>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
     </plugins>
   </build>
   <reporting>
@@ -158,6 +170,14 @@
           <scalaVersion>${scala.version}</scalaVersion>
         </configuration>
       </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.6.1</version>
+				<configuration>
+					<show>private</show>
+				</configuration>
+			</plugin>
     </plugins>
   </reporting>
 </project>

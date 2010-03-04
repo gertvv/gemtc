@@ -14,6 +14,8 @@ class NetworkBuilder {
 
 	def buildNetwork(): Network = new Network(treatmentSet, studySet)
 
+	def getTreatment(tId: String): Treatment = treatmentMap(tId)
+
 	private def createMeasurement(tId: String, r: Int, n: Int): Measurement = {
 		val t: Treatment = treatmentMap.get(tId) match {
 			case None => addTreatment(tId)
