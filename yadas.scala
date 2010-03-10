@@ -1,26 +1,11 @@
 import gov.lanl.yadas._
 import org.drugis.mtc._
+import org.drugis.mtc.yadas._
 
 val xmlFile = "smoking.xml"
 val xml = scala.xml.XML.loadFile(xmlFile)
 
 val network = NetworkModel(Network.fromXML(xml))
-
-def countArms(network: NetworkModel): Int =
-	{
-		for {study <- network.studyList} yield study.treatments.size
-	}.reduceLeft((a, b) => a + b)
-
-println(countArms(network))
-
-def armDoubleArray(network: NetworkModel, x: Double): Array[Double] =
-	Array.make(countArms(network), x)
-
-def armIntArray(network: NetworkModel, x: Int): Array[Double] =
-	Array.make(countArms(network), x)
-
-def studyDoubleArray(network: NetworkModel, x: Double): Array[Double] =
-	Array.make(network.studyList.size, x)
 
 def successArray(network: NetworkModel): Array[Double] =
 	network.data.map(m => m._2.responders.toDouble).toArray
@@ -28,71 +13,84 @@ def successArray(network: NetworkModel): Array[Double] =
 def sampleSizeArray(network: NetworkModel): Array[Double] =
 	network.data.map(m => m._2.sampleSize.toDouble).toArray
 
-def mleArray(network: NetworkModel): Array[Double] = 
-	network.data.map(m => logit(m._2.responders, m._2.sampleSize)).toArray
-
-def logit(success: Int, sample: Int): Double =
-	if (success > 0)
-		logit(success.toDouble / sample.toDouble)
-	else
-		logit(0.5 / sample.toDouble)
-		
-
-def logit(p: Double): Double = Math.log(p / (1 - p))
-
-def ilogit(q: Double): Double = {
-	val exq = Math.exp(q)
-	exq / (1 + exq)
-}
-
+// success-rate r from data
 val r = new ConstantArgument(successArray(network))
 // sample-size n from data
 val n = new ConstantArgument(sampleSizeArray(network))
-val ni = sampleSizeArray(network).map(x => (x + 1).toInt)
-// the log-odds theta, p = ilogit(theta), theta ~ N(mu_ijk, sigma)
-val theta = new MCMCParameter(
-	//mleArray(network),
-	armDoubleArray(network, 0.0),
-	armDoubleArray(network, 0.1), "./yadas-theta")
-// across-study baseline 
+// study baselines
 val mu = new MCMCParameter(
-	Array(0.0), Array(0.1), "./yadas-mu")
+	Array.make(network.studyList.size, 0.0),
+	Array.make(network.studyList.size, 0.1), "./yadas-mu")
+// random effects
+val delta = new MCMCParameter(
+	Array.make(network.relativeEffects.size, 0.0),
+	Array.make(network.relativeEffects.size, 0.1), "./yadas-delta")
+// basic parameters
+val basic = new MCMCParameter(
+	Array.make(network.basicParameters.size, 0.0),
+	Array.make(network.basicParameters.size, 0.1), "./yadas-basic")
+// inconsistency parameters
+val incons = new MCMCParameter(
+	Array.make(network.inconsistencyParameters.size, 0.0),
+	Array.make(network.inconsistencyParameters.size, 0.1), "./yadas-incons")
+// variance
 val sigma = new MCMCParameter(
 	Array(0.25), Array(0.1), "./yadas-sigma")
+// inconsistency variance
+val sigmaw = new MCMCParameter(
+	Array(0.25), Array(0.1), "./yadas-sigmaw")
 
-println(successArray(network).toList)
-println(sampleSizeArray(network).toList)
-
-val params = List[MCMCParameter](theta, mu, sigma)
+val params = List[MCMCParameter](mu, delta, basic, incons, sigma, sigmaw)
 
 // r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
 // theta_i = mu_s(i) + delta_s(i)b(i)t(i)
 val databond = new BasicMCMCBond(
-		Array[MCMCParameter](theta),
+		Array[MCMCParameter](mu, delta),
 		Array[ArgumentMaker](
 			r,
 			n,
-			new FunctionalArgument(
-				countArms(network), // desired parameter length
-				1, // number of parameters in bond
-				Array.make(0, 0), // parameters that need to be expanded
-				Array[Array[Int]](), // expanders
-				new Function() {
-					def f(args: Array[Double]): Double = {
-						ilogit(args(0))
-					}
-				}
-			)
+			new SuccessProbabilityArgumentMaker(network, 0, 1)
 		),
 		new Binomial()
 	)
 
-val thetaprior = new BasicMCMCBond(
-		Array[MCMCParameter](theta, mu, sigma),
+// random effects bound to basic/incons parameters
+val randomeffectbond =  new BasicMCMCBond(
+		Array[MCMCParameter](delta, basic, incons, sigma),
 		Array[ArgumentMaker](
 			new IdentityArgument(0),
-			new GroupArgument(1, Array.make(countArms(network), 0)),
-			new GroupArgument(2, Array.make(countArms(network), 0))
+			new RelativeEffectArgumentMaker(network, 1, None),
+			new GroupArgument(3, Array.make(network.relativeEffects.size, 0))
+		),
+		new Binomial()
+	)
+
+val muprior = new BasicMCMCBond(
+		Array[MCMCParameter](mu),
+		Array[ArgumentMaker](
+			new IdentityArgument(0),
+			new ConstantArgument(0, network.studyList.size),
+			new ConstantArgument(Math.sqrt(1000), network.studyList.size),
+		),
+		new Gaussian()
+	)
+
+val basicprior = new BasicMCMCBond(
+		Array[MCMCParameter](basic),
+		Array[ArgumentMaker](
+			new IdentityArgument(0),
+			new ConstantArgument(0, network.basicParameters.size),
+			new ConstantArgument(Math.sqrt(1000), network.basicParameters.size),
+		),
+		new Gaussian()
+	)
+
+val inconsprior = new BasicMCMCBond(
+		Array[MCMCParameter](incons, sigmaw),
+		Array[ArgumentMaker](
+			new IdentityArgument(0),
+			new ConstantArgument(0, network.inconsistencyParameters.size),
+			new GroupArgument(1, Array.make(network.inconsistencyParameters.size, 0))
 		),
 		new Gaussian()
 	)
@@ -101,18 +99,30 @@ val sigmaprior = new BasicMCMCBond(
 		Array[MCMCParameter](sigma),
 		Array[ArgumentMaker](
 			new IdentityArgument(0),
-			new ConstantArgument(0.5),
-			new ConstantArgument(0.5)
+			new ConstantArgument(0.00001),
+			new ConstantArgument(2)
 		),
-		new Gamma()
+		new Uniform()
 	)
 
-val bonds = List[MCMCBond](databond, thetaprior, sigmaprior)
+val sigmawprior = new BasicMCMCBond(
+		Array[MCMCParameter](sigmaw),
+		Array[ArgumentMaker](
+			new IdentityArgument(0),
+			new ConstantArgument(0.00001),
+			new ConstantArgument(2)
+		),
+		new Uniform()
+	)
 
-val updates = List[MCMCUpdate](//new FiniteUpdate(r, ni),
-	new UpdateTuner(theta), new UpdateTuner(mu), new UpdateTuner(sigma))
+def tuner(param: MCMCParameter): MCMCUpdate =
+	new UpdateTuner(param, 40, 50, 1, Math.exp(-1))
 
-for (i <- 0 until 2000) {
+val updates = List(
+	basic, incons, tuner(delta), tuner(mu), tuner(sigma), tuner(sigmaw))
+
+for (i <- 0 until 10000) {
+	if (i % 1000 == 0) println(i)
 	for (u <- updates) {
 		u.update()
 	}
@@ -121,7 +131,13 @@ for (i <- 0 until 2000) {
 	}
 }
 
+for (update <- updates) {
+	println("Update " + update + ": " + update.accepted())
+}
+
 for (p <- params) {
 	p.finish()
 }
 
+println(network.basicParameters)
+println(network.inconsistencyParameters)
