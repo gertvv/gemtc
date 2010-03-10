@@ -59,10 +59,10 @@ val randomeffectbond =  new BasicMCMCBond(
 		Array[MCMCParameter](delta, basic, incons, sigma),
 		Array[ArgumentMaker](
 			new IdentityArgument(0),
-			new RelativeEffectArgumentMaker(network, 1, None),
+			new RelativeEffectArgumentMaker(network, 1, Some(2)),
 			new GroupArgument(3, Array.make(network.relativeEffects.size, 0))
 		),
-		new Binomial()
+		new Gaussian()
 	)
 
 val muprior = new BasicMCMCBond(
