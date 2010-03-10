@@ -143,6 +143,20 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 			(new BasicParameter(tb, td), 1)
 		))
 	}
+
+	@Test def testRelativeEffects() {
+		val model = NetworkModel(network, spanningTree)
+		// assignment of baselines is 1:B, 2:D, 3:A
+		model.relativeEffects should be (
+			List((tb, ta), (tb, tc), (td, tb), (td, tc), (ta, tc)))
+	}
+
+	@Test def testRelativeEffectIndex() {
+		val model = NetworkModel(network, spanningTree)
+		model.relativeEffectIndex(studies(0)) should be (0)
+		model.relativeEffectIndex(studies(1)) should be (2)
+		model.relativeEffectIndex(studies(2)) should be (4)
+	}
 }
 
 

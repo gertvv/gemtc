@@ -16,13 +16,7 @@ class RelativeEffectArgumentMaker(model: NetworkModel,
 	bIdx: Int, wIdx: Option[Int])
 extends ArgumentMaker {
 	private val relativeEffects: List[(Treatment, Treatment)] =
-		model.studyList.flatMap(study => studyRelativeEffects(study))
-
-	private def studyRelativeEffects(study: Study)
-	: List[(Treatment, Treatment)] =
-		for {t <- model.treatmentList; if (study.treatments.contains(t)
-				&& !(model.studyBaseline(study) == t))
-			} yield (model.studyBaseline(study), t)
+		model.relativeEffects
 
 	private def createMatrix(params: List[NetworkModelParameter])
 	: RealMatrix = {

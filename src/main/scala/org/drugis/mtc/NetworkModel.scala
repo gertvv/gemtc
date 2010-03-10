@@ -88,6 +88,28 @@ class NetworkModel(
 			if (param.isInstanceOf[BasicParameter])
 		} yield param.asInstanceOf[BasicParameter];
 
+	/**
+	 * List of relative effects in order
+	 */
+	val relativeEffects: List[(Treatment, Treatment)] =
+		studyList.flatMap(study => studyRelativeEffects(study))
+
+	val relativeEffectIndex: Map[Study, Int] =
+		reIndexMap(studyList, 0)
+
+	private def reIndexMap(l: List[Study], i: Int)
+	: Map[Study, Int] = l match {
+		case Nil => Map[Study, Int]()
+		case s :: l0 =>
+			reIndexMap(l0, i + s.treatments.size - 1) + ((s, i))
+	}
+
+	def studyRelativeEffects(study: Study)
+	: List[(Treatment, Treatment)] =
+		for {t <- treatmentList; if (study.treatments.contains(t)
+				&& !(studyBaseline(study) == t))
+			} yield (studyBaseline(study), t)
+
 	def parameterization(a: Treatment, b: Treatment)
 	: Map[NetworkModelParameter, Int] = param(a, b)
 
