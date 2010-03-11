@@ -24,7 +24,7 @@ class Parameter(p: MCMCParameter, i: Int) {
 	}
 }
 
-class YadasModel(proto: NetworkModel)
+class YadasModel(proto: NetworkModel, isInconsistency: Boolean)
 extends ProgressObservable {
 	private var ready = false
 
@@ -138,19 +138,32 @@ extends ProgressObservable {
 			Array.make(proto.basicParameters.size, 0.1),
 			null)
 		// inconsistency parameters
-		val incons = new MCMCParameter(
-			Array.make(proto.inconsistencyParameters.size, 0.0),
-			Array.make(proto.inconsistencyParameters.size, 0.1),
-			null)
+		val incons =
+			if (isInconsistency)
+				new MCMCParameter(
+					Array.make(proto.inconsistencyParameters.size, 0.0),
+					Array.make(proto.inconsistencyParameters.size, 0.1),
+					null)
+			else
+				new MCMCParameter(
+					Array.make(proto.inconsistencyParameters.size, 0.0),
+					Array.make(proto.inconsistencyParameters.size, 0.0),
+					null)
 		// variance
 		val sigma = new MCMCParameter(
 			Array(0.25), Array(0.1), null)
 		// inconsistency variance
-		val sigmaw = new MCMCParameter(
-			Array(0.25), Array(0.1), null)
+		val sigmaw =
+			if (isInconsistency)
+				new MCMCParameter(Array(0.25), Array(0.1), null)
+			else
+				new MCMCParameter(Array(0.0), Array(0.0), null)
 
 		val params =
-			List[MCMCParameter](mu, delta, basic, incons, sigma, sigmaw)
+			if (isInconsistency)
+				List[MCMCParameter](mu, delta, basic, incons, sigma, sigmaw)
+			else
+				List[MCMCParameter](mu, delta, basic, sigma)
 
 		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
 		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
@@ -169,7 +182,8 @@ extends ProgressObservable {
 				Array[MCMCParameter](delta, basic, incons, sigma),
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
-					new RelativeEffectArgumentMaker(proto, 1, Some(2)),
+					new RelativeEffectArgumentMaker(proto, 1,
+						if (isInconsistency) Some(2) else None),
 					new GroupArgument(3, Array.make(proto.relativeEffects.size, 0))
 				),
 				new Gaussian()
@@ -195,16 +209,6 @@ extends ProgressObservable {
 				new Gaussian()
 			)
 
-		val inconsprior = new BasicMCMCBond(
-				Array[MCMCParameter](incons, sigmaw),
-				Array[ArgumentMaker](
-					new IdentityArgument(0),
-					new ConstantArgument(0, proto.inconsistencyParameters.size),
-					new GroupArgument(1, Array.make(proto.inconsistencyParameters.size, 0))
-				),
-				new Gaussian()
-			)
-
 		val sigmaprior = new BasicMCMCBond(
 				Array[MCMCParameter](sigma),
 				Array[ArgumentMaker](
@@ -215,23 +219,33 @@ extends ProgressObservable {
 				new Uniform()
 			)
 
-		val sigmawprior = new BasicMCMCBond(
-				Array[MCMCParameter](sigmaw),
-				Array[ArgumentMaker](
-					new IdentityArgument(0),
-					new ConstantArgument(0.00001),
-					new ConstantArgument(2)
-				),
-				new Uniform()
-			)
+		if (isInconsistency) {
+			val inconsprior = new BasicMCMCBond(
+					Array[MCMCParameter](incons, sigmaw),
+					Array[ArgumentMaker](
+						new IdentityArgument(0),
+						new ConstantArgument(0, proto.inconsistencyParameters.size),
+						new GroupArgument(1, Array.make(proto.inconsistencyParameters.size, 0))
+					),
+					new Gaussian()
+				)
+
+			val sigmawprior = new BasicMCMCBond(
+					Array[MCMCParameter](sigmaw),
+					Array[ArgumentMaker](
+						new IdentityArgument(0),
+						new ConstantArgument(0.00001),
+						new ConstantArgument(2)
+					),
+					new Uniform()
+				)
+			sigmawprior
+		}
 
 		def tuner(param: MCMCParameter): MCMCUpdate =
 			new UpdateTuner(param, burnInIter / 50, 50, 1, Math.exp(-1))
 
-		updateList = List(
-			tuner(mu), tuner(delta),
-			tuner(basic), tuner(incons),
-			tuner(sigma), tuner(sigmaw))
+		updateList = params.map(p => tuner(p))
 
 		def paramList(p: MCMCParameter, n: Int): List[Parameter] =
 			(0 until n).map(i => new Parameter(p, i)).toList

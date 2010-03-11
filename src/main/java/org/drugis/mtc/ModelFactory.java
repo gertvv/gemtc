@@ -7,7 +7,7 @@ public interface ModelFactory {
 	/**
 	 * Create a homogenous variance random effects consistency model.
 	 */
-	public MixedTreatmentComparison getConsistencyModel(Network network);
+	public ConsistencyModel getConsistencyModel(Network network);
 	/**
 	 * Create a homogenous variance random effects inconsistency model.
 	 */

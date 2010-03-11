@@ -9,7 +9,7 @@ import fr.iarc.jags.ModuleManager
  * @see fr.iarc.jags
  */
 class JagsModelFactory extends ModelFactory {
-	def getConsistencyModel(network: Network): MixedTreatmentComparison = null
+	def getConsistencyModel(network: Network): ConsistencyModel = null
 	def getInconsistencyModel(network: Network): InconsistencyModel = {
 		JagsModelFactory.loadModules()
 		new JagsJniInconsistencyModel(NetworkModel(network))

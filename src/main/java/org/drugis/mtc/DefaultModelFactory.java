@@ -14,7 +14,7 @@ public class DefaultModelFactory {
 	public static ModelFactory instance() {
 		InputStream is =
 			DefaultModelFactory.class.getResourceAsStream("factory.properties");
-		String className = "org.drugis.mtc.jags.JagsModelFactory";
+		String className = "org.drugis.mtc.yadas.YadasModelFactory";
 		if (is != null) {
 			try {
 				Properties props = new Properties();
