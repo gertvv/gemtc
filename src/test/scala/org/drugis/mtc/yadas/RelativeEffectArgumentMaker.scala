@@ -56,4 +56,31 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 		val maker0 = new RelativeEffectArgumentMaker(networkModel, 0, Some(1))
 		maker0.getArgument(Array(basic, incons)).toList should be (expected)
 	}
+
+	/**
+	 * Created because creating an inconsistency model with no inconsistencies
+	 * threw an exception.
+	 */
+	@Test def testGetArgumentInconsistencyNone() {
+		val simpleNet = Network.fromXML(
+			<network>
+				<treatments>
+					<treatment id="A" />
+					<treatment id="B" />
+				</treatments>
+				<studies>	
+					<study id="01">
+						<measurement treatment="A" responders="0" sample="1"/>
+						<measurement treatment="B" responders="0" sample="1"/>
+					</study>
+				</studies>
+			</network>)
+		val simpleModel = NetworkModel(simpleNet)
+
+		val basic = Array(-1.0)
+		val incons: Array[Double] = Array()
+
+		val maker0 = new RelativeEffectArgumentMaker(simpleModel, 0, Some(1))
+		maker0.getArgument(Array(basic, incons)).toList should be (basic.toList)
+	}
 }

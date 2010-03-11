@@ -42,7 +42,8 @@ extends ArgumentMaker {
 
 
 	private val inconsistencyParamMatrix =
-		createMatrix(model.inconsistencyParameters)
+		if (model.inconsistencyParameters.isEmpty) null
+		else createMatrix(model.inconsistencyParameters)
 
 	private def calcBasic(data: Array[Array[Double]]): RealVector =
 		new ArrayRealVector(basicParamMatrix.operate(data(bIdx)))
@@ -50,8 +51,10 @@ extends ArgumentMaker {
 	private def calcIncons(data: Array[Array[Double]]): RealVector =
 		wIdx match {
 			case None => new ArrayRealVector(relativeEffects.size)
-			case Some(idx) => new ArrayRealVector(
-				inconsistencyParamMatrix.operate(data(idx)))
+			case Some(idx) =>
+				if (inconsistencyParamMatrix != null) new ArrayRealVector(
+					inconsistencyParamMatrix.operate(data(idx)))
+				else new ArrayRealVector(relativeEffects.size)
 		}
 
 	/**
