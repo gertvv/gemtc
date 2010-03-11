@@ -1,5 +1,6 @@
 import org.drugis.mtc._
 import org.drugis.mtc.jags._
+import org.drugis.mtc.yadas._
 
 if (args.size != 1) {
 	println("Usage: network.scala <data-xml-file>")
@@ -50,15 +51,30 @@ class ListenerImpl extends ProgressListener {
 	}
 }
 
-println("Running JAGS via JNI: ")
-val jniModel = (new JagsModelFactory()).getInconsistencyModel(network)
-jniModel.addProgressListener(new ListenerImpl())
-jniModel.run()
+println("Running YADAS inconsistency model: ")
+val inconsModel = (new YadasModelFactory()).getInconsistencyModel(network)
+inconsModel.addProgressListener(new ListenerImpl())
+inconsModel.run()
 val treatments = network.treatments.toList.sort((a, b) => a < b)
 for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
 	println(treatments(i).id + " " + treatments(j).id + " " +
-		jniModel.getRelativeEffect(treatments(i), treatments(j)))
+		inconsModel.getRelativeEffect(treatments(i), treatments(j)))
 }
-for (f <- jniModel.getInconsistencyFactors().toArray(Array[InconsistencyParameter]())) {
-	println(f + " " + jniModel.getInconsistency(f))
+for (f <- inconsModel.getInconsistencyFactors().toArray(Array[InconsistencyParameter]())) {
+	println(f + " " + inconsModel.getInconsistency(f))
+}
+
+println("Running YADAS consistency model: ")
+	val consModel = (new YadasModelFactory()).getConsistencyModel(network)
+	consModel.addProgressListener(new ListenerImpl())
+	consModel.run()
+	for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
+		println(treatments(i).id + " " + treatments(j).id + " " +
+			consModel.getRelativeEffect(treatments(i), treatments(j)))
+}
+println()
+for (t <- treatments) {
+	for (i <- 1 to treatments.size) {
+		println(t.id + " " + i + " " + consModel.rankProbability(t, i))
+	}
 }
