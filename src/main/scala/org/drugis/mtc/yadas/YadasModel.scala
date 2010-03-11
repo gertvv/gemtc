@@ -30,6 +30,8 @@ extends ProgressObservable {
 
 	private var parameters: Map[NetworkModelParameter, Parameter]
 		= null
+	protected var results: Map[NetworkModelParameter, Array[Double]]
+		= null
 	private var paramEstimates: Map[NetworkModelParameter, Estimate]
 		= null
 
@@ -40,7 +42,7 @@ extends ProgressObservable {
 	private var inconsistencyVar: Parameter = null
 
 	private var burnInIter = 4000
-	private var simulationIter = 100000
+	protected var simulationIter = 100000
 	private var reportingInterval = 100
 
 	def isReady = ready
@@ -304,22 +306,40 @@ extends ProgressObservable {
 	}
 
 	private def calculateResults() {
+		preCalculateResults()
+
 		val ts = proto.treatmentList
 		paramEstimates = Map[NetworkModelParameter, Estimate]() ++
-		(for {i <- 0 until (ts.size - 1); j <- (i + 1) until ts.size;
-			val p = new BasicParameter(ts(i), ts(j))
-		} yield (p, summary(p))) ++
-		(for {(p, m) <- parameters; if (p.isInstanceOf[InconsistencyParameter])
-		} yield (p, summary(m.value.toArray)))
+			(for {(p, v) <- results} yield (p, summary(v)))
 	}
 
-	private def summary(p: BasicParameter): Estimate = {
-		val value = 
-			if (proto.basicParameters.contains(p))
-				parameters(p).value.toArray
-			else
-				calcValue(proto.parameterization(p.base, p.subject))
-		summary(value)
+	private def preCalculateResults() {
+		val ts = proto.treatmentList
+		results = Map[NetworkModelParameter, Array[Double]]() ++
+		(for {i <- 0 until (ts.size - 1); j <- (i + 1) until ts.size;
+			val p = new BasicParameter(ts(i), ts(j))
+		} yield (p, preCalculateResult(p))) ++
+		(for {p <- proto.inconsistencyParameters
+		} yield (p, preCalculateResult(p)))
+	}
+
+	private def preCalculateResult(p: NetworkModelParameter): Array[Double] = {
+		if (proto.basicParameters.contains(p) ||
+				proto.inconsistencyParameters.contains(p))
+			parameters(p).value.toArray
+		else p match {
+			case bp: BasicParameter =>
+				calcValue(proto.parameterization(bp.base, bp.subject))
+			case _ => throw new IllegalStateException()
+		}
+	}
+
+	private def nullFields() {
+		parameters = null
+		parameterList = null
+		updateList = null
+		randomEffectVar = null
+		inconsistencyVar = null
 	}
 
 	private def calcValue(pz: Map[NetworkModelParameter, Int])
