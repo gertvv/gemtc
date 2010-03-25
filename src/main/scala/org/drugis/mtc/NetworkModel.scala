@@ -29,6 +29,14 @@ extends NetworkModelParameter {
 	}
 
 	override def hashCode: Int = cycle.hashCode
+
+	def treatmentList: java.util.List[Treatment] = {
+		val list = new java.util.ArrayList[Treatment]()
+		for (t <- cycle) {
+			list.add(t)
+		}
+		list
+	}
 }
 
 /**
