@@ -74,6 +74,9 @@ class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
 	}
 
 	def filterTreatments(ts: Set[Treatment]): Network = {
+		if (!ts.subsetOf(treatments))
+			throw new RuntimeException(ts + " not a subset of " + treatments)
+
 		new Network(ts,
 			studies.filter(s => s.treatments.intersect(ts).size > 1).map(
 				s => filterStudy(s, ts)))
