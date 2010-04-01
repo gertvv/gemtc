@@ -72,6 +72,16 @@ class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
 	def bestSpanningTree(top: Treatment): Tree[Treatment] = {
 		treeEnumerator(top).reduceLeft((a, b) => if (better(a, b)) a else b)
 	}
+
+	def filterTreatments(ts: Set[Treatment]): Network = {
+		new Network(ts,
+			studies.filter(s => s.treatments.intersect(ts).size > 1).map(
+				s => filterStudy(s, ts)))
+	}
+
+	private def filterStudy(s: Study, ts: Set[Treatment]): Study =
+		if (s.treatments.intersect(ts) == s.treatments) s
+		else new Study(s.id, s.measurements.filter(x => ts.contains(x._1)))
 }
 
 object Network {

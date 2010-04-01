@@ -34,6 +34,7 @@ abstract class JagsSyntaxModel(model: NetworkModel) {
 	def modelText: String
 	def scriptText(prefix: String): String
 	def analysisText(prefix: String): String
+	def expressParams(params: Map[NetworkModelParameter, Int]): String
 }
 
 class JagsSyntaxConsistencyModel(model: NetworkModel)
@@ -219,7 +220,8 @@ extends JagsSyntaxModel(model) {
 			case  _ => throw new Exception("Unexpected value!")
 		}
 
-	def expressParams(params: Map[NetworkModelParameter, Int]): String =
+	override def expressParams(params: Map[NetworkModelParameter, Int])
+	: String =
 		(for {(p, v) <- params} yield expressParam(p, v)).mkString(" + ")
 
 	def express(study: Study, effect: Treatment) = {
