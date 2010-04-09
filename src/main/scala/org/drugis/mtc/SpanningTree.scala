@@ -6,12 +6,7 @@ object SpanningTreeEnumerator {
 	 */
 	def treeEnumerator[T <% Ordered[T]](g: Graph[T], r: T)
 	: Iterable[Tree[T]] = 
-		grow(g.directedGraph, // algorithm requires a directed graph
-			new Tree[T](Set[(T, T)](), r), // the result tree so far
-			g.edgesFrom(r).toList, // the fringe of nodes
-			None, // the last found tree
-			(t : Tree[T]) => t.vertexSet == g.vertexSet // complete(t)
-		)
+		new SpanningTreeIterable[T](g, r)
 
 	/**
 	 * Enumerate all spanning trees of the undirected graph g.
@@ -22,45 +17,130 @@ object SpanningTreeEnumerator {
 			case None => Nil
 			case Some(r) => treeEnumerator(g, r)
 	}
+}
+
+class SpanningTreeIterable[T <% Ordered[T]](
+		val graph: Graph[T], val root: T)
+extends Iterable[Tree[T]] {
+	def elements: Iterator[Tree[T]] = new SpanningTreeIterator[T](graph, root)
+}
+
+/**
+ * Iterate over all spanning trees of a graph, storing only 2 at a time.
+ */
+class SpanningTreeIterator[T <% Ordered[T]](
+		val graph: Graph[T], val root: T)
+extends Iterator[Tree[T]] {
+	private var last: Tree[T] = null
+	private var current: Tree[T] = null
+	private var queue: List[ProblemState] = List(new ProblemState(
+			graph.directedGraph, // algorithm requires a directed graph
+			new Tree[T](Set[(T, T)](), root), // the result tree so far
+			graph.edgesFrom(root).toList, // the fringe of unexplored edges
+			false // don't do bridge test
+		))
+
+	def next: Tree[T] = {
+		if (hasNext) {
+			last = current
+			current = null
+			last
+		} else null
+	}
+
+	def hasNext: Boolean = {
+		if (current == null) current = findNext
+		current != null
+	}
 
 	/**
-	 * Enumerate all spanning trees of g (root: r) containing t (root: r)
+	 * Find the next spanning tree.
 	 */
-	private def grow[T](g: Graph[T], t: Tree[T], f: List[(T, T)],
-			l: Option[Tree[T]],
-			complete: Tree[T] => Boolean): List[Tree[T]] = {
-		if (complete(t)) List(t)
-		else if (f.isEmpty) Nil
-		else {
-			val d = deepen(g, t, f.tail, f.head, l, complete)
-			val l1 = // last generated tree
-				if (d.isEmpty) l
-				else Some(d.head)
-			val e = f.head
-			val g1 = g.remove(e)
-			if (bridgeTest(g1, l1, e._2)) d
-			else grow(g1, t, f.tail, l1, complete) ::: d
+	private def findNext: Tree[T] = {
+		while (!queue.isEmpty) {
+			val head = queue.head
+			queue = successors(head) ::: queue.tail
+			if (isGoal(head)) return head.tree
+		}
+		null
+	}
+
+	/**
+	 * Given the current state, determine the next state(s).
+	 */
+	private def successors(state: ProblemState): List[ProblemState] = {
+		if (state.fringe.isEmpty) Nil
+		else if (state.bridgeTest) {
+			widenSucc(state)
+		} else {
+			deepenSucc(state) ::: bridgeTestSucc(state)
 		}
 	}
 
 	/**
-	 * Enumerate all spanning trees in g that contain t + e
+	 * Widen the search.
 	 */
-	private def deepen[T](g: Graph[T], t: Tree[T], f: List[(T, T)], e: (T, T),
-			l: Option[Tree[T]],
-			complete: Tree[T] => Boolean): List[Tree[T]] = {
-		val v = e._2
-		val t1 = t.add(e)
-		val f1 = (g.edgesFrom(v).filter(x => !t1.vertexSet.contains(x._2) && !f.contains(x)).toList ::: f).filter(x => x._2 != v || !t1.vertexSet.contains(x._1))
-		grow(g, t1, f1, l, complete)
+	private def widenSucc(state: ProblemState): List[ProblemState] = {
+		val e = state.fringe.head
+		val g1 = state.graph.remove(e)
+		if (bridgeTest(g1, e._2)) Nil
+		else List(new ProblemState(g1, state.tree, state.fringe.tail, false))
 	}
 
-	private def bridgeTest[T](g: Graph[T], l: Option[Tree[T]], v: T) =
-	l match {
-		case None => throw new IllegalStateException
-		case Some(t) =>
-			!g.edgesTo(v).map(x => x._1).exists(w => !descendent(t, v, w))
+	/**
+	 * Determine whether to widen the search (if e is a bridge, all spanning
+	 * trees will include it, hence we don't need to widen the search).
+	 */
+	private def bridgeTestSucc(state: ProblemState): List[ProblemState] = {
+		List(new ProblemState(state.graph, state.tree, state.fringe, true))
 	}
+
+	/**
+	 * Search deeper.
+	 */
+	private def deepenSucc(state: ProblemState): List[ProblemState] = {
+		val e = state.fringe.head
+		val v = e._2
+		val t1 = state.tree.add(e)
+		val f = state.fringe.tail
+		val g = state.graph
+		// Add to the fringe forall_w (v, w) \in g, w \not\in t
+		// Then, remove \forall_w (w, v) from F
+		val f1 = (
+			g.edgesFrom(v).filter(
+				x => !t1.vertexSet.contains(x._2)
+			).toList ::: f).filter(
+				x => x._2 != v
+			)
+		return List(new ProblemState(g, t1, f1, false))
+	}
+
+	/**
+	 * Test whether the given state is a goal state (spanning tree found).
+	 */
+	private def isGoal(state: ProblemState): Boolean = 
+		!state.bridgeTest && complete(state.tree)
+
+	/**
+	 * Test whether v is a bridge in g, using the last found spanning tree.
+	 */
+	private def bridgeTest(g: Graph[T], v: T) =
+		if (last == null) throw new IllegalStateException
+		else !g.edgesTo(v).map(x => x._1).exists(w => !descendent(last, v, w))
+
+	/**
+	 * Represents a node on the search queue.
+	 */
+	private class ProblemState(
+		val graph: Graph[T],
+		val tree: Tree[T],
+		val fringe: List[(T, T)],
+		val bridgeTest: Boolean) { }
+
+	/**
+	 * Test whether t is a complete tree for graph.
+	 */
+	private def complete(t: Tree[T]): Boolean = t.vertexSet == graph.vertexSet
 
 	/**
 	 * Test whether w is a descendent of v in tree t.
