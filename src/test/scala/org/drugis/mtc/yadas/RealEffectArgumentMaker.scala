@@ -14,26 +14,26 @@ class RealEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 	val td = new Treatment("D")
 	val treatmentList = List(ta, tb, tc, td)
 
-	val study1 = new Study("1", Map[Treatment, Measurement](
-		(ta, new Measurement(ta, 0, 1)), (tb, new Measurement(tb, 0, 1))))
-	val study2 = new Study("2", Map[Treatment, Measurement](
-		(tb, new Measurement(tb, 0, 1)), (tc, new Measurement(tc, 0, 1)), (td, new Measurement(td, 0, 1))))
-	val study3 = new Study("3", Map[Treatment, Measurement](
-		(ta, new Measurement(ta, 0, 1)), (td, new Measurement(td, 0, 1))))
-	val study4 = new Study("4", Map[Treatment, Measurement](
-		(tc, new Measurement(tc, 0, 1)), (td, new Measurement(td, 0, 1))))
+	val study1 = new Study[DichotomousMeasurement]("1", Map[Treatment, DichotomousMeasurement](
+		(ta, new DichotomousMeasurement(ta, 0, 1)), (tb, new DichotomousMeasurement(tb, 0, 1))))
+	val study2 = new Study[DichotomousMeasurement]("2", Map[Treatment, DichotomousMeasurement](
+		(tb, new DichotomousMeasurement(tb, 0, 1)), (tc, new DichotomousMeasurement(tc, 0, 1)), (td, new DichotomousMeasurement(td, 0, 1))))
+	val study3 = new Study[DichotomousMeasurement]("3", Map[Treatment, DichotomousMeasurement](
+		(ta, new DichotomousMeasurement(ta, 0, 1)), (td, new DichotomousMeasurement(td, 0, 1))))
+	val study4 = new Study[DichotomousMeasurement]("4", Map[Treatment, DichotomousMeasurement](
+		(tc, new DichotomousMeasurement(tc, 0, 1)), (td, new DichotomousMeasurement(td, 0, 1))))
 	val studyList = List(study1, study2, study3, study4)
 
 	val network = new Network(
 		Set[Treatment]() ++ treatmentList,
-		Set[Study]() ++ studyList)
+		Set[Study[DichotomousMeasurement]]() ++ studyList)
 
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc), (ta, td)), ta)
 
 	val networkModel = new NetworkModel(network,
 		new FundamentalGraphBasis(network.treatmentGraph, spanningTree),
-		Map[Study, Treatment](
+		Map[Study[DichotomousMeasurement], Treatment](
 			(study1, ta), (study2, tb), (study3, ta), (study4, tc)),
 		treatmentList, studyList)
 

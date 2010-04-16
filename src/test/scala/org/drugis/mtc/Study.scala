@@ -12,8 +12,8 @@ class StudyTest extends ShouldMatchersForJUnit {
 		val c = new Treatment("C")
 
 		val meas = Map[Treatment, Measurement](
-				(a, new Measurement(a, 10, 100)),
-				(b, new Measurement(b, 10, 100))
+				(a, new DichotomousMeasurement(a, 10, 100)),
+				(b, new DichotomousMeasurement(b, 10, 100))
 			)
 
 		new Study("1", meas) should be (new Study("1", meas))

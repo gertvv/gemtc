@@ -8,20 +8,21 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class NetworkBuilderTest {
-	private Study study(String id, Measurement[] m) {
-		return Study$.MODULE$.build(id, m);
+	private Study<DichotomousMeasurement> study(String id,
+			DichotomousMeasurement[] m) {
+		return Study$.MODULE$.buildDichotomous(id, m);
 	}
 
 	private NetworkBuilder d_builder;
 	private Treatment d_ta = new Treatment("A");
 	private Treatment d_tb = new Treatment("B");
 	private Treatment d_tc = new Treatment("C");
-	private Measurement d_s1a = new Measurement(d_ta, 5, 100);
-	private Measurement d_s1b = new Measurement(d_tb, 23, 100);
-	private Study d_s1 = study("1", new Measurement[]{d_s1a, d_s1b});
-	private Measurement d_s2b = new Measurement(d_tb, 12, 43);
-	private Measurement d_s2c = new Measurement(d_tc, 15, 40);
-	private Study d_s2 = study("2", new Measurement[]{d_s2b, d_s2c});
+	private DichotomousMeasurement d_s1a = new DichotomousMeasurement(d_ta, 5, 100);
+	private DichotomousMeasurement d_s1b = new DichotomousMeasurement(d_tb, 23, 100);
+	private Study<DichotomousMeasurement> d_s1 = study("1", new DichotomousMeasurement[]{d_s1a, d_s1b});
+	private DichotomousMeasurement d_s2b = new DichotomousMeasurement(d_tb, 12, 43);
+	private DichotomousMeasurement d_s2c = new DichotomousMeasurement(d_tc, 15, 40);
+	private Study<DichotomousMeasurement> d_s2 = study("2", new DichotomousMeasurement[]{d_s2b, d_s2c});
 
 	@Before public void setUp() {
 		d_builder = new NetworkBuilder();

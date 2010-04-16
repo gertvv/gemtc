@@ -34,19 +34,19 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	@Test def testFromXML() {
 		val network = Network.fromXML(networkXML)
 
-		val a = new Measurement(new Treatment("A"), 1, 100)
-		val b = new Measurement(new Treatment("B"), 1, 100)
-		val c = new Measurement(new Treatment("C"), 1, 100)
-		val d = new Measurement(new Treatment("D"), 1, 100)
+		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
+		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
+		val c = new DichotomousMeasurement(new Treatment("C"), 1, 100)
+		val d = new DichotomousMeasurement(new Treatment("D"), 1, 100)
 
-		val s1 = new Study("1", Map((a.treatment, a), (b.treatment, b)))
-		val s2 = new Study("2", Map((a.treatment, a), (b.treatment, b), 
+		val s1 = new Study[DichotomousMeasurement]("1", Map((a.treatment, a), (b.treatment, b)))
+		val s2 = new Study[DichotomousMeasurement]("2", Map((a.treatment, a), (b.treatment, b), 
 			(c.treatment, c)))
-		val s3 = new Study("3", Map((b.treatment, b), (d.treatment, d)))
+		val s3 = new Study[DichotomousMeasurement]("3", Map((b.treatment, b), (d.treatment, d)))
 
 		network.treatments should be (Set[Treatment](
 			a.treatment, b.treatment, c.treatment, d.treatment))
-		network.studies should be (Set[Study](s1, s2, s3))
+		network.studies should be (Set[Study[DichotomousMeasurement]](s1, s2, s3))
 	}
 
 	@Test def testFilterTreatments() {
@@ -57,17 +57,17 @@ class NetworkTest extends ShouldMatchersForJUnit {
 
 		val network = Network.fromXML(networkXML).filterTreatments(ts)
 
-		val a = new Measurement(new Treatment("A"), 1, 100)
-		val b = new Measurement(new Treatment("B"), 1, 100)
-		val c = new Measurement(new Treatment("C"), 1, 100)
+		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
+		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
+		val c = new DichotomousMeasurement(new Treatment("C"), 1, 100)
 
-		val s1 = new Study("1", Map((a.treatment, a), (b.treatment, b)))
-		val s2 = new Study("2", Map((a.treatment, a), (b.treatment, b), 
+		val s1 = new Study[DichotomousMeasurement]("1", Map((a.treatment, a), (b.treatment, b)))
+		val s2 = new Study[DichotomousMeasurement]("2", Map((a.treatment, a), (b.treatment, b), 
 			(c.treatment, c)))
 
 		network.treatments should be (Set[Treatment](
 			a.treatment, b.treatment, c.treatment))
-		network.studies should be (Set[Study](s1, s2))
+		network.studies should be (Set[Study[DichotomousMeasurement]](s1, s2))
 	}
 
 	@Test def testFilterTreatmentsFilterStudy() {
@@ -78,17 +78,17 @@ class NetworkTest extends ShouldMatchersForJUnit {
 
 		val network = Network.fromXML(networkXML).filterTreatments(ts)
 
-		val a = new Measurement(new Treatment("A"), 1, 100)
-		val b = new Measurement(new Treatment("B"), 1, 100)
-		val d = new Measurement(new Treatment("D"), 1, 100)
+		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
+		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
+		val d = new DichotomousMeasurement(new Treatment("D"), 1, 100)
 
-		val s1 = new Study("1", Map((a.treatment, a), (b.treatment, b)))
-		val s2 = new Study("2", Map((a.treatment, a), (b.treatment, b)))
-		val s3 = new Study("3", Map((b.treatment, b), (d.treatment, d)))
+		val s1 = new Study[DichotomousMeasurement]("1", Map((a.treatment, a), (b.treatment, b)))
+		val s2 = new Study[DichotomousMeasurement]("2", Map((a.treatment, a), (b.treatment, b)))
+		val s3 = new Study[DichotomousMeasurement]("3", Map((b.treatment, b), (d.treatment, d)))
 
 		network.treatments should be (Set[Treatment](
 			a.treatment, b.treatment, d.treatment))
-		network.studies should be (Set[Study](s1, s2, s3))
+		network.studies should be (Set[Study[DichotomousMeasurement]](s1, s2, s3))
 	}
 
 	@Test def testTreatmentGraph() {

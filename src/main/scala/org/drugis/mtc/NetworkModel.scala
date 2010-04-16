@@ -1,5 +1,7 @@
 package org.drugis.mtc
 
+import org.drugis.mtc.{DichotomousMeasurement => M}
+
 trait NetworkModelParameter {
 
 }
@@ -45,11 +47,11 @@ extends NetworkModelParameter {
 class NetworkModel(
 	val network: Network, 
 	val basis: FundamentalGraphBasis[Treatment],
-	val studyBaseline: Map[Study, Treatment],
+	val studyBaseline: Map[Study[M], Treatment],
 	val treatmentList: List[Treatment],
-	val studyList: List[Study]) {
+	val studyList: List[Study[M]]) {
 
-	require(Set[Study]() ++ studyList == network.studies)
+	require(Set[Study[M]]() ++ studyList == network.studies)
 	require(Set[Treatment]() ++ treatmentList == network.treatments)
 	require(studyBaseline.keySet == network.studies)
 	require(basis.tree.vertexSet == network.treatments)
@@ -102,17 +104,17 @@ class NetworkModel(
 	val relativeEffects: List[(Treatment, Treatment)] =
 		studyList.flatMap(study => studyRelativeEffects(study))
 
-	val relativeEffectIndex: Map[Study, Int] =
+	val relativeEffectIndex: Map[Study[M], Int] =
 		reIndexMap(studyList, 0)
 
-	private def reIndexMap(l: List[Study], i: Int)
-	: Map[Study, Int] = l match {
-		case Nil => Map[Study, Int]()
+	private def reIndexMap(l: List[Study[M]], i: Int)
+	: Map[Study[M], Int] = l match {
+		case Nil => Map[Study[M], Int]()
 		case s :: l0 =>
 			reIndexMap(l0, i + s.treatments.size - 1) + ((s, i))
 	}
 
-	def studyRelativeEffects(study: Study)
+	def studyRelativeEffects(study: Study[M])
 	: List[(Treatment, Treatment)] =
 		for {t <- treatmentList; if (study.treatments.contains(t)
 				&& !(studyBaseline(study) == t))
@@ -185,15 +187,15 @@ class NetworkModel(
 
 class BaselineSearchState(
 	val toCover: Set[(Treatment, Treatment)],
-	val studies: List[Study],
-	val assignment: Map[Study, Treatment]) { }
+	val studies: List[Study[M]],
+	val assignment: Map[Study[M], Treatment]) { }
 
 class BaselineSearchProblem(
 	toCover: Set[(Treatment, Treatment)],
-	studies: Set[Study]) extends SearchProblem[BaselineSearchState] {
+	studies: Set[Study[M]]) extends SearchProblem[BaselineSearchState] {
 
 	val initialState = new BaselineSearchState(toCover, studies.toList,
-		Map[Study, Treatment]())
+		Map[Study[M], Treatment]())
 
 	def isGoal(s: BaselineSearchState): Boolean = {
 		s.toCover.isEmpty && s.studies.isEmpty
@@ -231,8 +233,8 @@ object NetworkModel {
 	}
 
 	private def assignMultiArm(
-		toCover: Set[(Treatment, Treatment)], studies: Set[Study])
-	: Map[Study, Treatment] = {
+		toCover: Set[(Treatment, Treatment)], studies: Set[Study[M]])
+	: Map[Study[M], Treatment] = {
 		val problem = new BaselineSearchProblem(toCover, studies)
 		val alg = new DFS()
 		alg.search(problem) match {
@@ -242,19 +244,19 @@ object NetworkModel {
 	}
 
 	def assignBaselines(network: Network, st: Tree[Treatment])
-	: Map[Study, Treatment] = {
+	: Map[Study[M], Treatment] = {
 		val toCover = network.inconsistencies(st).flatMap(a => a.edgeSet)
 		val twoArm = network.studies.filter(study => study.treatments.size == 2)
 		val multiArm = network.studies -- twoArm
 		val covered = twoArm.flatMap(study => study.treatmentGraph.edgeSet)
 
-		val twoArmMap = Map[Study, Treatment]() ++ twoArm.map(study => (study, study.treatments.toList.sort((a, b) => a < b).head))
+		val twoArmMap = Map[Study[M], Treatment]() ++ twoArm.map(study => (study, study.treatments.toList.sort((a, b) => a < b).head))
 
 		val leftToCover = toCover -- covered
 		twoArmMap ++ assignMultiArm(leftToCover, multiArm)
 	}
 
-	def studyList(studies: Set[Study]) = {
+	def studyList(studies: Set[Study[M]]) = {
 		studies.toList.sort((a, b) => a.id < b.id)
 	}
 

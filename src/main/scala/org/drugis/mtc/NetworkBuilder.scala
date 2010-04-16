@@ -1,9 +1,10 @@
 package org.drugis.mtc
 
 import scala.collection.mutable.{Map => MMap}
+import org.drugis.mtc.{DichotomousMeasurement => M}
 
 class NetworkBuilder {
-	private val measurementMap = MMap[(String, Treatment), Measurement]()
+	private val measurementMap = MMap[(String, Treatment), M]()
 	private val treatmentMap = MMap[String, Treatment]()
 
 	def add(studyId: String, treatmentId: String,
@@ -16,13 +17,13 @@ class NetworkBuilder {
 
 	def getTreatment(tId: String): Treatment = treatmentMap(tId)
 
-	private def createMeasurement(tId: String, r: Int, n: Int): Measurement = {
+	private def createMeasurement(tId: String, r: Int, n: Int): M = {
 		val t: Treatment = treatmentMap.get(tId) match {
 			case None => addTreatment(tId)
 			case Some(x: Treatment) => x
 		}
 
-		new Measurement(t, r, n)
+		new DichotomousMeasurement(t, r, n)
 	}
 
 	private def addTreatment(id: String): Treatment = {
@@ -31,7 +32,7 @@ class NetworkBuilder {
 		t
 	}
 
-	private def put(k: (String, Treatment), v: Measurement) {
+	private def put(k: (String, Treatment), v: M) {
 		if (measurementMap.contains(k)) {
 			throw new IllegalArgumentException("Study/Treatment combination " +
 				"already mapped.");
@@ -42,15 +43,15 @@ class NetworkBuilder {
 	private def treatmentSet: Set[Treatment] =
 		Set[Treatment]() ++ treatmentMap.values
 
-	private def studySet: Set[Study] = {
+	private def studySet: Set[Study[M]] = {
 		val idSet = measurementMap.keySet.map(x => x._1)
-		return Set[Study]() ++ idSet.map(id => study(id))
+		return Set[Study[M]]() ++ idSet.map(id => study(id))
 	}
 
-	private def study(id: String): Study = {
+	private def study(id: String): Study[M] = {
 		val measurements = measurementMap.keySet.filter(x => x._1 == id).map(
 			k => measurementMap(k))
-		new Study(id, Map[Treatment, Measurement]() ++
+		new Study[M](id, Map[Treatment, M]() ++
 			measurements.map(m => (m.treatment, m)))
 	}
 }

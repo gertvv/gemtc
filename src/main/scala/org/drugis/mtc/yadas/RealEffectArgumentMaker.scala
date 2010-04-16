@@ -22,17 +22,22 @@ extends ArgumentMaker {
 		}
 	}
 
-	private def relativeTreatmentIndex(s: Study, t: Treatment): Int = {
+	private def relativeTreatmentIndex(s: Study[DichotomousMeasurement],
+			t: Treatment)
+	: Int = {
 		model.studyRelativeEffects(s).findIndexOf(x => x._2 == t)
 	}
 
-	private def treatmentIndex(s: Study, t: Treatment): Int = {
+	private def treatmentIndex(s: Study[DichotomousMeasurement],
+			t: Treatment)
+	: Int = {
 		val base = model.relativeEffectIndex(s)
 		if (model.studyBaseline(s) == t) -1
 		else base + relativeTreatmentIndex(s, t)
 	}
 
-	private def prob(s: Study, t: Treatment, data: Array[Array[Double]])
+	private def prob(s: Study[DichotomousMeasurement],
+			t: Treatment, data: Array[Array[Double]])
 	: Double = {
 		val baselineIdx = model.studyList.indexOf(s)
 		val treatmentIdx = treatmentIndex(s, t)

@@ -1,6 +1,7 @@
 package org.drugis.mtc.jags
 
 import org.drugis.mtc._
+import org.drugis.mtc.{DichotomousMeasurement => M}
 
 abstract class JagsSyntaxModel(model: NetworkModel) {
 	def dataText: String =
@@ -19,7 +20,7 @@ abstract class JagsSyntaxModel(model: NetworkModel) {
 		model.data.map(a => model.treatmentMap(a._2.treatment))
 
 	private def responderVector: List[Int] = 
-		model.data.map(a => a._2.responders)
+		model.data.map(a => a._2.asInstanceOf[DichotomousMeasurement].responders)
 
 	private def sampleSizeVector: List[Int] =
 		model.data.map(a => a._2.sampleSize)
@@ -156,11 +157,11 @@ extends JagsSyntaxModel(model) {
 			study <- model.studyList
 		} yield studyDeltas(study)).mkString("\n")
 
-	private def studyDeltas(study: Study): String = 
+	private def studyDeltas(study: Study[M]): String = 
 		if (study.treatments.size == 2) twoArmDeltas(study)
 		else multiArmDeltas(study)
 
-	private def twoArmDeltas(study: Study) =
+	private def twoArmDeltas(study: Study[M]) =
 		List(
 			"\t# Random effects in study " + study.id,
 			"\t" + zeroDelta(study, base(study)),
@@ -168,12 +169,12 @@ extends JagsSyntaxModel(model) {
 				normal(express(study, subj(study)), "tau.d")
 		).mkString("\n")
 
-	private def subj(study: Study) = {
+	private def subj(study: Study[M]) = {
 		require(study.treatments.size == 2)
 		(study.treatments - base(study)).toList.first
 	}
 
-	private def multiArmDeltas(study: Study) = {
+	private def multiArmDeltas(study: Study[M]) = {
 		val treatments = (study.treatments - base(study)).toList
 		List(
 			"\t# Random effects in study " + study.id,
@@ -183,17 +184,17 @@ extends JagsSyntaxModel(model) {
 			deltasArray(study, treatments)).mkString("\n")
 	}
 
-	private def paramArray(study: Study, treatments: List[Treatment]) = 
+	private def paramArray(study: Study[M], treatments: List[Treatment]) = 
 		(for {
 			k <- 1 to treatments.size
 		} yield "\td[" + idx(study) + ", " + k + "] <- " +
 			express(study, treatments(k - 1))).mkString("\n")
 
-	private def randomEffectArray(study: Study, n: Int) = 
+	private def randomEffectArray(study: Study[M], n: Int) = 
 		"\tre[" + idx(study) + ", 1:" + n + "] ~ " +
 			"dmnorm(d[" + idx(study) + ", 1:" + n + "], tau." + n + ")"
 
-	private def deltasArray(study: Study, treatments: List[Treatment]) = 
+	private def deltasArray(study: Study[M], treatments: List[Treatment]) = 
 		(for {k <- 1 to treatments.size} yield
 			"\t" + delta(study, treatments(k - 1)) + " <- " +
 			"re[" + idx(study) + ", " + k + "]").mkString("\n")
@@ -201,17 +202,17 @@ extends JagsSyntaxModel(model) {
 	private def normal(mean: String, tau: String) =
 		"dnorm(" + mean + ", " + tau + ")"
 
-	private def zeroDelta(study: Study, subj: Treatment) =
+	private def zeroDelta(study: Study[M], subj: Treatment) =
 		delta(study, subj) + " <- 0"
 
-	private def delta(study: Study, subj: Treatment) = "delta[" +
+	private def delta(study: Study[M], subj: Treatment) = "delta[" +
 		idx(study) + ", " + idx(base(study)) + ", " + idx(subj) + "]"
 
-	private def idx(study: Study) = model.studyMap(study)
+	private def idx(study: Study[M]) = model.studyMap(study)
 
 	private def idx(treatment: Treatment) = model.treatmentMap(treatment)
 
-	private def base(study: Study) = model.studyBaseline(study)
+	private def base(study: Study[M]) = model.studyBaseline(study)
 
 	protected def expressParam(p: NetworkModelParameter, v: Int): String = 
 		v match {
@@ -224,7 +225,7 @@ extends JagsSyntaxModel(model) {
 	: String =
 		(for {(p, v) <- params} yield expressParam(p, v)).mkString(" + ")
 
-	def express(study: Study, effect: Treatment) = {
+	def express(study: Study[M], effect: Treatment) = {
 		val base = model.studyBaseline(study)
 		require(effect != base)
 		expressParams(model.parameterization(base, effect))

@@ -1,7 +1,7 @@
 package org.drugis.mtc
 
-final class Study(val id: String,
-		val measurements: Map[Treatment, Measurement]) {
+final class Study[M <: Measurement](val id: String,
+		val measurements: Map[Treatment, M]) {
 	val treatments = Set[Treatment]() ++ measurements.keySet
 	override def toString = "Study(" + id + ") = " + treatments
 
@@ -18,7 +18,7 @@ final class Study(val id: String,
 	}
 
 	override def equals(other: Any) = other match {
-		case that: Study =>
+		case that: Study[M] =>
 			that.id == this.id && that.treatments == this.treatments
 		case _ => false
 	}
@@ -28,29 +28,38 @@ final class Study(val id: String,
 
 object Study {
 	def fromXML(node: scala.xml.Node,
-			treatments: Map[String, Treatment]): Study =
-		new Study((node \ "@id").text, measurementsFromXML(node \ "measurement",
-			treatments))
+		treatments: Map[String, Treatment])
+	: Study[DichotomousMeasurement] =
+		fromXML[DichotomousMeasurement](node, treatments,
+			DichotomousMeasurement.fromXML)
 
-	private def measurementsFromXML(nodes: scala.xml.NodeSeq,
-			treatments: Map[String, Treatment]): Map[Treatment, Measurement] =
-		Map[Treatment, Measurement]() ++
-		{for {node <- nodes; val m = Measurement.fromXML(node, treatments)} yield (m.treatment, m)}
+	def fromXML[M <: Measurement](node: scala.xml.Node,
+			treatments: Map[String, Treatment],
+			measReader: (scala.xml.Node, Map[String, Treatment]) => M)
+	: Study[M] =
+		new Study[M]((node \ "@id").text,
+			measurementsFromXML(node \ "measurement", treatments, measReader))
 
-	private def treatmentsFromXML(nodes: scala.xml.NodeSeq,
-			treatments: Map[String, Treatment]): Set[Treatment] = 
-		Set[Treatment]() ++ measurementsFromXML(nodes, treatments).keySet
+	private def measurementsFromXML[M <: Measurement](
+			nodes: scala.xml.NodeSeq,
+			treatments: Map[String, Treatment],
+			reader: (scala.xml.Node, Map[String, Treatment]) => M)
+	: Map[Treatment, M] =
+		Map[Treatment, M]() ++
+		{for {node <- nodes; val m = reader(node, treatments)
+		} yield (m.treatment, m)}
 
-	private def getTreatment(treatments: Map[String, Treatment], id: String): Treatment = 
-		treatments.get(id) match {
-			case Some(treatment) => treatment
-			case None => throw new IllegalStateException("Non-existent treatment ID referred to!")
-		}
+	private def measurementMap[M <: Measurement](ms: Array[M]) =
+		Map[Treatment, M]() ++ ms.map(m => (m.treatment, m))
 
-	private def measurementMap(ms: Array[Measurement]) =
-		Map[Treatment, Measurement]() ++ ms.map(m => (m.treatment, m))
+	def build[M <: Measurement](id: String, measurements: Array[M])
+	: Study[M] = {
+		new Study[M](id, measurementMap(measurements));
+	}
 
-	def build(id: String, measurements: Array[Measurement]): Study = {
-		new Study(id, measurementMap(measurements));
+	def buildDichotomous(id: String,
+			measurements: Array[DichotomousMeasurement])
+	: Study[DichotomousMeasurement] = {
+		build(id, measurements)
 	}
 }

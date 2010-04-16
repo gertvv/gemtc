@@ -14,26 +14,26 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 	val td = new Treatment("D")
 	val treatmentList = List(ta, tb, tc, td)
 
-	val study1 = new Study("1", Map[Treatment, Measurement](
+	val study1 = new Study[DichotomousMeasurement]("1", Map[Treatment, DichotomousMeasurement](
 		(ta, null), (tb, null)))
-	val study2 = new Study("2", Map[Treatment, Measurement](
+	val study2 = new Study[DichotomousMeasurement]("2", Map[Treatment, DichotomousMeasurement](
 		(tb, null), (tc, null), (td, null)))
-	val study3 = new Study("3", Map[Treatment, Measurement](
+	val study3 = new Study[DichotomousMeasurement]("3", Map[Treatment, DichotomousMeasurement](
 		(ta, null), (td, null)))
-	val study4 = new Study("4", Map[Treatment, Measurement](
+	val study4 = new Study[DichotomousMeasurement]("4", Map[Treatment, DichotomousMeasurement](
 		(tc, null), (td, null)))
 	val studyList = List(study1, study2, study3, study4)
 
 	val network = new Network(
 		Set[Treatment]() ++ treatmentList,
-		Set[Study]() ++ studyList)
+		Set[Study[DichotomousMeasurement]]() ++ studyList)
 
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc), (ta, td)), ta)
 
 	val networkModel = new NetworkModel(network,
 		new FundamentalGraphBasis(network.treatmentGraph, spanningTree),
-		Map[Study, Treatment](
+		Map[Study[DichotomousMeasurement], Treatment](
 			(study1, ta), (study2, tb), (study3, ta), (study4, tc)),
 		treatmentList, studyList)
 

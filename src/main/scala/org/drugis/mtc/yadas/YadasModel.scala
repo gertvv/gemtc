@@ -115,7 +115,7 @@ extends ProgressObservable {
 
 	private def buildModel() {
 		def successArray(network: NetworkModel): Array[Double] =
-			network.data.map(m => m._2.responders.toDouble).toArray
+			network.data.map(m => m._2.asInstanceOf[DichotomousMeasurement].responders.toDouble).toArray
 
 		def sampleSizeArray(network: NetworkModel): Array[Double] =
 			network.data.map(m => m._2.sampleSize.toDouble).toArray

@@ -1,6 +1,8 @@
 package org.drugis.mtc
 
-class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
+import org.drugis.mtc.{DichotomousMeasurement => M}
+
+class Network(val treatments: Set[Treatment], val studies: Set[Study[M]]) {
 	override def toString = treatments.toString + studies.toString
 
 	val treatmentGraph: UndirectedGraph[Treatment] = {
@@ -82,9 +84,9 @@ class Network(val treatments: Set[Treatment], val studies: Set[Study]) {
 				s => filterStudy(s, ts)))
 	}
 
-	private def filterStudy(s: Study, ts: Set[Treatment]): Study =
+	private def filterStudy(s: Study[M], ts: Set[Treatment]): Study[M] =
 		if (s.treatments.intersect(ts) == s.treatments) s
-		else new Study(s.id, s.measurements.filter(x => ts.contains(x._1)))
+		else new Study[M](s.id, s.measurements.filter(x => ts.contains(x._1)))
 }
 
 object Network {
@@ -98,7 +100,7 @@ object Network {
 		Map[String, Treatment]() ++
 		{for (node <- n \ "treatment") yield ((node \ "@id").text, Treatment.fromXML(node))}
 
-	def studiesFromXML(n: scala.xml.Node, treatments: Map[String, Treatment]): Set[Study] =
-		Set[Study]() ++
+	def studiesFromXML(n: scala.xml.Node, treatments: Map[String, Treatment]): Set[Study[M]] =
+		Set[Study[M]]() ++
 		{for (node <- n \ "study") yield Study.fromXML(node, treatments)}
 }
