@@ -13,7 +13,7 @@ public class NetworkBuilderTest {
 		return Study$.MODULE$.buildDichotomous(id, m);
 	}
 
-	private NetworkBuilder d_builder;
+	private DichotomousNetworkBuilder d_builder;
 	private Treatment d_ta = new Treatment("A");
 	private Treatment d_tb = new Treatment("B");
 	private Treatment d_tc = new Treatment("C");
@@ -25,7 +25,7 @@ public class NetworkBuilderTest {
 	private Study<DichotomousMeasurement> d_s2 = study("2", new DichotomousMeasurement[]{d_s2b, d_s2c});
 
 	@Before public void setUp() {
-		d_builder = new NetworkBuilder();
+		d_builder = new DichotomousNetworkBuilder();
 	}
 
 	@Test public void testEmptyBuild() {

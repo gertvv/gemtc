@@ -1,30 +1,14 @@
 package org.drugis.mtc
 
 import scala.collection.mutable.{Map => MMap}
-import org.drugis.mtc.{DichotomousMeasurement => M}
 
-class NetworkBuilder {
+trait NetworkBuilder[M <: Measurement] {
 	private val measurementMap = MMap[(String, Treatment), M]()
 	private val treatmentMap = MMap[String, Treatment]()
-
-	def add(studyId: String, treatmentId: String,
-			responders: Int, sampleSize: Int) {
-		val m = createMeasurement(treatmentId, responders, sampleSize)
-		put((studyId, m.treatment), m)
-	}
 
 	def buildNetwork(): Network[M] = new Network[M](treatmentSet, studySet)
 
 	def getTreatment(tId: String): Treatment = treatmentMap(tId)
-
-	private def createMeasurement(tId: String, r: Int, n: Int): M = {
-		val t: Treatment = treatmentMap.get(tId) match {
-			case None => addTreatment(tId)
-			case Some(x: Treatment) => x
-		}
-
-		new DichotomousMeasurement(t, r, n)
-	}
 
 	private def addTreatment(id: String): Treatment = {
 		val t = new Treatment(id)
@@ -32,13 +16,19 @@ class NetworkBuilder {
 		t
 	}
 
-	private def put(k: (String, Treatment), v: M) {
+	protected def put(k: (String, Treatment), v: M) {
 		if (measurementMap.contains(k)) {
 			throw new IllegalArgumentException("Study/Treatment combination " +
 				"already mapped.");
 		}
 		measurementMap.put(k, v)
 	}
+
+	protected def makeTreatment(tId: String): Treatment = 
+		treatmentMap.get(tId) match {
+			case None => addTreatment(tId)
+			case Some(x: Treatment) => x
+		}
 
 	private def treatmentSet: Set[Treatment] =
 		Set[Treatment]() ++ treatmentMap.values
@@ -53,5 +43,19 @@ class NetworkBuilder {
 			k => measurementMap(k))
 		new Study[M](id, Map[Treatment, M]() ++
 			measurements.map(m => (m.treatment, m)))
+	}
+}
+
+class DichotomousNetworkBuilder extends NetworkBuilder[DichotomousMeasurement] {
+	def add(studyId: String, treatmentId: String,
+			responders: Int, sampleSize: Int) {
+		val m = createMeasurement(treatmentId, responders, sampleSize)
+		put((studyId, m.treatment), m)
+	}
+
+	private def createMeasurement(tId: String, r: Int, n: Int)
+	: DichotomousMeasurement = {
+
+		new DichotomousMeasurement(makeTreatment(tId), r, n)
 	}
 }
