@@ -3,7 +3,7 @@ package org.drugis.mtc.yadas
 import org.drugis.mtc._
 import gov.lanl.yadas._
 
-class YadasConsistencyModel(proto: NetworkModel)
+class YadasConsistencyModel(proto: NetworkModel[DichotomousMeasurement])
 extends YadasModel(proto, false) with ConsistencyModel {
 	var rankCount: Array[Array[Int]] = null
 

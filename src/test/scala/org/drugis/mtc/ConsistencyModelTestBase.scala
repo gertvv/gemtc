@@ -38,7 +38,7 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc)), ta)
 
-	def makeModel(nm: NetworkModel): ConsistencyModel
+	def makeModel(nm: NetworkModel[DichotomousMeasurement]): ConsistencyModel
 
 	var model: ConsistencyModel = null 
 

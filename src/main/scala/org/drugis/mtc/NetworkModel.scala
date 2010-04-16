@@ -1,7 +1,5 @@
 package org.drugis.mtc
 
-import org.drugis.mtc.{DichotomousMeasurement => M}
-
 trait NetworkModelParameter {
 
 }
@@ -44,7 +42,7 @@ extends NetworkModelParameter {
 /**
  * Class representing a Bayes model for a treatment network
  */
-class NetworkModel(
+class NetworkModel[M <: Measurement](
 	val network: Network[M], 
 	val basis: FundamentalGraphBasis[Treatment],
 	val studyBaseline: Map[Study[M], Treatment],
@@ -185,23 +183,23 @@ class NetworkModel(
 	}
 }
 
-class BaselineSearchState(
+class BaselineSearchState[M <: Measurement](
 	val toCover: Set[(Treatment, Treatment)],
 	val studies: List[Study[M]],
 	val assignment: Map[Study[M], Treatment]) { }
 
-class BaselineSearchProblem(
+class BaselineSearchProblem[M <: Measurement](
 	toCover: Set[(Treatment, Treatment)],
-	studies: Set[Study[M]]) extends SearchProblem[BaselineSearchState] {
+	studies: Set[Study[M]]) extends SearchProblem[BaselineSearchState[M]] {
 
 	val initialState = new BaselineSearchState(toCover, studies.toList,
 		Map[Study[M], Treatment]())
 
-	def isGoal(s: BaselineSearchState): Boolean = {
+	def isGoal(s: BaselineSearchState[M]): Boolean = {
 		s.toCover.isEmpty && s.studies.isEmpty
 	}
 
-	def successors(s: BaselineSearchState): List[BaselineSearchState] = {
+	def successors(s: BaselineSearchState[M]): List[BaselineSearchState[M]] = {
 		if (s.studies.isEmpty) Nil
 		else {
 			val study = s.studies.head
@@ -216,23 +214,25 @@ class BaselineSearchProblem(
 }
 
 object NetworkModel {
-	def apply(network: Network[M], tree: Tree[Treatment]): NetworkModel = {
-		new NetworkModel(network,
+	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment])
+	: NetworkModel[M] = {
+		new NetworkModel[M](network,
 			new FundamentalGraphBasis(network.treatmentGraph, tree),
 			assignBaselines(network, tree),
 			treatmentList(network.treatments),
 			studyList(network.studies))
 	}
 
-	def apply(network: Network[M], base: Treatment): NetworkModel = {
+	def apply[M <: Measurement](network: Network[M], base: Treatment)
+	: NetworkModel[M] = {
 		apply(network, network.bestSpanningTree(base))
 	}
 
-	def apply(network: Network[M]): NetworkModel = {
+	def apply[M <: Measurement](network: Network[M]): NetworkModel[M] = {
 		apply(network, treatmentList(network.treatments).first)
 	}
 
-	private def assignMultiArm(
+	private def assignMultiArm[M <: Measurement](
 		toCover: Set[(Treatment, Treatment)], studies: Set[Study[M]])
 	: Map[Study[M], Treatment] = {
 		val problem = new BaselineSearchProblem(toCover, studies)
@@ -243,7 +243,8 @@ object NetworkModel {
 		}
 	}
 
-	def assignBaselines(network: Network[M], st: Tree[Treatment])
+	def assignBaselines[M <: Measurement](
+			network: Network[M], st: Tree[Treatment])
 	: Map[Study[M], Treatment] = {
 		val toCover = network.inconsistencies(st).flatMap(a => a.edgeSet)
 		val twoArm = network.studies.filter(study => study.treatments.size == 2)
@@ -256,7 +257,7 @@ object NetworkModel {
 		twoArmMap ++ assignMultiArm(leftToCover, multiArm)
 	}
 
-	def studyList(studies: Set[Study[M]]) = {
+	def studyList[M <: Measurement](studies: Set[Study[M]]) = {
 		studies.toList.sort((a, b) => a.id < b.id)
 	}
 

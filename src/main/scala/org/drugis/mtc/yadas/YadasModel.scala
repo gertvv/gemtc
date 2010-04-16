@@ -24,7 +24,7 @@ class Parameter(p: MCMCParameter, i: Int) {
 	}
 }
 
-class YadasModel(proto: NetworkModel, isInconsistency: Boolean)
+class YadasModel(proto: NetworkModel[DichotomousMeasurement], isInconsistency: Boolean)
 extends ProgressObservable {
 	private var ready = false
 
@@ -114,10 +114,10 @@ extends ProgressObservable {
 		}
 
 	private def buildModel() {
-		def successArray(network: NetworkModel): Array[Double] =
+		def successArray(network: NetworkModel[DichotomousMeasurement]): Array[Double] =
 			network.data.map(m => m._2.asInstanceOf[DichotomousMeasurement].responders.toDouble).toArray
 
-		def sampleSizeArray(network: NetworkModel): Array[Double] =
+		def sampleSizeArray(network: NetworkModel[DichotomousMeasurement]): Array[Double] =
 			network.data.map(m => m._2.sampleSize.toDouble).toArray
 
 		// success-rate r from data

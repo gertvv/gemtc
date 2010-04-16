@@ -7,7 +7,7 @@ import gov.lanl.yadas.ArgumentMaker
  * ArgumentMaker for individual treatment success probabilities within studies.
  * p_i,k = ilogit(theta_i,k) ; theta_i,k = mu_i + delta_i,b(i),k
  */
-class SuccessProbabilityArgumentMaker(model: NetworkModel,
+class SuccessProbabilityArgumentMaker(model: NetworkModel[DichotomousMeasurement],
 		sIdx: Int, dIdx: Int)
 extends ArgumentMaker {
 	/**

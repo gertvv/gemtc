@@ -7,7 +7,7 @@ import gov.lanl.yadas.ArgumentMaker
  * ArgumentMaker for individual treatment effects within studies.
  * theta_i,k = mu_i + delta_i,b(i),k
  */
-class RealEffectArgumentMaker(model: NetworkModel,
+class RealEffectArgumentMaker(model: NetworkModel[DichotomousMeasurement],
 		sIdx: Int, dIdx: Int)
 extends ArgumentMaker {
 	/**

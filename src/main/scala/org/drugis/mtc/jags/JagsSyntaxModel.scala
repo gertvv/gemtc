@@ -3,7 +3,7 @@ package org.drugis.mtc.jags
 import org.drugis.mtc._
 import org.drugis.mtc.{DichotomousMeasurement => M}
 
-abstract class JagsSyntaxModel(model: NetworkModel) {
+abstract class JagsSyntaxModel(model: NetworkModel[M]) {
 	def dataText: String =
 		List(
 			vectorStr("s", studyIndexVector),
@@ -38,7 +38,7 @@ abstract class JagsSyntaxModel(model: NetworkModel) {
 	def expressParams(params: Map[NetworkModelParameter, Int]): String
 }
 
-class JagsSyntaxConsistencyModel(model: NetworkModel)
+class JagsSyntaxConsistencyModel(model: NetworkModel[M])
 extends JagsSyntaxInconsistencyModel(model) {
 	override def modelText: String = {
 		List(
@@ -73,7 +73,7 @@ extends JagsSyntaxInconsistencyModel(model) {
 		).mkString("\n")
 }
 
-class JagsSyntaxInconsistencyModel(model: NetworkModel)
+class JagsSyntaxInconsistencyModel(model: NetworkModel[M])
 extends JagsSyntaxModel(model) {
 	override def modelText: String = {
 		List(
