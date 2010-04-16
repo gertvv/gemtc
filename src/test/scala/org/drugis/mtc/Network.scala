@@ -32,7 +32,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		</network>
 
 	@Test def testFromXMLDich() {
-		val network = Network.fromXML(networkXML)
+		val network = Network.dichFromXML(networkXML)
 
 		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
 		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
@@ -47,6 +47,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.treatments should be (Set[Treatment](
 			a.treatment, b.treatment, c.treatment, d.treatment))
 		network.studies should be (Set[Study[DichotomousMeasurement]](s1, s2, s3))
+		network.measurementType should be (classOf[DichotomousMeasurement])
 	}
 
 	@Test def testFromXMLCont() {
@@ -73,6 +74,8 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.treatments should be (Set[Treatment](
 			a.treatment, b.treatment))
 		network.studies should be (Set[Study[ContinuousMeasurement]](s1))
+
+		network.measurementType should be (classOf[ContinuousMeasurement])
 	}
 
 	@Test def testFromXMLGeneric() {

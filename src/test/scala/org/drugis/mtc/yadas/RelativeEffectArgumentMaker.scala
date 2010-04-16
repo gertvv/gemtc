@@ -14,14 +14,18 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 	val td = new Treatment("D")
 	val treatmentList = List(ta, tb, tc, td)
 
+	def makeM(t: Treatment): DichotomousMeasurement = {
+		new DichotomousMeasurement(t, 50, 100)
+	}
+
 	val study1 = new Study[DichotomousMeasurement]("1", Map[Treatment, DichotomousMeasurement](
-		(ta, null), (tb, null)))
+		(ta, makeM(ta)), (tb, makeM(tb))))
 	val study2 = new Study[DichotomousMeasurement]("2", Map[Treatment, DichotomousMeasurement](
-		(tb, null), (tc, null), (td, null)))
+		(tb, makeM(tb)), (tc, makeM(tc)), (td, makeM(td))))
 	val study3 = new Study[DichotomousMeasurement]("3", Map[Treatment, DichotomousMeasurement](
-		(ta, null), (td, null)))
+		(ta, makeM(ta)), (td, makeM(td))))
 	val study4 = new Study[DichotomousMeasurement]("4", Map[Treatment, DichotomousMeasurement](
-		(tc, null), (td, null)))
+		(tc, makeM(tc)), (td, makeM(td))))
 	val studyList = List(study1, study2, study3, study4)
 
 	val network = new Network(

@@ -4,6 +4,15 @@ class Network[M <: Measurement](
 		val treatments: Set[Treatment], val studies: Set[Study[M]]) {
 	override def toString = treatments.toString + studies.toString
 
+	val measurementType: Class[M] =
+		studies.find(_ => true) match {
+			case Some(x) => x.measurements.values.find(_ => true) match {
+				case Some(y) => y.getClass.asInstanceOf[Class[M]]
+				case None => null
+			}
+			case None => null
+		}
+
 	val treatmentGraph: UndirectedGraph[Treatment] = {
 		var graph = new UndirectedGraph[Treatment](
 			Set[(Treatment, Treatment)]())
