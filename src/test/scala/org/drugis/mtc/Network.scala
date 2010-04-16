@@ -31,7 +31,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			</studies>
 		</network>
 
-	@Test def testFromXML() {
+	@Test def testFromXMLDich() {
 		val network = Network.fromXML(networkXML)
 
 		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
@@ -47,6 +47,36 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.treatments should be (Set[Treatment](
 			a.treatment, b.treatment, c.treatment, d.treatment))
 		network.studies should be (Set[Study[DichotomousMeasurement]](s1, s2, s3))
+	}
+
+	@Test def testFromXMLCont() {
+		val contXML =
+			<network type="continuous">
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A" mean="1.2" standardDeviation="0.25" sample="100" />
+						<measurement treatment="B" mean="1.8" standardDeviation="0.8" sample="100" />
+					</study>
+				</studies>
+			</network>
+		val network = Network.contFromXML(contXML)
+
+		val a = new ContinuousMeasurement(new Treatment("A"), 1.2, 0.25, 100)
+		val b = new ContinuousMeasurement(new Treatment("B"), 1.8, 0.8,  100)
+
+		val s1 = new Study[ContinuousMeasurement]("1", Map((a.treatment, a), (b.treatment, b)))
+
+		network.treatments should be (Set[Treatment](
+			a.treatment, b.treatment))
+		network.studies should be (Set[Study[ContinuousMeasurement]](s1))
+	}
+
+	@Test def testFromXMLGeneric() {
+		fail()
 	}
 
 	@Test def testFilterTreatments() {
