@@ -22,6 +22,20 @@ val top = network.treatments.toList.sort((a, b) => a < b).first
 
 val best = network.bestSpanningTree(top)
 
+println("graph {")
+for (e <- best.edgeSet) {
+	println(e._1.id + " -- " + e._2.id)
+}
+println("}")
+
+/*
+val iterable = SpanningTreeEnumerator.treeEnumerator(network.treatmentGraph)
+var i = 0
+for (t <- iterable) {
+	i += 1
+}
+println("Generated " + i + " trees")
+*/
 val model = NetworkModel(network, best)
 val syntaxModel = new JagsSyntaxInconsistencyModel(model)
 
