@@ -13,7 +13,7 @@ class NetworkBuilder {
 		put((studyId, m.treatment), m)
 	}
 
-	def buildNetwork(): Network = new Network(treatmentSet, studySet)
+	def buildNetwork(): Network[M] = new Network[M](treatmentSet, studySet)
 
 	def getTreatment(tId: String): Treatment = treatmentMap(tId)
 

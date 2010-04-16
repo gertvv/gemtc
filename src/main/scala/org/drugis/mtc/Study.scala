@@ -27,12 +27,6 @@ final class Study[M <: Measurement](val id: String,
 }
 
 object Study {
-	def fromXML(node: scala.xml.Node,
-		treatments: Map[String, Treatment])
-	: Study[DichotomousMeasurement] =
-		fromXML[DichotomousMeasurement](node, treatments,
-			DichotomousMeasurement.fromXML)
-
 	def fromXML[M <: Measurement](node: scala.xml.Node,
 			treatments: Map[String, Treatment],
 			measReader: (scala.xml.Node, Map[String, Treatment]) => M)

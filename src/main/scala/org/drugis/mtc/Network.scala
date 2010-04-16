@@ -1,8 +1,7 @@
 package org.drugis.mtc
 
-import org.drugis.mtc.{DichotomousMeasurement => M}
-
-class Network(val treatments: Set[Treatment], val studies: Set[Study[M]]) {
+class Network[M <: Measurement](
+		val treatments: Set[Treatment], val studies: Set[Study[M]]) {
 	override def toString = treatments.toString + studies.toString
 
 	val treatmentGraph: UndirectedGraph[Treatment] = {
@@ -75,11 +74,11 @@ class Network(val treatments: Set[Treatment], val studies: Set[Study[M]]) {
 		treeEnumerator(top).reduceLeft((a, b) => if (better(a, b)) a else b)
 	}
 
-	def filterTreatments(ts: Set[Treatment]): Network = {
+	def filterTreatments(ts: Set[Treatment]): Network[M] = {
 		if (!ts.subsetOf(treatments))
 			throw new RuntimeException(ts + " not a subset of " + treatments)
 
-		new Network(ts,
+		new Network[M](ts,
 			studies.filter(s => s.treatments.intersect(ts).size > 1).map(
 				s => filterStudy(s, ts)))
 	}
@@ -90,17 +89,44 @@ class Network(val treatments: Set[Treatment], val studies: Set[Study[M]]) {
 }
 
 object Network {
-	def fromXML(node: scala.xml.Node): Network =  {
+	def fromXML(node: scala.xml.Node): Network[DichotomousMeasurement] = {
+		dichFromXML(node)
+	}
+	/* further refactors needed first
+	def fromXML(node: scala.xml.Node): Network[_] = {
+		node.attribute("type") match {
+			case Some(x) => x.text match {
+				case "continuous" => contFromXML(node)
+				case "dichotomous" => dichFromXML(node)
+				case _ => throw new RuntimeException(
+					"Unsupported network type " + x.text)
+			}
+			case None => dichFromXML(node)
+		}
+	} */
+
+	def dichFromXML(node: scala.xml.Node): Network[DichotomousMeasurement] = {
 		val treatments = treatmentsFromXML((node \ "treatments")(0))
 		new Network(Set[Treatment]() ++ treatments.values, 
-			studiesFromXML((node \ "studies")(0), treatments))
+			studiesFromXML((node \ "studies")(0), treatments,
+				DichotomousMeasurement.fromXML))
+	}
+
+	def contFromXML(node: scala.xml.Node): Network[ContinuousMeasurement] = {
+		val treatments = treatmentsFromXML((node \ "treatments")(0))
+		new Network(Set[Treatment]() ++ treatments.values, 
+			studiesFromXML((node \ "studies")(0), treatments,
+				ContinuousMeasurement.fromXML))
 	}
 
 	def treatmentsFromXML(n: scala.xml.Node): Map[String, Treatment] =
 		Map[String, Treatment]() ++
 		{for (node <- n \ "treatment") yield ((node \ "@id").text, Treatment.fromXML(node))}
 
-	def studiesFromXML(n: scala.xml.Node, treatments: Map[String, Treatment]): Set[Study[M]] =
+	def studiesFromXML[M <: Measurement](n: scala.xml.Node,
+			treatments: Map[String, Treatment],
+			measReader: (scala.xml.Node, Map[String, Treatment]) => M)
+	: Set[Study[M]] =
 		Set[Study[M]]() ++
-		{for (node <- n \ "study") yield Study.fromXML(node, treatments)}
+		{for (node <- n \ "study") yield Study.fromXML(node, treatments, measReader)}
 }

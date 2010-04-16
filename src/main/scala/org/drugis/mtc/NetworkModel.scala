@@ -45,7 +45,7 @@ extends NetworkModelParameter {
  * Class representing a Bayes model for a treatment network
  */
 class NetworkModel(
-	val network: Network, 
+	val network: Network[M], 
 	val basis: FundamentalGraphBasis[Treatment],
 	val studyBaseline: Map[Study[M], Treatment],
 	val treatmentList: List[Treatment],
@@ -216,7 +216,7 @@ class BaselineSearchProblem(
 }
 
 object NetworkModel {
-	def apply(network: Network, tree: Tree[Treatment]): NetworkModel = {
+	def apply(network: Network[M], tree: Tree[Treatment]): NetworkModel = {
 		new NetworkModel(network,
 			new FundamentalGraphBasis(network.treatmentGraph, tree),
 			assignBaselines(network, tree),
@@ -224,11 +224,11 @@ object NetworkModel {
 			studyList(network.studies))
 	}
 
-	def apply(network: Network, base: Treatment): NetworkModel = {
+	def apply(network: Network[M], base: Treatment): NetworkModel = {
 		apply(network, network.bestSpanningTree(base))
 	}
 
-	def apply(network: Network): NetworkModel = {
+	def apply(network: Network[M]): NetworkModel = {
 		apply(network, treatmentList(network.treatments).first)
 	}
 
@@ -243,7 +243,7 @@ object NetworkModel {
 		}
 	}
 
-	def assignBaselines(network: Network, st: Tree[Treatment])
+	def assignBaselines(network: Network[M], st: Tree[Treatment])
 	: Map[Study[M], Treatment] = {
 		val toCover = network.inconsistencies(st).flatMap(a => a.edgeSet)
 		val twoArm = network.studies.filter(study => study.treatments.size == 2)
