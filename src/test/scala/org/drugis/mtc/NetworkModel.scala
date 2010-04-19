@@ -6,7 +6,7 @@ import org.junit.Test
 import org.junit.Before
 
 class NetworkModelTest extends ShouldMatchersForJUnit {
-	val network = Network.fromXML(<network>
+	val network = Network.dichFromXML(<network>
 			<treatments>
 				<treatment id="A"/>
 				<treatment id="B"/>

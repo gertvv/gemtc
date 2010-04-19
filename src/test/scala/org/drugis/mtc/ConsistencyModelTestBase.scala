@@ -7,7 +7,7 @@ import org.junit.Before
 
 abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 	val f = 0.15
-	def network = Network.fromXML(
+	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
 			<treatments>
 				<treatment id="A">No Contact</treatment>

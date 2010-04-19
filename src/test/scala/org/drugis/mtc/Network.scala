@@ -90,7 +90,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			new Treatment("B"),
 			new Treatment("C"))
 
-		val network = Network.fromXML(networkXML).filterTreatments(ts)
+		val network = Network.dichFromXML(networkXML).filterTreatments(ts)
 
 		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
 		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
@@ -111,7 +111,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			new Treatment("B"),
 			new Treatment("D"))
 
-		val network = Network.fromXML(networkXML).filterTreatments(ts)
+		val network = Network.dichFromXML(networkXML).filterTreatments(ts)
 
 		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
 		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
@@ -127,7 +127,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testTreatmentGraph() {
-		val network = Network.fromXML(networkXML)
+		val network = Network.dichFromXML(networkXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
@@ -142,7 +142,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testSupportingEvidence() {
-		val network = Network.fromXML(networkXML)
+		val network = Network.dichFromXML(networkXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
@@ -162,7 +162,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testEdgeVector() {
-		val network = Network.fromXML(networkXML)
+		val network = Network.dichFromXML(networkXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
@@ -175,7 +175,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testEvidenceMatrix() {
-		val network = Network.fromXML(networkXML)
+		val network = Network.dichFromXML(networkXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
@@ -198,7 +198,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testInconsistency() {
-		val network = Network.fromXML(
+		val network = Network.dichFromXML(
 			<network>
 				<treatments>
 					<treatment id="A"/>
@@ -239,7 +239,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testCountInconsistencies() {
-		val network = Network.fromXML(
+		val network = Network.dichFromXML(
 			<network>
 				<treatments>
 					<treatment id="A"/>
@@ -274,7 +274,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testCountInconsistencies2() {
-		val network = Network.fromXML(<network>
+		val network = Network.dichFromXML(<network>
 			<treatments>
 				<treatment id="A"/>
 				<treatment id="B"/>

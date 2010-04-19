@@ -95,7 +95,7 @@ b <- c(2, 1, 1)"""
 			|data$var.w <- var.w
 			|detach(trace)""".stripMargin
 
-	def network = Network.fromXML(
+	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
 			<treatments>
 				<treatment id="A">No Contact</treatment>
@@ -222,7 +222,7 @@ b <- c(2, 1, 1)"""
 			|data$var.d <- var.d
 			|detach(trace)""".stripMargin
 
-	def network = Network.fromXML(
+	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
 			<treatments>
 				<treatment id="A">No Contact</treatment>
