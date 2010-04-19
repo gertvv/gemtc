@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.drugis</groupId>
   <artifactId>mtc</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <inceptionYear>2009</inceptionYear>
   <properties>
     <scala.version>2.7.3</scala.version>
