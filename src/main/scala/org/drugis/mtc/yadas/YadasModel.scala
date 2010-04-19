@@ -145,6 +145,15 @@ extends ProgressObservable {
 			case None => None
 		}
 
+	private def sigmaPrior = {
+		if (dichotomous) new ConstantArgument(2) // FIXME
+		else new ConstantArgument(20)
+	}
+
+	private def inconsSigmaPrior = {
+		sigmaPrior
+	}
+
 	private def buildModel() {
 		if (proto == null) {
 			proto = NetworkModel(network)
@@ -241,8 +250,7 @@ extends ProgressObservable {
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
 					new ConstantArgument(0.00001),
-					if (dichotomous) new ConstantArgument(2) // FIXME
-					else new ConstantArgument(20)
+					new ConstantArgument(sigmaPrior)
 				),
 				new Uniform()
 			)
@@ -263,7 +271,7 @@ extends ProgressObservable {
 					Array[ArgumentMaker](
 						new IdentityArgument(0),
 						new ConstantArgument(0.00001),
-						new ConstantArgument(2)
+						new ConstantArgument(inconsSigmaPrior)
 					),
 					new Uniform()
 				)
