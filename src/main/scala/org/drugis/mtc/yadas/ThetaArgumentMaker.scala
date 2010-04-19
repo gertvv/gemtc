@@ -8,9 +8,10 @@ import gov.lanl.yadas.ArgumentMaker
  * p_i,k = ilogit(theta_i,k) ; theta_i,k = mu_i + delta_i,b(i),k
  */
 class ThetaArgumentMaker[M <: Measurement](
-		model: NetworkModel[M],
-		sIdx: Int, dIdx: Int)
-extends ArgumentMaker {
+		override val model: NetworkModel[M],
+		override val sIdx: Int,
+		override val dIdx: Int)
+extends ArgumentMaker with ThetaMaker[M] {
 	/**
 	 * Calculate "the argument": an array of succes-probabilities, one for
 	 * each study-arm.
@@ -22,6 +23,12 @@ extends ArgumentMaker {
 			for {d <- model.data} yield theta(d._1, d._2.treatment, data)
 		}
 	}
+}
+
+trait ThetaMaker[M <: Measurement] {
+	protected val model: NetworkModel[M]
+	protected val sIdx: Int
+	protected val dIdx: Int
 
 	private def relativeTreatmentIndex(s: Study[M], t: Treatment)
 	: Int = {
@@ -35,7 +42,7 @@ extends ArgumentMaker {
 		else base + relativeTreatmentIndex(s, t)
 	}
 
-	private def theta(s: Study[M], t: Treatment, data: Array[Array[Double]])
+	protected def theta(s: Study[M], t: Treatment, data: Array[Array[Double]])
 	: Double = {
 		val baselineIdx = model.studyList.indexOf(s)
 		val treatmentIdx = treatmentIndex(s, t)
