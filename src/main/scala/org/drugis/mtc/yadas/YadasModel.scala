@@ -15,12 +15,12 @@ extends Estimate {
 	override def toString = mean.toString + " (" + sd.toString + ")"
 }
 
-class Parameter(p: MCMCParameter, i: Int) {
-	private var v: List[Double] = List()
+class Parameter(p: MCMCParameter, i: Int, iter: Int) {
+	private var v: Array[Double] = Array(0.0, iter)
 	def value = v
 
-	def update() {
-		v = p.getValue(i) :: v
+	def update(curIter: Int) {
+		v(curIter) = p.getValue(i)
 	}
 }
 
@@ -146,8 +146,8 @@ extends ProgressObservable {
 		}
 
 	private def sigmaPrior = {
-		if (dichotomous) new ConstantArgument(2) // FIXME
-		else new ConstantArgument(20)
+		if (dichotomous) 2 // FIXME
+		else 20
 	}
 
 	private def inconsSigmaPrior = {
@@ -284,7 +284,7 @@ extends ProgressObservable {
 		updateList = params.map(p => tuner(p))
 
 		def paramList(p: MCMCParameter, n: Int): List[Parameter] =
-			(0 until n).map(i => new Parameter(p, i)).toList
+			(0 until n).map(i => new Parameter(p, i, simulationIter)).toList
 
 		val basicParam = paramList(basic, proto.basicParameters.size)
 		val inconsParam = paramList(incons, proto.inconsistencyParameters.size)
@@ -381,7 +381,7 @@ extends ProgressObservable {
 				notifySimulationProgress(i);
 
 			update()
-			output()
+			output(i)
 		}
 	}
 
@@ -391,9 +391,9 @@ extends ProgressObservable {
 		}
 	}
 
-	private def output() {
+	private def output(i: Int) {
 		for (p <- parameterList) {
-			p.update()
+			p.update(i)
 		}
 	}
 
@@ -418,7 +418,7 @@ extends ProgressObservable {
 	private def preCalculateResult(p: NetworkModelParameter): Array[Double] = {
 		if (proto.basicParameters.contains(p) ||
 				proto.inconsistencyParameters.contains(p))
-			parameters(p).value.toArray
+			parameters(p).value
 		else p match {
 			case bp: BasicParameter =>
 				calcValue(proto.parameterization(bp.base, bp.subject))
@@ -439,7 +439,7 @@ extends ProgressObservable {
 		var value = new ArrayRealVector(simulationIter)
 		for ((p, f) <- pz) {
 			if (f != 0) {
-				val pv = new ArrayRealVector(parameters(p).value.toArray)
+				val pv = new ArrayRealVector(parameters(p).value)
 				pv.mapMultiplyToSelf(f)
 				value = value.add(pv)
 			}
