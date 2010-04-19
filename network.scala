@@ -36,7 +36,9 @@ for (t <- iterable) {
 }
 println("Generated " + i + " trees")
 */
+
 val model = NetworkModel(network, best)
+/*
 val syntaxModel = new JagsSyntaxInconsistencyModel(model)
 
 import java.io.PrintStream
@@ -58,18 +60,19 @@ scriptOut.close()
 val analysisOut = new PrintStream(baseName + ".analysis.R")
 analysisOut.println(syntaxModel.analysisText(baseName))
 analysisOut.close()
-
+*/
 class ListenerImpl extends ProgressListener {
 	def update(mtc: MixedTreatmentComparison, evt: ProgressEvent) {
 		println(evt)
 	}
 }
 
+val treatments = network.treatments.toList.sort((a, b) => a < b)
+/*
 println("Running YADAS inconsistency model: ")
 val inconsModel = (new YadasModelFactory()).getInconsistencyModel(network)
 inconsModel.addProgressListener(new ListenerImpl())
 inconsModel.run()
-val treatments = network.treatments.toList.sort((a, b) => a < b)
 for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
 	println(treatments(i).id + " " + treatments(j).id + " " +
 		inconsModel.getRelativeEffect(treatments(i), treatments(j)))
@@ -77,12 +80,13 @@ for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
 for (f <- inconsModel.getInconsistencyFactors().toArray(Array[InconsistencyParameter]())) {
 	println(f + " " + inconsModel.getInconsistency(f))
 }
+*/
 
 println("Running YADAS consistency model: ")
-	val consModel = (new YadasModelFactory()).getConsistencyModel(network)
-	consModel.addProgressListener(new ListenerImpl())
-	consModel.run()
-	for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
+val consModel = (new YadasModelFactory()).getConsistencyModel(network)
+consModel.addProgressListener(new ListenerImpl())
+consModel.run()
+for (i <- 0 until (treatments.size - 1); j <- (i + 1) until treatments.size) {
 		println(treatments(i).id + " " + treatments(j).id + " " +
 			consModel.getRelativeEffect(treatments(i), treatments(j)))
 }

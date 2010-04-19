@@ -98,11 +98,11 @@ class Network[M <: Measurement](
 }
 
 object Network {
+	/*
 	def fromXML(node: scala.xml.Node): Network[DichotomousMeasurement] = {
 		dichFromXML(node)
-	}
-	/* further refactors needed first
-	def fromXML(node: scala.xml.Node): Network[_] = {
+	} */
+	def fromXML(node: scala.xml.Node): Network[_ <: Measurement] = {
 		node.attribute("type") match {
 			case Some(x) => x.text match {
 				case "continuous" => contFromXML(node)
@@ -112,7 +112,7 @@ object Network {
 			}
 			case None => dichFromXML(node)
 		}
-	} */
+	}
 
 	def dichFromXML(node: scala.xml.Node): Network[DichotomousMeasurement] = {
 		val treatments = treatmentsFromXML((node \ "treatments")(0))

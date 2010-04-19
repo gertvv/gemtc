@@ -128,10 +128,6 @@ extends ProgressObservable {
 		}
 
 	private def buildModel() {
-		if (!dichotomous) {
-			throw new IllegalStateException("Continuous analysis not supported")
-		}
-
 		if (proto == null) {
 			proto = NetworkModel(network)
 		}
@@ -180,9 +176,15 @@ extends ProgressObservable {
 				List[MCMCParameter](mu, delta, basic, sigma)
 
 		// data bond
-		val databond = dichotomousDataBond(
-			proto.asInstanceOf[NetworkModel[DichotomousMeasurement]],
-			mu, delta)
+		val databond =
+			if (dichotomous)
+				dichotomousDataBond(
+					proto.asInstanceOf[NetworkModel[DichotomousMeasurement]],
+					mu, delta)
+			else
+				continuousDataBond(
+					proto.asInstanceOf[NetworkModel[ContinuousMeasurement]],
+					mu, delta)
 
 		// random effects bound to basic/incons parameters
 		val randomeffectbond =  new BasicMCMCBond(
@@ -221,7 +223,8 @@ extends ProgressObservable {
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
 					new ConstantArgument(0.00001),
-					new ConstantArgument(2)
+					if (dichotomous) new ConstantArgument(2) // FIXME
+					else new ConstantArgument(20)
 				),
 				new Uniform()
 			)
@@ -305,6 +308,35 @@ extends ProgressObservable {
 					new SuccessProbabilityArgumentMaker(model, 0, 1)
 				),
 				new Binomial()
+			)
+	}
+
+	private def obsMeanArray(model: NetworkModel[ContinuousMeasurement])
+	: Array[Double] =
+		model.data.map(m => m._2.mean).toArray
+
+	private def obsErrorArray(model: NetworkModel[ContinuousMeasurement])
+	: Array[Double] =
+		model.data.map(m => m._2.stdErr).toArray
+
+	private def continuousDataBond(model: NetworkModel[ContinuousMeasurement],
+			mu: MCMCParameter, delta: MCMCParameter)
+	: BasicMCMCBond = {
+		// success-rate r from data
+		val m = new ConstantArgument(obsMeanArray(model))
+		// sample-size n from data
+		val s = new ConstantArgument(obsErrorArray(model))
+
+		// m_i ~ N(theta_i, s_i)
+		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
+		new BasicMCMCBond(
+				Array[MCMCParameter](mu, delta),
+				Array[ArgumentMaker](
+					m,
+					new ThetaArgumentMaker(model, 0, 1),
+					s,
+				),
+				new Gaussian()
 			)
 	}
 
