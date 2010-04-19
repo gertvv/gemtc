@@ -7,9 +7,9 @@ public interface ModelFactory {
 	/**
 	 * Create a homogenous variance random effects consistency model.
 	 */
-	public ConsistencyModel getConsistencyModel(Network<DichotomousMeasurement> network);
+	public <T extends Measurement> ConsistencyModel getConsistencyModel(Network<T> network);
 	/**
 	 * Create a homogenous variance random effects inconsistency model.
 	 */
-	public InconsistencyModel getInconsistencyModel(Network<DichotomousMeasurement> network);
+	public <T extends Measurement> InconsistencyModel getInconsistencyModel(Network<T> network);
 }

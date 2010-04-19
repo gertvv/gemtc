@@ -24,8 +24,19 @@ class Parameter(p: MCMCParameter, i: Int) {
 	}
 }
 
-class YadasModel(proto: NetworkModel[DichotomousMeasurement], isInconsistency: Boolean)
+class YadasModel(proto: NetworkModel[_ <: Measurement],
+	isInconsistency: Boolean)
 extends ProgressObservable {
+	def dichotomous: Boolean = {
+		val cls = proto.network.measurementType
+		if (cls == classOf[DichotomousMeasurement])
+			true
+		else if (cls == classOf[ContinuousMeasurement])
+			false
+		else
+			throw new IllegalStateException("Unknown measurement type " + cls)
+	}
+
 	private var ready = false
 
 	private var parameters: Map[NetworkModelParameter, Parameter]
@@ -114,14 +125,17 @@ extends ProgressObservable {
 		}
 
 	private def buildModel() {
+		if (!dichotomous) {
+			throw new IllegalStateException("Continuous analysis not supported")
+		}
 		def successArray(network: NetworkModel[DichotomousMeasurement]): Array[Double] =
 			network.data.map(m => m._2.asInstanceOf[DichotomousMeasurement].responders.toDouble).toArray
 
-		def sampleSizeArray(network: NetworkModel[DichotomousMeasurement]): Array[Double] =
+		def sampleSizeArray(network: NetworkModel[_ <: Measurement]): Array[Double] =
 			network.data.map(m => m._2.sampleSize.toDouble).toArray
 
 		// success-rate r from data
-		val r = new ConstantArgument(successArray(proto))
+		val r = new ConstantArgument(successArray(proto.asInstanceOf[NetworkModel[DichotomousMeasurement]]))
 		// sample-size n from data
 		val n = new ConstantArgument(sampleSizeArray(proto))
 		// study baselines
@@ -174,7 +188,7 @@ extends ProgressObservable {
 				Array[ArgumentMaker](
 					r,
 					n,
-					new SuccessProbabilityArgumentMaker(proto, 0, 1)
+					new SuccessProbabilityArgumentMaker(proto.asInstanceOf[NetworkModel[DichotomousMeasurement]], 0, 1)
 				),
 				new Binomial()
 			)

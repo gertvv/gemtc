@@ -12,7 +12,7 @@ import org.apache.commons.math.linear.ArrayRealVector
  * delta_ijk ~ N(d_jk, sigma) ; d_jk = f(B + W) ;
  * B basic parameters, W inconsistency factors.
  */
-class RelativeEffectArgumentMaker(model: NetworkModel[DichotomousMeasurement],
+class RelativeEffectArgumentMaker(model: NetworkModel[_ <: Measurement],
 	bIdx: Int, wIdx: Option[Int])
 extends ArgumentMaker {
 	private val relativeEffects: List[(Treatment, Treatment)] =
