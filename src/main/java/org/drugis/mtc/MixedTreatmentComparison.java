@@ -26,4 +26,24 @@ public interface MixedTreatmentComparison extends Runnable {
 	 * getters.
 	 */
 	public boolean isReady();
+	/**
+	 * @return the number of burn-in iterations
+	 */
+	public int getBurnInIterations();
+	/**
+	 * @param it The number of burn-in iterations, a multiple of 100.
+	 * @throws IllegalArgumentException if it is not a multiple of 100, or
+	 * if it <= 0.
+	 */
+	public void setBurnInIterations(int it);
+	/**
+	 * @return the number of simulation iterations
+	 */
+	public int getSimulationIterations();
+	/**
+	 * @param it The number of simulation iterations, a multiple of 100.
+	 * @throws IllegalArgumentException if it is not a multiple of 100, or
+	 * if it <= 0.
+	 */
+	public void setSimulationIterations(int it);
 }

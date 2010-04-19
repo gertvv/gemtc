@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class NetworkBuilderTest {
+public class DichotomousNetworkBuilderTest {
 	private Study<DichotomousMeasurement> study(String id,
 			DichotomousMeasurement[] m) {
 		return Study$.MODULE$.buildDichotomous(id, m);

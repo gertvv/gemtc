@@ -14,24 +14,26 @@ public class ProgressEvent {
 
 	private EventType d_type;
 	private Integer d_iter;
+	private Integer d_max;
 	
-	public ProgressEvent(EventType type, Integer iter) {
+	public ProgressEvent(EventType type, Integer iter, Integer max) {
 		d_type = type;
 		d_iter = iter;
+		d_max = max;
 
 		if (type.equals(EventType.BURNIN_PROGRESS) || type.equals(EventType.SIMULATION_PROGRESS)) {
-			if (d_iter == null) {
+			if (d_iter == null || d_max == null) {
 				throw new IllegalArgumentException("*_PROGRESS needs to have a specified iteration");
 			}
 		} else {
-			if (d_iter != null) {
+			if (d_iter != null || d_max != null) {
 				throw new IllegalArgumentException("Only *_PROGRESS can have a specified iteration");
 			}
 		}
 	}
 
 	public ProgressEvent(EventType type) {
-		this(type, null);
+		this(type, null, null);
 	}
 
 	public EventType getType() {
@@ -40,6 +42,10 @@ public class ProgressEvent {
 
 	public int getIteration() {
 		return d_iter;
+	}
+
+	public int getTotalIterations() {
+		return d_max;
 	}
 
 	@Override

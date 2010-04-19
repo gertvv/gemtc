@@ -27,7 +27,6 @@ class Parameter(p: MCMCParameter, i: Int) {
 class YadasModel[M <: Measurement](network: Network[M],
 	isInconsistency: Boolean)
 extends ProgressObservable {
-
 	def dichotomous: Boolean = {
 		val cls = network.measurementType
 		if (cls == classOf[DichotomousMeasurement])
@@ -55,7 +54,7 @@ extends ProgressObservable {
 	private var randomEffectVar: Parameter = null
 	private var inconsistencyVar: Parameter = null
 
-	private var burnInIter = 4000
+	private var burnInIter = 20000
 	protected var simulationIter = 100000
 	private var reportingInterval = 100
 
@@ -111,6 +110,25 @@ extends ProgressObservable {
 			case None => throw new IllegalArgumentException(
 				"Inconsistency not found")
 		}
+
+	def getBurnInIterations: Int = burnInIter
+
+	def setBurnInIterations(it: Int) {
+		validIt(it)
+		burnInIter = it
+	}
+
+	def getSimulationIterations: Int = simulationIter
+
+	def setSimulationIterations(it: Int) {
+		validIt(it)
+		simulationIter = it
+	}
+
+
+	private def validIt(it: Int) {
+		if (it <= 0 || it % 100 != 0) throw new IllegalArgumentException("Specified # iterations should be a positive multiple of 100");
+	}
 
 	private def paramEstimate(base: Treatment, subj: Treatment)
 	: Option[Estimate] =

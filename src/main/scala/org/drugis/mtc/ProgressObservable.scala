@@ -31,7 +31,8 @@ trait ProgressObservable extends MixedTreatmentComparison {
 	}
 
 	protected def notifyBurnInProgress(iteration: Int) {
-		notifyListeners(new ProgressEvent(BURNIN_PROGRESS, iteration))
+		notifyListeners(new ProgressEvent(BURNIN_PROGRESS, iteration,
+			getBurnInIterations()))
 	}
 
 	protected def notifySimulationStarted() {
@@ -43,6 +44,7 @@ trait ProgressObservable extends MixedTreatmentComparison {
 	}
 
 	protected def notifySimulationProgress(iteration: Int) {
-		notifyListeners(new ProgressEvent(SIMULATION_PROGRESS, iteration))
+		notifyListeners(new ProgressEvent(SIMULATION_PROGRESS, iteration,
+			getSimulationIterations()))
 	}
 }
