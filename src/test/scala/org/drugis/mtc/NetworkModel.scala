@@ -189,4 +189,18 @@ class InconsistencyParameterTest extends ShouldMatchersForJUnit {
 				new Treatment("C"), new Treatment("A")))
 			)
 	}
+
+	@Test def testConstructFromJavaList() {
+		val list = new java.util.ArrayList[Treatment]()
+		list.add(new Treatment("A"))
+		list.add(new Treatment("B"))
+		list.add(new Treatment("C"))
+		list.add(new Treatment("A"))
+
+		new InconsistencyParameter(list) should be (
+			new InconsistencyParameter(
+				List(new Treatment("A"), new Treatment("B"),
+				new Treatment("C"), new Treatment("A")))
+			)
+	}
 }

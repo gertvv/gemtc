@@ -18,6 +18,10 @@ extends NetworkModelParameter {
 
 final class InconsistencyParameter(val cycle: List[Treatment])
 extends NetworkModelParameter {
+	def this(list: java.util.List[Treatment]) {
+		this(scala.collection.jcl.Conversions.convertList(list).toList)
+	}
+
 	private val cycleStr =
 		cycle.reverse.tail.reverse.map(t => t.id).mkString(".")
 
