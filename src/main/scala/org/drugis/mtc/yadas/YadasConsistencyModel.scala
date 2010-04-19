@@ -5,6 +5,11 @@ import gov.lanl.yadas._
 
 class YadasConsistencyModel[M <: Measurement](network: Network[M])
 extends YadasModel(network, false) with ConsistencyModel {
+	def this(model: NetworkModel[M]) {
+		this(model.network)
+		proto = model
+	}
+
 	var rankCount: Array[Array[Int]] = null
 
 	def rankProbability(t: Treatment, r: Int) = {

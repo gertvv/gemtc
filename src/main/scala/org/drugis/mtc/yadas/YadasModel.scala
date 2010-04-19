@@ -27,6 +27,7 @@ class Parameter(p: MCMCParameter, i: Int) {
 class YadasModel[M <: Measurement](network: Network[M],
 	isInconsistency: Boolean)
 extends ProgressObservable {
+
 	def dichotomous: Boolean = {
 		val cls = network.measurementType
 		if (cls == classOf[DichotomousMeasurement])
@@ -131,19 +132,10 @@ extends ProgressObservable {
 			throw new IllegalStateException("Continuous analysis not supported")
 		}
 
-		proto = NetworkModel(network)
+		if (proto == null) {
+			proto = NetworkModel(network)
+		}
 		
-
-		def successArray(network: NetworkModel[DichotomousMeasurement]): Array[Double] =
-			network.data.map(m => m._2.asInstanceOf[DichotomousMeasurement].responders.toDouble).toArray
-
-		def sampleSizeArray(network: NetworkModel[_ <: Measurement]): Array[Double] =
-			network.data.map(m => m._2.sampleSize.toDouble).toArray
-
-		// success-rate r from data
-		val r = new ConstantArgument(successArray(proto.asInstanceOf[NetworkModel[DichotomousMeasurement]]))
-		// sample-size n from data
-		val n = new ConstantArgument(sampleSizeArray(proto))
 		// study baselines
 		val mu = new MCMCParameter(
 			Array.make(proto.studyList.size, 0.0),
@@ -187,17 +179,10 @@ extends ProgressObservable {
 			else
 				List[MCMCParameter](mu, delta, basic, sigma)
 
-		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
-		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
-		val databond = new BasicMCMCBond(
-				Array[MCMCParameter](mu, delta),
-				Array[ArgumentMaker](
-					r,
-					n,
-					new SuccessProbabilityArgumentMaker(proto.asInstanceOf[NetworkModel[DichotomousMeasurement]], 0, 1)
-				),
-				new Binomial()
-			)
+		// data bond
+		val databond = dichotomousDataBond(
+			proto.asInstanceOf[NetworkModel[DichotomousMeasurement]],
+			mu, delta)
 
 		// random effects bound to basic/incons parameters
 		val randomeffectbond =  new BasicMCMCBond(
@@ -292,6 +277,35 @@ extends ProgressObservable {
 		
 		randomEffectVar = sigmaParam(0)
 		inconsistencyVar = sigmawParam(0)
+	}
+
+	private def successArray(model: NetworkModel[DichotomousMeasurement])
+	: Array[Double] =
+		model.data.map(m => m._2.responders.toDouble).toArray
+
+	private def sampleSizeArray(model: NetworkModel[_ <: Measurement])
+	: Array[Double] =
+		model.data.map(m => m._2.sampleSize.toDouble).toArray
+
+	private def dichotomousDataBond(model: NetworkModel[DichotomousMeasurement],
+			mu: MCMCParameter, delta: MCMCParameter)
+	: BasicMCMCBond = {
+		// success-rate r from data
+		val r = new ConstantArgument(successArray(model))
+		// sample-size n from data
+		val n = new ConstantArgument(sampleSizeArray(model))
+
+		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
+		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
+		new BasicMCMCBond(
+				Array[MCMCParameter](mu, delta),
+				Array[ArgumentMaker](
+					r,
+					n,
+					new SuccessProbabilityArgumentMaker(model, 0, 1)
+				),
+				new Binomial()
+			)
 	}
 
 	private def burnIn() {

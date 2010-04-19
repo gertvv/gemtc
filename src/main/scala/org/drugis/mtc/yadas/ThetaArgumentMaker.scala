@@ -7,8 +7,8 @@ import gov.lanl.yadas.ArgumentMaker
  * ArgumentMaker for individual treatment success probabilities within studies.
  * p_i,k = ilogit(theta_i,k) ; theta_i,k = mu_i + delta_i,b(i),k
  */
-class SuccessProbabilityArgumentMaker(
-		model: NetworkModel[DichotomousMeasurement],
+class ThetaArgumentMaker[M <: Measurement](
+		model: NetworkModel[M],
 		sIdx: Int, dIdx: Int)
 extends ArgumentMaker {
 	/**
@@ -19,35 +19,30 @@ extends ArgumentMaker {
 	 */
 	def getArgument(data: Array[Array[Double]]): Array[Double] = {
 		Array.make(0, 0.0) ++ {
-			for {d <- model.data} yield prob(d._1, d._2.treatment, data)
+			for {d <- model.data} yield theta(d._1, d._2.treatment, data)
 		}
 	}
 
-	private def ilogit(x: Double): Double = 1 / (1 + Math.exp(-x))
-
-	private def relativeTreatmentIndex(s: Study[DichotomousMeasurement],
-			t: Treatment)
+	private def relativeTreatmentIndex(s: Study[M], t: Treatment)
 	: Int = {
 		model.studyRelativeEffects(s).findIndexOf(x => x._2 == t)
 	}
 
-	private def treatmentIndex(s: Study[DichotomousMeasurement],
-			t: Treatment)
+	private def treatmentIndex(s: Study[M], t: Treatment)
 	: Int = {
 		val base = model.relativeEffectIndex(s)
 		if (model.studyBaseline(s) == t) -1
 		else base + relativeTreatmentIndex(s, t)
 	}
 
-	private def prob(s: Study[DichotomousMeasurement],
-			t: Treatment, data: Array[Array[Double]])
+	private def theta(s: Study[M], t: Treatment, data: Array[Array[Double]])
 	: Double = {
 		val baselineIdx = model.studyList.indexOf(s)
 		val treatmentIdx = treatmentIndex(s, t)
 
 		if (treatmentIdx >= 0) 
-			ilogit(data(sIdx)(baselineIdx) + data(dIdx)(treatmentIdx))
+			data(sIdx)(baselineIdx) + data(dIdx)(treatmentIdx)
 		else
-			ilogit(data(sIdx)(baselineIdx))
+			data(sIdx)(baselineIdx)
 	}
 }
