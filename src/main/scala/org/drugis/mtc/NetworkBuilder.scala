@@ -59,3 +59,16 @@ class DichotomousNetworkBuilder extends NetworkBuilder[DichotomousMeasurement] {
 		new DichotomousMeasurement(makeTreatment(tId), r, n)
 	}
 }
+
+class ContinuousNetworkBuilder extends NetworkBuilder[ContinuousMeasurement] {
+	def add(studyId: String, treatmentId: String,
+			mean: Double, stdDev: Double, sampleSize: Int) {
+		val m = createMeasurement(treatmentId, mean, stdDev, sampleSize)
+		put((studyId, m.treatment), m)
+	}
+
+	private def createMeasurement(tId: String, m: Double, s: Double, n: Int)
+	: ContinuousMeasurement = {
+		new ContinuousMeasurement(makeTreatment(tId), m, s, n)
+	}
+}

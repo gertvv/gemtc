@@ -16,7 +16,7 @@ extends Estimate {
 }
 
 class Parameter(p: MCMCParameter, i: Int, iter: Int) {
-	private var v: Array[Double] = Array(0.0, iter)
+	private var v: Array[Double] = new Array[Double](iter)
 	def value = v
 
 	def update(curIter: Int) {

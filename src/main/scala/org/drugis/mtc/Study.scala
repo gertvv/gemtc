@@ -56,4 +56,10 @@ object Study {
 	: Study[DichotomousMeasurement] = {
 		build(id, measurements)
 	}
+
+	def buildContinuous(id: String,
+			measurements: Array[ContinuousMeasurement])
+	: Study[ContinuousMeasurement] = {
+		build(id, measurements)
+	}
 }
