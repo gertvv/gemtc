@@ -24,11 +24,11 @@ class Parameter(p: MCMCParameter, i: Int) {
 	}
 }
 
-class YadasModel(proto: NetworkModel[_ <: Measurement],
+class YadasModel[M <: Measurement](network: Network[M],
 	isInconsistency: Boolean)
 extends ProgressObservable {
 	def dichotomous: Boolean = {
-		val cls = proto.network.measurementType
+		val cls = network.measurementType
 		if (cls == classOf[DichotomousMeasurement])
 			true
 		else if (cls == classOf[ContinuousMeasurement])
@@ -38,6 +38,8 @@ extends ProgressObservable {
 	}
 
 	private var ready = false
+
+	protected var proto: NetworkModel[M] = null
 
 	private var parameters: Map[NetworkModelParameter, Parameter]
 		= null
@@ -128,6 +130,10 @@ extends ProgressObservable {
 		if (!dichotomous) {
 			throw new IllegalStateException("Continuous analysis not supported")
 		}
+
+		proto = NetworkModel(network)
+		
+
 		def successArray(network: NetworkModel[DichotomousMeasurement]): Array[Double] =
 			network.data.map(m => m._2.asInstanceOf[DichotomousMeasurement].responders.toDouble).toArray
 

@@ -3,8 +3,8 @@ package org.drugis.mtc.yadas
 import org.drugis.mtc._
 import gov.lanl.yadas._
 
-class YadasConsistencyModel(proto: NetworkModel[_ <: Measurement])
-extends YadasModel(proto, false) with ConsistencyModel {
+class YadasConsistencyModel[M <: Measurement](network: Network[M])
+extends YadasModel(network, false) with ConsistencyModel {
 	var rankCount: Array[Array[Int]] = null
 
 	def rankProbability(t: Treatment, r: Int) = {

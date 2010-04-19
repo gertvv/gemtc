@@ -8,11 +8,11 @@ import org.drugis.mtc._
 class YadasModelFactory extends ModelFactory {
 	def getConsistencyModel[M <: Measurement](network: Network[M])
 	: ConsistencyModel = {
-		new YadasConsistencyModel(NetworkModel(network))
+		new YadasConsistencyModel(network)
 	}
 
 	def getInconsistencyModel[M <: Measurement](network: Network[M])
 	: InconsistencyModel = {
-		new YadasInconsistencyModel(NetworkModel(network))
+		new YadasInconsistencyModel(network)
 	}
 }
