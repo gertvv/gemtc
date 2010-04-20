@@ -50,7 +50,7 @@ object Matrix {
 			// eliminate non-zero values in (i->nRows, col) by using (row, *)
 			def aux(m: Matrix[Boolean], row: Int, col: Int, i: Int)
 			: Matrix[Boolean] = {
-				if (i == m.nRows) m
+				if (i >= m.nRows) m
 				else aux(eliminateRow(m, row, col, i), row, col, i + 1)
 			}
 			aux(exchange(m, row, col), row, col, col + 1)
