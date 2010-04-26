@@ -27,7 +27,7 @@ class Parameter(p: MCMCParameter, i: Int, iter: Int) {
 class YadasModel[M <: Measurement](network: Network[M],
 	isInconsistency: Boolean)
 extends ProgressObservable {
-	def dichotomous: Boolean = {
+	val dichotomous: Boolean = {
 		val cls = network.measurementType
 		if (cls == classOf[DichotomousMeasurement])
 			true
@@ -146,8 +146,7 @@ extends ProgressObservable {
 		}
 
 	private def sigmaPrior = {
-		if (dichotomous) 2 // FIXME
-		else 20
+		proto.variancePrior
 	}
 
 	private def inconsSigmaPrior = {

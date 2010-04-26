@@ -1,23 +1,48 @@
 package org.drugis.mtc.jags
 
 import org.drugis.mtc._
-import org.drugis.mtc.{DichotomousMeasurement => M}
 
-abstract class JagsSyntaxModel(model: NetworkModel[M]) {
+abstract class JagsSyntaxModel[M <: Measurement](model: NetworkModel[M]) {
+	val dichotomous: Boolean = {
+		val cls = model.network.measurementType
+		if (cls == classOf[DichotomousMeasurement])
+			true
+		else if (cls == classOf[ContinuousMeasurement])
+			false
+		else
+			throw new IllegalStateException("Unknown measurement type " + cls)
+	}
+
 	def dataText: String =
-		List(
-			vectorStr("s", studyIndexVector),
-			vectorStr("t", treatmentIndexVector),
-			vectorStr("r", responderVector),
-			vectorStr("n", sampleSizeVector),
-			vectorStr("b", baselineVector)
-		).mkString("\n")
+		if (dichotomous) {
+			List(
+				vectorStr("s", studyIndexVector),
+				vectorStr("t", treatmentIndexVector),
+				vectorStr("r", responderVector),
+				vectorStr("n", sampleSizeVector),
+				vectorStr("b", baselineVector)
+			).mkString("\n")
+		} else {
+			List(
+				vectorStr("s", studyIndexVector),
+				vectorStr("t", treatmentIndexVector),
+				vectorStr("m", meanVector),
+				vectorStr("e", errorVector),
+				vectorStr("b", baselineVector)
+			).mkString("\n")
+		}
 
 	private def studyIndexVector: List[Int] =
 		model.data.map(a => model.studyMap(a._1))
 
 	private def treatmentIndexVector: List[Int] =
 		model.data.map(a => model.treatmentMap(a._2.treatment))
+
+	private def meanVector: List[Double] =
+		model.data.map(a => a._2.asInstanceOf[ContinuousMeasurement].mean)
+
+	private def errorVector: List[Double] =
+		model.data.map(a => a._2.asInstanceOf[ContinuousMeasurement].stdErr)
 
 	private def responderVector: List[Int] = 
 		model.data.map(a => a._2.asInstanceOf[DichotomousMeasurement].responders)
@@ -28,7 +53,7 @@ abstract class JagsSyntaxModel(model: NetworkModel[M]) {
 	private def baselineVector: List[Int] = 
 		model.studyList.map(s => model.treatmentMap(model.studyBaseline(s)))
 
-	private def vectorStr(name: String, vector: List[Int]): String = {
+	private def vectorStr(name: String, vector: List[_]): String = {
 		name + " <- c(" + vector.mkString(", ") + ")"
 	}
 
@@ -38,7 +63,7 @@ abstract class JagsSyntaxModel(model: NetworkModel[M]) {
 	def expressParams(params: Map[NetworkModelParameter, Int]): String
 }
 
-class JagsSyntaxConsistencyModel(model: NetworkModel[M])
+class JagsSyntaxConsistencyModel[M <: Measurement](model: NetworkModel[M])
 extends JagsSyntaxInconsistencyModel(model) {
 	override def modelText: String = {
 		List(
@@ -73,7 +98,7 @@ extends JagsSyntaxInconsistencyModel(model) {
 		).mkString("\n")
 }
 
-class JagsSyntaxInconsistencyModel(model: NetworkModel[M])
+class JagsSyntaxInconsistencyModel[M <: Measurement](model: NetworkModel[M])
 extends JagsSyntaxModel(model) {
 	override def modelText: String = {
 		List(
@@ -136,21 +161,19 @@ extends JagsSyntaxModel(model) {
 		|		mu[i] ~ dnorm(0, .001)
 		|	}""".stripMargin
 	protected val individualEffects = 
+		if (dichotomous)
 	"""	|	# For each (study, treatment), model effect
 		|	for (i in 1:length(s)) {
 		|		logit(p[s[i], t[i]]) <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
 		|		r[i] ~ dbin(p[s[i], t[i]], n[i])
 		|	}""".stripMargin
-	protected val inconsVar =
-	"""	|	# Inconsistency variance
-		|	sd.w ~ dunif(0.00001, 2)
-		|	var.w <- sd.w * sd.w
-		|	tau.w <- 1/ var.w""".stripMargin
-	protected val effectVar =
-	"""	|	# Random effect variance
-		|	sd.d ~ dunif(0.00001, 2)
-		|	var.d <- sd.d * sd.d
-		|	tau.d <- 1/ var.d""".stripMargin
+		else
+	"""	|	# For each (study, treatment), model effect
+		|	for (i in 1:length(s)) {
+		|		p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
+		|		m[i] ~ dnorm(p[s[i], t[i]], e[i])
+		|	}""".stripMargin
+	protected val varPrior = model.variancePrior
 
 	protected def deltas: String = 
 		(for {
@@ -246,10 +269,10 @@ extends JagsSyntaxModel(model) {
 		).mkString("\n")
 
 
-	private def basicVar(name: String) =
-		"""	|	sd.x ~ dunif(0.00001, 2)
+	private def basicVar(name: String) = (
+		"""	|	sd.x ~ dunif(0.00001, """ + varPrior + """)
 			|	var.x <- sd.x * sd.x
-			|	tau.x <- 1 / var.x""".stripMargin.replaceAll("x", name)
+			|	tau.x <- 1 / var.x""").stripMargin.replaceAll("x", name)
 
 	private def combinedVars: List[String] = 
 		for {

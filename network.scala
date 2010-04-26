@@ -82,6 +82,7 @@ for (f <- inconsModel.getInconsistencyFactors().toArray(Array[InconsistencyParam
 }
 */
 
+/*
 println("Running YADAS consistency model: ")
 val consModel = (new YadasModelFactory()).getConsistencyModel(network)
 consModel.addProgressListener(new ListenerImpl())
@@ -96,3 +97,4 @@ for (t <- treatments) {
 		println(t.id + " " + i + " " + consModel.rankProbability(t, i))
 	}
 }
+*/

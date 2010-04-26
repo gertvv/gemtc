@@ -125,6 +125,16 @@ class NetworkModel[M <: Measurement](
 	def parameterization(a: Treatment, b: Treatment)
 	: Map[NetworkModelParameter, Int] = param(a, b)
 
+	def variancePrior: Double = {
+		val cls = network.measurementType
+		if (cls == classOf[DichotomousMeasurement])
+			2
+		else if (cls == classOf[ContinuousMeasurement])
+			20
+		else
+			throw new IllegalStateException("Unknown measurement type " + cls)
+	}
+
 	private def param(a: Treatment, b: Treatment)
 	: Map[NetworkModelParameter, Int] = {
 		if (basicParameterEdges contains (a, b)) basicParam(a, b)
