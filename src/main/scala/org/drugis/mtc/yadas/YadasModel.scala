@@ -79,10 +79,6 @@ extends ProgressObservable {
 		calculateResults()
 		ready = true
 
-		for (update <- updateList) {
-			println("Update " + update + ": " + update.accepted())
-		}
-
 		notifySimulationFinished()
 	}
 
