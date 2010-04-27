@@ -48,12 +48,12 @@ b <- c(2, 1, 1)"""
 	w.A.C.B ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
-	sd.w ~ dunif(0.00001, 2.0)
+	sd.w ~ dunif(0.00001, 2.265204322822621)
 	var.w <- sd.w * sd.w
 	tau.w <- 1 / var.w
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 2.0)
+	sd.d ~ dunif(0.00001, 2.265204322822621)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 
@@ -184,7 +184,7 @@ b <- c(2, 1, 1)"""
 	d.B.C ~ dnorm(0, .001)
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 2.0)
+	sd.d ~ dunif(0.00001, 2.265204322822621)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 
@@ -311,7 +311,7 @@ b <- c(2, 1, 1)"""
 	d.B.C ~ dnorm(0, .001)
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 20.0)
+	sd.d ~ dunif(0.00001, 8.0)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 
@@ -357,12 +357,12 @@ b <- c(2, 1, 1)"""
 	w.A.C.B ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
-	sd.w ~ dunif(0.00001, 20.0)
+	sd.w ~ dunif(0.00001, 8.0)
 	var.w <- sd.w * sd.w
 	tau.w <- 1 / var.w
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 20.0)
+	sd.d ~ dunif(0.00001, 8.0)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 

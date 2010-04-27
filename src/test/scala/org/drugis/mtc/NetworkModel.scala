@@ -157,6 +157,55 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 		model.relativeEffectIndex(studies(1)) should be (2)
 		model.relativeEffectIndex(studies(2)) should be (4)
 	}
+
+	val networkDich = Network.dichFromXML(<network>
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="A" responders="12" sample="100" />
+					<measurement treatment="B" responders="14" sample="100" />
+				</study>
+				<study id="2">
+					<measurement treatment="A" responders="30" sample="100" />
+					<measurement treatment="B" responders="35" sample="100" />
+				</study>
+				<study id="3">
+					<measurement treatment="A" responders="20" sample="100" />
+					<measurement treatment="B" responders="28" sample="100" />
+				</study>
+			</studies>
+		</network>)
+
+	val networkCont = Network.contFromXML(<network type="continuous">
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="A" mean="12" standardDeviation="8" sample="100" />
+					<measurement treatment="B" mean="18" standardDeviation="8" sample="100" />
+				</study>
+				<study id="2">
+					<measurement treatment="A" mean="10" standardDeviation="8" sample="100" />
+					<measurement treatment="B" mean="20" standardDeviation="8" sample="100" />
+				</study>
+				<study id="3">
+					<measurement treatment="A" mean="28" standardDeviation="8" sample="100" />
+					<measurement treatment="B" mean="25" standardDeviation="8" sample="100" />
+				</study>
+			</studies>
+		</network>)
+
+	@Test def testVariancePrior() {
+		NetworkModel(networkDich).variancePrior should be (
+			2.138684 plusOrMinus 0.000001)
+		NetworkModel(networkCont).variancePrior should be (
+			28.5 plusOrMinus 0.000001)
+	}
 }
 
 
