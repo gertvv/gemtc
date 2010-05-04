@@ -208,6 +208,42 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 }
 
+class AdditionalBaselineAssignmentTest extends ShouldMatchersForJUnit {
+	val network = Network.dichFromXML(<network>
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+				<treatment id="C"/>
+				<treatment id="D"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="A" responders="1" sample="100" />
+					<measurement treatment="B" responders="1" sample="100" />
+					<measurement treatment="C" responders="1" sample="100" />
+				</study>
+				<study id="2">
+					<measurement treatment="B" responders="1" sample="100" />
+					<measurement treatment="C" responders="1" sample="100" />
+					<measurement treatment="D" responders="1" sample="100" />
+				</study>
+			</studies>
+		</network>)
+
+	val ta = new Treatment("A")
+	val tb = new Treatment("B")
+	val tc = new Treatment("C")
+	val td = new Treatment("D")
+
+	val spanningTree = new Tree[Treatment](
+		Set((ta, tc), (ta, tb), (ta, td)), ta)
+
+	// Too strict problem defn. would chocke on this
+	@Test def testAssignBaselines() {
+		val baselines = NetworkModel.assignBaselines(network, spanningTree)
+		baselines should not be (null)
+	}
+}
 
 class BasicParameterTest extends ShouldMatchersForJUnit {
 	@Test def testToString() {

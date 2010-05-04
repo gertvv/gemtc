@@ -225,19 +225,43 @@ class NetworkModel[M <: Measurement](
 }
 
 class BaselineSearchState[M <: Measurement](
-	val toCover: Set[(Treatment, Treatment)],
 	val studies: List[Study[M]],
-	val assignment: Map[Study[M], Treatment]) { }
+	val assignment: Map[Study[M], Treatment]) {
+
+
+	def coverGraph: UndirectedGraph[Treatment] = {
+		if (assignment.keySet.size == 0)
+			new UndirectedGraph(Set[(Treatment,Treatment)]())
+		else if (assignment.keySet.size == 1)
+			assignment.keySet.map(studyBaselineGraph).toList(0)
+		else
+			assignment.keySet.map(studyBaselineGraph).reduceLeft(
+				(a, b) => a.union(b))
+	}
+
+	private def studyBaselineGraph(s: Study[M]): UndirectedGraph[Treatment] = {
+		val baseline = assignment(s)
+		val other = s.treatments - baseline
+		new UndirectedGraph(other.map(x => (baseline, x)))
+	}
+
+	override def toString: String = {
+		"Remaining: " + studies + "\nAssigned: " + assignment
+	}
+}
 
 class BaselineSearchProblem[M <: Measurement](
-	toCover: Set[(Treatment, Treatment)],
-	studies: Set[Study[M]]) extends SearchProblem[BaselineSearchState[M]] {
+	studies: Set[Study[M]],
+	initialAssignment: Map[Study[M], Treatment],
+	constraints: List[(Set[(Treatment, Treatment)]) => Boolean])
+extends SearchProblem[BaselineSearchState[M]] {
 
-	val initialState = new BaselineSearchState(toCover, studies.toList,
-		Map[Study[M], Treatment]())
+	val initialState = new BaselineSearchState(studies.toList,
+		initialAssignment)
 
 	def isGoal(s: BaselineSearchState[M]): Boolean = {
-		s.toCover.isEmpty && s.studies.isEmpty
+		val edges = s.coverGraph.edgeSet
+		s.studies.isEmpty && constraints.forall(c => c(edges))
 	}
 
 	def successors(s: BaselineSearchState[M]): List[BaselineSearchState[M]] = {
@@ -245,10 +269,8 @@ class BaselineSearchProblem[M <: Measurement](
 		else {
 			val study = s.studies.head
 			(for {t <- study.treatments.toList.sort((a, b) => a < b)
-				val toCover = s.toCover -- (
-					study.treatmentGraph.edgeSet.filter(e => (e._1 == t || e._2 == t)))
 				val assignment = s.assignment + ((study, t))
-			} yield new BaselineSearchState(toCover, s.studies.tail, assignment)
+			} yield new BaselineSearchState(s.studies.tail, assignment)
 			).toList
 		}
 	}
@@ -273,10 +295,12 @@ object NetworkModel {
 		apply(network, treatmentList(network.treatments).first)
 	}
 
-	private def assignMultiArm[M <: Measurement](
-		toCover: Set[(Treatment, Treatment)], studies: Set[Study[M]])
+	private def assignMultiArm[M <: Measurement](studies: Set[Study[M]],
+		assignment: Map[Study[M], Treatment],
+		constraints: List[(Set[(Treatment, Treatment)]) => Boolean])
 	: Map[Study[M], Treatment] = {
-		val problem = new BaselineSearchProblem(toCover, studies)
+		val problem = new BaselineSearchProblem(
+			studies, assignment, constraints)
 		val alg = new DFS()
 		alg.search(problem) match {
 			case None => throw new Exception("No Assignment Found!")
@@ -284,18 +308,30 @@ object NetworkModel {
 		}
 	}
 
+	private def constraint[M <: Measurement](network: Network[M],
+			cycle: UndirectedGraph[Treatment])(
+			edges: Set[(Treatment, Treatment)])
+	: Boolean = {
+		val n = cycle.edgeSet.size
+		val m =
+			if (network.isInconsistency(cycle)) n
+			else n - 1
+		cycle.intersection(new UndirectedGraph(edges)).edgeSet.size >= m
+	}
+
 	def assignBaselines[M <: Measurement](
 			network: Network[M], st: Tree[Treatment])
 	: Map[Study[M], Treatment] = {
-		val toCover = network.inconsistencies(st).flatMap(a => a.edgeSet)
 		val twoArm = network.studies.filter(study => study.treatments.size == 2)
 		val multiArm = network.studies -- twoArm
-		val covered = twoArm.flatMap(study => study.treatmentGraph.edgeSet)
 
 		val twoArmMap = Map[Study[M], Treatment]() ++ twoArm.map(study => (study, study.treatments.toList.sort((a, b) => a < b).head))
 
-		val leftToCover = toCover -- covered
-		twoArmMap ++ assignMultiArm(leftToCover, multiArm)
+		val constraints =
+			network.treatmentGraph.fundamentalCycles(st).toList.map(
+				c => constraint(network, c)_)
+
+		assignMultiArm(multiArm, twoArmMap, constraints)
 	}
 
 	def studyList[M <: Measurement](studies: Set[Study[M]]) = {
