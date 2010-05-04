@@ -11,33 +11,17 @@ class EstimateImpl(val mean: Double, val sd: Double)
 extends Estimate {
 	def getMean = mean
 	def getStandardDeviation = sd
+
+	override def toString = mean.toString + " (" + sd.toString + ")"
 }
 
+class Parameter(p: MCMCParameter, i: Int, iter: Int) {
+	private var v: Array[Double] = new Array[Double](iter)
+	def value = v
 
-abstract class Parameter
-extends Estimate {
-	private val mean = new Mean()
-	private val sd = new StandardDeviation(false)
-
-	def update() {
-		val value = getValue
-		mean.increment(value)
-		sd.increment(value)
+	def update(curIter: Int) {
+		v(curIter) = p.getValue(i)
 	}
-
-	def getMean = mean.getResult
-	def getStandardDeviation = sd.getResult
-	def getValue: Double
-}
-
-class DirectParameter(p: MCMCParameter, i: Int)
-extends Parameter {
-	override def getValue = p.getValue(i)
-}
-
-class IndirectParameter(parameterization: Map[Parameter, Int])
-extends Parameter {
-	override def getValue = parameterization.keySet.map(p => parameterization(p) * p.getValue).reduceLeft((a, b) => a + b)
 }
 
 class YadasModel[M <: Measurement](network: Network[M],
@@ -57,7 +41,12 @@ extends ProgressObservable {
 
 	protected var proto: NetworkModel[M] = null
 
-	protected var parameters: Map[NetworkModelParameter, Parameter] = null
+	private var parameters: Map[NetworkModelParameter, Parameter]
+		= null
+	protected var results: Map[NetworkModelParameter, Array[Double]]
+		= null
+	private var paramEstimates: Map[NetworkModelParameter, Estimate]
+		= null
 
 	private var parameterList: List[Parameter] = null
 	private var updateList: List[MCMCUpdate] = null
@@ -87,13 +76,15 @@ extends ProgressObservable {
 		simulate()
 
 		// calculate results
+		calculateResults()
 		ready = true
 
 		notifySimulationFinished()
 	}
 
 	def getRelativeEffect(base: Treatment, subj: Treatment): Estimate =
-		paramEstimate(base, subj) match {
+		if (!isReady) throw new IllegalStateException("Model is not ready")
+		else paramEstimate(base, subj) match {
 			case Some(x) => x
 			case None => throw new IllegalArgumentException(
 				"Treatment(s) not found")
@@ -109,7 +100,12 @@ extends ProgressObservable {
 	}
 
 	def getInconsistency(param: InconsistencyParameter): Estimate =
-		parameters(param)
+		if (!isReady) throw new IllegalStateException("Model is not ready")
+		else paramEstimates.get(param) match {
+			case Some(x: EstimateImpl) => x
+			case None => throw new IllegalArgumentException(
+				"Inconsistency not found")
+		}
 
 	def getBurnInIterations: Int = burnInIter
 
@@ -132,16 +128,16 @@ extends ProgressObservable {
 
 	private def paramEstimate(base: Treatment, subj: Treatment)
 	: Option[Estimate] =
-		parameters.get(new BasicParameter(base, subj)) match {
-			case Some(x: Estimate) => Some[Estimate](x)
+		paramEstimates.get(new BasicParameter(base, subj)) match {
+			case Some(x: EstimateImpl) => Some[Estimate](x)
 			case None => negParamEstimate(subj, base)
 		}
 
 	private def negParamEstimate(base: Treatment, subj: Treatment)
 	: Option[Estimate] =
-		parameters.get(new BasicParameter(base, subj)) match {
-			case Some(x: Estimate) =>
-				Some[Estimate](new EstimateImpl(-x.getMean, x.getStandardDeviation))
+		paramEstimates.get(new BasicParameter(base, subj)) match {
+			case Some(x: EstimateImpl) =>
+				Some[Estimate](new EstimateImpl(-x.mean, x.sd))
 			case None => None
 		}
 
@@ -283,8 +279,7 @@ extends ProgressObservable {
 		updateList = params.map(p => tuner(p))
 
 		def paramList(p: MCMCParameter, n: Int): List[Parameter] =
-			(0 until n).map(i => new DirectParameter(p, i)
-				).toList
+			(0 until n).map(i => new Parameter(p, i, simulationIter)).toList
 
 		val basicParam = paramList(basic, proto.basicParameters.size)
 		val inconsParam = paramList(incons, proto.inconsistencyParameters.size)
@@ -301,32 +296,11 @@ extends ProgressObservable {
 			yield (proto.inconsistencyParameters(i), inconsParam(i))
 		}
 
-		parameters = parameterMap(
-			Map[NetworkModelParameter, Parameter]() ++
-				basicParamPairs ++ inconsParamPairs)
-		parameterList = parameters.values.toList ++ sigmaParam ++ sigmawParam
+		parameters = Map[NetworkModelParameter, Parameter]() ++
+			basicParamPairs ++ inconsParamPairs
 		
 		randomEffectVar = sigmaParam(0)
 		inconsistencyVar = sigmawParam(0)
-	}
-
-	private def parameterMap(basicMap: Map[NetworkModelParameter, Parameter])
-	:Map[NetworkModelParameter, Parameter] = {
-		val ts = proto.treatmentList
-		basicMap ++ (
-		for {i <- 0 until (ts.size - 1); j <- (i + 1) until ts.size;
-			val p = new BasicParameter(ts(i), ts(j));
-			if (!basicMap.keySet.contains(p))
-		} yield (p, createIndirect(p, basicMap)))
-	}
-
-	private def createIndirect(p: BasicParameter,
-			basicMap: Map[NetworkModelParameter, Parameter])
-	: IndirectParameter = {
-		val param = Map[Parameter, Int]() ++
-			proto.parameterization(p.base, p.subject).map(
-				(x) => (basicMap(x._1), x._2)).filter((x) => x._2 != 0)
-		new IndirectParameter(param)
 	}
 
 	private def successArray(model: NetworkModel[DichotomousMeasurement])
@@ -402,7 +376,7 @@ extends ProgressObservable {
 				notifySimulationProgress(i);
 
 			update()
-			output()
+			output(i)
 		}
 	}
 
@@ -412,9 +386,64 @@ extends ProgressObservable {
 		}
 	}
 
-	protected def output() {
+	private def output(i: Int) {
 		for (p <- parameterList) {
-			p.update()
+			p.update(i)
 		}
+	}
+
+	private def calculateResults() {
+		preCalculateResults()
+
+		val ts = proto.treatmentList
+		paramEstimates = Map[NetworkModelParameter, Estimate]() ++
+			(for {(p, v) <- results} yield (p, summary(v)))
+	}
+
+	private def preCalculateResults() {
+		val ts = proto.treatmentList
+		results = Map[NetworkModelParameter, Array[Double]]() ++
+		(for {i <- 0 until (ts.size - 1); j <- (i + 1) until ts.size;
+			val p = new BasicParameter(ts(i), ts(j))
+		} yield (p, preCalculateResult(p))) ++
+		(for {p <- proto.inconsistencyParameters
+		} yield (p, preCalculateResult(p)))
+	}
+
+	private def preCalculateResult(p: NetworkModelParameter): Array[Double] = {
+		if (proto.basicParameters.contains(p) ||
+				proto.inconsistencyParameters.contains(p))
+			parameters(p).value
+		else p match {
+			case bp: BasicParameter =>
+				calcValue(proto.parameterization(bp.base, bp.subject))
+			case _ => throw new IllegalStateException()
+		}
+	}
+
+	private def nullFields() {
+		parameters = null
+		parameterList = null
+		updateList = null
+		randomEffectVar = null
+		inconsistencyVar = null
+	}
+
+	private def calcValue(pz: Map[NetworkModelParameter, Int])
+	: Array[Double] = {
+		var value = new ArrayRealVector(simulationIter)
+		for ((p, f) <- pz) {
+			if (f != 0) {
+				val pv = new ArrayRealVector(parameters(p).value)
+				pv.mapMultiplyToSelf(f)
+				value = value.add(pv)
+			}
+		}
+		return value.getData()
+	}
+
+	private def summary(result: Array[Double]): Estimate = {
+		new EstimateImpl((new Mean()).evaluate(result),
+			(new StandardDeviation()).evaluate(result))
 	}
 }
