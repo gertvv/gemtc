@@ -70,9 +70,7 @@ class Network[M <: Measurement](
 	}
 
 	private def compare(a: Tree[Treatment], b: Tree[Treatment]): Int = {
-		val icdf = countInconsistencies(a) - countInconsistencies(b)
-		if (icdf == 0) weight(b) - weight(a)
-		else icdf
+		countInconsistencies(a) - countInconsistencies(b)
 	}
 
 	private def better(a: Tree[Treatment], b: Tree[Treatment]): Boolean = {
