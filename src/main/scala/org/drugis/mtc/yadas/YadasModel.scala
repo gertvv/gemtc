@@ -57,7 +57,6 @@ extends ProgressObservable {
 	private var burnInIter = 20000
 	protected var simulationIter = 100000
 	private var reportingInterval = 100
-	private var thinningInterval = 10
 
 	def isReady = ready
 
@@ -280,7 +279,7 @@ extends ProgressObservable {
 		updateList = params.map(p => tuner(p))
 
 		def paramList(p: MCMCParameter, n: Int): List[Parameter] =
-			(0 until n).map(i => new Parameter(p, i, simulationIter / thinningInterval)).toList
+			(0 until n).map(i => new Parameter(p, i, simulationIter)).toList
 
 		val basicParam = paramList(basic, proto.basicParameters.size)
 		val inconsParam = paramList(incons, proto.inconsistencyParameters.size)
@@ -377,8 +376,7 @@ extends ProgressObservable {
 				notifySimulationProgress(i);
 
 			update()
-			if (i % thinningInterval == 0)
-				output(i / thinningInterval)
+			output(i)
 		}
 	}
 
@@ -433,7 +431,7 @@ extends ProgressObservable {
 
 	private def calcValue(pz: Map[NetworkModelParameter, Int])
 	: Array[Double] = {
-		var value = new ArrayRealVector(simulationIter / thinningInterval)
+		var value = new ArrayRealVector(simulationIter)
 		for ((p, f) <- pz) {
 			if (f != 0) {
 				val pv = new ArrayRealVector(parameters(p).value)
