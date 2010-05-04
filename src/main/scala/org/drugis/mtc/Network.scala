@@ -52,6 +52,9 @@ class Network[M <: Measurement](
 	val edgeVector: List[(Treatment, Treatment)] =
 		treatmentGraph.edgeVector
 
+	val countFunctionalParameters: Int =
+		treatmentGraph.edgeSet.size - treatmentGraph.vertexSet.size + 1
+
 	def countInconsistencies(st: Tree[Treatment]): Int =
 		inconsistencies(st).size
 
@@ -64,11 +67,6 @@ class Network[M <: Measurement](
 	def treeEnumerator(top: Treatment) =
 		SpanningTreeEnumerator.treeEnumerator(treatmentGraph, top)
 
-	private def weight(a: Tree[Treatment]): Int = {
-		{for {c <- treatmentGraph.fundamentalCycles(a)} yield c.edgeSet.size
-		}.reduceLeft((a, b) => a + b)
-	}
-
 	private def compare(a: Tree[Treatment], b: Tree[Treatment]): Int = {
 		countInconsistencies(a) - countInconsistencies(b)
 	}
@@ -78,7 +76,20 @@ class Network[M <: Measurement](
 	}
 
 	def bestSpanningTree(top: Treatment): Tree[Treatment] = {
-		treeEnumerator(top).reduceLeft((a, b) => if (better(a, b)) a else b)
+		var max = 0
+		var best: Tree[Treatment] = null
+		for (tree <- treeEnumerator(top)) {
+			val incons = countInconsistencies(tree)
+			if (incons >= max) {
+				// FIXME: check for existence of baseline assignment
+				max = incons
+				best = tree
+			}
+			if (max == countFunctionalParameters) {
+				return best
+			}
+		}
+		best
 	}
 
 	def filterTreatments(ts: Set[Treatment]): Network[M] = {
