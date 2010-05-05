@@ -63,16 +63,16 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
 		// for testing against WinBUGS results).
-		val mAB = 0.493260093404085
-		val sAB = 0.748945563653493
+		val mAB = 0.5078252
+		val sAB = 0.8135523
 		dAB.getMean should be (mAB plusOrMinus f * sAB)
 		dAB.getStandardDeviation should be(sAB plusOrMinus f * sAB)
-		val mBC = -0.515757678945450
-		val sBC = 0.938949102208760
+		val mBC = -0.5224309
+		val sBC = 1.024877
 		dBC.getMean should be (mBC plusOrMinus f * sBC)
 		dBC.getStandardDeviation should be(sBC plusOrMinus f * sBC)
-		val mACB = 0.215175403524793
-		val sACB = 0.753639001832770
+		val mACB = 0.2015848
+		val sACB = 0.8444993
 		wACB.getMean should be (mACB plusOrMinus f * sACB)
 		wACB.getStandardDeviation should be(sACB plusOrMinus f * sACB)
 	}
@@ -86,8 +86,8 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		val dBA = m.getRelativeEffect(tb, ta)
 		dBA should not be (null)
 		val dAC = m.getRelativeEffect(ta, tc)
-		val mAC = 0.192677817983428
-		val sAC = 0.853568634052751
+		val mAC = 0.1869791
+		val sAC = 0.9310103
 		dAC.getMean should be (mAC plusOrMinus f * sAC)
 		dAC.getStandardDeviation should be(sAC plusOrMinus f * sAC)
 	}

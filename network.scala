@@ -38,8 +38,7 @@ println("Generated " + i + " trees")
 */
 
 val model = NetworkModel(network, best)
-/*
-val syntaxModel = new JagsSyntaxInconsistencyModel(model)
+val syntaxModel = new JagsSyntaxConsistencyModel(model)
 
 import java.io.PrintStream
 
@@ -60,7 +59,7 @@ scriptOut.close()
 val analysisOut = new PrintStream(baseName + ".analysis.R")
 analysisOut.println(syntaxModel.analysisText(baseName))
 analysisOut.close()
-*/
+
 class ListenerImpl extends ProgressListener {
 	def update(mtc: MixedTreatmentComparison, evt: ProgressEvent) {
 		println(evt)
