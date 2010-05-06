@@ -1,0 +1,110 @@
+<!-- Smoking cessation data from
+	Lu & Ades, J Am Stat Assoc 2006;101(474):447-459, Table 1. -->
+<network description="Smoking cessation rates">
+	<treatments>
+		<treatment id="A">No Contact</treatment>
+		<treatment id="B">Self-help</treatment>
+		<treatment id="C">Individual Counseling</treatment>
+		<treatment id="D">Group Counseling</treatment>
+	</treatments>
+	<studies>
+		<study id="01">
+			<measurement treatment="A" responders="9" sample="140" />
+			<measurement treatment="C" responders="23" sample="140" />
+			<measurement treatment="D" responders="10" sample="138" />
+		</study>
+		<study id="02">
+			<measurement treatment="B" responders="11" sample="78" />
+			<measurement treatment="C" responders="12" sample="85" />
+			<measurement treatment="D" responders="29" sample="170" />
+		</study>
+		<study id="03">
+			<measurement treatment="A" responders="79" sample="702" />
+			<measurement treatment="B" responders="77" sample="694" />
+		</study>
+		<study id="04">
+			<measurement treatment="A" responders="18" sample="671" />
+			<measurement treatment="B" responders="21" sample="535" />
+		</study>
+		<study id="05">
+			<measurement treatment="A" responders="8" sample="116" />
+			<measurement treatment="B" responders="19" sample="146" />
+		</study>
+		<study id="06">
+			<measurement treatment="A" responders="75" sample="731" />
+			<measurement treatment="C" responders="363" sample="714" />
+		</study>
+		<study id="07">
+			<measurement treatment="A" responders="2" sample="106" />
+			<measurement treatment="C" responders="9" sample="205" />
+		</study>
+		<study id="08">
+			<measurement treatment="A" responders="58" sample="549" />
+			<measurement treatment="C" responders="237" sample="1561" />
+		</study>
+		<study id="09">
+			<measurement treatment="A" responders="0" sample="33" />
+			<measurement treatment="C" responders="9" sample="48" />
+		</study>
+		<study id="10">
+			<measurement treatment="A" responders="3" sample="100" />
+			<measurement treatment="C" responders="31" sample="98" />
+		</study>
+		<study id="11">
+			<measurement treatment="A" responders="1" sample="31" />
+			<measurement treatment="C" responders="26" sample="95" />
+		</study>
+		<study id="12">
+			<measurement treatment="A" responders="6" sample="39" />
+			<measurement treatment="C" responders="17" sample="77" />
+		</study>
+		<study id="13">
+			<measurement treatment="A" responders="95" sample="1107" />
+			<measurement treatment="C" responders="134" sample="1031" />
+		</study>
+		<study id="14">
+			<measurement treatment="A" responders="15" sample="187" />
+			<measurement treatment="C" responders="35" sample="504" />
+		</study>
+		<study id="15">
+			<measurement treatment="A" responders="78" sample="584" />
+			<measurement treatment="C" responders="73" sample="675" />
+		</study>
+		<study id="16">
+			<measurement treatment="A" responders="69" sample="1177" />
+			<measurement treatment="C" responders="54" sample="888" />
+		</study>
+		<study id="17">
+			<measurement treatment="A" responders="64" sample="642" />
+			<measurement treatment="C" responders="107" sample="761" />
+		</study>
+		<study id="18">
+			<measurement treatment="A" responders="5" sample="62" />
+			<measurement treatment="C" responders="8" sample="90" />
+		</study>
+		<study id="19">
+			<measurement treatment="A" responders="20" sample="234" />
+			<measurement treatment="C" responders="34" sample="237" />
+		</study>
+		<study id="20">
+			<measurement treatment="A" responders="0" sample="20" />
+			<measurement treatment="D" responders="9" sample="20" />
+		</study>
+		<study id="21">
+			<measurement treatment="B" responders="20" sample="49" />
+			<measurement treatment="C" responders="16" sample="43" />
+		</study>
+		<study id="22">
+			<measurement treatment="B" responders="7" sample="66" />
+			<measurement treatment="D" responders="32" sample="127" />
+		</study>
+		<study id="23">
+			<measurement treatment="C" responders="12" sample="76" />
+			<measurement treatment="D" responders="20" sample="74" />
+		</study>
+		<study id="24">
+			<measurement treatment="C" responders="9" sample="55" />
+			<measurement treatment="D" responders="3" sample="26" />
+		</study>
+	</studies>
+</network>
