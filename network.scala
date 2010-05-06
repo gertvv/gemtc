@@ -38,7 +38,7 @@ println("Generated " + i + " trees")
 */
 
 val model = NetworkModel(network, best)
-val syntaxModel = new JagsSyntaxConsistencyModel(model)
+val syntaxModel = new JagsSyntaxInconsistencyModel(model)
 
 import java.io.PrintStream
 
