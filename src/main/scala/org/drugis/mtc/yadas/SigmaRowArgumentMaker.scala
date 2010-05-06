@@ -23,3 +23,12 @@ extends ArgumentMaker {
 		arr
 	}
 }
+
+object SigmaMatrixArgumentMaker {
+	def apply[M <: Measurement](study: Study[M], sigmaIdx: Int)
+	: List[ArgumentMaker] = {
+		(0 until (study.treatments.size - 1)).map(
+			rowIdx => new SigmaRowArgumentMaker(study, sigmaIdx, rowIdx)
+		).toList
+	}
+}	

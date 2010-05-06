@@ -46,4 +46,14 @@ class SigmaRowArgumentMakerTest extends ShouldMatchersForJUnit {
 		val maker1 = new SigmaRowArgumentMaker(study2, 0, 1)
 		maker1.getArgument(Array(sigma)).toList should be (expected1)
 	}
+
+	@Test def testMatrixMaker() {
+		val sigma = Array(2.0)
+		val expected = List(List(4.0, 2.0, 2.0), List(2.0, 4.0, 2.0), List(2.0, 2.0, 4.0))
+
+		val makers = SigmaMatrixArgumentMaker(study2, 0)
+
+		makers.map(maker => maker.getArgument(Array(sigma)).toList
+			) should be (expected)
+	}
 }
