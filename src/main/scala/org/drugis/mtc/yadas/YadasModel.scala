@@ -167,6 +167,31 @@ extends ProgressObservable {
 		map.map(x => x._2)
 	}
 
+
+	private def relativeEffectBond(study: Study[M], delta: MCMCParameter,
+			basic: MCMCParameter, incons: MCMCParameter, sigma: MCMCParameter,
+			isInconsistency: Boolean) = {
+		val baseArguments = List(
+				new IdentityArgument(0),
+				new RelativeEffectArgumentMaker(proto, 1,
+					if (isInconsistency) Some(2) else None, study)
+			)
+
+		if (reDim(study) == 1) {
+			new BasicMCMCBond(
+				Array[MCMCParameter](delta, basic, incons, sigma),
+				(baseArguments ::: List(new IdentityArgument(3))).toArray,
+				new Gaussian()
+			)
+		} else {
+			new BasicMCMCBond(
+				Array[MCMCParameter](delta, basic, incons, sigma),
+				(baseArguments ::: SigmaMatrixArgumentMaker(study, 3)).toArray,
+				new MultivariateGaussian()
+			)
+		}
+	}
+
 	private def buildModel() {
 		if (proto == null) {
 			proto = NetworkModel(network)
@@ -232,16 +257,9 @@ extends ProgressObservable {
 
 		// random effects bound to basic/incons parameters
 		for (study <- proto.studyList) {
-			new BasicMCMCBond(
-				Array[MCMCParameter](delta(study), basic, incons, sigma),
-				Array[ArgumentMaker](
-					new IdentityArgument(0),
-					new RelativeEffectArgumentMaker(proto, 1,
-						if (isInconsistency) Some(2) else None, study),
-					new GroupArgument(3, Array.make(reDim(study), 0))
-				),
-				new Gaussian()
-			)
+			relativeEffectBond(study, delta(study),
+					basic, incons, sigma,
+					isInconsistency)
 		}
 
 		// per-study mean prior
