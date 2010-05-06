@@ -39,11 +39,44 @@ class Network[M <: Measurement](
 			yield s.incidenceVector(cycle.edgeVector)}.toList)
 	}
 
+	private def invert(e: (Treatment, Treatment)) = (e._2, e._1)
+
+	def walkCycle(cycle: UndirectedGraph[Treatment])
+	: List[(Treatment, Treatment)] = {
+		def aux(cycle: UndirectedGraph[Treatment],
+			l0: List[(Treatment, Treatment)])
+		: List[(Treatment, Treatment)] = {
+			if (l0.size > 1 && l0.head == l0.last) l0
+			else {
+				val edge = (cycle.edgesFrom(l0.head._2) - invert(l0.head)
+					).toList(0)
+				aux(cycle, edge :: l0)
+			}
+		}
+		val edge = cycle.edgesFrom(cycle.vertexSet.toList(0)).toList(0)
+		aux(cycle, List(edge))
+	}
+
+	def supportingStudies(edge: (Treatment, Treatment)): Set[Study[M]] = {
+		studies.filter(s => s.treatmentGraph.containsEdge(edge))
+	}
+
+	def evidenceDimensionality(cycle: List[(Treatment, Treatment)]): Int = {
+		def aux(l: List[(Treatment, Treatment)]): Int = l match {
+			case e2 :: (e1 :: l1) => aux(e1 :: l1) + {
+				if (supportingStudies(e2) != supportingStudies(e1)) 1
+				else 0
+			}
+			case e2 :: Nil => 0
+			case Nil => 0
+		}
+		if (cycle.size < 3 || cycle.head != cycle.last)
+			throw new IllegalArgumentException("Not a cycle: " + cycle)
+		aux(cycle)
+	}
+
 	def evidenceDimensionality(cycle: UndirectedGraph[Treatment]): Int = {
-		val m = Matrix.gaussElimGF2(evidenceMatrix(cycle))
-		val i = m.elements.findIndexOf(r => !r.contains(true))
-		if (i == -1) m.nRows
-		else i
+		evidenceDimensionality(walkCycle(cycle))
 	}
 
 	def isInconsistency(cycle: UndirectedGraph[Treatment]): Boolean =

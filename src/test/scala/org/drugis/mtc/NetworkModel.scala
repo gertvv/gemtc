@@ -236,7 +236,7 @@ class AdditionalBaselineAssignmentTest extends ShouldMatchersForJUnit {
 	val td = new Treatment("D")
 
 	val spanningTree = new Tree[Treatment](
-		Set((ta, tc), (ta, tb), (ta, td)), ta)
+		Set((ta, tc), (ta, tb), (tb, td)), ta)
 
 	// Too strict problem defn. would chocke on this
 	@Test def testAssignBaselines() {

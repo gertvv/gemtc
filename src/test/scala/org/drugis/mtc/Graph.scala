@@ -179,7 +179,6 @@ class UndirectedGraphTest extends ShouldMatchersForJUnit {
 			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
 		val edgeVector =
 			List[(String, String)](("A", "C"), ("B", "D"), ("B", "A"))
-		println(graph.incidenceVector(edgeVector))
 		graph.incidenceVector(edgeVector) should be (List[Boolean](true, false, true))
 	}
 
