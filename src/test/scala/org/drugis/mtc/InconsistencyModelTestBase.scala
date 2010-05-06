@@ -6,7 +6,7 @@ import org.junit.Test
 import org.junit.Before
 
 abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
-	val f = 0.15
+	val f = 0.05
 	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
 			<treatments>
