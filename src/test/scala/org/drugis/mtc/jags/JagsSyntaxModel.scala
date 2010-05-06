@@ -303,7 +303,7 @@ b <- c(2, 1, 1)"""
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
 		p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-		m[i] ~ dnorm(p[s[i], t[i]], e[i])
+		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
 	}
 
 	# Basic parameters
@@ -346,7 +346,7 @@ b <- c(2, 1, 1)"""
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
 		p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-		m[i] ~ dnorm(p[s[i], t[i]], e[i])
+		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
 	}
 
 	# Basic parameters
