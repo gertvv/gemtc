@@ -9,8 +9,8 @@ import org.drugis.mtc._
 
 class ContinuousDataIT extends ShouldMatchersForJUnit {
 	// data from Welton et. al., Am J Epidemiol 2009;169:1158–1165
-	val m = -1.274624 // mean(d)
-	val s = 1.278736 // sd(d)
+	val m = -1.368 // mean(d)
+	val s = 0.9772 // sd(d)
 	val f = 0.05
 
 	def network = {
@@ -28,8 +28,6 @@ class ContinuousDataIT extends ShouldMatchersForJUnit {
 		model.isReady should be (true)
 		val d = model.getRelativeEffect(usual, psych)
 		d.getMean should be (m plusOrMinus f * s)
-		println(d.getMean)
 		d.getStandardDeviation should be (s plusOrMinus f * s)
-		println(d.getStandardDeviation)
 	}
 }
