@@ -10,7 +10,8 @@ import gov.lanl.yadas.ArgumentMaker
 class SuccessProbabilityArgumentMaker(
 		override val model: NetworkModel[DichotomousMeasurement],
 		override val sIdx: Int,
-		override val dIdx: Int)
+		override val dIdx: Int,
+		override val study: Study[DichotomousMeasurement])
 extends ArgumentMaker with ThetaMaker[DichotomousMeasurement] {
 	/**
 	 * Calculate "the argument": an array of succes-probabilities, one for
@@ -20,15 +21,14 @@ extends ArgumentMaker with ThetaMaker[DichotomousMeasurement] {
 	 */
 	def getArgument(data: Array[Array[Double]]): Array[Double] = {
 		Array.make(0, 0.0) ++ {
-			for {d <- model.data} yield prob(d._1, d._2.treatment, data)
+			for {t <- treatments} yield prob(t, data)
 		}
 	}
 
 	private def ilogit(x: Double): Double = 1 / (1 + Math.exp(-x))
 
-	private def prob(s: Study[DichotomousMeasurement],
-			t: Treatment, data: Array[Array[Double]])
+	private def prob(t: Treatment, data: Array[Array[Double]])
 	: Double = {
-		ilogit(theta(s, t, data))
+		ilogit(theta(t, data))
 	}
 }

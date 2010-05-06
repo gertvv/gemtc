@@ -34,15 +34,42 @@ class ThetaArgumentMakerTest extends ShouldMatchersForJUnit {
 	val networkModel = new NetworkModel(network,
 		new FundamentalGraphBasis(network.treatmentGraph, spanningTree),
 		Map[Study[DichotomousMeasurement], Treatment](
-			(study1, ta), (study2, tb), (study3, ta), (study4, tc)),
+			(study1, ta), (study2, tb), (study3, ta), (study4, td)),
 		treatmentList, studyList)
 
-	@Test def testGetArgument() {
-		val baselines = Array(1.0, 2.0, 1.5, 3.0)
-		val deltas = Array(-1.0, 3.0, 2.0, 1.0, -1.0)
-		val expected = List(1.0, 0.0, 2.0, 5.0, 4.0, 1.5, 2.5, 3.0, 2.0)
+	@Test def testGetArgument1() {
+		val baseline = Array(1.0)
+		val delta = Array(-1.0)
+		val expected = List(1.0, 0.0)
 		
-		val maker0 = new ThetaArgumentMaker(networkModel, 0, 1)
-		maker0.getArgument(Array(baselines, deltas)).toList should be (expected)
+		val maker0 = new ThetaArgumentMaker(networkModel, 0, 1, study1)
+		maker0.getArgument(Array(baseline, delta)).toList should be (expected)
+	}
+
+	@Test def testGetArgument2() {
+		val baseline = Array(2.0)
+		val delta = Array(3.0, 2.0)
+		val expected = List(2.0, 5.0, 4.0)
+		
+		val maker0 = new ThetaArgumentMaker(networkModel, 0, 1, study2)
+		maker0.getArgument(Array(baseline, delta)).toList should be (expected)
+	}
+
+	@Test def testGetArgument3() {
+		val baseline = Array(1.5)
+		val delta = Array(1.0)
+		val expected = List(1.5, 2.5)
+		
+		val maker0 = new ThetaArgumentMaker(networkModel, 0, 1, study3)
+		maker0.getArgument(Array(baseline, delta)).toList should be (expected)
+	}
+
+	@Test def testGetArgument4() {
+		val baseline = Array(2.0)
+		val delta = Array(1.0)
+		val expected = List(3.0, 2.0)
+		
+		val maker0 = new ThetaArgumentMaker(networkModel, 0, 1, study4)
+		maker0.getArgument(Array(baseline, delta)).toList should be (expected)
 	}
 }

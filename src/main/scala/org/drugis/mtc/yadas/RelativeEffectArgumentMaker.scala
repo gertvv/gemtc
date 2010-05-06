@@ -9,14 +9,14 @@ import org.apache.commons.math.linear.ArrayRealVector
 
 /**
  * ArgumentMaker for treatment relative effects.
- * delta_ijk ~ N(d_jk, sigma) ; d_jk = f(B + W) ;
+ * delta_ijk ~ N(d_jk, sigma) ; d_jk = f(B, W) ;
  * B basic parameters, W inconsistency factors.
  */
-class RelativeEffectArgumentMaker(model: NetworkModel[_ <: Measurement],
-	bIdx: Int, wIdx: Option[Int])
+class RelativeEffectArgumentMaker[M <: Measurement](model: NetworkModel[M],
+	bIdx: Int, wIdx: Option[Int], study: Study[M])
 extends ArgumentMaker {
 	private val relativeEffects: List[(Treatment, Treatment)] =
-		model.relativeEffects
+		model.studyRelativeEffects(study)
 
 	private def createMatrix(params: List[NetworkModelParameter])
 	: RealMatrix = {

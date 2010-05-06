@@ -4,13 +4,14 @@ import org.drugis.mtc._
 import gov.lanl.yadas.ArgumentMaker
 
 /**
- * ArgumentMaker for individual treatment success probabilities within studies.
- * p_i,k = ilogit(theta_i,k) ; theta_i,k = mu_i + delta_i,b(i),k
+ * ArgumentMaker for individual treatment means within studies.
+ * theta_i,k = mu_i + delta_i,b(i),k
  */
 class ThetaArgumentMaker[M <: Measurement](
 		override val model: NetworkModel[M],
 		override val sIdx: Int,
-		override val dIdx: Int)
+		override val dIdx: Int,
+		override val study: Study[M])
 extends ArgumentMaker with ThetaMaker[M] {
 	/**
 	 * Calculate "the argument": an array of succes-probabilities, one for
@@ -20,7 +21,7 @@ extends ArgumentMaker with ThetaMaker[M] {
 	 */
 	def getArgument(data: Array[Array[Double]]): Array[Double] = {
 		Array.make(0, 0.0) ++ {
-			for {d <- model.data} yield theta(d._1, d._2.treatment, data)
+			for {t <- treatments} yield theta(t, data)
 		}
 	}
 }
@@ -29,23 +30,25 @@ trait ThetaMaker[M <: Measurement] {
 	protected val model: NetworkModel[M]
 	protected val sIdx: Int
 	protected val dIdx: Int
+	protected val study: Study[M]
 
-	private def relativeTreatmentIndex(s: Study[M], t: Treatment)
-	: Int = {
-		model.studyRelativeEffects(s).findIndexOf(x => x._2 == t)
+	protected val treatments = NetworkModel.treatmentList(study.treatments)
+	protected val baseline = model.studyBaseline(study)
+
+	private def treatmentIndex(t: Treatment): Int = {
+		treatments.indexOf(t)
 	}
 
-	private def treatmentIndex(s: Study[M], t: Treatment)
-	: Int = {
-		val base = model.relativeEffectIndex(s)
-		if (model.studyBaseline(s) == t) -1
-		else base + relativeTreatmentIndex(s, t)
+	private def deltaIndex(t: Treatment): Int = {
+		if (t == baseline) -1
+		else if (treatmentIndex(baseline) > treatmentIndex(t)) treatmentIndex(t)
+		else treatmentIndex(t) - 1
 	}
 
-	protected def theta(s: Study[M], t: Treatment, data: Array[Array[Double]])
+	protected def theta(t: Treatment, data: Array[Array[Double]])
 	: Double = {
-		val baselineIdx = model.studyList.indexOf(s)
-		val treatmentIdx = treatmentIndex(s, t)
+		val baselineIdx = 0
+		val treatmentIdx = deltaIndex(t)
 
 		if (treatmentIdx >= 0) 
 			data(sIdx)(baselineIdx) + data(dIdx)(treatmentIdx)

@@ -153,21 +153,37 @@ extends ProgressObservable {
 		sigmaPrior
 	}
 
+	private def reIndexArray(s: Study[M]): Array[Int] = {
+		val first = proto.relativeEffectIndex(s)
+		val last = first + reDim(s) 
+		(first to last).toArray
+	}
+
+	private def reDim(s: Study[M]): Int = {
+		s.treatments.size - 1
+	}
+
+	private def values(map: Map[Study[M], MCMCParameter]) = {
+		map.map(x => x._2)
+	}
+
 	private def buildModel() {
 		if (proto == null) {
 			proto = NetworkModel(network)
 		}
 		
 		// study baselines
-		val mu = new MCMCParameter(
-			Array.make(proto.studyList.size, 0.0),
-			Array.make(proto.studyList.size, 0.1),
-			null)
+		val mu = Map[Study[M], MCMCParameter]() ++
+			proto.studyList.map(s => (s, new MCMCParameter(
+				Array(0.0),
+				Array(0.1),
+				null)))
 		// random effects
-		val delta = new MCMCParameter(
-			Array.make(proto.relativeEffects.size, 0.0),
-			Array.make(proto.relativeEffects.size, 0.1),
-			null)
+		val delta = Map[Study[M], MCMCParameter]() ++
+			proto.studyList.map(s => (s, new MCMCParameter(
+				Array.make(reDim(s), 0.0),
+				Array.make(reDim(s), 0.1),
+				null)))
 		// basic parameters
 		val basic = new MCMCParameter(
 			Array.make(proto.basicParameters.size, 0.0),
@@ -195,46 +211,54 @@ extends ProgressObservable {
 			else
 				new MCMCParameter(Array(0.0), Array(0.0), null)
 
-		val params =
+		val params = List[MCMCParameter]() ++ values(mu) ++ values(delta) ++ {
 			if (isInconsistency)
-				List[MCMCParameter](mu, delta, basic, incons, sigma, sigmaw)
+				 List(basic, incons, sigma, sigmaw)
 			else
-				List[MCMCParameter](mu, delta, basic, sigma)
+				List(basic, sigma)
+		}
 
 		// data bond
-		val databond =
-			if (dichotomous)
-				dichotomousDataBond(
-					proto.asInstanceOf[NetworkModel[DichotomousMeasurement]],
-					mu, delta)
-			else
-				continuousDataBond(
-					proto.asInstanceOf[NetworkModel[ContinuousMeasurement]],
-					mu, delta)
+		if (dichotomous)
+			dichotomousDataBond(
+				proto.asInstanceOf[NetworkModel[DichotomousMeasurement]],
+				mu.asInstanceOf[Map[Study[DichotomousMeasurement], MCMCParameter]],
+				delta.asInstanceOf[Map[Study[DichotomousMeasurement], MCMCParameter]])
+		else
+			continuousDataBond(
+				proto.asInstanceOf[NetworkModel[ContinuousMeasurement]],
+				mu.asInstanceOf[Map[Study[ContinuousMeasurement], MCMCParameter]],
+				delta.asInstanceOf[Map[Study[ContinuousMeasurement], MCMCParameter]])
 
 		// random effects bound to basic/incons parameters
-		val randomeffectbond =  new BasicMCMCBond(
-				Array[MCMCParameter](delta, basic, incons, sigma),
+		for (study <- proto.studyList) {
+			new BasicMCMCBond(
+				Array[MCMCParameter](delta(study), basic, incons, sigma),
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
 					new RelativeEffectArgumentMaker(proto, 1,
-						if (isInconsistency) Some(2) else None),
-					new GroupArgument(3, Array.make(proto.relativeEffects.size, 0))
+						if (isInconsistency) Some(2) else None, study),
+					new GroupArgument(3, Array.make(reDim(study), 0))
 				),
 				new Gaussian()
 			)
+		}
 
-		val muprior = new BasicMCMCBond(
-				Array[MCMCParameter](mu),
-				Array[ArgumentMaker](
-					new IdentityArgument(0),
-					new ConstantArgument(0, proto.studyList.size),
-					new ConstantArgument(Math.sqrt(1000), proto.studyList.size),
-				),
-				new Gaussian()
-			)
+		// per-study mean prior
+		for (study <- proto.studyList) {
+			new BasicMCMCBond(
+					Array[MCMCParameter](mu(study)),
+					Array[ArgumentMaker](
+						new IdentityArgument(0),
+						new ConstantArgument(0, 1),
+						new ConstantArgument(Math.sqrt(1000), 1),
+					),
+					new Gaussian()
+				)
+		}
 
-		val basicprior = new BasicMCMCBond(
+		// basic parameter prior
+		new BasicMCMCBond(
 				Array[MCMCParameter](basic),
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
@@ -244,7 +268,8 @@ extends ProgressObservable {
 				new Gaussian()
 			)
 
-		val sigmaprior = new BasicMCMCBond(
+		// sigma prior
+		new BasicMCMCBond(
 				Array[MCMCParameter](sigma),
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
@@ -255,7 +280,8 @@ extends ProgressObservable {
 			)
 
 		if (isInconsistency) {
-			val inconsprior = new BasicMCMCBond(
+			// inconsistency prior
+			new BasicMCMCBond(
 					Array[MCMCParameter](incons, sigmaw),
 					Array[ArgumentMaker](
 						new IdentityArgument(0),
@@ -265,7 +291,8 @@ extends ProgressObservable {
 					new Gaussian()
 				)
 
-			val sigmawprior = new BasicMCMCBond(
+			// sigma_w prior
+			new BasicMCMCBond(
 					Array[MCMCParameter](sigmaw),
 					Array[ArgumentMaker](
 						new IdentityArgument(0),
@@ -274,7 +301,6 @@ extends ProgressObservable {
 					),
 					new Uniform()
 				)
-			sigmawprior
 		}
 
 		def tuner(param: MCMCParameter): MCMCUpdate =
@@ -329,62 +355,73 @@ extends ProgressObservable {
 		new IndirectParameter(param)
 	}
 
-	private def successArray(model: NetworkModel[DichotomousMeasurement])
+	private def successArray(model: NetworkModel[DichotomousMeasurement],
+		study: Study[DichotomousMeasurement])
 	: Array[Double] =
-		model.data.map(m => m._2.responders.toDouble).toArray
+		NetworkModel.treatmentList(study.treatments).map(t =>
+			study.measurements(t).responders.toDouble).toArray
 
-	private def sampleSizeArray(model: NetworkModel[_ <: Measurement])
+	private def sampleSizeArray(model: NetworkModel[DichotomousMeasurement],
+		study: Study[DichotomousMeasurement])
 	: Array[Double] =
-		model.data.map(m => m._2.sampleSize.toDouble).toArray
+		NetworkModel.treatmentList(study.treatments).map(t =>
+			study.measurements(t).sampleSize.toDouble).toArray
 
 	private def dichotomousDataBond(model: NetworkModel[DichotomousMeasurement],
-			mu: MCMCParameter, delta: MCMCParameter)
-	: BasicMCMCBond = {
-		// success-rate r from data
-		val r = new ConstantArgument(successArray(model))
-		// sample-size n from data
-		val n = new ConstantArgument(sampleSizeArray(model))
-
+			mu: Map[Study[DichotomousMeasurement], MCMCParameter],
+			delta: Map[Study[DichotomousMeasurement], MCMCParameter]) {
 		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
 		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
-		new BasicMCMCBond(
-				Array[MCMCParameter](mu, delta),
-				Array[ArgumentMaker](
-					r,
-					n,
-					new SuccessProbabilityArgumentMaker(model, 0, 1)
-				),
-				new Binomial()
-			)
+		for (study <- model.studyList) {
+			// success-rate r from data
+			val r = new ConstantArgument(successArray(model, study))
+			// sample-size n from data
+			val n = new ConstantArgument(sampleSizeArray(model, study))
+			new BasicMCMCBond(
+					Array[MCMCParameter](mu(study), delta(study)),
+					Array[ArgumentMaker](
+						r,
+						n,
+						new SuccessProbabilityArgumentMaker(model, 0, 1, study)
+					),
+					new Binomial()
+				)
+		}
 	}
 
-	private def obsMeanArray(model: NetworkModel[ContinuousMeasurement])
+	private def obsMeanArray(model: NetworkModel[ContinuousMeasurement],
+		study: Study[ContinuousMeasurement])
 	: Array[Double] =
-		model.data.map(m => m._2.mean).toArray
+		NetworkModel.treatmentList(study.treatments).map(t =>
+			study.measurements(t).mean).toArray
 
-	private def obsErrorArray(model: NetworkModel[ContinuousMeasurement])
+	private def obsErrorArray(model: NetworkModel[ContinuousMeasurement],
+		study: Study[ContinuousMeasurement])
 	: Array[Double] =
-		model.data.map(m => m._2.stdErr).toArray
+		NetworkModel.treatmentList(study.treatments).map(t =>
+			study.measurements(t).stdErr).toArray
 
 	private def continuousDataBond(model: NetworkModel[ContinuousMeasurement],
-			mu: MCMCParameter, delta: MCMCParameter)
-	: BasicMCMCBond = {
-		// success-rate r from data
-		val m = new ConstantArgument(obsMeanArray(model))
-		// sample-size n from data
-		val s = new ConstantArgument(obsErrorArray(model))
+			mu: Map[Study[ContinuousMeasurement], MCMCParameter],
+			delta: Map[Study[ContinuousMeasurement], MCMCParameter]) {
+		for (study <- model.studyList) {
+			// success-rate r from data
+			val m = new ConstantArgument(obsMeanArray(model, study))
+			// sample-size n from data
+			val s = new ConstantArgument(obsErrorArray(model, study))
 
-		// m_i ~ N(theta_i, s_i)
-		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
-		new BasicMCMCBond(
-				Array[MCMCParameter](mu, delta),
-				Array[ArgumentMaker](
-					m,
-					new ThetaArgumentMaker(model, 0, 1),
-					s,
-				),
-				new Gaussian()
-			)
+			// m_i ~ N(theta_i, s_i)
+			// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
+			new BasicMCMCBond(
+					Array[MCMCParameter](mu(study), delta(study)),
+					Array[ArgumentMaker](
+						m,
+						new ThetaArgumentMaker(model, 0, 1, study),
+						s,
+					),
+					new Gaussian()
+				)
+		}
 	}
 
 	private def burnIn() {

@@ -43,22 +43,55 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 
 	@Test def testGetArgumentConsistency() {
 		val input = Array(-1.0, 1.0, 3.0)
-		val expected = List(-1.0, 3.0, 2.0, 1.0, -1.0)
+		val expected1 = List(-1.0)
+		val expected2 = List(3.0, 2.0)
+		val expected3 = List(1.0)
+		val expected4 = List(-1.0)
 
-		val maker0 = new RelativeEffectArgumentMaker(networkModel, 0, None)
-		maker0.getArgument(Array(input)).toList should be (expected)
+		val maker1a = new RelativeEffectArgumentMaker(networkModel, 0, None,
+			study1)
+		maker1a.getArgument(Array(input)).toList should be (expected1)
 
-		val maker1 = new RelativeEffectArgumentMaker(networkModel, 1, None)
-		maker1.getArgument(Array(null, input)).toList should be (expected)
+		val maker1b = new RelativeEffectArgumentMaker(networkModel, 1, None,
+			study1)
+		maker1b.getArgument(Array(null, input)).toList should be (expected1)
+
+		val maker2a = new RelativeEffectArgumentMaker(networkModel, 0, None,
+			study2)
+		maker2a.getArgument(Array(input)).toList should be (expected2)
+
+		val maker3a = new RelativeEffectArgumentMaker(networkModel, 0, None,
+			study3)
+		maker3a.getArgument(Array(input)).toList should be (expected3)
+
+		val maker4a = new RelativeEffectArgumentMaker(networkModel, 0, None,
+			study4)
+		maker4a.getArgument(Array(input)).toList should be (expected4)
 	}
 
 	@Test def testGetArgumentInconsistency() {
 		val basic = Array(-1.0, 1.0, 3.0)
 		val incons = Array(0.5, -0.5)
-		val expected = List(-1.0, 3.0, 2.5, 1.0, -1.5)
+		val expected1 = List(-1.0)
+		val expected2 = List(3.0, 2.5)
+		val expected3 = List(1.0)
+		val expected4 = List(-1.5)
 
-		val maker0 = new RelativeEffectArgumentMaker(networkModel, 0, Some(1))
-		maker0.getArgument(Array(basic, incons)).toList should be (expected)
+		val maker1a = new RelativeEffectArgumentMaker(networkModel, 0, Some(1),
+			study1)
+		maker1a.getArgument(Array(basic, incons)).toList should be (expected1)
+
+		val maker2a = new RelativeEffectArgumentMaker(networkModel, 0, Some(1),
+			study2)
+		maker2a.getArgument(Array(basic, incons)).toList should be (expected2)
+
+		val maker3a = new RelativeEffectArgumentMaker(networkModel, 0, Some(1),
+			study3)
+		maker3a.getArgument(Array(basic, incons)).toList should be (expected3)
+
+		val maker4a = new RelativeEffectArgumentMaker(networkModel, 0, Some(1),
+			study4)
+		maker4a.getArgument(Array(basic, incons)).toList should be (expected4)
 	}
 
 	/**
@@ -66,7 +99,7 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 	 * threw an exception.
 	 */
 	@Test def testGetArgumentInconsistencyNone() {
-		val simpleNet = Network.fromXML(
+		val simpleNet = Network.dichFromXML(
 			<network>
 				<treatments>
 					<treatment id="A" />
@@ -84,7 +117,7 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 		val basic = Array(-1.0)
 		val incons: Array[Double] = Array()
 
-		val maker0 = new RelativeEffectArgumentMaker(simpleModel, 0, Some(1))
+		val maker0 = new RelativeEffectArgumentMaker(simpleModel, 0, Some(1), simpleModel.studyList(0))
 		maker0.getArgument(Array(basic, incons)).toList should be (basic.toList)
 	}
 }
