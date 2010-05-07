@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="warn" name="ADDIS">
+	<target name="warn">
+		<echo>Please use Maven2!</echo>
+	</target>
+
+	<loadfile property="header" srcFile="HEADER" />
+
+	<target name="license">
+		<replaceregexp flags="s"
+			match=".*package org.drugis.mtc"
+			replace="${header}package org.drugis.mtc">
+			<fileset dir="src">
+				<include name="**/*.java" />
+				<include name="**/*.scala" />
+			</fileset>
+		</replaceregexp>
+	</target>
+</project>
