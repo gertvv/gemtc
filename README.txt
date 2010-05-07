@@ -28,8 +28,8 @@ Requirements
 
 drugis.org MTC is written in a mixture of Java and Scala, and requires
 Java 5 (JRE 1.5) to run (http://java.com). To run the generated models,
-you need JAGS (http://sourceforge.net/projects/mcmc-jags/) and you may
-want to use R (http://r-project.org) to perform post-processing and
+you need JAGS 1.0.3 (http://sourceforge.net/projects/mcmc-jags/) and you
+may want to use R (http://r-project.org) to perform post-processing and
 analysis. Future versions may include scripts to aid in the process.
 
 The JAGS model language is a close analogue of the (Win)BUGS language,
