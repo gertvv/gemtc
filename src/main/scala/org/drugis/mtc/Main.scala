@@ -69,8 +69,7 @@ class JAGSGenerator(options: Options) {
 }
 
 object Main {
-	val usage = """Usage: java -cp ${MTC_JAR} \\
-		|      org.drugis.mtc.Main [--consistency|--inconsistency] <xml-file> <output>
+	val usage = """Usage: java -jar ${MTC_JAR} [--consistency|--inconsistency] <xml-file> <output>
 		|   When unspecified, the default is --inconsistency.
 		|This will generate a JAGS model from the specified XML file, which can
 		|subsequently be run using the output.script file.""".stripMargin

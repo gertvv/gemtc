@@ -116,11 +116,9 @@
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 					<archive>
-						<!--
 						<manifest>
-							<mainClass>org.drugis.addis.gui.Main</mainClass>
+							<mainClass>org.drugis.mtc.Main</mainClass>
 						</manifest>
-						-->
 					</archive>
 				</configuration>
                     <executions>
