@@ -131,6 +131,14 @@ class Network[M <: Measurement](
 		searchSpanningTree(top)._1
 	}
 
+	private def baselineAssignmentExists(tree: Tree[Treatment]): Boolean =
+		try {
+			NetworkModel.assignBaselines(this, tree)
+			true
+		} catch {
+			case _ => false
+		}
+
 	def searchSpanningTree(top: Treatment): (Tree[Treatment], Int) = {
 		var max = 0
 		var best: Tree[Treatment] = null
@@ -138,8 +146,7 @@ class Network[M <: Measurement](
 		for (tree <- treeEnumerator(top)) {
 			iter = iter + 1
 			val incons = countInconsistencies(tree)
-			if (incons >= max) {
-				// FIXME: check for existence of baseline assignment
+			if (incons >= max && baselineAssignmentExists(tree)) {
 				max = incons
 				best = tree
 			}
