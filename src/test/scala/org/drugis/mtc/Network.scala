@@ -26,7 +26,7 @@ import org.junit.Before
 import org.junit.Ignore
 
 class NetworkTest extends ShouldMatchersForJUnit {
-	val networkXML =
+	val dichXML =
 		<network>
 			<treatments>
 				<treatment id="A"/>
@@ -52,7 +52,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		</network>
 
 	@Test def testFromXMLDich() {
-		val network = Network.dichFromXML(networkXML)
+		val network = Network.dichFromXML(dichXML)
 
 		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
 		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
@@ -70,20 +70,21 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.measurementType should be (classOf[DichotomousMeasurement])
 	}
 
+	val contXML =
+		<network type="continuous">
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="A" mean="1.2" standardDeviation="0.25" sample="100" />
+					<measurement treatment="B" mean="1.8" standardDeviation="0.8" sample="100" />
+				</study>
+			</studies>
+		</network>
+
 	@Test def testFromXMLCont() {
-		val contXML =
-			<network type="continuous">
-				<treatments>
-					<treatment id="A"/>
-					<treatment id="B"/>
-				</treatments>
-				<studies>
-					<study id="1">
-						<measurement treatment="A" mean="1.2" standardDeviation="0.25" sample="100" />
-						<measurement treatment="B" mean="1.8" standardDeviation="0.8" sample="100" />
-					</study>
-				</studies>
-			</network>
 		val network = Network.contFromXML(contXML)
 
 		val a = new ContinuousMeasurement(new Treatment("A"), 1.2, 0.25, 100)
@@ -98,20 +99,21 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.measurementType should be (classOf[ContinuousMeasurement])
 	}
 
+	val noneXML = 
+		<network type="none">
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="A" />
+					<measurement treatment="B" />
+				</study>
+			</studies>
+		</network>
+
 	@Test def testFromXMLNone() {
-		val noneXML = 
-			<network type="none">
-				<treatments>
-					<treatment id="A"/>
-					<treatment id="B"/>
-				</treatments>
-				<studies>
-					<study id="1">
-						<measurement treatment="A" />
-						<measurement treatment="B" />
-					</study>
-				</studies>
-			</network>
 		val network = Network.noneFromXML(noneXML)
 
 		val a = new NoneMeasurement(new Treatment("A"))
@@ -126,9 +128,13 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.measurementType should be (classOf[NoneMeasurement])
 	}
 
-	@Ignore
 	@Test def testFromXMLGeneric() {
-		fail()
+		val noneNetwork = Network.fromXML(noneXML).asInstanceOf[Network[NoneMeasurement]]
+		noneNetwork.measurementType should be (classOf[NoneMeasurement])
+		val contNetwork = Network.fromXML(contXML).asInstanceOf[Network[ContinuousMeasurement]]
+		contNetwork.measurementType should be (classOf[ContinuousMeasurement])
+		val dichNetwork = Network.fromXML(dichXML).asInstanceOf[Network[DichotomousMeasurement]]
+		dichNetwork.measurementType should be (classOf[DichotomousMeasurement])
 	}
 
 	@Test def testFilterTreatments() {
@@ -137,7 +143,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			new Treatment("B"),
 			new Treatment("C"))
 
-		val network = Network.dichFromXML(networkXML).filterTreatments(ts)
+		val network = Network.dichFromXML(dichXML).filterTreatments(ts)
 
 		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
 		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
@@ -158,7 +164,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			new Treatment("B"),
 			new Treatment("D"))
 
-		val network = Network.dichFromXML(networkXML).filterTreatments(ts)
+		val network = Network.dichFromXML(dichXML).filterTreatments(ts)
 
 		val a = new DichotomousMeasurement(new Treatment("A"), 1, 100)
 		val b = new DichotomousMeasurement(new Treatment("B"), 1, 100)
@@ -174,7 +180,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testTreatmentGraph() {
-		val network = Network.dichFromXML(networkXML)
+		val network = Network.dichFromXML(dichXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
@@ -189,7 +195,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testSupportingEvidence() {
-		val network = Network.dichFromXML(networkXML)
+		val network = Network.dichFromXML(dichXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
@@ -209,7 +215,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testEdgeVector() {
-		val network = Network.dichFromXML(networkXML)
+		val network = Network.dichFromXML(dichXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
@@ -222,7 +228,7 @@ class NetworkTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testEvidenceMatrix() {
-		val network = Network.dichFromXML(networkXML)
+		val network = Network.dichFromXML(dichXML)
 
 		val a = new Treatment("A")
 		val b = new Treatment("B")
