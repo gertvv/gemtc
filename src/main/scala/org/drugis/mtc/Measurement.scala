@@ -22,6 +22,10 @@ package org.drugis.mtc
 class Measurement(val treatment: Treatment, val sampleSize: Int) {
 }
 
+class NoneMeasurement(treatment: Treatment)
+extends Measurement(treatment, 0) {
+}
+
 class DichotomousMeasurement(treatment: Treatment,
 		val responders: Int, sampleSize: Int) 
 extends Measurement(treatment, sampleSize) {
@@ -59,5 +63,13 @@ object ContinuousMeasurement extends MeasurementBuilder {
 		val stdDev = (node \ "@standardDeviation").text.toDouble
 		val sample = (node \ "@sample").text.toInt
 		new ContinuousMeasurement(treatment, mean, stdDev, sample)
+	}
+}
+
+object NoneMeasurement extends MeasurementBuilder {
+	def fromXML(node: scala.xml.Node, treatments: Map[String, Treatment])
+	: NoneMeasurement = {
+		val treatment = getTreatment(treatments, (node \ "@treatment").text)
+		new NoneMeasurement(treatment)
 	}
 }

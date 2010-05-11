@@ -219,11 +219,38 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 			</studies>
 		</network>)
 
+	val networkNone = Network.noneFromXML(<network type="none">
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="A" />
+					<measurement treatment="B" />
+				</study>
+				<study id="2">
+					<measurement treatment="A" />
+					<measurement treatment="B" />
+				</study>
+				<study id="3">
+					<measurement treatment="A" />
+					<measurement treatment="B" />
+				</study>
+			</studies>
+		</network>)
+
 	@Test def testVariancePrior() {
 		NetworkModel(networkDich).variancePrior should be (
 			2.138684 plusOrMinus 0.000001)
 		NetworkModel(networkCont).variancePrior should be (
 			28.5 plusOrMinus 0.000001)
+	}
+
+	@Test def testNoneModel() {
+		val model = NetworkModel(networkNone)
+		model.treatmentList should be (List(new Treatment("A"), new Treatment("B")))
+		model.studyList.size should be (3)
 	}
 }
 

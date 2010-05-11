@@ -168,6 +168,7 @@ object Network {
 			case Some(x) => x.text match {
 				case "continuous" => contFromXML(node)
 				case "dichotomous" => dichFromXML(node)
+				case "none" => noneFromXML(node)
 				case _ => throw new RuntimeException(
 					"Unsupported network type " + x.text)
 			}
@@ -187,6 +188,13 @@ object Network {
 		new Network(Set[Treatment]() ++ treatments.values, 
 			studiesFromXML((node \ "studies")(0), treatments,
 				ContinuousMeasurement.fromXML))
+	}
+
+	def noneFromXML(node: scala.xml.Node): Network[NoneMeasurement] = {
+		val treatments = treatmentsFromXML((node \ "treatments")(0))
+		new Network(Set[Treatment]() ++ treatments.values, 
+			studiesFromXML((node \ "studies")(0), treatments,
+				NoneMeasurement.fromXML))
 	}
 
 	def treatmentsFromXML(n: scala.xml.Node): Map[String, Treatment] =

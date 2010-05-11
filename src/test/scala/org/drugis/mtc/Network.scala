@@ -98,6 +98,34 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.measurementType should be (classOf[ContinuousMeasurement])
 	}
 
+	@Test def testFromXMLNone() {
+		val noneXML = 
+			<network type="none">
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A" />
+						<measurement treatment="B" />
+					</study>
+				</studies>
+			</network>
+		val network = Network.noneFromXML(noneXML)
+
+		val a = new NoneMeasurement(new Treatment("A"))
+		val b = new NoneMeasurement(new Treatment("B"))
+
+		val s1 = new Study[NoneMeasurement]("1", Map((a.treatment, a), (b.treatment, b)))
+
+		network.treatments should be (Set[Treatment](
+			a.treatment, b.treatment))
+		network.studies should be (Set[Study[NoneMeasurement]](s1))
+
+		network.measurementType should be (classOf[NoneMeasurement])
+	}
+
 	@Ignore
 	@Test def testFromXMLGeneric() {
 		fail()
