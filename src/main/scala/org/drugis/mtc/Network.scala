@@ -128,9 +128,15 @@ class Network[M <: Measurement](
 	}
 
 	def bestSpanningTree(top: Treatment): Tree[Treatment] = {
+		searchSpanningTree(top)._1
+	}
+
+	def searchSpanningTree(top: Treatment): (Tree[Treatment], Int) = {
 		var max = 0
 		var best: Tree[Treatment] = null
+		var iter = 0
 		for (tree <- treeEnumerator(top)) {
+			iter = iter + 1
 			val incons = countInconsistencies(tree)
 			if (incons >= max) {
 				// FIXME: check for existence of baseline assignment
@@ -138,10 +144,10 @@ class Network[M <: Measurement](
 				best = tree
 			}
 			if (max == countFunctionalParameters) {
-				return best
+				return (best, iter)
 			}
 		}
-		best
+		(best, iter)
 	}
 
 	def filterTreatments(ts: Set[Treatment]): Network[M] = {
