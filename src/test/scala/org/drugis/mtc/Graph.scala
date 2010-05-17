@@ -118,6 +118,7 @@ class GraphTest extends ShouldMatchersForJUnit {
 		g2.remove(e) should be (g1)
 	}
 
+
 	@Test def testEdgesFrom() {
 		val g = new Graph[String](
 			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
@@ -132,6 +133,18 @@ class GraphTest extends ShouldMatchersForJUnit {
 		val es = Set[(String, String)](("A", "B"))
 
 		g.edgesTo("B") should be (es)
+	}
+
+	@Test def testDotString() {
+		val g = new Graph[String](
+			Set[(String, String)](("A", "B"), ("B", "C"), ("A", "C")))
+
+		g.dotString should be (
+			"""digraph G {
+			  |	A -> B
+			  |	A -> C
+			  |	B -> C
+			  |}""".stripMargin)
 	}
 }
 
@@ -277,6 +290,24 @@ class UndirectedGraphTest extends ShouldMatchersForJUnit {
 
 		g.fundamentalCycles(t) should be (Set(c1, c2, c3))
 	}
+
+	@Test def testDotString() {
+		val g = new UndirectedGraph[String](
+			Set[(String, String)](
+				("A", "B"), ("A", "C"), ("A", "D"),
+				("B", "C"), ("B", "D"),
+				("C", "D")))
+		
+		g.dotString should be (
+			"""graph G {
+			  |	A -- B
+			  |	A -- C
+			  |	A -- D
+			  |	B -- C
+			  |	B -- D
+			  |	C -- D
+			  |}""".stripMargin)
+	}
 }
 
 class TreeTest extends ShouldMatchersForJUnit {
@@ -349,5 +380,30 @@ class FundamentalGraphBasisTest extends ShouldMatchersForJUnit {
 
 		b.treeEdges should be (Set(("A", "B"), ("A", "C"), ("A", "D")))
 		b.backEdges should be (Set(("B", "C"), ("B", "D"), ("C", "D")))
+	}
+
+	@Test
+	def testDotString() {
+		val g = new UndirectedGraph[String](
+			Set[(String, String)](
+				("A", "B"), ("A", "C"), ("A", "D"),
+				("B", "C"), ("B", "D"),
+				("C", "D")))
+
+		val t = new Tree[String](
+			Set[(String, String)](
+				("A", "B"), ("A", "C"), ("A", "D")), "A")
+		
+		val b = new FundamentalGraphBasis[String](g, t)
+
+		b.dotString should be (
+			"""digraph G {
+			  |	A -> B
+			  |	A -> C
+			  |	A -> D
+			  |	B -> C [style=dashed]
+			  |	B -> D [style=dashed]
+			  |	C -> D [style=dashed]
+			  |}""".stripMargin)
 	}
 }

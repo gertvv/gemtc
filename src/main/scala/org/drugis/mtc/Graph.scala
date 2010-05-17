@@ -36,8 +36,10 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 
 	def remove(es: Set[(T, T)]): Graph[T] = new Graph[T](edgeSet -- es)
 
-	def edgeVector: List[(T, T)] =
-		edgeSet.toList.sort((a, b) =>
+	val edgeVector: List[(T, T)] = asVector(edgeSet)
+
+	def asVector(s: Set[(T, T)]): List[(T, T)] =
+		s.toList.sort((a, b) =>
 			if (a._1 == b._1) a._2 < b._2
 			else a._1 < b._1)
 
@@ -70,6 +72,14 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 	override def toString = edgeSet.toString
 
 	def directedGraph: Graph[T] = this
+
+	def dotString: String = "digraph G {\n" + edgesStr("->") + "\n}"
+
+	def edgesStr(sep: String): String =
+		edgeVector.map(edgeStr(sep)).mkString("\n")
+
+	def edgeStr(sep: String)(edge: (T, T)): String =
+		"\t" + edge._1 + " " + sep + " " + edge._2
 }
 
 class UndirectedGraph[T <% Ordered[T]](edges: Set[(T, T)])
@@ -126,6 +136,8 @@ extends Graph[T](UndirectedGraph.order(edges)) {
 		for (e <- remove(st.edgeSet).edgeSet)
 		yield st.createCycle(e)
 	}
+
+	override def dotString: String = "graph G {\n" + edgesStr("--") + "\n}"
 }
 
 object UndirectedGraph {
@@ -222,4 +234,10 @@ class FundamentalGraphBasis[T <% Ordered[T]](
 	val treeEdges = tree.edgeSet
 	val backEdges = graph.remove(tree.edgeSet).edgeSet
 	val cycles = backEdges.map(e => tree.cycle(e._1, e._2))
+
+	def dotString: String = "digraph G {\n" + edgesStr + "\n}"
+
+	def edgesStr = (graph.asVector(treeEdges).map(graph.edgeStr("->")) :::
+		graph.asVector(backEdges).map(graph.edgeStr("->")
+			).map(s => s + " [style=dashed]")).mkString("\n")
 }
