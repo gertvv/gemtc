@@ -34,7 +34,7 @@ class Network[M <: Measurement](
 
 	val treatmentGraph: UndirectedGraph[Treatment] = {
 		var graph = new UndirectedGraph[Treatment](
-			Set[(Treatment, Treatment)]())
+			Set[(Treatment, Treatment)](), (t: Treatment) => t.id)
 		for (s <- studies) {
 			graph = graph.union(s.treatmentGraph)
 		}

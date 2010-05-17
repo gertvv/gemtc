@@ -141,9 +141,9 @@ class GraphTest extends ShouldMatchersForJUnit {
 
 		g.dotString should be (
 			"""digraph G {
-			  |	A -> B
-			  |	A -> C
-			  |	B -> C
+			  |	"A" -> "B"
+			  |	"A" -> "C"
+			  |	"B" -> "C"
 			  |}""".stripMargin)
 	}
 }
@@ -300,12 +300,12 @@ class UndirectedGraphTest extends ShouldMatchersForJUnit {
 		
 		g.dotString should be (
 			"""graph G {
-			  |	A -- B
-			  |	A -- C
-			  |	A -- D
-			  |	B -- C
-			  |	B -- D
-			  |	C -- D
+			  |	"A" -- "B"
+			  |	"A" -- "C"
+			  |	"A" -- "D"
+			  |	"B" -- "C"
+			  |	"B" -- "D"
+			  |	"C" -- "D"
 			  |}""".stripMargin)
 	}
 }
@@ -398,12 +398,12 @@ class FundamentalGraphBasisTest extends ShouldMatchersForJUnit {
 
 		b.dotString should be (
 			"""digraph G {
-			  |	A -> B
-			  |	A -> C
-			  |	A -> D
-			  |	B -> C [style=dashed]
-			  |	B -> D [style=dashed]
-			  |	C -> D [style=dashed]
+			  |	"A" -> "B"
+			  |	"A" -> "C"
+			  |	"A" -> "D"
+			  |	"B" -> "C" [style=dashed]
+			  |	"B" -> "D" [style=dashed]
+			  |	"C" -> "D" [style=dashed]
 			  |}""".stripMargin)
 	}
 }

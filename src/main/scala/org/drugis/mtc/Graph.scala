@@ -19,22 +19,24 @@
 
 package org.drugis.mtc
 
-class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
+class Graph[T <% Ordered[T]](edges: Set[(T, T)], vertexPrint: (T) => String) {
 	val edgeSet: Set[(T, T)] = edges
 	val vertexSet: Set[T] = vertices(edges)
 
+	def this(edges: Set[(T, T)]) = this(edges, (t: T) => t.toString)
+
 	def union(other: Graph[T]) =
-		if (other canEqual this) new Graph[T](edgeSet ++ other.edgeSet)
+		if (other canEqual this) new Graph[T](edgeSet ++ other.edgeSet, vertexPrint)
 		else throw new IllegalArgumentException
 
 	def intersection(other: Graph[T]) = 
-		if (other canEqual this) new Graph[T](edgeSet ** other.edgeSet)
+		if (other canEqual this) new Graph[T](edgeSet ** other.edgeSet, vertexPrint)
 		else throw new IllegalArgumentException
 
-	def add(e: (T, T)): Graph[T] = new Graph[T](edgeSet + e)
-	def remove(e: (T, T)): Graph[T] = new Graph[T](edgeSet - e)
+	def add(e: (T, T)): Graph[T] = new Graph[T](edgeSet + e, vertexPrint)
+	def remove(e: (T, T)): Graph[T] = new Graph[T](edgeSet - e, vertexPrint)
 
-	def remove(es: Set[(T, T)]): Graph[T] = new Graph[T](edgeSet -- es)
+	def remove(es: Set[(T, T)]): Graph[T] = new Graph[T](edgeSet -- es, vertexPrint)
 
 	val edgeVector: List[(T, T)] = asVector(edgeSet)
 
@@ -79,30 +81,33 @@ class Graph[T <% Ordered[T]](edges: Set[(T, T)]) {
 		edgeVector.map(edgeStr(sep)).mkString("\n")
 
 	def edgeStr(sep: String)(edge: (T, T)): String =
-		"\t" + edge._1 + " " + sep + " " + edge._2
+		"\t\"" + vertexPrint(edge._1) + "\" " + sep +
+		" \"" + vertexPrint(edge._2) + "\""
 }
 
-class UndirectedGraph[T <% Ordered[T]](edges: Set[(T, T)])
-extends Graph[T](UndirectedGraph.order(edges)) {
+class UndirectedGraph[T <% Ordered[T]](
+	edges: Set[(T, T)], vertexPrint: (T) => String)
+extends Graph[T](UndirectedGraph.order(edges), vertexPrint) {
+	def this(edges: Set[(T, T)]) = this(edges, (t: T) => t.toString)
 
 	override def union(other: Graph[T]): UndirectedGraph[T] =
 		if ((this canEqual other) && (other canEqual this))
-			new UndirectedGraph[T](edgeSet ++ other.edgeSet)
+			new UndirectedGraph[T](edgeSet ++ other.edgeSet, vertexPrint)
 		else throw new IllegalArgumentException
 
 	override def intersection(other: Graph[T]): UndirectedGraph[T] =
 		if ((this canEqual other) && (other canEqual this))
-			new UndirectedGraph[T](edgeSet ** other.edgeSet)
+			new UndirectedGraph[T](edgeSet ** other.edgeSet, vertexPrint)
 		else throw new IllegalArgumentException
 
 	override def add(e: (T, T)): UndirectedGraph[T] =
-		new UndirectedGraph[T](edgeSet + UndirectedGraph.order(e))
+		new UndirectedGraph[T](edgeSet + UndirectedGraph.order(e), vertexPrint)
 
 	override def remove(e: (T, T)): UndirectedGraph[T] =
-		new UndirectedGraph[T](edgeSet - UndirectedGraph.order(e))
+		new UndirectedGraph[T](edgeSet - UndirectedGraph.order(e), vertexPrint)
 
 	override def remove(es: Set[(T, T)]): UndirectedGraph[T] =
-		new UndirectedGraph[T](edgeSet -- UndirectedGraph.order(es))
+		new UndirectedGraph[T](edgeSet -- UndirectedGraph.order(es), vertexPrint)
 
 	override def containsEdge(e: (T, T)): Boolean =
 		super.containsEdge(UndirectedGraph.order(e))
@@ -126,7 +131,8 @@ extends Graph[T](UndirectedGraph.order(edges)) {
 
 	override def directedGraph: Graph[T] = 
 		new Graph[T](
-			edgeSet.map(e => Set(e, invert(e))).reduceLeft((a, b) => a ++ b)
+			edgeSet.map(e => Set(e, invert(e))).reduceLeft((a, b) => a ++ b),
+			vertexPrint
 		)
 
 	/**
@@ -149,11 +155,16 @@ object UndirectedGraph {
 		es.map(e => order(e))
 }
 
-class Tree[T <% Ordered[T]](edges: Set[(T, T)], val root: T)
+class Tree[T <% Ordered[T]](edges: Set[(T, T)], val root: T,
+		vertexPrint: (T) => String)
 extends Graph[T](edges) {
 	override val vertexSet = vertices(edges) + root
 
-	override def add(e: (T, T)): Tree[T] = new Tree[T](edgeSet + e, root)
+	def this(edges: Set[(T, T)], root: T) =
+		this(edges, root, (t: T) => t.toString)
+
+	override def add(e: (T, T)): Tree[T] = new Tree[T](edgeSet + e, root,
+		vertexPrint)
 
 	/**
 	 * Given an edge e = (w, v) that is not in this tree and with
@@ -169,7 +180,7 @@ extends Graph[T](edges) {
 		val a = commonAncestor(w, v)
 
 		val c = new UndirectedGraph[T](
-			pathEdges(path(a, w)) ++ pathEdges(path(a, v)) + e)
+			pathEdges(path(a, w)) ++ pathEdges(path(a, v)) + e, vertexPrint)
 		if (c.edgeSet.size <= 1) new UndirectedGraph[T](Set[(T, T)]())
 		else c
 	}
@@ -227,7 +238,12 @@ extends Graph[T](edges) {
 
 class FundamentalGraphBasis[T <% Ordered[T]](
 	val graph: UndirectedGraph[T],
-	val tree: Tree[T]) {
+	val tree: Tree[T],
+	vertexPrint: (T) => String) {
+
+	def this(
+		graph: UndirectedGraph[T],
+		tree: Tree[T]) = this(graph, tree, (t: T) => t.toString)
 	
 	require(tree.vertexSet == graph.vertexSet)
 

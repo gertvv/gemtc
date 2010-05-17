@@ -32,3 +32,12 @@ object SearchTest {
 		test.run()
 	}
 }
+
+object StructurePrint {
+	def main(args: Array[String]) {
+		val xmlFile = args(0)
+		val xml = scala.xml.XML.loadFile(xmlFile)
+		val network = Network.fromXML(xml)
+		println(network.treatmentGraph.dotString)
+	}
+}
