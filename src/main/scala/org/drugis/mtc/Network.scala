@@ -128,7 +128,7 @@ class Network[M <: Measurement](
 	}
 
 	def bestSpanningTree(top: Treatment): Tree[Treatment] = {
-		searchSpanningTree(top)._1
+		searchSpanningTree(top, new NullSpanningTreeSearchListener())
 	}
 
 	private def baselineAssignmentExists(tree: Tree[Treatment]): Boolean =
@@ -139,22 +139,28 @@ class Network[M <: Measurement](
 			case _ => false
 		}
 
-	def searchSpanningTree(top: Treatment): (Tree[Treatment], Int) = {
+	def searchSpanningTree(top: Treatment, l: SpanningTreeSearchListener)
+	: Tree[Treatment] = {
 		var max = 0
 		var best: Tree[Treatment] = null
-		var iter = 0
 		for (tree <- treeEnumerator(top)) {
-			iter = iter + 1
 			val incons = countInconsistencies(tree)
-			if (incons >= max && baselineAssignmentExists(tree)) {
-				max = incons
-				best = tree
+			if (incons >= max) {
+				if (baselineAssignmentExists(tree)) {
+					max = incons
+					best = tree
+					l.receive(tree, incons, true, Some(true), true)
+				} else {
+					l.receive(tree, incons, true, Some(false), false)
+				}
+			} else {
+				l.receive(tree, incons, false, None, false)
 			}
 			if (max == countFunctionalParameters) {
-				return (best, iter)
+				return best
 			}
 		}
-		(best, iter)
+		best
 	}
 
 	def filterTreatments(ts: Set[Treatment]): Network[M] = {
@@ -220,4 +226,14 @@ object Network {
 	: Set[Study[M]] =
 		Set[Study[M]]() ++
 		{for (node <- n \ "study") yield Study.fromXML(node, treatments, measReader)}
+}
+
+trait SpanningTreeSearchListener {
+	def receive(tree: Tree[Treatment], icd: Integer, max: Boolean,
+		assignment: Option[Boolean], best: Boolean): Unit
+}
+
+class NullSpanningTreeSearchListener extends SpanningTreeSearchListener {
+	def receive(tree: Tree[Treatment], icd: Integer, max: Boolean,
+		assignment: Option[Boolean], best: Boolean) {}
 }

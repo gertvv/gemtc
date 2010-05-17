@@ -1,5 +1,15 @@
 package org.drugis.mtc
 
+class SpanningTreeSearchListenerImpl extends SpanningTreeSearchListener {
+	var iter = 0
+	def receive(tree: Tree[Treatment], icd: Integer, max: Boolean,
+			assignment: Option[Boolean], best: Boolean) {
+		println(tree.edgeSet + "; " + icd + "; " + max + "; " +
+				assignment + "; " + best)
+		iter = iter + 1
+	}
+}
+
 class SearchTestImpl(xmlFile: String) {
 	val xml = scala.xml.XML.loadFile(xmlFile)
 	val network = Network.fromXML(xml)
@@ -7,11 +17,14 @@ class SearchTestImpl(xmlFile: String) {
 
 	def run() {
 		val t0 = System.currentTimeMillis()
-		val result = network.searchSpanningTree(top)
-		val best = result._1
+		val listener = new SpanningTreeSearchListenerImpl()
+		val result = network.searchSpanningTree(top, listener)
+		val best = result
 		val model = NetworkModel(network, best)
 		val t1 = System.currentTimeMillis()
-		println("Enumerated " + result._2)
+		println("Enumerated " + listener.iter)
+		println("Solution: ")
+		println(best.dotString)
 		println("ICDF " + model.inconsistencyParameters.size)
 		val v = network.treatmentGraph.vertexSet.size
 		println("|V| " + v)
@@ -23,6 +36,9 @@ class SearchTestImpl(xmlFile: String) {
 		println("K " + k)
 		val dt = t1 - t0
 		println("dt " + dt)
+
+		val basis = new FundamentalGraphBasis(network.treatmentGraph, best)
+		println(basis.dotString)
 	}
 }
 
