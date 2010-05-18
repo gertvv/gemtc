@@ -143,10 +143,30 @@ class Network[M <: Measurement](
 	: Tree[Treatment] = {
 		var max = 0
 		var best: Tree[Treatment] = null
+		var kHasBaseline: Option[Boolean] = None
+		def maxPossible(kAchievable: Option[Boolean]) = kAchievable match {
+			case Some(true) => countFunctionalParameters
+			case Some(false) => countFunctionalParameters - 1
+			case None => countFunctionalParameters
+		}
 		for (tree <- treeEnumerator(top)) {
 			val incons = countInconsistencies(tree)
 			if (incons >= max) {
-				if (baselineAssignmentExists(tree)) {
+				// Optimization for ICD(T) = K case
+				val hasBaseline = 
+					if (incons == countFunctionalParameters) {
+						kHasBaseline match {
+							case Some(x) => x
+							case None => {
+								val mhb = baselineAssignmentExists(tree)
+								kHasBaseline = Some(mhb)
+								mhb
+							}
+						}
+					} else {
+						baselineAssignmentExists(tree)
+					}
+				if (hasBaseline) {
 					max = incons
 					best = tree
 					l.receive(tree, incons, true, Some(true), true)
@@ -156,7 +176,7 @@ class Network[M <: Measurement](
 			} else {
 				l.receive(tree, incons, false, None, false)
 			}
-			if (max == countFunctionalParameters) {
+			if (max == maxPossible(kHasBaseline)) {
 				return best
 			}
 		}
