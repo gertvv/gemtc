@@ -172,7 +172,8 @@ class NetworkModel[M <: Measurement](
 	}
 
 	private def logOdds(m: DichotomousMeasurement): Double = {
-		val p = m.responders.toDouble / m.sampleSize.toDouble
+		val p = (if (m.responders == 0) 0.5 else m.responders.toDouble) /
+			m.sampleSize.toDouble
 		Math.log(p / (1 - p))
 	}
 
