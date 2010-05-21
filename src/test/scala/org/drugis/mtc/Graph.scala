@@ -407,3 +407,46 @@ class FundamentalGraphBasisTest extends ShouldMatchersForJUnit {
 			  |}""".stripMargin)
 	}
 }
+
+class CycleTest extends ShouldMatchersForJUnit {
+	@Test
+	def testIsCycle() {
+		Cycle.isCycle(List("A", "B", "A")) should be (false)
+		Cycle.isCycle(List("A", "B", "C", "A")) should be (true)
+		Cycle.isCycle(List("A", "B", "C", "D", "A")) should be (true)
+		Cycle.isCycle(List("A", "B", "C", "B")) should be (false)
+		Cycle.isCycle(List("A", "B", "C", "D", "B")) should be (false)
+		Cycle.isCycle(List("A", "C", "E", "D", "C", "B", "A")) should be (false)
+	}
+
+	@Test
+	def testConstruct() {
+		new Cycle(List("A", "B", "C", "A")).vertexSeq should be (List("A", "B", "C", "A"))
+		intercept[IllegalArgumentException] {
+			new Cycle(List("A", "B", "C"))
+		}
+		Cycle(List("A", "B", "C", "A")).vertexSeq should be (List("A", "B", "C", "A"))
+		intercept[IllegalArgumentException] {
+			Cycle(List("A", "B", "C"))
+		}
+	}
+
+	@Test
+	def testEquals() {
+		(Cycle(List("A", "B", "C", "A")) == Cycle(List("A", "B", "C", "A"))) should be (true)
+		(Cycle(List("A", "B", "C", "A")).hashCode == Cycle(List("A", "B", "C", "A")).hashCode) should be (true)
+		(Cycle(List("A", "B", "C", "A")) == Cycle(List("A", "B", "C", "D", "A"))) should be (false)
+	}
+
+	@Test
+	def testUGConstruct() {
+		Cycle(new UndirectedGraph(Set(("A", "B"), ("B", "C"), ("A", "C")))) should be (
+			Cycle(List("A", "B", "C")))
+	}
+
+	@Test
+	def testEdgeSeq() {
+		Cycle(List("A", "B", "C", "A")).edgeSeq should be (
+			List(("A", "B"), ("B", "C"), ("C", "A")))
+	}
+}

@@ -257,3 +257,54 @@ class FundamentalGraphBasis[T <% Ordered[T]](
 		graph.asVector(backEdges).map(graph.edgeStr("->")
 			).map(s => s + " [style=dashed]")).mkString("\n")
 }
+
+class Cycle[T <% Ordered[T]](
+	val vertexSeq: List[T]) {
+
+	require(Cycle.isCycle(vertexSeq))
+
+	val edgeSeq: List[(T, T)] = edgeSeq(vertexSeq)
+
+	private def edgeSeq(trail: List[T]): List[(T, T)] = trail match {
+		case a :: (b :: l) => (a, b) :: edgeSeq(b :: l)
+		case a :: Nil => List()
+		case Nil => List()
+
+	}
+
+	override def equals(other: Any) = other match {
+		case that: Cycle[T] => that.vertexSeq == vertexSeq
+		case _ => false
+	}
+
+	override def hashCode: Int = vertexSeq.hashCode
+}
+
+object Cycle {
+	def isCycle[T <% Ordered[T]](vertexSeq: List[T]): Boolean =
+		(vertexSeq.size > 3) && (vertexSeq.head == vertexSeq.last) &&
+		((Set[T]() ++ vertexSeq).size == (vertexSeq.size - 1))
+
+	def apply[T <% Ordered[T]](vertexSeq: List[T]): Cycle[T] = new Cycle(vertexSeq)
+	def apply[T <% Ordered[T]](g: UndirectedGraph[T]): Cycle[T] = {
+		val v = first(g.vertexSet)
+		val c = walkCycle(g, List(v, first(reach(g, v)))).reverse
+		println(c)
+		new Cycle(c)
+	}
+
+	private def walkCycle[T <% Ordered[T]](g: UndirectedGraph[T], l0: List[T]): List[T] = {
+		if (g.edgesFrom(l0.head).size != 2) throw new IllegalArgumentException()
+		if (l0.size > 1 && l0.head == l0.last) l0
+		else {
+			val v = first(reach(g, l0.head) - l0.tail.head)
+			walkCycle(g, v :: l0)
+		}
+	}
+
+	private def first[T <% Ordered[T]](set: Set[T]) = set.toList.sort((a, b) => a < b)(0)
+
+	private def reach[T <% Ordered[T]](g: UndirectedGraph[T], v: T): Set[T] = {
+		g.edgesFrom(v).map(x => x._2)
+	}
+}
