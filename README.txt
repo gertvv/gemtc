@@ -66,6 +66,8 @@ To run an inconsistency model, replace --consistency with
 Versions
 --------
 
+0.4: Improved parametrization algorithm.
+
 0.2: Initial release. JAGS and Yadas model generation. Java API for
 running MTC models.
 
