@@ -61,15 +61,67 @@ class PartTest extends ShouldMatchersForJUnit {
 }
 
 class PartitionTest extends ShouldMatchersForJUnit {
+	def t(id: String) = new Treatment(id)
+	def m(id: String) = new NoneMeasurement(t(id))
+	val map = Map((t("A"), m("A")), (t("B"), m("B")), (t("C"), m("C")))
+	val mapAB = Map((t("A"), m("A")), (t("B"), m("B")))
+	val mapBC = Map((t("C"), m("C")), (t("B"), m("B")))
+	val p1 = new Part(t("A"), t("A"),
+		Set(new Study("1", map)))
+	val p2 = new Part(t("A"), t("B"),
+		Set(new Study("1", map)))
+	val p3 = new Part(t("A"), t("B"),
+		Set(new Study("2", map)))
+	val p4 = new Part(t("A"), t("C"),
+		Set(new Study("2", map)))
+	val p5 = new Part(t("B"), t("C"),
+		Set(new Study("2", map)))
+	val p6 = new Part(t("A"), t("A"),
+		Set(new Study("2", map)))
+	val p7 = new Part(t("A"), t("B"),
+		Set(new Study("1", mapAB), new Study("2", map)))
+	val p8 = new Part(t("C"), t("B"),
+		Set(new Study("1", mapBC), new Study("2", map)))
+
 	@Test def testPrecondition() {
-		fail()
+
+		new Partition(Set(p1)) should not be (null)
+
+
+		intercept[IllegalArgumentException] {
+			new Partition(Set(p2))
+		}
+
+		new Partition(Set(p2, p3)) should not be (null)
+
+		new Partition(Set(p3, p4, p5)) should not be (null)
 	}
 
 	@Test def testEquals() {
-		fail()
+		new Partition(Set(p1)) should be (new Partition(Set(p1)))
+		new Partition(Set(p1)).hashCode should be (
+			new Partition(Set(p1)).hashCode)
+		new Partition(Set(p1)) should not be (new Partition(Set(p2, p3)))
+		new Partition(Set(p1)) should not be (new Partition(Set(p6)))
 	}
 
 	@Test def testReduce() {
-		fail()
+		new Partition(Set(p3, p4, p5)).reduce should be (new Partition(Set(p6)))
+
+		val pAB = new Part(t("A"), t("B"),
+			Set(new Study("1", mapAB),
+				new Study("2", map)))
+		val pBA = new Part(t("A"), t("B"),
+			Set(new Study("2", map)))
+		new Partition(Set(p7, p4, p5)).reduce should be (
+			new Partition(Set(pAB, pBA)))
+
+		val pBC = new Part(t("B"), t("C"),
+			Set(new Study("1", mapBC),
+				new Study("2", map)))
+		val pCB = new Part(t("B"), t("C"),
+			Set(new Study("2", map)))
+		new Partition(Set(p3, p8, p4)).reduce should be (
+			new Partition(Set(pBC, pCB)))
 	}
 }
