@@ -273,7 +273,7 @@ class Cycle[T <% Ordered[T]](
 	}
 
 	override def equals(other: Any) = other match {
-		case that: Cycle[T] => that.vertexSeq == vertexSeq
+		case that: Cycle[T] => { that.vertexSeq == vertexSeq }
 		case _ => false
 	}
 
