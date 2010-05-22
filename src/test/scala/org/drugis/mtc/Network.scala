@@ -194,26 +194,6 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		))
 	}
 
-	@Test def testSupportingEvidence() {
-		val network = Network.dichFromXML(dichXML)
-
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-
-		val cycle = new UndirectedGraph[Treatment](
-			Set[(Treatment, Treatment)]((a, b), (a, c), (b, c)))
-
-		network.supportingEvidence(cycle) should be (
-			Set[UndirectedGraph[Treatment]](
-				new UndirectedGraph[Treatment](
-					Set[(Treatment, Treatment)]((a, b))),
-				new UndirectedGraph[Treatment](
-					Set[(Treatment, Treatment)]((a, b), (a, c), (b, c)))
-			)
-		)
-	}
-
 	@Test def testEdgeVector() {
 		val network = Network.dichFromXML(dichXML)
 
@@ -225,29 +205,6 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		network.edgeVector should be (List[(Treatment, Treatment)](
 			(a, b), (a, c), (b, c), (b, d)
 		))
-	}
-
-	@Test def testEvidenceMatrix() {
-		val network = Network.dichFromXML(dichXML)
-
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-
-		val cycle = new UndirectedGraph[Treatment](
-			Set[(Treatment, Treatment)]((a, b), (a, c), (b, c)))
-
-		val m1 = new Matrix[Boolean](List[List[Boolean]](
-			List[Boolean](true, false, false),
-			List[Boolean](true, true, true)
-		))
-		val m2 = m1.exchangeRows(0, 1)
-
-		val evidence = network.evidenceMatrix(cycle)
-		assert(evidence == m1 || evidence == m2)
-
-		network.evidenceDimensionality(cycle) should be (2)
-		assert(!network.isInconsistency(cycle))
 	}
 
 	@Test def testInconsistency() {
@@ -286,7 +243,6 @@ class NetworkTest extends ShouldMatchersForJUnit {
 		val cycle = new UndirectedGraph[Treatment](
 			Set[(Treatment, Treatment)]((a, b), (a, c), (b, c)))
 
-		network.evidenceMatrix(cycle).nRows should be (4)
 		network.evidenceDimensionality(cycle) should be (3)
 		assert(network.isInconsistency(cycle))
 	}
