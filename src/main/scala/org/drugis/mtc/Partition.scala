@@ -96,5 +96,10 @@ class Partition[M <: Measurement](val parts: Set[Part[M]]) {
 
 object Partition {
 	def apply[M <: Measurement](network: Network[M], cycle: Cycle[Treatment]) 
-	:Partition[M] = null
+	:Partition[M] = new Partition(Set[Part[M]]() ++
+		cycle.edgeSeq.map(edgePart(network) _))
+
+	private def edgePart[M <: Measurement](network: Network[M])(
+		e: (Treatment, Treatment))
+	: Part[M] = new Part(e._1, e._2, network.supportingStudies(e))
 }

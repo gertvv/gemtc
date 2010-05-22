@@ -124,4 +124,55 @@ class PartitionTest extends ShouldMatchersForJUnit {
 		new Partition(Set(p3, p8, p4)).reduce should be (
 			new Partition(Set(pBC, pCB)))
 	}
+
+	@Test def testFromNetwork() {
+		val network = Network.noneFromXML(
+			<network type="none">
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+					<treatment id="C"/>
+					<treatment id="D"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A" />
+						<measurement treatment="D" />
+					</study>
+					<study id="2">
+						<measurement treatment="A" />
+						<measurement treatment="B" />
+					</study>
+					<study id="3">
+						<measurement treatment="B" />
+						<measurement treatment="C" />
+						<measurement treatment="D" />
+					</study>
+					<study id="4">
+						<measurement treatment="A" />
+						<measurement treatment="B" />
+					</study>
+				</studies>
+			</network>)
+		def t(id: String) = network.treatments.find(t => t.id == id).toList(0)
+		def s(id: String) = network.studies.find(s => s.id == id).toList(0)
+
+		val pAB = new Part(t("A"), t("B"), Set(s("2"), s("4")))
+		val pBD = new Part(t("B"), t("D"), Set(s("3")))
+		val pBC = new Part(t("B"), t("C"), Set(s("3")))
+		val pCD = new Part(t("C"), t("D"), Set(s("3")))
+		val pAD = new Part(t("A"), t("D"), Set(s("1")))
+
+		val cABDA = new Cycle(List(t("A"), t("B"), t("D"), t("A")))
+		val cABCDA = new Cycle(List(t("A"), t("B"), t("C"), t("D"), t("A")))
+
+		Partition(network, cABDA) should be (
+			new Partition(Set(pAB, pBD, pAD)))
+
+		Partition(network, cABCDA) should be (
+			new Partition(Set(pAB, pBC, pCD, pAD)))
+
+		Partition(network, cABCDA).reduce should be (
+			new Partition(Set(pAB, pBD, pAD)))
+	}
 }
