@@ -441,7 +441,7 @@ class CycleTest extends ShouldMatchersForJUnit {
 	@Test
 	def testUGConstruct() {
 		Cycle(new UndirectedGraph(Set(("A", "B"), ("B", "C"), ("A", "C")))) should be (
-			Cycle(List("A", "B", "C")))
+			Cycle(List("A", "B", "C", "A")))
 	}
 
 	@Test

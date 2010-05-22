@@ -288,8 +288,7 @@ object Cycle {
 	def apply[T <% Ordered[T]](vertexSeq: List[T]): Cycle[T] = new Cycle(vertexSeq)
 	def apply[T <% Ordered[T]](g: UndirectedGraph[T]): Cycle[T] = {
 		val v = first(g.vertexSet)
-		val c = walkCycle(g, List(v, first(reach(g, v)))).reverse
-		println(c)
+		val c = walkCycle(g, List(first(reach(g, v)), v)).reverse
 		new Cycle(c)
 	}
 
