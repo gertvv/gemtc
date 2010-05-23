@@ -25,7 +25,7 @@ class SearchTestImpl(xmlFile: String) {
 		println("Enumerated " + listener.iter)
 		println("Solution: ")
 		println(best.dotString)
-		println("ICDF " + model.inconsistencyParameters.size)
+		println("ICDF " + model.parametrization.inconsistencyDegree)
 		val v = network.treatmentGraph.vertexSet.size
 		println("|V| " + v)
 		val e = network.treatmentGraph.edgeSet.size
