@@ -83,8 +83,18 @@ class Partition[M <: Measurement](val parts: Set[Part[M]]) {
 		else if (parts.size == 1) partList(0).treatments.size == 1
 		else if (parts.size == 2)
 			partList(0).treatments == partList(1).treatments
-		else try { Cycle(asGraph); true } catch { case _ => false }
+		else asCycle match {
+			case Some(c) => true
+			case None => false
+		}
 	}
+
+	def asCycle: Option[Cycle[Treatment]] =
+		try {
+			Some(Cycle(asGraph))
+		} catch {
+			case _ => None
+		}
 
 	private def asGraph = new UndirectedGraph(parts.map(asEdge _))
 

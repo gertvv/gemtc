@@ -278,6 +278,16 @@ class Cycle[T <% Ordered[T]](
 	}
 
 	override def hashCode: Int = vertexSeq.hashCode
+
+	def rebase(base: T): Cycle[T] = new Cycle(rebase(base, vertexSeq.tail, Nil))
+
+	private def rebase(base: T, toWalk: List[T], walked: List[T])
+	: List[T] = toWalk match {
+		case Nil => throw new IllegalArgumentException
+		case x :: l => 
+			if (x == base) toWalk ::: (base :: walked).reverse
+			else rebase(base, toWalk.tail, toWalk.head :: walked)
+	}
 }
 
 object Cycle {

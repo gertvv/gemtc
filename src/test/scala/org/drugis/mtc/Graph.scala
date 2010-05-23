@@ -431,22 +431,34 @@ class CycleTest extends ShouldMatchersForJUnit {
 		}
 	}
 
-	@Test
-	def testEquals() {
+	@Test def testEquals() {
 		(Cycle(List("A", "B", "C", "A")) == Cycle(List("A", "B", "C", "A"))) should be (true)
 		(Cycle(List("A", "B", "C", "A")).hashCode == Cycle(List("A", "B", "C", "A")).hashCode) should be (true)
 		(Cycle(List("A", "B", "C", "A")) == Cycle(List("A", "B", "C", "D", "A"))) should be (false)
 	}
 
-	@Test
-	def testUGConstruct() {
+	@Test def testUGConstruct() {
 		Cycle(new UndirectedGraph(Set(("A", "B"), ("B", "C"), ("A", "C")))) should be (
 			Cycle(List("A", "B", "C", "A")))
 	}
 
-	@Test
-	def testEdgeSeq() {
+	@Test def testEdgeSeq() {
 		Cycle(List("A", "B", "C", "A")).edgeSeq should be (
 			List(("A", "B"), ("B", "C"), ("C", "A")))
+	}
+
+	@Test def testRebase() {
+		Cycle(List("A", "B", "C", "A")).rebase("A") should be (
+			Cycle(List("A", "B", "C", "A")))
+
+		Cycle(List("A", "B", "C", "A")).rebase("B") should be (
+			Cycle(List("B", "C", "A", "B")))
+
+		Cycle(List("A", "B", "C", "A")).rebase("C") should be (
+			Cycle(List("C", "A", "B", "C")))
+
+		intercept[IllegalArgumentException] {
+			Cycle(List("A", "B", "C", "A")).rebase("D")
+		}
 	}
 }

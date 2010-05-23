@@ -148,6 +148,16 @@ class Network[M <: Measurement](
 	private def filterStudy(s: Study[M], ts: Set[Treatment]): Study[M] =
 		if (s.treatments.intersect(ts) == s.treatments) s
 		else new Study[M](s.id, s.measurements.filter(x => ts.contains(x._1)))
+
+	def study(id: String) = studies.find(s => s.id == id) match {
+		case Some(s) => s
+		case None => null
+	}
+
+	def treatment(id: String) = treatments.find(t => t.id == id) match {
+		case Some(t) => t
+		case None => null
+	}
 }
 
 object Network {
