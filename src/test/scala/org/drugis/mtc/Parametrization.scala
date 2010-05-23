@@ -152,4 +152,134 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 				(a, d), (d, c), (d, b)), a))
 		new Parametrization(network, basis4).inconsistencyDegree should be (2)
 	}
+
+	@Test def testBasicParameters() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		new Parametrization(network, basis2).basicParameters should be (
+			List[NetworkModelParameter](
+				new BasicParameter(a, b),
+				new BasicParameter(b, c),
+				new BasicParameter(b, d))
+		)
+
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a))
+		new Parametrization(network, basis3).basicParameters should be (
+			List[NetworkModelParameter](
+				new BasicParameter(a, c),
+				new BasicParameter(a, d),
+				new BasicParameter(d, b))
+		)
+	}
+
+	@Test def testInconsistencyParameters() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		// None of the cycles reduce, all of them have 3 distinct support
+		val basis1 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (a, c), (a, d)), a))
+		new Parametrization(network, basis1).inconsistencyParameters should be (
+			List[NetworkModelParameter](
+				new InconsistencyParameter(List(a, b, c, a)),
+				new InconsistencyParameter(List(a, b, d, a)),
+				new InconsistencyParameter(List(a, c, d, a)))
+		)
+
+		// BCDB has support from only two studies
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		new Parametrization(network, basis2).inconsistencyParameters should be (
+			List[NetworkModelParameter](
+				new InconsistencyParameter(List(a, b, c, a)),
+				new InconsistencyParameter(List(a, b, d, a)))
+		)
+
+		// ACBDA reduces to ACDA
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a))
+		new Parametrization(network, basis3).inconsistencyParameters should be (
+			List[NetworkModelParameter](
+				new InconsistencyParameter(List(a, b, d, a)),
+				new InconsistencyParameter(List(a, c, d, a)))
+		)
+	}
+
+	@Test def testParameterizationBasic() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		val param = new Parametrization(network, basis2)
+
+		param(a, b) should be (
+			Map((new BasicParameter(a, b), 1)))
+		param(b, a) should be (
+			Map((new BasicParameter(a, b), -1)))
+	}
+
+	@Test def testParameterizationFunctional() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		val param2 = new Parametrization(network, basis2)
+
+		param2(c, d) should be (
+			Map((new BasicParameter(b, d), 1),
+				(new BasicParameter(b, c), -1)))
+
+		param2(a, d) should be (
+			Map((new BasicParameter(b, d), 1),
+				(new BasicParameter(a, b), 1),
+				(new InconsistencyParameter(List(a, b, d, a)), -1)))
+
+		param2(a, c) should be (
+			Map((new BasicParameter(a, b), 1),
+				(new BasicParameter(b, c), 1),
+				(new InconsistencyParameter(List(a, b, c, a)), -1)))
+
+		// ACBDA reduces to ACDA
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a))
+		val param3 = new Parametrization(network, basis3)
+
+		param3(a, b) should be (
+			Map((new BasicParameter(a, d), 1),
+				(new BasicParameter(d, b), 1),
+				(new InconsistencyParameter(List(a, b, d, a)), 1)))
+
+		param3(c, d) should be (
+			Map((new BasicParameter(a, c), -1),
+				(new BasicParameter(a, d), 1),
+				(new InconsistencyParameter(List(a, c, d, a)), 1)))
+
+		param3(b, c) should be (
+			Map((new BasicParameter(a, d), -1),
+				(new BasicParameter(d, b), -1),
+				(new InconsistencyParameter(List(a, c, d, a)), -1),
+				(new BasicParameter(a, c), 1)))
+	}
 }
