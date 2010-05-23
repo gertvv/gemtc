@@ -84,9 +84,9 @@ class Network[M <: Measurement](
 		searchSpanningTree(top, new NullSpanningTreeSearchListener())
 	}
 
-	private def baselineAssignmentExists(tree: Tree[Treatment]): Boolean =
+	private def baselineAssignmentExists(pmtz: Parametrization[M]): Boolean =
 		try {
-			NetworkModel.assignBaselines(this, tree)
+			NetworkModel.assignBaselines(this, pmtz.basis.tree) // FIXME
 			true
 		} catch {
 			case _ => false
@@ -103,7 +103,9 @@ class Network[M <: Measurement](
 			case None => countFunctionalParameters
 		}
 		for (tree <- treeEnumerator(top)) {
-			val incons = countInconsistencies(tree)
+			val pmtz = new Parametrization(this, 
+				new FundamentalGraphBasis(treatmentGraph, tree))
+			val incons = pmtz.inconsistencyDegree
 			if (incons >= max) {
 				// Optimization for ICD(T) = K case
 				val hasBaseline = 
@@ -111,13 +113,13 @@ class Network[M <: Measurement](
 						kHasBaseline match {
 							case Some(x) => x
 							case None => {
-								val mhb = baselineAssignmentExists(tree)
+								val mhb = baselineAssignmentExists(pmtz)
 								kHasBaseline = Some(mhb)
 								mhb
 							}
 						}
 					} else {
-						baselineAssignmentExists(tree)
+						baselineAssignmentExists(pmtz)
 					}
 				if (hasBaseline) {
 					max = incons
