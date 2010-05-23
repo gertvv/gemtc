@@ -4,9 +4,12 @@ class Parametrization[M <: Measurement](
 		val network: Network[M],
 		val basis: FundamentalGraphBasis[Treatment]
 ) {
+	val cycles: Set[Cycle[Treatment]] = 
+		basis.cycles.map(c => Cycle(c))
+
 	val cycleClass: Map[Cycle[Treatment], Option[(Partition[M], Int)]] = 
 		Map[Cycle[Treatment], Option[(Partition[M], Int)]]() ++
-			basis.cycles.map(c => classEntry(Cycle(c)))
+			cycles.map(c => classEntry(c))
 
 	val inconsistencyCycles: Map[Partition[M], Set[Cycle[Treatment]]] =
 		mapInconsistencyCycles(cycleClass.keySet.toList)

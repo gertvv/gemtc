@@ -86,22 +86,29 @@ class Network[M <: Measurement](
 
 	private def baselineAssignmentExists(pmtz: Parametrization[M]): Boolean =
 		try {
-			NetworkModel.assignBaselines(this, pmtz.basis.tree) // FIXME
+			NetworkModel.assignBaselines(pmtz)
 			true
 		} catch {
 			case _ => false
 		}
 
+	private def completeBaselineAssignment = 
+		(new DFS()).search(BaselineSearchProblem(this))
+
 	def searchSpanningTree(top: Treatment, l: SpanningTreeSearchListener)
 	: Tree[Treatment] = {
+		// First, check if there is an assignment that covers the full graph
+		val completeBaseline = completeBaselineAssignment
+		val hasCompleteBaseline = completeBaseline match {
+			case Some(x) => true
+			case None => false
+		}
+		val maxPossible =
+			if (hasCompleteBaseline) countFunctionalParameters
+			else countFunctionalParameters - 1
+
 		var max = 0
 		var best: Tree[Treatment] = null
-		var kHasBaseline: Option[Boolean] = None
-		def maxPossible(kAchievable: Option[Boolean]) = kAchievable match {
-			case Some(true) => countFunctionalParameters
-			case Some(false) => countFunctionalParameters - 1
-			case None => countFunctionalParameters
-		}
 		for (tree <- treeEnumerator(top)) {
 			val pmtz = new Parametrization(this, 
 				new FundamentalGraphBasis(treatmentGraph, tree))
@@ -109,18 +116,9 @@ class Network[M <: Measurement](
 			if (incons >= max) {
 				// Optimization for ICD(T) = K case
 				val hasBaseline = 
-					if (incons == countFunctionalParameters) {
-						kHasBaseline match {
-							case Some(x) => x
-							case None => {
-								val mhb = baselineAssignmentExists(pmtz)
-								kHasBaseline = Some(mhb)
-								mhb
-							}
-						}
-					} else {
-						baselineAssignmentExists(pmtz)
-					}
+					if (hasCompleteBaseline) true
+					else if (incons == countFunctionalParameters) false
+					else baselineAssignmentExists(pmtz)
 				if (hasBaseline) {
 					max = incons
 					best = tree
@@ -131,7 +129,7 @@ class Network[M <: Measurement](
 			} else {
 				l.receive(tree, incons, false, None, false)
 			}
-			if (max == maxPossible(kHasBaseline)) {
+			if (max == maxPossible) {
 				return best
 			}
 		}
