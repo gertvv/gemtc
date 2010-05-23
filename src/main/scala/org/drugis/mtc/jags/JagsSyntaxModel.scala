@@ -270,7 +270,7 @@ extends JagsSyntaxModel(model) {
 	def express(study: Study[M], effect: Treatment) = {
 		val base = model.studyBaseline(study)
 		require(effect != base)
-		expressParams(model.parameterization(base, effect))
+		expressParams(model.parametrization(base, effect))
 	}
 
 	protected def basicParameters: String = 
@@ -323,7 +323,7 @@ extends JagsSyntaxModel(model) {
 	protected def standardizeParameters(frame: String) = 
 		(for {edge <- model.network.edgeVector
 			val p = new BasicParameter(edge._1, edge._2)
-			val e = expressParams(model.parameterization(edge._1, edge._2))
+			val e = expressParams(model.parametrization(edge._1, edge._2))
 		 } yield frame + "$" + p + " <- " + e).mkString("\n")
 
 	private def standardizeInconsistencies(frame: String) = 

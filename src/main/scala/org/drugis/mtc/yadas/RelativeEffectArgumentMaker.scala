@@ -44,7 +44,7 @@ extends ArgumentMaker {
 			res.size, params.size)
 		for (i <- 0 until res.size) {
 			val re = res(i)
-			val reparam = model.parameterization(re._1, re._2)
+			val reparam = model.parametrization(re._1, re._2)
 			for (j <- 0 until params.size) {
 				val value = 
 					if (reparam.contains(params(j)))

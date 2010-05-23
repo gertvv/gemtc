@@ -51,7 +51,7 @@ b <- c(2, 1, 1)"""
 	delta[2, 1, 2] ~ dnorm(d.A.B, tau.d)
 	# Random effects in study 03
 	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C + w.A.C.B, tau.d)
+	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
 
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
@@ -64,7 +64,7 @@ b <- c(2, 1, 1)"""
 	d.B.C ~ dnorm(0, .001)
 
 	# Inconsistency factors
-	w.A.C.B ~ dnorm(0, tau.w)
+	w.A.B.C ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
 	sd.w ~ dunif(0.00001, 2.265204322822621)
@@ -94,7 +94,7 @@ b <- c(2, 1, 1)"""
 			|
 			|monitor d.A.B
 			|monitor d.B.C
-			|monitor w.A.C.B
+			|monitor w.A.B.C
 			|monitor var.d
 			|monitor var.w
 			|
@@ -107,9 +107,9 @@ b <- c(2, 1, 1)"""
 			|attach(trace)
 			|data <- list()
 			|data$d.A.B <- d.A.B
-			|data$d.A.C <- d.A.B + d.B.C + w.A.C.B
+			|data$d.A.C <- d.A.B + d.B.C + -w.A.B.C
 			|data$d.B.C <- d.B.C
-			|data$w.A.C.B <- w.A.C.B
+			|data$w.A.B.C <- w.A.B.C
 			|data$var.d <- var.d
 			|data$var.w <- var.w
 			|detach(trace)""".stripMargin
@@ -360,7 +360,7 @@ b <- c(2, 1, 1)"""
 	delta[2, 1, 2] ~ dnorm(d.A.B, tau.d)
 	# Random effects in study 03
 	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C + w.A.C.B, tau.d)
+	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
 
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
@@ -373,7 +373,7 @@ b <- c(2, 1, 1)"""
 	d.B.C ~ dnorm(0, .001)
 
 	# Inconsistency factors
-	w.A.C.B ~ dnorm(0, tau.w)
+	w.A.B.C ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
 	sd.w ~ dunif(0.00001, 8.0)

@@ -16,15 +16,15 @@ class Parametrization[M <: Measurement](
 
 	def inconsistencyDegree: Int = inconsistencyClasses.size
 
-	def basicParameters: List[NetworkModelParameter] =
+	def basicParameters: List[BasicParameter] =
 		sort(basis.treeEdges).map(e => new BasicParameter(e._1, e._2))
 
-	def inconsistencyParameters: List[NetworkModelParameter] = 
+	def inconsistencyParameters: List[InconsistencyParameter] = 
 		cycleSort(inconsistencyClasses.map(asCycle _)).map(c =>
 			new InconsistencyParameter(c.vertexSeq))
 
 	/**
-	 * Parametrization of t1 -> t2.
+	 * Parametrization of d.t1.t2 (effect of t2 relative to t1).
 	 */
 	def apply(t1: Treatment, t2: Treatment): Map[NetworkModelParameter, Int] =
 		param(t1, t2)

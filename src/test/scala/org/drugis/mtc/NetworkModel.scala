@@ -120,8 +120,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 				new BasicParameter(ta, tb),
 				new BasicParameter(ta, tc),
 				new BasicParameter(tb, td),
-				new InconsistencyParameter(List(ta, tb, tc, ta)),
-				new InconsistencyParameter(List(ta, tc, td, tb, ta))
+				new InconsistencyParameter(List(ta, tb, tc, ta))
 			))
 	}
 
@@ -134,33 +133,6 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 				new BasicParameter(tc, tb),
 				new InconsistencyParameter(List(ta, tb, tc, ta))
 			))
-	}
-
-	@Test def testParameterizationBasic() {
-		val model = NetworkModel(network, spanningTree)
-		model.parameterization(ta, tb) should be (
-			Map((new BasicParameter(ta, tb), 1)))
-		model.parameterization(tb, ta) should be (
-			Map((new BasicParameter(ta, tb), -1)))
-	}
-
-	@Test def testParameterizationFunctional() {
-		val model = NetworkModel(network, spanningTree)
-		model.parameterization(tc, td) should be (Map(
-			(new BasicParameter(ta, tb), 1),
-			(new BasicParameter(tb, td), 1),
-			(new BasicParameter(ta, tc), -1),
-			(new InconsistencyParameter(List(ta, tc, td, tb, ta)), 1)
-		))
-	}
-
-	@Test def testParameterizationFunctionalWithoutIncons() {
-		val model = NetworkModel(network, new Tree[Treatment](
-			Set((ta, tc), (tc, tb), (tb, td)), ta))
-		model.parameterization(tc, td) should be (Map(
-			(new BasicParameter(tc, tb), 1),
-			(new BasicParameter(tb, td), 1)
-		))
 	}
 
 	@Test def testRelativeEffects() {

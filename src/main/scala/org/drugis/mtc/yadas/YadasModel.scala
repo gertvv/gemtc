@@ -387,7 +387,7 @@ extends ProgressObservable {
 			basicMap: Map[NetworkModelParameter, Parameter])
 	: IndirectParameter = {
 		val param = Map[Parameter, Int]() ++
-			proto.parameterization(p.base, p.subject).map(
+			proto.parametrization(p.base, p.subject).map(
 				(x) => (basicMap(x._1), x._2)).filter((x) => x._2 != 0)
 		new IndirectParameter(param)
 	}

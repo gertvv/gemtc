@@ -76,8 +76,8 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		val m = model
 		val dAB = m.getRelativeEffect(ta, tb)
 		val dBC = m.getRelativeEffect(tb, tc)
-		val wACB = m.getInconsistency(
-			new InconsistencyParameter(List(ta, tc, tb, ta)))
+		val wABC = m.getInconsistency(
+			new InconsistencyParameter(List(ta, tb, tc, ta)))
 
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
@@ -92,8 +92,8 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		dBC.getStandardDeviation should be(sBC plusOrMinus f * sBC)
 		val mACB = 0.2015848
 		val sACB = 0.8444993
-		wACB.getMean should be (mACB plusOrMinus f * sACB)
-		wACB.getStandardDeviation should be(sACB plusOrMinus f * sACB)
+		wABC.getMean should be (-mACB plusOrMinus f * sACB)
+		wABC.getStandardDeviation should be(sACB plusOrMinus f * sACB)
 	}
 
 	@Test def testDerivedParameters() {
@@ -115,6 +115,6 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		val list = model.getInconsistencyFactors
 		list.size should be (1)
 		list.contains(
-			new InconsistencyParameter(List(ta, tc, tb, ta))) should be (true)
+			new InconsistencyParameter(List(ta, tb, tc, ta))) should be (true)
 	}
 }

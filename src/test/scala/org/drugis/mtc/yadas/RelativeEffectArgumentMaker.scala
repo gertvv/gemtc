@@ -89,8 +89,8 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testGetArgumentInconsistency() {
-		val basic = Array(-1.0, 1.0, 3.0)
-		val incons = Array(0.5, -0.5)
+		val basic = Array(-1.0, 1.0, 3.0) // AB, AD, BC
+		val incons = Array(-0.5, 0.5) // ABCDA, ABDA
 		val expected1 = List(-1.0)
 		val expected2 = List(3.0, 2.5)
 		val expected3 = List(1.0)
