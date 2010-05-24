@@ -39,6 +39,55 @@ class SearchTestImpl(xmlFile: String) {
 
 		val basis = new FundamentalGraphBasis(network.treatmentGraph, best)
 		println(basis.dotString)
+		println(model.parametrization.inconsistencyClasses)
+	}
+}
+
+class EnumerateTestImpl(xmlFile: String) {
+	val xml = scala.xml.XML.loadFile(xmlFile)
+	val network = Network.fromXML(xml)
+	val top = network.treatments.toList.sort((a, b) => a < b).first 
+
+	def run() {
+		val treeIterable = SpanningTreeEnumerator.treeEnumerator(
+			network.treatmentGraph, top)
+		var count = 0
+		for (tree <- treeIterable) {
+			count = count + 1
+			val pmtz = new Parametrization(network,
+				new FundamentalGraphBasis(network.treatmentGraph, tree))
+			val bsp = BaselineSearchProblem(pmtz)
+			val sol = 
+				(new DFS()).search(bsp) match {
+					case Some(x) => true
+					case None => false
+				}
+			println(count + ", " + sol + ", \"" + tree + "\"")
+		}
+	}
+}
+
+object EnumerateTest {
+	def main(args: Array[String]) {
+		val test = new EnumerateTestImpl(args(0))
+		test.run()
+	}
+}
+
+object CountTest {
+	def main(args: Array[String]) {
+		val xmlFile = args(0)
+		val xml = scala.xml.XML.loadFile(xmlFile)
+		val network = Network.fromXML(xml)
+		val top = network.treatments.toList.sort((a, b) => a < b).first 
+
+		val treeIterable = SpanningTreeEnumerator.treeEnumerator(
+			network.treatmentGraph, top)
+		var count = 0
+		for (tree <- treeIterable) {
+			count = count + 1
+			println(count)
+		}
 	}
 }
 

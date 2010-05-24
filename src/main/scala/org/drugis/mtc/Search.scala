@@ -44,7 +44,8 @@ trait GeneralSearch extends SearchAlgorithm {
 		search(problem, List(problem.initialState))
 	}
 
-	def search[State](problem: SearchProblem[State], queue: List[State]): Option[State] = {
+	final def search[State](problem: SearchProblem[State], queue: List[State])
+	: Option[State] = {
 		if (queue.isEmpty) return None
 		updateStats(queue)
 		val fringe = queue.head
