@@ -36,6 +36,8 @@ class MeasurementTest extends ShouldMatchersForJUnit {
 		measurement.treatment should be (treatmentA)
 		measurement.responders should be (9)
 		measurement.sampleSize should be (140)
+
+		measurement.toXML should be (xml)
 	}
 
 	@Test def testFromXML2() {
@@ -59,5 +61,7 @@ class MeasurementTest extends ShouldMatchersForJUnit {
 		measurement.stdDev should be (0.3)
 		measurement.sampleSize should be (140)
 		measurement.stdErr should be (0.3/Math.sqrt(140.toDouble))
+
+		measurement.toXML should be (xml)
 	}
 }

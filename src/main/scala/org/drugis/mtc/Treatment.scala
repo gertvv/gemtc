@@ -36,6 +36,8 @@ final class Treatment(_id: String, _desc: String) extends Ordered[Treatment] {
 		}
 
 	override def hashCode = id.hashCode
+
+	def toXML = <treatment id={id}>{description}</treatment>
 }
 
 object Treatment {

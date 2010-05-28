@@ -127,10 +127,17 @@ class Parametrization[M <: Measurement](
 	}
 
 	private def inconsParam(cycle: Cycle[Treatment])
-	: Map[NetworkModelParameter, Int] = cycleClass(cycle) match {
-		case None => emptyParam()
-		case Some(cls) => Map[NetworkModelParameter, Int](
-			(new InconsistencyParameter(asCycle(cls._1).vertexSeq), cls._2))
+	: Map[NetworkModelParameter, Int] = {
+		val clsopt = try {
+			cycleClass(cycle)
+		} catch {
+			case e: NoSuchElementException => None
+		}
+	 	clsopt match {
+			case None => emptyParam()
+			case Some(cls) => Map[NetworkModelParameter, Int](
+				(new InconsistencyParameter(asCycle(cls._1).vertexSeq), cls._2))
+		}
 	}
 
 	private def pathParam(path: List[Treatment])

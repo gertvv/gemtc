@@ -19,22 +19,26 @@
 
 package org.drugis.mtc
 
-class Measurement(val treatment: Treatment, val sampleSize: Int) {
+abstract class Measurement(val treatment: Treatment, val sampleSize: Int) {
+	def toXML: scala.xml.Node
 }
 
 class NoneMeasurement(treatment: Treatment)
 extends Measurement(treatment, 0) {
+	override def toXML = <measurement treatment={ treatment.id } />
 }
 
 class DichotomousMeasurement(treatment: Treatment,
 		val responders: Int, sampleSize: Int) 
 extends Measurement(treatment, sampleSize) {
+	override def toXML = <measurement treatment={ treatment.id } responders={ responders.toString } sample={ sampleSize.toString } />
 }
 
 class ContinuousMeasurement(treatment: Treatment,
 		val mean: Double, val stdDev: Double, sampleSize: Int)
 extends Measurement(treatment, sampleSize) {
 	val stdErr = stdDev / Math.sqrt(sampleSize.toDouble)
+	override def toXML = <measurement treatment={ treatment.id } mean={ mean.toString } standardDeviation={ stdDev.toString } sample={ sampleSize.toString } />
 }
 
 trait MeasurementBuilder {

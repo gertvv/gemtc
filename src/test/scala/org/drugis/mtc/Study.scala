@@ -28,7 +28,6 @@ class StudyTest extends ShouldMatchersForJUnit {
 	@Test def testEquals() {
 		val a = new Treatment("A")
 		val b = new Treatment("B")
-		val c = new Treatment("C")
 
 		val meas = Map[Treatment, Measurement](
 				(a, new DichotomousMeasurement(a, 10, 100)),
@@ -36,5 +35,20 @@ class StudyTest extends ShouldMatchersForJUnit {
 			)
 
 		new Study("1", meas) should be (new Study("1", meas))
+	}
+
+	@Test def testXML() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+
+		val meas = Map[Treatment, Measurement](
+				(a, new DichotomousMeasurement(a, 10, 100)),
+				(b, new DichotomousMeasurement(b, 10, 100))
+			)
+
+		val study = new Study("1", meas)
+
+		study.toXML should be (
+			<study id="1"><measurement treatment="A" responders="10" sample="100" /><measurement treatment="B" responders="10" sample="100" /></study>)
 	}
 }

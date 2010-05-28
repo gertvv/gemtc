@@ -32,6 +32,18 @@ class Network[M <: Measurement](
 			case None => null
 		}
 
+	val measurementTypeString: String = {
+		if (measurementType == classOf[DichotomousMeasurement])
+			"dichotomous"
+		else if (measurementType == classOf[ContinuousMeasurement])
+			"continuous"
+		else if (measurementType == classOf[NoneMeasurement])
+			"none"
+		else if (measurementType == null)
+			"none"
+		else throw new IllegalStateException("Unknown type " + measurementType)
+	}
+
 	val treatmentGraph: UndirectedGraph[Treatment] = {
 		var graph = new UndirectedGraph[Treatment](
 			Set[(Treatment, Treatment)](), (t: Treatment) => t.id)
@@ -63,8 +75,7 @@ class Network[M <: Measurement](
 	def countInconsistencies(st: Tree[Treatment]): Int =
 		inconsistencies(st).size
 
-	def inconsistencies(st: Tree[Treatment])
-	: Set[UndirectedGraph[Treatment]] = {
+	def inconsistencies(st: Tree[Treatment]) : Set[UndirectedGraph[Treatment]] = {
 		for {c <- treatmentGraph.fundamentalCycles(st);
 			if isInconsistency(c)} yield c
 	}
@@ -158,6 +169,14 @@ class Network[M <: Measurement](
 		case Some(t) => t
 		case None => null
 	}
+
+	def toXML = <network type={measurementTypeString}>
+		<treatments>{treatments.toList.sort((a, b) => a.id < b.id).map(t => t.toXML)}</treatments>
+		<studies>{studies.toList.sort((a, b) => a.id < b.id).map(s => s.toXML)}</studies>
+	</network>
+
+	def toPrettyXML =
+		(new scala.xml.PrettyPrinter(80, 4)).format(toXML)
 }
 
 object Network {

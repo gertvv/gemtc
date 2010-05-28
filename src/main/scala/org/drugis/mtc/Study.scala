@@ -43,6 +43,8 @@ final class Study[M <: Measurement](val id: String,
 	}
 
 	override def hashCode = id.hashCode
+
+	def toXML = <study id={id}>{measurements.values.toList.sort((a, b) => a.treatment.id < b.treatment.id).map(m => m.toXML)}</study>
 }
 
 object Study {
