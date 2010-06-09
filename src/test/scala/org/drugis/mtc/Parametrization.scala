@@ -282,4 +282,44 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 				(new InconsistencyParameter(List(a, c, d, a)), -1),
 				(new BasicParameter(a, c), 1)))
 	}
+
+	@Test def testParamForNonExistantCycle() {
+		val network = Network.noneFromXML(<network type="none">
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+				<treatment id="C"/>
+				<treatment id="D"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="D" />
+					<measurement treatment="B" />
+					<measurement treatment="C" />
+				</study>
+				<study id="3">
+					<measurement treatment="A" />
+					<measurement treatment="C" />
+				</study>
+				<study id="4">
+					<measurement treatment="A" />
+					<measurement treatment="D" />
+				</study>
+			</studies>
+		</network>)
+
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a))
+		val param3 = new Parametrization(network, basis3)
+
+		param3(a, b) should be (
+			Map((new BasicParameter(a, d), 1),
+				(new BasicParameter(d, b), 1)))
+	}
 }
