@@ -53,6 +53,9 @@ class Network[M <: Measurement](
 		graph
 	}
 
+	if (!isConnected) throw new IllegalArgumentException(
+			"Network has to be connected.")
+
 	private def invert(e: (Treatment, Treatment)) = (e._2, e._1)
 
 	def supportingStudies(edge: (Treatment, Treatment)): Set[Study[M]] = {
@@ -105,6 +108,37 @@ class Network[M <: Measurement](
 
 	private def completeBaselineAssignment = 
 		(new DFS()).search(BaselineSearchProblem(this))
+
+	private def isConnected: Boolean = {
+		val g = treatmentGraph
+		if (g.vertexSet.size < treatments.size) false
+		else if (g.edgeSet.size < g.vertexSet.size - 1) false
+		else if (treatments.size == 0) true
+		else connectedNessCheck
+	}
+
+	private def verticesFrom(v: Treatment) =
+		treatmentGraph.edgesFrom(v).map(e => e._2).toList
+
+	private def connectedNessCheck: Boolean = {
+		val v = treatmentGraph.vertexSet.toList(0)
+		val expanded = Set(v)
+		val fringe = verticesFrom(v)
+		connectedNessCheck(fringe, expanded)
+	}
+
+	private def connectedNessCheck(
+		fringe: List[Treatment], expanded: Set[Treatment])
+	: Boolean = {
+		if (expanded == treatmentGraph.vertexSet) true
+		else fringe match {
+			case Nil => false
+			case v :: f0 =>
+				if (expanded contains v) connectedNessCheck(f0, expanded)
+				else connectedNessCheck(f0 ::: verticesFrom(v), expanded + v)
+		}
+	}
+
 
 	def searchSpanningTree(top: Treatment, l: SpanningTreeSearchListener)
 	: Tree[Treatment] = {

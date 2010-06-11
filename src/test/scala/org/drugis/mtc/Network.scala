@@ -332,4 +332,52 @@ class NetworkTest extends ShouldMatchersForJUnit {
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, d), (d, c), (d, b)), a)) should be (2)
 	}
+
+	@Test
+	def testDisconnectedShouldThrowException() {
+		val xml1 =
+			<network type="none">
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+					<treatment id="C"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A" />
+						<measurement treatment="B" />
+					</study>
+				</studies>
+			</network>
+		evaluating {
+			Network.noneFromXML(xml1)
+		} should produce [IllegalArgumentException]
+
+		val xml2 =
+			<network type="none">
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+					<treatment id="C"/>
+					<treatment id="D"/>
+					<treatment id="E"/>
+					<treatment id="F"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A" />
+						<measurement treatment="B" />
+						<measurement treatment="C" />
+					</study>
+					<study id="2">
+						<measurement treatment="D" />
+						<measurement treatment="E" />
+						<measurement treatment="F" />
+					</study>
+				</studies>
+			</network>
+		evaluating {
+			Network.noneFromXML(xml2)
+		} should produce [IllegalArgumentException]
+	}
 }
