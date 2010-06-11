@@ -66,7 +66,8 @@ To run an inconsistency model, replace --consistency with
 Versions
 --------
 
-0.4: Improved parametrization algorithm.
+0.4: Improved parametrization algorithm. Allow output of Network as XML.
+Check connectedness of network. Some issues fixed.
 
 0.2: Initial release. JAGS and Yadas model generation. Java API for
 running MTC models.
