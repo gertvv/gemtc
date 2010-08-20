@@ -20,8 +20,10 @@
 package org.drugis.mtc
 
 import ProgressEvent.EventType._
+import org.drugis.common.threading._
 
-trait ProgressObservable extends MixedTreatmentComparison {
+trait ProgressObservable extends AbstractSuspendable
+with MixedTreatmentComparison {
 	private var listeners = List[ProgressListener]()
 	def addProgressListener(l: ProgressListener) {
 		listeners += l

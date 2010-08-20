@@ -19,7 +19,9 @@
 
 package org.drugis.mtc;
 
-public interface MCMCModel extends Runnable {
+import org.drugis.common.threading.Suspendable;
+
+public interface MCMCModel extends Suspendable {
 	/**
 	 * Add a progress listener to this Model.
 	 */

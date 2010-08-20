@@ -93,7 +93,9 @@ extends ProgressObservable {
 	def run() {
 		// construct model
 		notifyModelConstructionStarted()
+		waitIfSuspended()
 		buildModel()
+		waitIfSuspended()
 		notifyModelConstructionFinished()
 
 		// burn-in iterations
@@ -463,8 +465,10 @@ extends ProgressObservable {
 
 	private def burnIn() {
 		for (i <- 0 until burnInIter) {
-			if (i % reportingInterval == 0 && i / reportingInterval > 0)
+			if (i % reportingInterval == 0 && i / reportingInterval > 0) {
 				notifyBurnInProgress(i);
+				waitIfSuspended()
+			}
 
 			update()
 		}
@@ -472,8 +476,10 @@ extends ProgressObservable {
 
 	private def simulate() {
 		for (i <- 0 until simulationIter) {
-			if (i % reportingInterval == 0 && i / reportingInterval > 0)
+			if (i % reportingInterval == 0 && i / reportingInterval > 0) {
 				notifySimulationProgress(i);
+				waitIfSuspended()
+			}
 
 			update()
 			output()
