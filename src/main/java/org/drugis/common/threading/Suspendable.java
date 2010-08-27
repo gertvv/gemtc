@@ -5,5 +5,6 @@ public interface Suspendable extends Runnable{
 	public boolean isThreadSuspended();
 	public void suspend();
 	public void wakeUp();
+	public void terminate();
 	
 }
