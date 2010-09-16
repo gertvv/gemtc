@@ -26,7 +26,7 @@ abstract class Parametrization[M <: Measurement](
 	val cycles: Set[Cycle[Treatment]] = 
 		basis.cycles.map(c => Cycle(c))
 
-	def basicParameters: List[BasicParameter] =
+	def basicParameters: List[NetworkModelParameter] =
 		sort(basis.treeEdges).map(e => new BasicParameter(e._1, e._2))
 
 	private def sort(edges: Set[(Treatment, Treatment)])
@@ -215,4 +215,19 @@ class NodeSplitParametrization[M <: Measurement](
 		val splitNode: (Treatment, Treatment)
 ) extends Parametrization[M](network, basis) {
 	require(basis.tree.edgeSet.contains(splitNode))
+
+	override def basicParameters: List[NetworkModelParameter] = {
+		val basic = super.basicParameters
+		val toRemove = new BasicParameter(splitNode._1, splitNode._2)
+		val split = basic.splitAt(basic.findIndexOf(x => x == toRemove))
+		split._1 ::: List[NetworkModelParameter](new SplitParameter(splitNode._1, splitNode._2, true), new SplitParameter(splitNode._1, splitNode._2, false)) ::: (split._2 - toRemove)
+	}
+
+	override def basicParam(a: Treatment, b: Treatment, direct: Boolean)
+	: Map[NetworkModelParameter, Int] = {
+		if (splitNode == (a, b))
+			Map[NetworkModelParameter, Int](
+				(new SplitParameter(a, b, direct), 1))
+		else super.basicParam(a, b, direct)
+	}
 }

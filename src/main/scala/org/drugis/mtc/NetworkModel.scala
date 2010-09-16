@@ -25,9 +25,9 @@ trait NetworkModelParameter {
 
 }
 
-final class BasicParameter(val base: Treatment, val subject: Treatment)
+class BasicParameter(val base: Treatment, val subject: Treatment)
 extends NetworkModelParameter {
-	override def toString() = "d." + base.id + "." + subject.id
+	override def toString = "d." + base.id + "." + subject.id
 
 	override def equals(other: Any): Boolean = other match {
 		case p: BasicParameter => (p.base == base && p.subject == subject)
@@ -35,6 +35,24 @@ extends NetworkModelParameter {
 	}
 
 	override def hashCode: Int = 31 * base.hashCode + subject.hashCode
+}
+
+class SplitParameter(
+	val base: Treatment,
+	val subject: Treatment,
+	val direct: Boolean)
+extends NetworkModelParameter {
+	override def toString =  "d." + base.id + "." + subject.id +
+		{ if (direct) ".Dir" else ".Ind" }
+
+	override def equals(other: Any): Boolean = other match {
+		case p: SplitParameter =>
+			(p.base == base && p.subject == subject && p.direct == direct)
+		case _ => false
+	}
+
+	override def hashCode: Int =
+		31 * (31 * base.hashCode + subject.hashCode) + direct.hashCode
 }
 
 final class InconsistencyParameter(val cycle: List[Treatment])
@@ -107,7 +125,7 @@ class NetworkModel[M <: Measurement](
 	/**
 	 * Gives the list of Basic parameters
 	 */
-	val basicParameters: List[BasicParameter] =
+	val basicParameters: List[NetworkModelParameter] =
 		parametrization.basicParameters
 
 	/**

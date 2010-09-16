@@ -534,10 +534,11 @@ class NodeSplitParametrizationTest extends ShouldMatchersForJUnit {
 	val tc = new Treatment("C")
 	val td = new Treatment("D")
 
+	val basis1 = new FundamentalGraphBasis(network.treatmentGraph,
+		new Tree[Treatment](Set[(Treatment, Treatment)](
+			(ta, tb), (ta, tc), (ta, td)), ta))
+
 	@Test def testSplitNodeRequiredToBeInTree() {
-		val basis1 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(ta, tb), (ta, tc), (ta, td)), ta))
 
 		evaluating {
 			new NodeSplitParametrization(network, basis1, (tb, td))
@@ -559,21 +560,77 @@ class NodeSplitParametrizationTest extends ShouldMatchersForJUnit {
 		new NodeSplitParametrization(network, basis1, (ta, tc))
 		new NodeSplitParametrization(network, basis1, (ta, td))
 	}
-/*
-	@Test def testBasicParameters() {
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-		val d = new Treatment("D")
 
-		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(a, b), (b, d), (b, c)), a))
-		new ConsistencyParametrization(network, basis2).basicParameters should be (
+	@Test def testBasicParameters() {
+		val paramb = new NodeSplitParametrization(network, basis1, (ta, tb))
+
+		paramb.basicParameters should be (
 			List[NetworkModelParameter](
-				new BasicParameter(a, b),
-				new BasicParameter(b, c),
-				new BasicParameter(b, d))
+				new SplitParameter(ta, tb, true),
+				new SplitParameter(ta, tb, false),
+				new BasicParameter(ta, tc),
+				new BasicParameter(ta, td))
 		)
-*/
+
+		val paramc = new NodeSplitParametrization(network, basis1, (ta, tc))
+
+		paramc.basicParameters should be (
+			List[NetworkModelParameter](
+				new BasicParameter(ta, tb),
+				new SplitParameter(ta, tc, true),
+				new SplitParameter(ta, tc, false),
+				new BasicParameter(ta, td))
+		)
+	}
+
+	val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+		new Tree[Treatment](Set[(Treatment, Treatment)](
+			(ta, tb), (tb, td), (tb, tc)), ta))
+
+	@Test def testParameterizationBasic() {
+		val param = new NodeSplitParametrization(network, basis2, (ta, tb))
+
+		param(tb, td) should be (
+			Map((new BasicParameter(tb, td), 1)))
+		param(td, tb) should be (
+			Map((new BasicParameter(tb, td), -1)))
+		param(ta, tb) should be (
+			Map((new SplitParameter(ta, tb, true), 1)))
+		param(tb, ta) should be (
+			Map((new SplitParameter(ta, tb, true), -1)))
+	}
+
+	@Test def testParameterizationFunctional() {
+		val param2 = new NodeSplitParametrization(network, basis2, (ta, tb))
+
+		param2(tc, td) should be (
+			Map((new BasicParameter(tb, td), 1),
+				(new BasicParameter(tb, tc), -1)))
+
+		param2(ta, td) should be (
+			Map((new BasicParameter(tb, td), 1),
+				(new SplitParameter(ta, tb, false), 1)))
+
+		param2(ta, tc) should be (
+			Map((new SplitParameter(ta, tb, false), 1),
+				(new BasicParameter(tb, tc), 1)))
+
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(ta, tc), (ta, td), (td, tb)), ta))
+		val param3 = new NodeSplitParametrization(network, basis3, (td, tb))
+
+		param3(ta, tb) should be (
+			Map((new BasicParameter(ta, td), 1),
+				(new SplitParameter(td, tb, false), 1)))
+
+		param3(tc, td) should be (
+			Map((new BasicParameter(ta, tc), -1),
+				(new BasicParameter(ta, td), 1)))
+
+		param3(tb, tc) should be (
+			Map((new BasicParameter(ta, td), -1),
+				(new SplitParameter(td, tb, false), -1), 
+				(new BasicParameter(ta, tc), 1)))
+	}
 }
