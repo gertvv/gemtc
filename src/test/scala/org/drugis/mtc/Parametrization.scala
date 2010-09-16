@@ -499,3 +499,81 @@ class InconsistencyParametrizationTest extends ShouldMatchersForJUnit {
 				(new BasicParameter(d, b), 1)))
 	}
 }
+
+class NodeSplitParametrizationTest extends ShouldMatchersForJUnit {
+	val network = Network.noneFromXML(<network type="none">
+		<treatments>
+			<treatment id="A"/>
+			<treatment id="B"/>
+			<treatment id="C"/>
+			<treatment id="D"/>
+		</treatments>
+		<studies>
+			<study id="1">
+				<measurement treatment="D" />
+				<measurement treatment="B" />
+				<measurement treatment="C" />
+			</study>
+			<study id="2">
+				<measurement treatment="A" />
+				<measurement treatment="B" />
+			</study>
+			<study id="3">
+				<measurement treatment="A" />
+				<measurement treatment="C" />
+			</study>
+			<study id="4">
+				<measurement treatment="A" />
+				<measurement treatment="D" />
+			</study>
+		</studies>
+	</network>)
+
+	val ta = new Treatment("A")
+	val tb = new Treatment("B")
+	val tc = new Treatment("C")
+	val td = new Treatment("D")
+
+	@Test def testSplitNodeRequiredToBeInTree() {
+		val basis1 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(ta, tb), (ta, tc), (ta, td)), ta))
+
+		evaluating {
+			new NodeSplitParametrization(network, basis1, (tb, td))
+		} should produce [IllegalArgumentException]
+
+		evaluating {
+			new NodeSplitParametrization(network, basis1, (tb, tc))
+		} should produce [IllegalArgumentException]
+
+		evaluating {
+			new NodeSplitParametrization(network, basis1, (tc, td))
+		} should produce [IllegalArgumentException]
+
+		evaluating {
+			new NodeSplitParametrization(network, basis1, (tb, ta))
+		} should produce [IllegalArgumentException]
+
+		new NodeSplitParametrization(network, basis1, (ta, tb))
+		new NodeSplitParametrization(network, basis1, (ta, tc))
+		new NodeSplitParametrization(network, basis1, (ta, td))
+	}
+/*
+	@Test def testBasicParameters() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		new ConsistencyParametrization(network, basis2).basicParameters should be (
+			List[NetworkModelParameter](
+				new BasicParameter(a, b),
+				new BasicParameter(b, c),
+				new BasicParameter(b, d))
+		)
+*/
+}

@@ -208,3 +208,11 @@ class InconsistencyParametrization[M <: Measurement] (
 	}
 
 }
+
+class NodeSplitParametrization[M <: Measurement](
+		network: Network[M],
+		basis: FundamentalGraphBasis[Treatment],
+		val splitNode: (Treatment, Treatment)
+) extends Parametrization[M](network, basis) {
+	require(basis.tree.edgeSet.contains(splitNode))
+}

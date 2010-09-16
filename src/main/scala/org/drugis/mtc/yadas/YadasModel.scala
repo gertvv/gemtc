@@ -299,7 +299,7 @@ extends ProgressObservable {
 					Array[ArgumentMaker](
 						new IdentityArgument(0),
 						new ConstantArgument(0, 1),
-						new ConstantArgument(Math.sqrt(1000), 1),
+						new ConstantArgument(Math.sqrt(1000), 1)
 					),
 					new Gaussian()
 				)
@@ -311,7 +311,7 @@ extends ProgressObservable {
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
 					new ConstantArgument(0, proto.basicParameters.size),
-					new ConstantArgument(Math.sqrt(1000), proto.basicParameters.size),
+					new ConstantArgument(Math.sqrt(1000), proto.basicParameters.size)
 				),
 				new Gaussian()
 			)
@@ -465,7 +465,7 @@ extends ProgressObservable {
 					Array[ArgumentMaker](
 						m,
 						new ThetaArgumentMaker(model, 0, 1, study),
-						s,
+						s
 					),
 					new Gaussian()
 				)
