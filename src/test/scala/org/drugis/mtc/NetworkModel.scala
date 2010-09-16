@@ -60,7 +60,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 		Set((ta, tc), (ta, tb), (tb, td)), ta)
 
 	@Test def testAssignBaselines() {
-		val pmtz = new Parametrization(network,
+		val pmtz = new InconsistencyParametrization(network,
 			new FundamentalGraphBasis(network.treatmentGraph, spanningTree))
 		val baselines = NetworkModel.assignBaselines(pmtz)
 		baselines(studies(0)) should be (tb)
@@ -260,7 +260,7 @@ class AdditionalBaselineAssignmentTest extends ShouldMatchersForJUnit {
 
 	// Too strict problem defn. would chocke on this
 	@Test def testAssignBaselines() {
-		val pmtz = new Parametrization(network,
+		val pmtz = new InconsistencyParametrization(network,
 			new FundamentalGraphBasis(network.treatmentGraph, spanningTree))
 		val baselines = NetworkModel.assignBaselines(pmtz)
 		baselines should not be (null)

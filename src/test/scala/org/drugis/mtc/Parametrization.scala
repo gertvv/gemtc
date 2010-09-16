@@ -23,7 +23,7 @@ import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._
 import org.junit.Test
 
-class ParametrizationTest extends ShouldMatchersForJUnit {
+class InconsistencyParametrizationTest extends ShouldMatchersForJUnit {
 	@Test def testCycleClass() {
 		val network = Network.noneFromXML(
 			<network type="none">
@@ -58,7 +58,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 
 		val basis = new FundamentalGraphBasis(network.treatmentGraph, st)
 
-		val p = new Parametrization(network, basis)
+		val p = new InconsistencyParametrization(network, basis)
 
 		val cycle = Cycle(List(a, b, c, a))
 
@@ -114,7 +114,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (b, d), (b, c)), a))
-		new Parametrization(network, basis2).cycleClass(cycle) should be (None)
+		new InconsistencyParametrization(network, basis2).cycleClass(cycle) should be (None)
 	}
 
 	@Test def testNegativeSignClass() {
@@ -129,7 +129,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, c), (a, d), (d, b)), a))
-		val param = new Parametrization(network, basis3)
+		val param = new InconsistencyParametrization(network, basis3)
 
 		val partition = new Partition(Set(
 				new Part(a, c, Set(network.study("3"))),
@@ -151,25 +151,25 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis1 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (a, c), (a, d)), a))
-		new Parametrization(network, basis1).inconsistencyDegree should be (3)
+		new InconsistencyParametrization(network, basis1).inconsistencyDegree should be (3)
 
 		// BCDB has support from only two studies
 		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (b, d), (b, c)), a))
-		new Parametrization(network, basis2).inconsistencyDegree should be (2)
+		new InconsistencyParametrization(network, basis2).inconsistencyDegree should be (2)
 
 		// ACBDA reduces to ACDA
 		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, c), (a, d), (d, b)), a))
-		new Parametrization(network, basis3).inconsistencyDegree should be (2)
+		new InconsistencyParametrization(network, basis3).inconsistencyDegree should be (2)
 
 		// DBCD has support from only one study
 		val basis4 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, d), (d, c), (d, b)), a))
-		new Parametrization(network, basis4).inconsistencyDegree should be (2)
+		new InconsistencyParametrization(network, basis4).inconsistencyDegree should be (2)
 	}
 
 	@Test def testBasicParameters() {
@@ -181,7 +181,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (b, d), (b, c)), a))
-		new Parametrization(network, basis2).basicParameters should be (
+		new InconsistencyParametrization(network, basis2).basicParameters should be (
 			List[NetworkModelParameter](
 				new BasicParameter(a, b),
 				new BasicParameter(b, c),
@@ -191,7 +191,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, c), (a, d), (d, b)), a))
-		new Parametrization(network, basis3).basicParameters should be (
+		new InconsistencyParametrization(network, basis3).basicParameters should be (
 			List[NetworkModelParameter](
 				new BasicParameter(a, c),
 				new BasicParameter(a, d),
@@ -209,7 +209,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis1 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (a, c), (a, d)), a))
-		new Parametrization(network, basis1).inconsistencyParameters should be (
+		new InconsistencyParametrization(network, basis1).inconsistencyParameters should be (
 			List[NetworkModelParameter](
 				new InconsistencyParameter(List(a, b, c, a)),
 				new InconsistencyParameter(List(a, b, d, a)),
@@ -220,7 +220,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (b, d), (b, c)), a))
-		new Parametrization(network, basis2).inconsistencyParameters should be (
+		new InconsistencyParametrization(network, basis2).inconsistencyParameters should be (
 			List[NetworkModelParameter](
 				new InconsistencyParameter(List(a, b, c, a)),
 				new InconsistencyParameter(List(a, b, d, a)))
@@ -230,7 +230,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, c), (a, d), (d, b)), a))
-		new Parametrization(network, basis3).inconsistencyParameters should be (
+		new InconsistencyParametrization(network, basis3).inconsistencyParameters should be (
 			List[NetworkModelParameter](
 				new InconsistencyParameter(List(a, b, d, a)),
 				new InconsistencyParameter(List(a, c, d, a)))
@@ -246,7 +246,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (b, d), (b, c)), a))
-		val param = new Parametrization(network, basis2)
+		val param = new InconsistencyParametrization(network, basis2)
 
 		param(a, b) should be (
 			Map((new BasicParameter(a, b), 1)))
@@ -263,7 +263,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, b), (b, d), (b, c)), a))
-		val param2 = new Parametrization(network, basis2)
+		val param2 = new InconsistencyParametrization(network, basis2)
 
 		param2(c, d) should be (
 			Map((new BasicParameter(b, d), 1),
@@ -283,7 +283,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, c), (a, d), (d, b)), a))
-		val param3 = new Parametrization(network, basis3)
+		val param3 = new InconsistencyParametrization(network, basis3)
 
 		param3(a, b) should be (
 			Map((new BasicParameter(a, d), 1),
@@ -335,7 +335,7 @@ class ParametrizationTest extends ShouldMatchersForJUnit {
 		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
 			new Tree[Treatment](Set[(Treatment, Treatment)](
 				(a, c), (a, d), (d, b)), a))
-		val param3 = new Parametrization(network, basis3)
+		val param3 = new InconsistencyParametrization(network, basis3)
 
 		param3(a, b) should be (
 			Map((new BasicParameter(a, d), 1),

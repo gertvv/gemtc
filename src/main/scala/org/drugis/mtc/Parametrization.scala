@@ -19,13 +19,78 @@
 
 package org.drugis.mtc
 
-class Parametrization[M <: Measurement](
+abstract class Parametrization[M <: Measurement](
 		val network: Network[M],
 		val basis: FundamentalGraphBasis[Treatment]
 ) {
 	val cycles: Set[Cycle[Treatment]] = 
 		basis.cycles.map(c => Cycle(c))
 
+	def basicParameters: List[BasicParameter] =
+		sort(basis.treeEdges).map(e => new BasicParameter(e._1, e._2))
+
+	private def sort(edges: Set[(Treatment, Treatment)])
+	: List[(Treatment, Treatment)] =
+		edges.toList.sort(
+			(a, b) => if (a._1 == b._1) a._2 < b._2 else a._1 < b._1)
+
+	/**
+	 * Parametrization of d.t1.t2 (effect of t2 relative to t1).
+	 */
+	def apply(t1: Treatment, t2: Treatment): Map[NetworkModelParameter, Int] =
+		param(t1, t2, true)
+
+	protected def param(a: Treatment, b: Treatment, direct: Boolean)
+	: Map[NetworkModelParameter, Int] = {
+		if (basis.treeEdges contains (a, b))
+			basicParam(a, b, direct)
+		else if (basis.treeEdges contains (b, a))
+			negate(basicParam(b, a, direct))
+		else
+			functionalParam(a, b)
+	}
+
+	protected def basicParam(a: Treatment, b: Treatment, direct: Boolean) =
+		Map[NetworkModelParameter, Int]((new BasicParameter(a, b), 1))
+	
+	protected def functionalParam(a: Treatment, b: Treatment)
+	: Map[NetworkModelParameter, Int] = {
+		val r = basis.tree.commonAncestor(a, b)
+		add(negate(pathParam(basis.tree.path(r, a))),
+			pathParam(basis.tree.path(r, b)))
+	}
+
+	private def pathParam(path: List[Treatment])
+	: Map[NetworkModelParameter, Int] = {
+		if (path.size < 2) emptyParam()
+		else add(param(path(0), path(1), false), pathParam(path.tail))
+	}
+
+	protected def negate(p: Map[NetworkModelParameter, Int]) =
+		p.transform((a, b) => -b)
+
+	protected def add(p: Map[NetworkModelParameter, Int],
+			q: Map[NetworkModelParameter, Int])
+	: Map[NetworkModelParameter, Int] = {
+		emptyParam() ++
+		(for {x <- (p.keySet ++ q.keySet)
+		} yield (x, getOrZero(p, x) + getOrZero(q, x)))
+	}
+
+	protected def emptyParam() = Map[NetworkModelParameter, Int]()
+
+	protected def getOrZero(p: Map[NetworkModelParameter, Int],
+			x: NetworkModelParameter): Int =
+	p.get(x) match {
+		case None => 0
+		case Some(d) => d
+	}
+}
+
+class InconsistencyParametrization[M <: Measurement] (
+		network: Network[M],
+		basis: FundamentalGraphBasis[Treatment]
+) extends Parametrization[M](network, basis) {
 	val cycleClass: Map[Cycle[Treatment], Option[(Partition[M], Int)]] = 
 		Map[Cycle[Treatment], Option[(Partition[M], Int)]]() ++
 			cycles.map(c => classEntry(c))
@@ -38,18 +103,9 @@ class Parametrization[M <: Measurement](
 
 	def inconsistencyDegree: Int = inconsistencyClasses.size
 
-	def basicParameters: List[BasicParameter] =
-		sort(basis.treeEdges).map(e => new BasicParameter(e._1, e._2))
-
 	def inconsistencyParameters: List[InconsistencyParameter] = 
 		cycleSort(inconsistencyClasses.map(asCycle _)).map(c =>
 			new InconsistencyParameter(c.vertexSeq))
-
-	/**
-	 * Parametrization of d.t1.t2 (effect of t2 relative to t1).
-	 */
-	def apply(t1: Treatment, t2: Treatment): Map[NetworkModelParameter, Int] =
-		param(t1, t2)
 
 	private def classEntry(cycle: Cycle[Treatment])
 	: (Cycle[Treatment], Option[(Partition[M], Int)]) = {
@@ -80,6 +136,7 @@ class Parametrization[M <: Measurement](
 		case Nil => throw new IllegalStateException()
 	}
 
+
 	private def mapInconsistencyCycles(l: List[Cycle[Treatment]])
 	: Map[Partition[M], Set[Cycle[Treatment]]] = l match {
 		case c :: l0 => addClassOf(c, mapInconsistencyCycles(l0))
@@ -98,11 +155,6 @@ class Parametrization[M <: Measurement](
 			m + ((p, set + c)) // add the new set
 		}
 	}
-
-	private def sort(edges: Set[(Treatment, Treatment)])
-	: List[(Treatment, Treatment)] =
-		edges.toList.sort(
-			(a, b) => if (a._1 == b._1) a._2 < b._2 else a._1 < b._1)
 
 	private def cycleSort(cycles: Set[Cycle[Treatment]])
 	: List[Cycle[Treatment]] =
@@ -124,19 +176,9 @@ class Parametrization[M <: Measurement](
 		}
 	}
 
-	private def param(a: Treatment, b: Treatment)
+	override protected def functionalParam(a: Treatment, b: Treatment)
 	: Map[NetworkModelParameter, Int] = {
-		if (basis.treeEdges contains (a, b)) basicParam(a, b)
-		else if (basis.treeEdges contains (b, a)) negate(basicParam(b, a))
-		else functionalParam(a, b)
-	}
-
-	private def functionalParam(a: Treatment, b: Treatment)
-	: Map[NetworkModelParameter, Int] = {
-		val r = basis.tree.commonAncestor(a, b)
-		add(add(negate(pathParam(basis.tree.path(r, a))),
-			pathParam(basis.tree.path(r, b))),
-			inconsParam(a, b))
+		add(super.functionalParam(a, b), inconsParam(a, b))
 	}
 
 	private def inconsParam(a: Treatment, b: Treatment)
@@ -157,35 +199,6 @@ class Parametrization[M <: Measurement](
 			case Some(cls) => Map[NetworkModelParameter, Int](
 				(new InconsistencyParameter(asCycle(cls._1).vertexSeq), cls._2))
 		}
-	}
-
-	private def pathParam(path: List[Treatment])
-	: Map[NetworkModelParameter, Int] = {
-		if (path.size < 2) emptyParam()
-		else add(param(path(0), path(1)), pathParam(path.tail))
-	}
-
-	private def basicParam(a: Treatment, b: Treatment) =
-		Map[NetworkModelParameter, Int]((new BasicParameter(a, b), 1))
-
-	private def negate(p: Map[NetworkModelParameter, Int]) =
-		p.transform((a, b) => -b)
-
-	private def add(p: Map[NetworkModelParameter, Int],
-			q: Map[NetworkModelParameter, Int])
-	: Map[NetworkModelParameter, Int] = {
-		emptyParam() ++
-		(for {x <- (p.keySet ++ q.keySet)
-		} yield (x, getOrZero(p, x) + getOrZero(q, x)))
-	}
-
-	private def emptyParam() = Map[NetworkModelParameter, Int]()
-
-	private def getOrZero(p: Map[NetworkModelParameter, Int],
-			x: NetworkModelParameter): Int =
-	p.get(x) match {
-		case None => 0
-		case Some(d) => d
 	}
 
 }

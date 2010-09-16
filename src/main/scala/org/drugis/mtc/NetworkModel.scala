@@ -68,7 +68,7 @@ extends NetworkModelParameter {
  * Class representing a Bayes model for a treatment network
  */
 class NetworkModel[M <: Measurement](
-	val parametrization: Parametrization[M],
+	val parametrization: InconsistencyParametrization[M],
 	val studyBaseline: Map[Study[M], Treatment],
 	val treatmentList: List[Treatment],
 	val studyList: List[Study[M]]) {
@@ -87,7 +87,7 @@ class NetworkModel[M <: Measurement](
 			studyBaseline: Map[Study[M], Treatment],
 			treatmentList: List[Treatment],
 			studyList: List[Study[M]]) {
-		this(new Parametrization(network, basis), studyBaseline,
+		this(new InconsistencyParametrization(network, basis), studyBaseline,
 			treatmentList, studyList)
 	}
 
@@ -179,7 +179,7 @@ class NetworkModel[M <: Measurement](
 object NetworkModel {
 	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment])
 	: NetworkModel[M] = {
-		val pmtz = new Parametrization(network,
+		val pmtz = new InconsistencyParametrization(network,
 			new FundamentalGraphBasis(network.treatmentGraph, tree))
 		new NetworkModel[M](pmtz,
 			assignBaselines(pmtz),
@@ -196,7 +196,7 @@ object NetworkModel {
 		apply(network, treatmentList(network.treatments).first)
 	}
 
-	def assignBaselines[M <: Measurement](pmtz: Parametrization[M])
+	def assignBaselines[M <: Measurement](pmtz: InconsistencyParametrization[M])
 	: Map[Study[M], Treatment] = {
 		val alg = new DFS()
 		alg.search(BaselineSearchProblem(pmtz)) match {

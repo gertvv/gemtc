@@ -73,7 +73,7 @@ class EnumerateTestImpl(xmlFile: String) {
 		var count = 0
 		for (tree <- treeIterable) {
 			count = count + 1
-			val pmtz = new Parametrization(network,
+			val pmtz = new InconsistencyParametrization(network,
 				new FundamentalGraphBasis(network.treatmentGraph, tree))
 			val bsp = BaselineSearchProblem(pmtz)
 			val sol = 

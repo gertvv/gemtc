@@ -23,14 +23,15 @@ object BaselineSearchProblem {
 	def apply[M <: Measurement](network: Network[M]) =
 		new BaselineSearchProblem(network, completeConstraint(network)_)
 
-	def apply[M <: Measurement](pmtz: Parametrization[M]) =
+	def apply[M <: Measurement](pmtz: InconsistencyParametrization[M]) =
 		new BaselineSearchProblem(pmtz.network, constraint(pmtz)_)
 
 	private def completeConstraint[M <: Measurement](network: Network[M])(
 		edges: Set[(Treatment, Treatment)])
 	: Boolean = network.treatmentGraph.edgeSet == edges
 
-	private def constraint[M <: Measurement](pmtz: Parametrization[M])(
+	private def constraint[M <: Measurement](
+		pmtz: InconsistencyParametrization[M])(
 		edges: Set[(Treatment, Treatment)])
 	: Boolean = {
 		pmtz.cycles.forall(cycle => cycleConstraint(cycle, edges)) &&
