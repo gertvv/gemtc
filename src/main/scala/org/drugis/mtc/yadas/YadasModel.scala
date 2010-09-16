@@ -94,33 +94,21 @@ extends ProgressObservable {
 		// construct model
 		notifyModelConstructionStarted()
 		waitIfSuspended()
-		if (isTerminated()) {
-				return;
-		}
 		
 		buildModel()
 		waitIfSuspended()
-		if (isTerminated()) {
-				return;
-		}
 		
 		notifyModelConstructionFinished()
 
 		// burn-in iterations
 		notifyBurnInStarted()
 		burnIn()
-		if (isTerminated()) {
-				return;
-		}
 		notifyBurnInFinished()
 		
 
 		// simulation iterations
 		notifySimulationStarted()
 		simulate()
-		if (isTerminated()) {
-				return;
-		}
 
 		// calculate results
 		ready = true
@@ -484,9 +472,6 @@ extends ProgressObservable {
 				notifyBurnInProgress(i);
 				waitIfSuspended()
 			}
-			if (isTerminated()) {
-				return;
-			}
 
 			update()
 		}
@@ -497,9 +482,6 @@ extends ProgressObservable {
 			if (i % reportingInterval == 0 && i / reportingInterval > 0) {
 				notifySimulationProgress(i);
 				waitIfSuspended()
-			}
-			if (isTerminated()) {
-				return;
 			}
 
 			update()
