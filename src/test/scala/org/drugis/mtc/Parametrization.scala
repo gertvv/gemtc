@@ -23,6 +23,163 @@ import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._
 import org.junit.Test
 
+class ConsistencyParametrizationTest extends ShouldMatchersForJUnit {
+	val network = Network.noneFromXML(<network type="none">
+		<treatments>
+			<treatment id="A"/>
+			<treatment id="B"/>
+			<treatment id="C"/>
+			<treatment id="D"/>
+		</treatments>
+		<studies>
+			<study id="1">
+				<measurement treatment="D" />
+				<measurement treatment="B" />
+				<measurement treatment="C" />
+			</study>
+			<study id="2">
+				<measurement treatment="A" />
+				<measurement treatment="B" />
+			</study>
+			<study id="3">
+				<measurement treatment="A" />
+				<measurement treatment="C" />
+			</study>
+			<study id="4">
+				<measurement treatment="A" />
+				<measurement treatment="D" />
+			</study>
+		</studies>
+	</network>)
+
+	@Test def testBasicParameters() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		new ConsistencyParametrization(network, basis2).basicParameters should be (
+			List[NetworkModelParameter](
+				new BasicParameter(a, b),
+				new BasicParameter(b, c),
+				new BasicParameter(b, d))
+		)
+
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a))
+		new ConsistencyParametrization(network, basis3).basicParameters should be (
+			List[NetworkModelParameter](
+				new BasicParameter(a, c),
+				new BasicParameter(a, d),
+				new BasicParameter(d, b))
+		)
+	}
+
+	@Test def testParameterizationBasic() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		val param = new ConsistencyParametrization(network, basis2)
+
+		param(a, b) should be (
+			Map((new BasicParameter(a, b), 1)))
+		param(b, a) should be (
+			Map((new BasicParameter(a, b), -1)))
+	}
+
+	@Test def testParameterizationFunctional() {
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, b), (b, d), (b, c)), a))
+		val param2 = new ConsistencyParametrization(network, basis2)
+
+		param2(c, d) should be (
+			Map((new BasicParameter(b, d), 1),
+				(new BasicParameter(b, c), -1)))
+
+		param2(a, d) should be (
+			Map((new BasicParameter(b, d), 1),
+				(new BasicParameter(a, b), 1)))
+
+		param2(a, c) should be (
+			Map((new BasicParameter(a, b), 1),
+				(new BasicParameter(b, c), 1)))
+
+		// ACBDA reduces to ACDA
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a))
+		val param3 = new ConsistencyParametrization(network, basis3)
+
+		param3(a, b) should be (
+			Map((new BasicParameter(a, d), 1),
+				(new BasicParameter(d, b), 1)))
+
+		param3(c, d) should be (
+			Map((new BasicParameter(a, c), -1),
+				(new BasicParameter(a, d), 1)))
+
+		param3(b, c) should be (
+			Map((new BasicParameter(a, d), -1),
+				(new BasicParameter(d, b), -1), 
+				(new BasicParameter(a, c), 1)))
+	}
+
+	@Test def testParamForNonExistantCycle() {
+		val network = Network.noneFromXML(<network type="none">
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+				<treatment id="C"/>
+				<treatment id="D"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="D" />
+					<measurement treatment="B" />
+					<measurement treatment="C" />
+				</study>
+				<study id="3">
+					<measurement treatment="A" />
+					<measurement treatment="C" />
+				</study>
+				<study id="4">
+					<measurement treatment="A" />
+					<measurement treatment="D" />
+				</study>
+			</studies>
+		</network>)
+
+		val a = new Treatment("A")
+		val b = new Treatment("B")
+		val c = new Treatment("C")
+		val d = new Treatment("D")
+
+		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
+			new Tree[Treatment](Set[(Treatment, Treatment)](
+				(a, c), (a, d), (d, b)), a))
+		val param3 = new ConsistencyParametrization(network, basis3)
+
+		param3(a, b) should be (
+			Map((new BasicParameter(a, d), 1),
+				(new BasicParameter(d, b), 1)))
+	}
+}
+
 class InconsistencyParametrizationTest extends ShouldMatchersForJUnit {
 	@Test def testCycleClass() {
 		val network = Network.noneFromXML(

@@ -87,6 +87,12 @@ abstract class Parametrization[M <: Measurement](
 	}
 }
 
+class ConsistencyParametrization[M <: Measurement](
+		network: Network[M],
+		basis: FundamentalGraphBasis[Treatment]
+) extends Parametrization[M](network, basis) {
+}
+
 class InconsistencyParametrization[M <: Measurement] (
 		network: Network[M],
 		basis: FundamentalGraphBasis[Treatment]
