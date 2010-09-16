@@ -26,6 +26,8 @@ import org.apache.commons.math.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.math.stat.descriptive.moment.Mean
 import org.apache.commons.math.linear.ArrayRealVector
 
+import org.drugis.common.threading.TerminatedException
+
 class EstimateImpl(val mean: Double, val sd: Double)
 extends Estimate {
 	def getMean = mean
@@ -91,29 +93,33 @@ extends ProgressObservable {
 	def isReady = ready
 
 	def run() {
-		// construct model
-		notifyModelConstructionStarted()
-		waitIfSuspended()
-		
-		buildModel()
-		waitIfSuspended()
-		
-		notifyModelConstructionFinished()
+		try {
+			// construct model
+			notifyModelConstructionStarted()
+			waitIfSuspended()
+			
+			buildModel()
+			waitIfSuspended()
+			
+			notifyModelConstructionFinished()
 
-		// burn-in iterations
-		notifyBurnInStarted()
-		burnIn()
-		notifyBurnInFinished()
-		
+			// burn-in iterations
+			notifyBurnInStarted()
+			burnIn()
+			notifyBurnInFinished()
+			
 
-		// simulation iterations
-		notifySimulationStarted()
-		simulate()
+			// simulation iterations
+			notifySimulationStarted()
+			simulate()
 
-		// calculate results
-		ready = true
+			// calculate results
+			ready = true
 
-		notifySimulationFinished()
+			notifySimulationFinished()
+		} catch {
+			case te: TerminatedException => 
+		}
 	}
 
 	def getRelativeEffect(base: Treatment, subj: Treatment): Estimate =
