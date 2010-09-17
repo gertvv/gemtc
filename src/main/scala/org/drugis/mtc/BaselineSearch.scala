@@ -26,9 +26,19 @@ object BaselineSearchProblem {
 	def apply[M <: Measurement](pmtz: InconsistencyParametrization[M]) =
 		new BaselineSearchProblem(pmtz.network, constraint(pmtz)_)
 
+	def apply[M <: Measurement](pmtz: ConsistencyParametrization[M]) =
+		new BaselineSearchProblem(pmtz.network, constraint(pmtz)_)
+
 	private def completeConstraint[M <: Measurement](network: Network[M])(
 		edges: Set[(Treatment, Treatment)])
 	: Boolean = network.treatmentGraph.edgeSet == edges
+
+	private def constraint[M <: Measurement](
+		pmtz: ConsistencyParametrization[M])(
+		edges: Set[(Treatment, Treatment)])
+	: Boolean = {
+		pmtz.cycles.forall(cycle => cycleConstraint(cycle, edges))
+	}
 
 	private def constraint[M <: Measurement](
 		pmtz: InconsistencyParametrization[M])(

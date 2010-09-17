@@ -185,7 +185,38 @@ class NetworkModel[M <: Measurement, P <: Parametrization[M]](
 	}
 }
 
-object NetworkModel {
+object ConsistencyNetworkModel extends NetworkModelUtil {
+	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment])
+	: NetworkModel[M, ConsistencyParametrization[M]] = {
+		val pmtz = new ConsistencyParametrization(network,
+			new FundamentalGraphBasis(network.treatmentGraph, tree))
+		new NetworkModel[M, ConsistencyParametrization[M]](pmtz,
+			assignBaselines(pmtz),
+			treatmentList(network.treatments),
+			studyList(network.studies))
+	}
+
+	def apply[M <: Measurement](network: Network[M], base: Treatment)
+	: NetworkModel[M, ConsistencyParametrization[M]] = {
+		apply(network, network.bestSpanningTree(base))
+	}
+
+	def apply[M <: Measurement](network: Network[M])
+	: NetworkModel[M, ConsistencyParametrization[M]] = {
+		apply(network, treatmentList(network.treatments).first)
+	}
+
+	def assignBaselines[M <: Measurement](pmtz: ConsistencyParametrization[M])
+	: Map[Study[M], Treatment] = {
+		val alg = new DFS()
+		alg.search(BaselineSearchProblem(pmtz)) match {
+			case None => throw new Exception("No Assignment Found!")
+			case Some(x) => x.assignment
+		}
+	}
+}
+
+object NetworkModel extends NetworkModelUtil {
 	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment])
 	: NetworkModel[M, InconsistencyParametrization[M]] = {
 		val pmtz = new InconsistencyParametrization(network,
@@ -214,7 +245,9 @@ object NetworkModel {
 			case Some(x) => x.assignment
 		}
 	}
+}
 
+trait NetworkModelUtil {
 	def studyList[M <: Measurement](studies: Set[Study[M]]) = {
 		studies.toList.sort((a, b) => a.id < b.id)
 	}

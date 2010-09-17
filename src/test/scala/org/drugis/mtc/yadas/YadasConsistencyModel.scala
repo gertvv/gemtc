@@ -26,7 +26,7 @@ import org.junit.Test
 import org.drugis.mtc._
 
 class YadasConsistencyModelTest extends ShouldMatchersForJUnit {
-	val model = new YadasConsistencyModel(NetworkModel(Network.dichFromXML(
+	val model = new YadasConsistencyModel(ConsistencyNetworkModel(Network.dichFromXML(
 		<network>
 			<treatments>
 				<treatment id="A"/>
@@ -67,7 +67,7 @@ class YadasConsistencyModelTest extends ShouldMatchersForJUnit {
 }
 
 class YadasConsistencyModelIT extends ConsistencyModelTestBase {
-	override def makeModel(nm: NetworkModel[DichotomousMeasurement, InconsistencyParametrization[DichotomousMeasurement]])
+	override def makeModel(nm: NetworkModel[DichotomousMeasurement, ConsistencyParametrization[DichotomousMeasurement]])
 	: ConsistencyModel = {
 		new YadasConsistencyModel(nm)
 	}
