@@ -85,8 +85,8 @@ extends NetworkModelParameter {
 /**
  * Class representing a Bayes model for a treatment network
  */
-class NetworkModel[M <: Measurement](
-	val parametrization: InconsistencyParametrization[M],
+class NetworkModel[M <: Measurement, P <: Parametrization[M]](
+	val parametrization: P,
 	val studyBaseline: Map[Study[M], Treatment],
 	val treatmentList: List[Treatment],
 	val studyList: List[Study[M]]) {
@@ -99,16 +99,6 @@ class NetworkModel[M <: Measurement](
 	require(studyBaseline.keySet == network.studies)
 	require(basis.tree.vertexSet == network.treatments)
 
-	def this(
-			network: Network[M],
-			basis: FundamentalGraphBasis[Treatment],
-			studyBaseline: Map[Study[M], Treatment],
-			treatmentList: List[Treatment],
-			studyList: List[Study[M]]) {
-		this(new InconsistencyParametrization(network, basis), studyBaseline,
-			treatmentList, studyList)
-	}
-
 	val studyMap = NetworkModel.indexMap(studyList)
 	val treatmentMap = NetworkModel.indexMap(treatmentList)
 
@@ -117,23 +107,24 @@ class NetworkModel[M <: Measurement](
 				t => (study, study.measurements(t))))
 
 	/**
-	 * Gives the list of Inconsistency parameters
+	 * Basic parameters
 	 */
-	val inconsistencyParameters: List[InconsistencyParameter] =
-		parametrization.inconsistencyParameters
+	val basicParameters = parametrization.basicParameters
 
 	/**
-	 * Gives the list of Basic parameters
+	 * Inconsistency parameters
 	 */
-	val basicParameters: List[NetworkModelParameter] =
-		parametrization.basicParameters
+	val inconsistencyParameters:List[InconsistencyParameter] =
+	parametrization match {
+		case ip: InconsistencyParametrization[M] => ip.inconsistencyParameters
+		case _ => List[InconsistencyParameter]()
+	}
 
 	/**
 	 * Full list of parameters
 	 */
 	val parameterVector: List[NetworkModelParameter] =
-		List[NetworkModelParameter]() ::: basicParameters :::
-			inconsistencyParameters
+		parametrization.parameterVector
 
 	/**
 	 * List of relative effects in order
@@ -196,21 +187,22 @@ class NetworkModel[M <: Measurement](
 
 object NetworkModel {
 	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment])
-	: NetworkModel[M] = {
+	: NetworkModel[M, InconsistencyParametrization[M]] = {
 		val pmtz = new InconsistencyParametrization(network,
 			new FundamentalGraphBasis(network.treatmentGraph, tree))
-		new NetworkModel[M](pmtz,
+		new NetworkModel[M, InconsistencyParametrization[M]](pmtz,
 			assignBaselines(pmtz),
 			treatmentList(network.treatments),
 			studyList(network.studies))
 	}
 
 	def apply[M <: Measurement](network: Network[M], base: Treatment)
-	: NetworkModel[M] = {
+	: NetworkModel[M, InconsistencyParametrization[M]] = {
 		apply(network, network.bestSpanningTree(base))
 	}
 
-	def apply[M <: Measurement](network: Network[M]): NetworkModel[M] = {
+	def apply[M <: Measurement](network: Network[M])
+	: NetworkModel[M, InconsistencyParametrization[M]] = {
 		apply(network, treatmentList(network.treatments).first)
 	}
 

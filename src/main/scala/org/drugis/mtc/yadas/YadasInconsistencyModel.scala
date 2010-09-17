@@ -27,9 +27,16 @@ import org.apache.commons.math.stat.descriptive.moment.Mean
 import org.apache.commons.math.linear.ArrayRealVector
 
 class YadasInconsistencyModel[M <: Measurement](network: Network[M])
-extends YadasModel(network, true) with InconsistencyModel {
-	def this(model: NetworkModel[M]) {
+extends YadasModel[M, InconsistencyParametrization[M]](network, true)
+with InconsistencyModel {
+	def this(model: NetworkModel[M, InconsistencyParametrization[M]]) {
 		this(model.network)
 		proto = model
+	}
+
+	override protected def buildNetworkModel() {
+		if (proto == null) {
+			proto = NetworkModel(network)
+		}
 	}
 }

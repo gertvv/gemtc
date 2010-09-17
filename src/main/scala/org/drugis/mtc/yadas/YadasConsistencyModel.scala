@@ -23,10 +23,17 @@ import org.drugis.mtc._
 import gov.lanl.yadas._
 
 class YadasConsistencyModel[M <: Measurement](network: Network[M])
-extends YadasModel(network, false) with ConsistencyModel {
-	def this(model: NetworkModel[M]) {
+extends YadasModel[M, InconsistencyParametrization[M]](network, false)
+with ConsistencyModel {
+	def this(model: NetworkModel[M, InconsistencyParametrization[M]]) {
 		this(model.network)
 		proto = model
+	}
+
+	override protected def buildNetworkModel() {
+		if (proto == null) {
+			proto = NetworkModel(network)
+		}
 	}
 
 	var rankCount: Array[Array[Int]] = null

@@ -27,7 +27,7 @@ import gov.lanl.yadas.ArgumentMaker
  * theta_i,k = mu_i + delta_i,b(i),k
  */
 class ThetaArgumentMaker[M <: Measurement](
-		override val model: NetworkModel[M],
+		override val model: NetworkModel[M, _],
 		override val sIdx: Int,
 		override val dIdx: Int,
 		override val study: Study[M])
@@ -46,7 +46,7 @@ extends ArgumentMaker with ThetaMaker[M] {
 }
 
 trait ThetaMaker[M <: Measurement] {
-	protected val model: NetworkModel[M]
+	protected val model: NetworkModel[M, _]
 	protected val sIdx: Int
 	protected val dIdx: Int
 	protected val study: Study[M]

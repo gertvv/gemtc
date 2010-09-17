@@ -61,7 +61,8 @@ extends Parameter {
 	override def getValue = parameterization.keySet.map(p => parameterization(p) * p.getValue).reduceLeft((a, b) => a + b)
 }
 
-class YadasModel[M <: Measurement](network: Network[M],
+abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
+	network: Network[M],
 	isInconsistency: Boolean)
 extends ProgressObservable {
 	val dichotomous: Boolean = {
@@ -76,7 +77,7 @@ extends ProgressObservable {
 
 	private var ready = false
 
-	protected var proto: NetworkModel[M] = null
+	protected var proto: NetworkModel[M, P] = null
 
 	protected var parameters: Map[NetworkModelParameter, Parameter] = null
 
@@ -222,10 +223,10 @@ extends ProgressObservable {
 		}
 	}
 
+	protected def buildNetworkModel();
+
 	private def buildModel() {
-		if (proto == null) {
-			proto = NetworkModel(network)
-		}
+		buildNetworkModel()
 		
 		// study baselines
 		val mu = Map[Study[M], MCMCParameter]() ++
@@ -276,12 +277,12 @@ extends ProgressObservable {
 		// data bond
 		if (dichotomous)
 			dichotomousDataBond(
-				proto.asInstanceOf[NetworkModel[DichotomousMeasurement]],
+				proto.asInstanceOf[NetworkModel[DichotomousMeasurement, _]],
 				mu.asInstanceOf[Map[Study[DichotomousMeasurement], MCMCParameter]],
 				delta.asInstanceOf[Map[Study[DichotomousMeasurement], MCMCParameter]])
 		else
 			continuousDataBond(
-				proto.asInstanceOf[NetworkModel[ContinuousMeasurement]],
+				proto.asInstanceOf[NetworkModel[ContinuousMeasurement, _]],
 				mu.asInstanceOf[Map[Study[ContinuousMeasurement], MCMCParameter]],
 				delta.asInstanceOf[Map[Study[ContinuousMeasurement], MCMCParameter]])
 
@@ -403,19 +404,19 @@ extends ProgressObservable {
 		new IndirectParameter(param)
 	}
 
-	private def successArray(model: NetworkModel[DichotomousMeasurement],
+	private def successArray(model: NetworkModel[DichotomousMeasurement, _],
 		study: Study[DichotomousMeasurement])
 	: Array[Double] =
 		NetworkModel.treatmentList(study.treatments).map(t =>
 			study.measurements(t).responders.toDouble).toArray
 
-	private def sampleSizeArray(model: NetworkModel[DichotomousMeasurement],
+	private def sampleSizeArray(model: NetworkModel[DichotomousMeasurement, _],
 		study: Study[DichotomousMeasurement])
 	: Array[Double] =
 		NetworkModel.treatmentList(study.treatments).map(t =>
 			study.measurements(t).sampleSize.toDouble).toArray
 
-	private def dichotomousDataBond(model: NetworkModel[DichotomousMeasurement],
+	private def dichotomousDataBond(model: NetworkModel[DichotomousMeasurement, _],
 			mu: Map[Study[DichotomousMeasurement], MCMCParameter],
 			delta: Map[Study[DichotomousMeasurement], MCMCParameter]) {
 		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
@@ -437,19 +438,19 @@ extends ProgressObservable {
 		}
 	}
 
-	private def obsMeanArray(model: NetworkModel[ContinuousMeasurement],
+	private def obsMeanArray(model: NetworkModel[ContinuousMeasurement, _],
 		study: Study[ContinuousMeasurement])
 	: Array[Double] =
 		NetworkModel.treatmentList(study.treatments).map(t =>
 			study.measurements(t).mean).toArray
 
-	private def obsErrorArray(model: NetworkModel[ContinuousMeasurement],
+	private def obsErrorArray(model: NetworkModel[ContinuousMeasurement, _],
 		study: Study[ContinuousMeasurement])
 	: Array[Double] =
 		NetworkModel.treatmentList(study.treatments).map(t =>
 			study.measurements(t).stdErr).toArray
 
-	private def continuousDataBond(model: NetworkModel[ContinuousMeasurement],
+	private def continuousDataBond(model: NetworkModel[ContinuousMeasurement, _],
 			mu: Map[Study[ContinuousMeasurement], MCMCParameter],
 			delta: Map[Study[ContinuousMeasurement], MCMCParameter]) {
 		for (study <- model.studyList) {

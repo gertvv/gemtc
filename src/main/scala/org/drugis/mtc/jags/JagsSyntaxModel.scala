@@ -21,7 +21,9 @@ package org.drugis.mtc.jags
 
 import org.drugis.mtc._
 
-abstract class JagsSyntaxModel[M <: Measurement](model: NetworkModel[M]) {
+abstract class JagsSyntaxModel[M <: Measurement](
+		model: NetworkModel[M, InconsistencyParametrization[M]]
+) {
 	val dichotomous: Boolean = {
 		val cls = model.network.measurementType
 		if (cls == classOf[DichotomousMeasurement])
@@ -82,7 +84,8 @@ abstract class JagsSyntaxModel[M <: Measurement](model: NetworkModel[M]) {
 	def expressParams(params: Map[NetworkModelParameter, Int]): String
 }
 
-class JagsSyntaxConsistencyModel[M <: Measurement](model: NetworkModel[M])
+class JagsSyntaxConsistencyModel[M <: Measurement](
+	model: NetworkModel[M, InconsistencyParametrization[M]])
 extends JagsSyntaxInconsistencyModel(model) {
 	override def modelText: String = {
 		List(
@@ -117,7 +120,8 @@ extends JagsSyntaxInconsistencyModel(model) {
 		).mkString("\n")
 }
 
-class JagsSyntaxInconsistencyModel[M <: Measurement](model: NetworkModel[M])
+class JagsSyntaxInconsistencyModel[M <: Measurement](
+	model: NetworkModel[M, InconsistencyParametrization[M]])
 extends JagsSyntaxModel(model) {
 	override def modelText: String = {
 		List(

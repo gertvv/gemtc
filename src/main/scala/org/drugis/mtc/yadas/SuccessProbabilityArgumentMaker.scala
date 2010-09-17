@@ -27,7 +27,7 @@ import gov.lanl.yadas.ArgumentMaker
  * p_i,k = ilogit(theta_i,k) ; theta_i,k = mu_i + delta_i,b(i),k
  */
 class SuccessProbabilityArgumentMaker(
-		override val model: NetworkModel[DichotomousMeasurement],
+		override val model: NetworkModel[DichotomousMeasurement, _],
 		override val sIdx: Int,
 		override val dIdx: Int,
 		override val study: Study[DichotomousMeasurement])

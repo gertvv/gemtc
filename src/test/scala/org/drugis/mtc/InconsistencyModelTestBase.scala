@@ -57,7 +57,7 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc)), ta)
 
-	def makeModel(nm: NetworkModel[DichotomousMeasurement]): InconsistencyModel
+	def makeModel(nm: NetworkModel[DichotomousMeasurement, InconsistencyParametrization[DichotomousMeasurement]]): InconsistencyModel
 
 	var model: InconsistencyModel = null 
 

@@ -85,6 +85,12 @@ abstract class Parametrization[M <: Measurement](
 		case None => 0
 		case Some(d) => d
 	}
+
+	/**
+	 * Full list of parameters
+	 */
+	val parameterVector: List[NetworkModelParameter] =
+		List[NetworkModelParameter]() ::: basicParameters
 }
 
 class ConsistencyParametrization[M <: Measurement](
@@ -207,6 +213,12 @@ class InconsistencyParametrization[M <: Measurement] (
 		}
 	}
 
+	/**
+	 * Full list of parameters
+	 */
+	override val parameterVector: List[NetworkModelParameter] =
+		List[NetworkModelParameter]() ::: basicParameters :::
+			inconsistencyParameters
 }
 
 class NodeSplitParametrization[M <: Measurement](

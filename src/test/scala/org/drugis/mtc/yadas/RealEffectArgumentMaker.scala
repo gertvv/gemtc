@@ -50,8 +50,9 @@ class RealEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc), (ta, td)), ta)
 
-	val networkModel = new NetworkModel(network,
-		new FundamentalGraphBasis(network.treatmentGraph, spanningTree),
+	val networkModel = new NetworkModel(
+		new InconsistencyParametrization(network,
+		new FundamentalGraphBasis(network.treatmentGraph, spanningTree)),
 		Map[Study[DichotomousMeasurement], Treatment](
 			(study1, ta), (study2, tb), (study3, ta), (study4, tc)),
 		treatmentList, studyList)

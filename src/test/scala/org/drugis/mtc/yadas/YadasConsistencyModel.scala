@@ -67,7 +67,7 @@ class YadasConsistencyModelTest extends ShouldMatchersForJUnit {
 }
 
 class YadasConsistencyModelIT extends ConsistencyModelTestBase {
-	override def makeModel(nm: NetworkModel[DichotomousMeasurement])
+	override def makeModel(nm: NetworkModel[DichotomousMeasurement, InconsistencyParametrization[DichotomousMeasurement]])
 	: ConsistencyModel = {
 		new YadasConsistencyModel(nm)
 	}
