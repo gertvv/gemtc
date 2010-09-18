@@ -83,21 +83,7 @@ abstract class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		name + " <- c(" + vector.mkString(", ") + ")"
 	}
 
-	def modelText: String
-	def scriptText(prefix: String): String
-	def analysisText(prefix: String): String
-	def expressParams(params: Map[NetworkModelParameter, Int]): String
-}
-
-class JagsSyntaxConsistencyModel[M <: Measurement, P <: Parametrization[M]](
-	model: NetworkModel[M, P])
-extends JagsSyntaxInconsistencyModel(model) {
-}
-
-class JagsSyntaxInconsistencyModel[M <: Measurement, P <: Parametrization[M]](
-	model: NetworkModel[M, P])
-extends JagsSyntaxModel(model) {
-	override def modelText: String = {
+	def modelText: String = {
 		List(
 			header,
 			baselineEffects,
@@ -112,7 +98,7 @@ extends JagsSyntaxModel(model) {
 			footer).mkString("\n")
 	}
 
-	override def scriptText(prefix: String): String = 
+	def scriptText(prefix: String): String = 
 		List(
 			"model in '" + prefix + ".model'",
 			"data in '" + prefix + ".data'",
@@ -128,7 +114,7 @@ extends JagsSyntaxModel(model) {
 			"monitors to '" + prefix + ".R'"
 		).mkString("\n")
 
-	override def analysisText(prefix: String): String =
+	def analysisText(prefix: String): String =
 		List(
 			"source('" + prefix + ".R')",
 			"attach(trace)",
@@ -138,7 +124,7 @@ extends JagsSyntaxModel(model) {
 			"detach(trace)"
 		).mkString("\n")
 
-	protected def monitors =
+	private def monitors =
 		(paramNames ++ varNames).map(p => "monitor " + p).mkString("\n")
 
 	private def paramNames = model.parameterVector.map(p => p.toString)
@@ -149,15 +135,15 @@ extends JagsSyntaxModel(model) {
 			List("var.d")
 		}
 
-	protected val header = "model {"
-	protected val empty = ""
-	protected val footer = "}"
-	protected val baselineEffects = 
+	private val header = "model {"
+	private val empty = ""
+	private val footer = "}"
+	private val baselineEffects = 
 	"""	|	# Study baseline effects
 		|	for (i in 1:length(b)) {
 		|		mu[i] ~ dnorm(0, .001)
 		|	}""".stripMargin
-	protected val individualEffects = 
+	private val individualEffects = 
 		if (dichotomous)
 	"""	|	# For each (study, treatment), model effect
 		|	for (i in 1:length(s)) {
@@ -170,9 +156,9 @@ extends JagsSyntaxModel(model) {
 		|		p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
 		|		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
 		|	}""".stripMargin
-	protected val varPrior = model.variancePrior
+	private val varPrior = model.variancePrior
 
-	protected def deltas: String = 
+	private def deltas: String = 
 		(for {
 			study <- model.studyList
 		} yield studyDeltas(study)).mkString("\n")
@@ -234,14 +220,14 @@ extends JagsSyntaxModel(model) {
 
 	private def base(study: Study[M]) = model.studyBaseline(study)
 
-	protected def expressParam(p: NetworkModelParameter, v: Int): String = 
+	private def expressParam(p: NetworkModelParameter, v: Int): String = 
 		v match {
 			case  1 => p.toString
 			case -1 => "-" + p.toString
 			case  _ => throw new Exception("Unexpected value!")
 		}
 
-	override def expressParams(params: Map[NetworkModelParameter, Int])
+	private def expressParams(params: Map[NetworkModelParameter, Int])
 	: String =
 		(for {(p, v) <- params} yield expressParam(p, v)).mkString(" + ")
 
@@ -251,7 +237,7 @@ extends JagsSyntaxModel(model) {
 		expressParams(model.parametrization(base, effect))
 	}
 
-	protected def metaParameters: String =
+	private def metaParameters: String =
 		(
 			List("\t# Meta-parameters") ++
 			(for {param <- model.parameterVector} yield format(param))
@@ -288,7 +274,7 @@ extends JagsSyntaxModel(model) {
 				|	tau.2 <- inverse(var.2)""".stripMargin
 		else throw new Exception("Studies with > 3 arms not supported yet; Please email Gert van Valkenhoef <g.h.m.van.valkenhoef at rug.nl>")
 
-	protected def varianceParameters: String =
+	private def varianceParameters: String =
 		if (inconsistency) {
 			List(
 				inconsistencyVariance,
@@ -299,23 +285,23 @@ extends JagsSyntaxModel(model) {
 			randomEffectsVariance
 		}
 
-	protected def inconsistencyVariance: String =
+	private def inconsistencyVariance: String =
 		List(
 			"\t# Inconsistency variance",
 			basicVar("w")).mkString("\n")
 
-	protected def randomEffectsVariance: String = 
+	private def randomEffectsVariance: String = 
 		(List(
 			"\t# Random effect variance",
 			basicVar("d")
 		) ++ combinedVars).mkString("\n")
 
 
-	protected def standardizeParameters(frame: String) =
+	private def standardizeParameters(frame: String) =
 		(standardParameters(frame) ++ standardInconsistencies(frame)
 		).mkString("\n")
 
-	protected def standardParameters(frame: String) = 
+	private def standardParameters(frame: String) = 
 		(for {edge <- model.network.edgeVector
 			val p = new BasicParameter(edge._1, edge._2)
 			val e = expressParams(model.parametrization(edge._1, edge._2))
@@ -327,7 +313,7 @@ extends JagsSyntaxModel(model) {
 		} yield frame + "$" + param + " <- " + param)
 			
 
-	protected def standardizeVariances(frame: String) = 
+	private def standardizeVariances(frame: String) = 
 		if (inconsistency)
 			List(
 				frame + "$var.d <- var.d",
@@ -335,4 +321,14 @@ extends JagsSyntaxModel(model) {
 			).mkString("\n")
 		else
 			frame + "$var.d <- var.d"
+}
+
+class JagsSyntaxConsistencyModel[M <: Measurement, P <: Parametrization[M]](
+	model: NetworkModel[M, P])
+extends JagsSyntaxInconsistencyModel(model) {
+}
+
+class JagsSyntaxInconsistencyModel[M <: Measurement, P <: Parametrization[M]](
+	model: NetworkModel[M, P])
+extends JagsSyntaxModel(model) {
 }
