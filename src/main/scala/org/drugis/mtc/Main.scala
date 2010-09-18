@@ -27,20 +27,44 @@ class Options(val xmlFile: String, val baseName: String,
 }
 
 class JAGSGenerator(options: Options) {
+	def createConsistencyModel[M <: Measurement](
+		network: Network[M],
+		best: Tree[Treatment])
+	: NetworkModel[M, ConsistencyParametrization[M]] = {
+		ConsistencyNetworkModel(network, best)
+	}
+
+	def createInconsistencyModel[M <: Measurement](
+		network: Network[M],
+		best: Tree[Treatment])
+	: NetworkModel[M, InconsistencyParametrization[M]] = {
+		NetworkModel(network, best)
+	}
+
+	def createJagsModel[M <: Measurement](
+		netw: Network[M], best: Tree[Treatment])
+	: JagsSyntaxModel[_,_] =
+		if (options.isInconsistency) {
+			new JagsSyntaxModel(createInconsistencyModel(netw, best))
+		} else {
+			new JagsSyntaxModel(createConsistencyModel(netw, best))
+		}
+
 	def run() {
 		val xml = scala.xml.XML.loadFile(options.xmlFile)
 		val network = Network.fromXML(xml)
 		val top = network.treatments.toList.sort((a, b) => a < b).first 
 		println("Identifying spanning tree:")
 		val best = network.bestSpanningTree(top)
-		val model = NetworkModel(network, best)
 
-		val syntaxModel = {
-			if (options.isInconsistency)
-				new JagsSyntaxInconsistencyModel(model)
-			else
-				new JagsSyntaxConsistencyModel(model)
-		}
+		val syntaxModel: JagsSyntaxModel[_, _] =
+			if (network.measurementType == classOf[DichotomousMeasurement]) {
+				createJagsModel(network.asInstanceOf[Network[DichotomousMeasurement]], best)
+			} else if (network.measurementType == classOf[ContinuousMeasurement]) {
+				createJagsModel(network.asInstanceOf[Network[ContinuousMeasurement]], best)
+			} else {
+				null
+			}
 
 		println("\tgraph {")
 		for (e <- best.edgeSet) {

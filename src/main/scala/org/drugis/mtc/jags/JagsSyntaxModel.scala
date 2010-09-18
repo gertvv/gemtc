@@ -21,7 +21,7 @@ package org.drugis.mtc.jags
 
 import org.drugis.mtc._
 
-abstract class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
+class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		model: NetworkModel[M, P]
 ) {
 	val dichotomous: Boolean = {
@@ -321,14 +321,4 @@ abstract class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			).mkString("\n")
 		else
 			frame + "$var.d <- var.d"
-}
-
-class JagsSyntaxConsistencyModel[M <: Measurement, P <: Parametrization[M]](
-	model: NetworkModel[M, P])
-extends JagsSyntaxInconsistencyModel(model) {
-}
-
-class JagsSyntaxInconsistencyModel[M <: Measurement, P <: Parametrization[M]](
-	model: NetworkModel[M, P])
-extends JagsSyntaxModel(model) {
 }

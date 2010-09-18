@@ -143,7 +143,7 @@ b <- c(2, 1, 1)"""
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc)), ta)
 
-	def model = new JagsSyntaxInconsistencyModel(
+	def model = new JagsSyntaxModel(
 		NetworkModel(network, spanningTree))
 
 	@Test def testDataText() {
@@ -276,7 +276,7 @@ b <- c(2, 1, 1)"""
 		(network.study("03"), ta)
 	)
 
-	def model = new JagsSyntaxConsistencyModel(
+	def model = new JagsSyntaxModel(
 		ConsistencyNetworkModel(network, spanningTree, baselines))
 
 	@Test def testDataText() {
@@ -458,10 +458,10 @@ b <- c(2, 1, 1)"""
 		(network.study("03"), ta)
 	)
 
-	def model = new JagsSyntaxConsistencyModel(
+	def model = new JagsSyntaxModel(
 		ConsistencyNetworkModel(network, spanningTree, baselines))
 
-	def inconsModel = new JagsSyntaxInconsistencyModel(
+	def inconsModel = new JagsSyntaxModel(
 		NetworkModel(network, spanningTree))
 
 	@Test def testDataText() {
