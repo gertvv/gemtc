@@ -186,6 +186,17 @@ class NetworkModel[M <: Measurement, P <: Parametrization[M]](
 }
 
 object ConsistencyNetworkModel extends NetworkModelUtil {
+	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment],
+		baselines: Map[Study[M], Treatment])
+	: NetworkModel[M, ConsistencyParametrization[M]] = {
+		val pmtz = new ConsistencyParametrization(network,
+			new FundamentalGraphBasis(network.treatmentGraph, tree))
+		new NetworkModel[M, ConsistencyParametrization[M]](
+			pmtz, baselines,
+			treatmentList(network.treatments),
+			studyList(network.studies))
+	}
+
 	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment])
 	: NetworkModel[M, ConsistencyParametrization[M]] = {
 		val pmtz = new ConsistencyParametrization(network,

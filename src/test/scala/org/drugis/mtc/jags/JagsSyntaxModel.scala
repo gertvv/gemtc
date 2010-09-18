@@ -59,11 +59,9 @@ b <- c(2, 1, 1)"""
 		r[i] ~ dbin(p[s[i], t[i]], n[i])
 	}
 
-	# Basic parameters
+	# Meta-parameters
 	d.A.B ~ dnorm(0, .001)
 	d.B.C ~ dnorm(0, .001)
-
-	# Inconsistency factors
 	w.A.B.C ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
@@ -198,7 +196,7 @@ b <- c(2, 1, 1)"""
 		r[i] ~ dbin(p[s[i], t[i]], n[i])
 	}
 
-	# Basic parameters
+	# Meta-parameters
 	d.A.B ~ dnorm(0, .001)
 	d.B.C ~ dnorm(0, .001)
 
@@ -272,8 +270,14 @@ b <- c(2, 1, 1)"""
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc)), ta)
 
+	val baselines = Map[Study[DichotomousMeasurement], Treatment](
+		(network.study("01"), tb),
+		(network.study("02"), ta),
+		(network.study("03"), ta)
+	)
+
 	def model = new JagsSyntaxConsistencyModel(
-		NetworkModel(network, spanningTree))
+		ConsistencyNetworkModel(network, spanningTree, baselines))
 
 	@Test def testDataText() {
 		model.dataText should be (dataText)
@@ -325,7 +329,7 @@ b <- c(2, 1, 1)"""
 		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
 	}
 
-	# Basic parameters
+	# Meta-parameters
 	d.A.B ~ dnorm(0, .001)
 	d.B.C ~ dnorm(0, .001)
 
@@ -368,11 +372,9 @@ b <- c(2, 1, 1)"""
 		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
 	}
 
-	# Basic parameters
+	# Meta-parameters
 	d.A.B ~ dnorm(0, .001)
 	d.B.C ~ dnorm(0, .001)
-
-	# Inconsistency factors
 	w.A.B.C ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
@@ -450,8 +452,14 @@ b <- c(2, 1, 1)"""
 	val spanningTree = new Tree[Treatment](
 		Set((ta, tb), (tb, tc)), ta)
 
+	val baselines = Map[Study[ContinuousMeasurement], Treatment](
+		(network.study("01"), tb),
+		(network.study("02"), ta),
+		(network.study("03"), ta)
+	)
+
 	def model = new JagsSyntaxConsistencyModel(
-		NetworkModel(network, spanningTree))
+		ConsistencyNetworkModel(network, spanningTree, baselines))
 
 	def inconsModel = new JagsSyntaxInconsistencyModel(
 		NetworkModel(network, spanningTree))

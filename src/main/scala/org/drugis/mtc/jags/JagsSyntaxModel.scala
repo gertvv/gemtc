@@ -21,8 +21,8 @@ package org.drugis.mtc.jags
 
 import org.drugis.mtc._
 
-abstract class JagsSyntaxModel[M <: Measurement](
-		model: NetworkModel[M, InconsistencyParametrization[M]]
+abstract class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
+		model: NetworkModel[M, P]
 ) {
 	val dichotomous: Boolean = {
 		val cls = model.network.measurementType
@@ -32,6 +32,11 @@ abstract class JagsSyntaxModel[M <: Measurement](
 			false
 		else
 			throw new IllegalStateException("Unknown measurement type " + cls)
+	}
+
+	val inconsistency: Boolean = model.parametrization match {
+		case i: InconsistencyParametrization[M] => true
+		case _ => false
 	}
 
 	def dataText: String =
@@ -84,44 +89,13 @@ abstract class JagsSyntaxModel[M <: Measurement](
 	def expressParams(params: Map[NetworkModelParameter, Int]): String
 }
 
-class JagsSyntaxConsistencyModel[M <: Measurement](
-	model: NetworkModel[M, InconsistencyParametrization[M]])
+class JagsSyntaxConsistencyModel[M <: Measurement, P <: Parametrization[M]](
+	model: NetworkModel[M, P])
 extends JagsSyntaxInconsistencyModel(model) {
-	override def modelText: String = {
-		List(
-			header,
-			baselineEffects,
-			empty,
-			deltas,
-			empty,
-			individualEffects,
-			empty,
-			basicParameters,
-			empty,
-			randomEffectsVariance,
-			footer).mkString("\n")
-	}
-
-	override def expressParams(params: Map[NetworkModelParameter, Int])
-	: String =
-		(for {(p, v) <- params; if (p.isInstanceOf[BasicParameter])} yield expressParam(p, v)).mkString(" + ")
-
-	override def monitors =
-		(model.basicParameters.map(p => p.toString) + "var.d").map(p => "monitor " + p).mkString("\n")
-
-	override def analysisText(prefix: String): String =
-		List(
-			"source('" + prefix + ".R')",
-			"attach(trace)",
-			"data <- list()",
-			standardizeParameters("data"),
-			"data$var.d <- var.d",
-			"detach(trace)"
-		).mkString("\n")
 }
 
-class JagsSyntaxInconsistencyModel[M <: Measurement](
-	model: NetworkModel[M, InconsistencyParametrization[M]])
+class JagsSyntaxInconsistencyModel[M <: Measurement, P <: Parametrization[M]](
+	model: NetworkModel[M, P])
 extends JagsSyntaxModel(model) {
 	override def modelText: String = {
 		List(
@@ -132,13 +106,9 @@ extends JagsSyntaxModel(model) {
 			empty,
 			individualEffects,
 			empty,
-			basicParameters,
+			metaParameters,
 			empty,
-			inconsistencyFactors,
-			empty,
-			inconsistencyVariance,
-			empty,
-			randomEffectsVariance,
+			varianceParameters,
 			footer).mkString("\n")
 	}
 
@@ -164,7 +134,6 @@ extends JagsSyntaxModel(model) {
 			"attach(trace)",
 			"data <- list()",
 			standardizeParameters("data"),
-			standardizeInconsistencies("data"),
 			standardizeVariances("data"),
 			"detach(trace)"
 		).mkString("\n")
@@ -173,7 +142,12 @@ extends JagsSyntaxModel(model) {
 		(paramNames ++ varNames).map(p => "monitor " + p).mkString("\n")
 
 	private def paramNames = model.parameterVector.map(p => p.toString)
-	private def varNames = List("var.d", "var.w")
+	private def varNames =
+		if (inconsistency) {
+			List("var.d", "var.w")
+		} else {
+			List("var.d")
+		}
 
 	protected val header = "model {"
 	protected val empty = ""
@@ -277,20 +251,21 @@ extends JagsSyntaxModel(model) {
 		expressParams(model.parametrization(base, effect))
 	}
 
-	protected def basicParameters: String = 
+	protected def metaParameters: String =
 		(
-			List("\t# Basic parameters") ++
-			(for {param <- model.basicParameters
-				} yield "\t" + param.toString + " ~ " + normal("0", ".001"))
+			List("\t# Meta-parameters") ++
+			(for {param <- model.parameterVector} yield format(param))
 		).mkString("\n")
 
-	protected def inconsistencyFactors: String =
-		(
-			List("\t# Inconsistency factors") ++
-			(for {param <- model.inconsistencyParameters
-				} yield "\t" + param.toString + " ~ " + normal("0", "tau.w"))
-		).mkString("\n")
+	private def format(p: NetworkModelParameter): String = 
+		"\t" + p.toString + " ~ " + normal("0", variance(p))
 
+	private def variance(p: NetworkModelParameter): String = p match {
+		case b: BasicParameter => ".001"
+		case s: SplitParameter => ".001"
+		case i: InconsistencyParameter => "tau.w"
+		case _ => throw new RuntimeException("Unhandled Parameter type")
+	}
 
 	private def basicVar(name: String) = (
 		"""	|	sd.x ~ dunif(0.00001, """ + varPrior + """)
@@ -313,6 +288,17 @@ extends JagsSyntaxModel(model) {
 				|	tau.2 <- inverse(var.2)""".stripMargin
 		else throw new Exception("Studies with > 3 arms not supported yet; Please email Gert van Valkenhoef <g.h.m.van.valkenhoef at rug.nl>")
 
+	protected def varianceParameters: String =
+		if (inconsistency) {
+			List(
+				inconsistencyVariance,
+				empty,
+				randomEffectsVariance
+			).mkString("\n")
+		} else {
+			randomEffectsVariance
+		}
+
 	protected def inconsistencyVariance: String =
 		List(
 			"\t# Inconsistency variance",
@@ -324,21 +310,29 @@ extends JagsSyntaxModel(model) {
 			basicVar("d")
 		) ++ combinedVars).mkString("\n")
 
-	protected def standardizeParameters(frame: String) = 
+
+	protected def standardizeParameters(frame: String) =
+		(standardParameters(frame) ++ standardInconsistencies(frame)
+		).mkString("\n")
+
+	protected def standardParameters(frame: String) = 
 		(for {edge <- model.network.edgeVector
 			val p = new BasicParameter(edge._1, edge._2)
 			val e = expressParams(model.parametrization(edge._1, edge._2))
-		 } yield frame + "$" + p + " <- " + e).mkString("\n")
+		 } yield frame + "$" + p + " <- " + e)
 
-	private def standardizeInconsistencies(frame: String) = 
+	private def standardInconsistencies(frame: String) = 
 		(for {param <- model.parameterVector;
 			if (param.isInstanceOf[InconsistencyParameter])
-		} yield frame + "$" + param + " <- " + param).mkString("\n")
+		} yield frame + "$" + param + " <- " + param)
 			
 
 	protected def standardizeVariances(frame: String) = 
-		List(
-			frame + "$var.d <- var.d",
-			frame + "$var.w <- var.w"
-		).mkString("\n")
+		if (inconsistency)
+			List(
+				frame + "$var.d <- var.d",
+				frame + "$var.w <- var.w"
+			).mkString("\n")
+		else
+			frame + "$var.d <- var.d"
 }
