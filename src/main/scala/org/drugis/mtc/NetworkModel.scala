@@ -20,6 +20,7 @@
 package org.drugis.mtc
 
 import org.apache.commons.math.stat.descriptive.rank.Percentile
+import collection.JavaConversions._
 
 trait NetworkModelParameter {
 
@@ -58,7 +59,7 @@ extends NetworkModelParameter {
 final class InconsistencyParameter(val cycle: List[Treatment])
 extends NetworkModelParameter {
 	def this(list: java.util.List[Treatment]) {
-		this(scala.collection.jcl.Conversions.convertList(list).toList)
+		this(asBuffer(list).toList)
 	}
 
 	private val cycleStr =

@@ -26,7 +26,7 @@ trait ProgressObservable extends AbstractSuspendable
 with MixedTreatmentComparison {
 	private var listeners = List[ProgressListener]()
 	def addProgressListener(l: ProgressListener) {
-		listeners += l
+		listeners = l :: listeners
 	}
 
 	protected def notifyListeners(e: ProgressEvent) {

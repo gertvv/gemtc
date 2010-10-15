@@ -19,6 +19,8 @@
 
 package org.drugis.mtc.yadas
 
+import org.drugis.mtc._
+
 class YadasInconsistencyModelIT extends InconsistencyModelTestBase {
 	override def makeModel(
 		nm: NetworkModel[DichotomousMeasurement, InconsistencyParametrization[DichotomousMeasurement]])

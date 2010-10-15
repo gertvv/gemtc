@@ -48,7 +48,7 @@ public class ContinuousNetworkBuilderTest {
 	}
 
 	@Test public void testEmptyBuild() {
-		Network n = d_builder.buildNetwork();
+		Network<ContinuousMeasurement> n = d_builder.buildNetwork();
 
 		assertNotNull(n);
 		assertTrue(n.treatments().isEmpty());
@@ -60,7 +60,7 @@ public class ContinuousNetworkBuilderTest {
 		d_builder.add("1", "B", d_s1b.mean(), d_s1b.stdDev(), d_s1b.sampleSize());
 		d_builder.add("2", "B", d_s2b.mean(), d_s2b.stdDev(), d_s2b.sampleSize());
 		d_builder.add("2", "C", d_s2c.mean(), d_s2c.stdDev(), d_s2c.sampleSize());
-		Network n = d_builder.buildNetwork();
+		Network<ContinuousMeasurement> n = d_builder.buildNetwork();
 
 		assertNotNull(n);
 		assertEquals(3, n.treatments().size());

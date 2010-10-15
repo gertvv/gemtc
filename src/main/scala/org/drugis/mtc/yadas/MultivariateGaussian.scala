@@ -28,7 +28,7 @@ import org.apache.commons.math.linear.Array2DRowRealMatrix
  */
 class MultivariateGaussian extends Likelihood {
 	override def compute(args: Array[Array[Double]]): Double = {
-		compute(args(0), args(1), args.subArray(2, args.length))
+		compute(args(0), args(1), args.slice(2, args.length))
 	}
 
 	def compute(x: Array[Double],

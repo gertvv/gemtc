@@ -48,7 +48,7 @@ public class DichotomousNetworkBuilderTest {
 	}
 
 	@Test public void testEmptyBuild() {
-		Network n = d_builder.buildNetwork();
+		Network<DichotomousMeasurement> n = d_builder.buildNetwork();
 
 		assertNotNull(n);
 		assertTrue(n.treatments().isEmpty());
@@ -60,7 +60,7 @@ public class DichotomousNetworkBuilderTest {
 		d_builder.add("1", "B", d_s1b.responders(), d_s1b.sampleSize());
 		d_builder.add("2", "B", d_s2b.responders(), d_s2b.sampleSize());
 		d_builder.add("2", "C", d_s2c.responders(), d_s2c.sampleSize());
-		Network n = d_builder.buildNetwork();
+		Network<DichotomousMeasurement> n = d_builder.buildNetwork();
 
 		assertNotNull(n);
 		assertEquals(3, n.treatments().size());

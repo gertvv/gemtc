@@ -41,7 +41,8 @@ object SpanningTreeEnumerator {
 class SpanningTreeIterable[T <% Ordered[T]](
 		val graph: Graph[T], val root: T)
 extends Iterable[Tree[T]] {
-	def elements: Iterator[Tree[T]] = new SpanningTreeIterator[T](graph, root)
+	override def iterator: Iterator[Tree[T]] = new SpanningTreeIterator[T](graph, root)
+	override def elements: Iterator[Tree[T]] = new SpanningTreeIterator[T](graph, root)
 }
 
 /**
