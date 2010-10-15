@@ -19,12 +19,12 @@
 
 package org.drugis.mtc;
 
-import java.util.Map;
-import java.util.HashMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class ContinuousNetworkBuilderTest {
 	private Study<ContinuousMeasurement> study(String id,
@@ -48,6 +48,7 @@ public class ContinuousNetworkBuilderTest {
 	}
 
 	@Test public void testEmptyBuild() {
+		@SuppressWarnings("unchecked")
 		Network<ContinuousMeasurement> n = d_builder.buildNetwork();
 
 		assertNotNull(n);
@@ -60,6 +61,7 @@ public class ContinuousNetworkBuilderTest {
 		d_builder.add("1", "B", d_s1b.mean(), d_s1b.stdDev(), d_s1b.sampleSize());
 		d_builder.add("2", "B", d_s2b.mean(), d_s2b.stdDev(), d_s2b.sampleSize());
 		d_builder.add("2", "C", d_s2c.mean(), d_s2c.stdDev(), d_s2c.sampleSize());
+		@SuppressWarnings("unchecked")
 		Network<ContinuousMeasurement> n = d_builder.buildNetwork();
 
 		assertNotNull(n);
