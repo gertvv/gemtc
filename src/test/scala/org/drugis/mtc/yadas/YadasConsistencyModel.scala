@@ -41,9 +41,9 @@ class YadasConsistencyModelTest extends ShouldMatchersForJUnit {
 		</network>)))
 
 	@Test def testSimulationIterations() {
-		model.getSimulationIterations() should be (100000)
+		model.getSimulationIterations should be (100000)
 		model.setSimulationIterations(10000)
-		model.getSimulationIterations() should be (10000)
+		model.getSimulationIterations should be (10000)
 		intercept[IllegalArgumentException] {
 			model.setSimulationIterations(10001)
 		}
@@ -54,9 +54,9 @@ class YadasConsistencyModelTest extends ShouldMatchersForJUnit {
 
 
 	@Test def testBurnInIterations() {
-		model.getBurnInIterations() should be (20000)
+		model.getBurnInIterations should be (20000)
 		model.setBurnInIterations(10000)
-		model.getBurnInIterations() should be (10000)
+		model.getBurnInIterations should be (10000)
 		intercept[IllegalArgumentException] {
 			model.setBurnInIterations(10001)
 		}

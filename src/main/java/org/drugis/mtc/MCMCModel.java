@@ -19,13 +19,14 @@
 
 package org.drugis.mtc;
 
-import org.drugis.common.threading.Suspendable;
+import org.drugis.common.threading.activity.ActivityModel;
 
-public interface MCMCModel extends Suspendable {
+
+public interface MCMCModel {
 	/**
-	 * Add a progress listener to this Model.
+	 * Get the ActivityModel that defines how to execute this MTC model.
 	 */
-	public void addProgressListener(ProgressListener l);
+	public ActivityModel getActivityModel();
 	/**
 	 * @return false if it's necessary to run() this model before calling any
 	 * getters.

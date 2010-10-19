@@ -22,8 +22,7 @@ package org.drugis.mtc;
 /**
  * A MixedTreatmentComparison estimates the relative effects of a set of
  * treatments given an evidence network. The estimates are only provided after
- * the model has been run (using Runnable.run()). It is possible to track the
- * progress of the model run using a ProgressListener.
+ * the model has been run (by executing the ActivityModel).
  */
 public interface MixedTreatmentComparison extends MCMCModel {
 	/**

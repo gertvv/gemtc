@@ -19,6 +19,9 @@
 
 package org.drugis.mtc
 
+import org.drugis.common.threading.Task
+import org.drugis.common.threading.activity.ActivityTask
+import org.drugis.common.threading.ThreadHandler
 import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._
 import org.junit.Test
@@ -70,7 +73,7 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testBasicParameters() {
-		model.run()
+		run(model)
 		model.isReady should be (true)
 
 		val m = model
@@ -91,7 +94,7 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testDerivedParameters() {
-		model.run()
+		run(model)
 		model.isReady should be (true)
 
 		val m = model
@@ -104,5 +107,17 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 		dAC.getMean should be (mAC plusOrMinus f * sAC)
 		dAC.getStandardDeviation should be(sAC plusOrMinus f * sAC)
 	}
+	
+	def run(model: MCMCModel) {
+		val th = ThreadHandler.getInstance()
+		val task = new ActivityTask(model.getActivityModel())
+		th.scheduleTask(task)
+		waitUntilReady(task)
+	}
+	
+	def waitUntilReady(task: Task) {
+		while (!task.isFinished()) {
+			Thread.sleep(100);
+		}
+	}
 }
-

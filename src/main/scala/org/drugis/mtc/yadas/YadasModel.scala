@@ -19,14 +19,22 @@
 
 package org.drugis.mtc.yadas
 
+import scala.collection.mutable.ArrayBuffer
+import org.drugis.common.threading.activity.Transition
+import org.drugis.common.threading.activity.DirectTransition
+import scala.collection.mutable.ArrayBuffer
+import org.drugis.common.threading.IterativeComputation
+import org.drugis.common.threading.IterativeTask
+import org.drugis.common.threading.SimpleSuspendableTask
+import org.drugis.common.threading.activity.ActivityModel
 import org.drugis.mtc._
 import gov.lanl.yadas._
+
+import collection.JavaConversions._
 
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.math.stat.descriptive.moment.Mean
 import org.apache.commons.math.linear.ArrayRealVector
-
-import org.drugis.common.threading.TerminatedException
 
 class EstimateImpl(val mean: Double, val sd: Double)
 extends Estimate {
@@ -63,8 +71,7 @@ extends Parameter {
 
 abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	network: Network[M],
-	isInconsistency: Boolean)
-extends ProgressObservable {
+	isInconsistency: Boolean) {
 	val dichotomous: Boolean = {
 		val cls = network.measurementType
 		if (cls == classOf[DichotomousMeasurement])
@@ -74,8 +81,6 @@ extends ProgressObservable {
 		else
 			throw new IllegalStateException("Unknown measurement type " + cls)
 	}
-
-	private var ready = false
 
 	protected var proto: NetworkModel[M, P] = null
 
@@ -91,38 +96,45 @@ extends ProgressObservable {
 	protected var simulationIter = 100000
 	private var reportingInterval = 100
 
-	def isReady = ready
-
-	def run() {
-		try {
-			// construct model
-			notifyModelConstructionStarted()
-			waitIfSuspended()
-			
-			buildModel()
-			waitIfSuspended()
-			
-			notifyModelConstructionFinished()
-
-			// burn-in iterations
-			notifyBurnInStarted()
-			burnIn()
-			notifyBurnInFinished()
-			
-
-			// simulation iterations
-			notifySimulationStarted()
-			simulate()
-
-			// calculate results
-			ready = true
-
-			notifySimulationFinished()
-		} catch {
-			case te: TerminatedException => 
+	private val buildModelPhase = new SimpleSuspendableTask(new Runnable() {
+		def run() {
+			buildModel();
 		}
-	}
+	})
+	
+	private val burnInPhase = new IterativeTask(new IterativeComputation() {
+		private var iter = 0
+		def initialize() {}
+		def finish() {}
+		def step() { update(); iter += 1; }
+		def getIteration(): Int = iter
+		def getTotalIterations(): Int = burnInIter
+	})
+	burnInPhase.setReportingInterval(reportingInterval)
+	
+	private  val simulationPhase = new IterativeTask(new IterativeComputation() {
+		private var iter = 0 
+		def initialize() {}
+		def finish() {}
+		def step() { update(); output(); iter += 1; }
+		def getIteration(): Int = iter
+		def getTotalIterations(): Int = simulationIter
+	})
+	burnInPhase.setReportingInterval(reportingInterval)
+	
+	val activityModel = new ActivityModel(
+			buildModelPhase, // start
+			simulationPhase, // end
+			ArrayBuffer[Transition]( // transitions
+				new DirectTransition(buildModelPhase, burnInPhase),
+				new DirectTransition(burnInPhase, simulationPhase)
+			)
+		)
+	
+	def isReady = simulationPhase.isFinished()
 
+	def getActivityModel: ActivityModel = activityModel
+	
 	def getRelativeEffect(base: Treatment, subj: Treatment): Estimate =
 		paramEstimate(base, subj) match {
 			case Some(x) => x
@@ -470,29 +482,6 @@ extends ProgressObservable {
 					),
 					new Gaussian()
 				)
-		}
-	}
-
-	private def burnIn() {
-		for (i <- 0 until burnInIter) {
-			if (i % reportingInterval == 0 && i / reportingInterval > 0) {
-				notifyBurnInProgress(i);
-				waitIfSuspended()
-			}
-
-			update()
-		}
-	}
-
-	private def simulate() {
-		for (i <- 0 until simulationIter) {
-			if (i % reportingInterval == 0 && i / reportingInterval > 0) {
-				notifySimulationProgress(i);
-				waitIfSuspended()
-			}
-
-			update()
-			output()
 		}
 	}
 

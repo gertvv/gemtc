@@ -19,6 +19,9 @@
 
 package org.drugis.mtc.yadas
 
+import org.drugis.common.threading.Task
+import org.drugis.common.threading.activity.ActivityTask
+import org.drugis.common.threading.ThreadHandler
 import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._
 import org.junit.Test
@@ -42,11 +45,24 @@ class ContinuousDataIT extends ShouldMatchersForJUnit {
 
 	@Test def testResult() {
 		val model = new YadasConsistencyModel(network)
-		model.run()
+		run(model)
 		
 		model.isReady should be (true)
 		val d = model.getRelativeEffect(usual, psych)
 		d.getMean should be (m plusOrMinus f * s)
 		d.getStandardDeviation should be (s plusOrMinus f * s)
+	}
+	
+	def run(model: MCMCModel) {
+		val th = ThreadHandler.getInstance()
+		val task = new ActivityTask(model.getActivityModel())
+		th.scheduleTask(task)
+		waitUntilReady(task)
+	}
+	
+	def waitUntilReady(task: Task) {
+		while (!task.isFinished()) {
+			Thread.sleep(100);
+		}
 	}
 }

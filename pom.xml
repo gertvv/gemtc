@@ -61,8 +61,8 @@
 	</dependency>	
 	<dependency>	
 		<groupId>org.drugis</groupId>
-		<artifactId>common</artifactId>
-		<version>0.1</version>
+		<artifactId>common-lib</artifactId>
+		<version>0.2.1-SNAPSHOT</version>
 	</dependency>	
   </dependencies>
 
