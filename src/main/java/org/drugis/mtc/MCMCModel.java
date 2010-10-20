@@ -19,14 +19,14 @@
 
 package org.drugis.mtc;
 
-import org.drugis.common.threading.activity.ActivityModel;
+import org.drugis.common.threading.activity.ActivityTask;
 
 
 public interface MCMCModel {
 	/**
-	 * Get the ActivityModel that defines how to execute this MTC model.
+	 * Get the ActivityTask that defines how to execute this MCMC model.
 	 */
-	public ActivityModel getActivityModel();
+	public ActivityTask getActivityTask();
 	/**
 	 * @return false if it's necessary to run() this model before calling any
 	 * getters.

@@ -55,7 +55,7 @@ class ContinuousDataIT extends ShouldMatchersForJUnit {
 	
 	def run(model: MCMCModel) {
 		val th = ThreadHandler.getInstance()
-		val task = new ActivityTask(model.getActivityModel())
+		val task = model.getActivityTask()
 		th.scheduleTask(task)
 		waitUntilReady(task)
 	}

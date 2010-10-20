@@ -27,6 +27,7 @@ import org.drugis.common.threading.IterativeComputation
 import org.drugis.common.threading.IterativeTask
 import org.drugis.common.threading.SimpleSuspendableTask
 import org.drugis.common.threading.activity.ActivityModel
+import org.drugis.common.threading.activity.ActivityTask
 import org.drugis.mtc._
 import gov.lanl.yadas._
 
@@ -100,7 +101,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		def run() {
 			buildModel();
 		}
-	})
+	}, "building model")
 	
 	private val burnInPhase = new IterativeTask(new IterativeComputation() {
 		private var iter = 0
@@ -109,18 +110,18 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		def step() { update(); iter += 1; }
 		def getIteration(): Int = iter
 		def getTotalIterations(): Int = burnInIter
-	})
+	}, "burn-in")
 	burnInPhase.setReportingInterval(reportingInterval)
 	
-	private  val simulationPhase = new IterativeTask(new IterativeComputation() {
+	private val simulationPhase = new IterativeTask(new IterativeComputation() {
 		private var iter = 0 
 		def initialize() {}
 		def finish() {}
 		def step() { update(); output(); iter += 1; }
 		def getIteration(): Int = iter
 		def getTotalIterations(): Int = simulationIter
-	})
-	burnInPhase.setReportingInterval(reportingInterval)
+	}, "simulation")
+	simulationPhase.setReportingInterval(reportingInterval)
 	
 	val activityModel = new ActivityModel(
 			buildModelPhase, // start
@@ -130,10 +131,12 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 				new DirectTransition(burnInPhase, simulationPhase)
 			)
 		)
+
+	val activityTask = new ActivityTask(activityModel, "MCMC model")
 	
 	def isReady = simulationPhase.isFinished()
 
-	def getActivityModel: ActivityModel = activityModel
+	def getActivityTask: ActivityTask = activityTask
 	
 	def getRelativeEffect(base: Treatment, subj: Treatment): Estimate =
 		paramEstimate(base, subj) match {
