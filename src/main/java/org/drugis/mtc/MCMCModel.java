@@ -27,6 +27,12 @@ public interface MCMCModel {
 	 * Get the ActivityTask that defines how to execute this MCMC model.
 	 */
 	public ActivityTask getActivityTask();
+	
+	/**
+	 * Get the simulation results. The results are always available, however they may not be filled.
+	 */
+	public MCMCResults getResults();
+	
 	/**
 	 * @return false if it's necessary to run() this model before calling any
 	 * getters.

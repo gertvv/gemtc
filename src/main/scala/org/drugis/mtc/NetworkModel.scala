@@ -22,8 +22,8 @@ package org.drugis.mtc
 import org.apache.commons.math.stat.descriptive.rank.Percentile
 import collection.JavaConversions._
 
-trait NetworkModelParameter {
-
+trait NetworkModelParameter extends Parameter {
+	def getName: String = toString
 }
 
 class BasicParameter(val base: Treatment, val subject: Treatment)

@@ -26,13 +26,19 @@ package org.drugis.mtc;
  */
 public interface MixedTreatmentComparison extends MCMCModel {
 	/**
-	 * Get the estimated relative effect.
-	 * @return The effect estimate.
+	 * Get the relative effect MCMCParameter.
+	 * @return The effect parameter.
 	 * @param base The treatment to use as baseline.
 	 * @param subj The treatment to use as alternative.
 	 * @throws IllegalArgumentException if one of the treatments is not
 	 * present in the evidence network.
 	 * @throws IllegalStateException if the MTC is not ready.
 	 */
-	public Estimate getRelativeEffect(Treatment base, Treatment subj);
+	public Parameter getRelativeEffect(Treatment base, Treatment subj);
+	
+	/**
+	 * Get the random effects variance.
+	 * @return The variance parameter.
+	 */
+	public Parameter getRandomEffectsVariance();
 }

@@ -22,6 +22,13 @@ package org.drugis.mtc;
 import java.util.List;
 
 public interface InconsistencyModel extends MixedTreatmentComparison {
-	public List<InconsistencyParameter> getInconsistencyFactors();
-	public Estimate getInconsistency(InconsistencyParameter param);
+	/**
+	 * Get the inconsistency factors.
+	 */
+	public List<Parameter> getInconsistencyFactors();
+	
+	/**
+	 * Get the inconsistency variance parameter.
+	 */
+	public Parameter getInconsistencyVariance();
 }

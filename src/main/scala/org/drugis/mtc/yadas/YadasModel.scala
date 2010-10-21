@@ -37,38 +37,63 @@ import org.apache.commons.math.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.math.stat.descriptive.moment.Mean
 import org.apache.commons.math.linear.ArrayRealVector
 
-class EstimateImpl(val mean: Double, val sd: Double)
-extends Estimate {
-	def getMean = mean
-	def getStandardDeviation = sd
-}
-
-
-abstract class Parameter
-extends Estimate {
-	private val mean = new Mean()
-	private val sd = new StandardDeviation(false)
-
-	def update() {
-		val value = getValue
-		mean.increment(value)
-		sd.increment(value)
+abstract class ParameterWriter(val p: MCMCParameter, val i: Int) {
+	def output() {
+		write(p.getValue(i))
 	}
 
-	def getMean = mean.getResult
-	def getStandardDeviation = sd.getResult
-	def getValue: Double
+	def write(x: Double): Unit
 }
 
-class DirectParameter(p: MCMCParameter, i: Int)
-extends Parameter {
-	override def getValue = p.getValue(i)
+class DerivedParameter extends Parameter {
+	def calculate(results: MCMCResults, c: Int): ArrayBuffer[Double] = {
+		null
+	}
+	def calculate(results: MCMCResults, c: Int, i: Int): Double = {
+		null
+	}
 }
 
+class YadasResults extends MCMCResults {
+	private var results: List[List[ArrayBuffer[Double]]]
+	private var directParameters: List[Parameter]
+	private var derivedParameters: List[Parameter]
+
+	private class YadasParameterWriter(
+		val paramIdx: Int, val chainIdx: Int, mp: MCMCParameter, i: Int)
+	extends ParameterWriter(mp, i) {
+		private var idx: Int = 0
+
+		override def write(x: Double): Unit = {
+			results(paramIdx)(chainIdx)(idx) = x
+			idx += 1
+		}
+	}
+
+	def setDirectParameters(p: List[Parameter]): Unit {}
+	def setDerivedParameters(p: List[DerivedParameter]): Unit = {}
+	def setNumberOfChains(n: Int): Unit = {}
+	def setNumberOfIterations(n: Int): Unit = {}
+	/**
+	 * Writer to write samples from mp[i] to parameter p, chain c.
+	 */
+	def getParameterWriter(p: Parameter, c: Int, mp: MCMCParameter, i: Int)
+	: ParameterWriter = null
+
+	def getParameters: Array[Parameter] = null
+	def findParameter(p: Parameter): Int = null
+	def getNumberOfChains: Int = 0
+	def getNumberOfSamples: Int = 0
+	def getSample(p: Int, c: Int, i: Int): Double = 0.0
+	def getSamples(p: Int, c: Int): Array[Double] = null
+}
+
+/*
 class IndirectParameter(parameterization: Map[Parameter, Int])
-extends Parameter {
+extends MyParameter {
 	override def getValue = parameterization.keySet.map(p => parameterization(p) * p.getValue).reduceLeft((a, b) => a + b)
 }
+*/
 
 abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	network: Network[M],
@@ -87,7 +112,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	protected var parameters: Map[NetworkModelParameter, Parameter] = null
 
-	private var parameterList: List[Parameter] = null
+	private var parameterList: List[ParameterWriter] = null
 	private var updateList: List[MCMCUpdate] = null
 
 	private var randomEffectVar: Parameter = null
@@ -138,13 +163,12 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	def getActivityTask: ActivityTask = activityTask
 	
-	def getRelativeEffect(base: Treatment, subj: Treatment): Estimate =
-		paramEstimate(base, subj) match {
+	def getRelativeEffect(base: Treatment, subj: Treatment): Parameter =
+		parameters.get(new BasicParameter(base, subj)) match {
 			case Some(x) => x
 			case None => throw new IllegalArgumentException(
 				"Treatment(s) not found")
 		}
-
 
 	def getInconsistencyFactors: java.util.List[InconsistencyParameter] = {
 		val list = new java.util.ArrayList[InconsistencyParameter]()
@@ -175,21 +199,6 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	private def validIt(it: Int) {
 		if (it <= 0 || it % 100 != 0) throw new IllegalArgumentException("Specified # iterations should be a positive multiple of 100");
 	}
-
-	private def paramEstimate(base: Treatment, subj: Treatment)
-	: Option[Estimate] =
-		parameters.get(new BasicParameter(base, subj)) match {
-			case Some(x: Estimate) => Some[Estimate](x)
-			case None => negParamEstimate(subj, base)
-		}
-
-	private def negParamEstimate(base: Treatment, subj: Treatment)
-	: Option[Estimate] =
-		parameters.get(new BasicParameter(base, subj)) match {
-			case Some(x: Estimate) =>
-				Some[Estimate](new EstimateImpl(-x.getMean, x.getStandardDeviation))
-			case None => None
-		}
 
 	private def sigmaPrior = {
 		proto.variancePrior
@@ -372,7 +381,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 		updateList = params.map(p => tuner(p))
 
-		def paramList(p: MCMCParameter, n: Int): List[Parameter] =
+		def paramList(p: MCMCParameter, n: Int): List[MyParameter] =
 			(0 until n).map(i => new DirectParameter(p, i)
 				).toList
 
@@ -392,7 +401,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		}
 
 		parameters = parameterMap(
-			Map[NetworkModelParameter, Parameter]() ++
+			Map[NetworkModelParameter, MyParameter]() ++
 				basicParamPairs ++ inconsParamPairs)
 		parameterList = parameters.values.toList ++ sigmaParam ++ sigmawParam
 		
@@ -400,8 +409,8 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		inconsistencyVar = sigmawParam(0)
 	}
 
-	private def parameterMap(basicMap: Map[NetworkModelParameter, Parameter])
-	:Map[NetworkModelParameter, Parameter] = {
+	private def parameterMap(basicMap: Map[NetworkModelParameter, MyParameter])
+	:Map[NetworkModelParameter, MyParameter] = {
 		val ts = proto.treatmentList
 		basicMap ++ (
 		for {i <- 0 until (ts.size - 1); j <- (i + 1) until ts.size;
@@ -411,9 +420,9 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	}
 
 	private def createIndirect(p: BasicParameter,
-			basicMap: Map[NetworkModelParameter, Parameter])
+			basicMap: Map[NetworkModelParameter, MyParameter])
 	: IndirectParameter = {
-		val param = Map[Parameter, Int]() ++
+		val param = Map[MyParameter, Int]() ++
 			proto.parametrization(p.base, p.subject).map(
 				(x) => (basicMap(x._1), x._2)).filter((x) => x._2 != 0)
 		new IndirectParameter(param)
@@ -496,7 +505,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	protected def output() {
 		for (p <- parameterList) {
-			p.update()
+			p.output()
 		}
 	}
 }
