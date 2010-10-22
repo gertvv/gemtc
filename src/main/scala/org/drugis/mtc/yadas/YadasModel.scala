@@ -107,11 +107,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	def getActivityTask: ActivityTask = activityTask
 	
 	def getRelativeEffect(base: Treatment, subj: Treatment): Parameter =
-		parameters.get(new BasicParameter(base, subj)) match {
-			case Some(x) => x
-			case None => throw new IllegalArgumentException(
-				"Treatment(s) not found")
-		}
+		new BasicParameter(base, subj)
 
 	def getBurnInIterations: Int = burnInIter
 
@@ -338,7 +334,8 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 		parameterList = writers
 
-		// FIXME: create indirect
+		results.setDerivedParameters(
+			indirectParameters.map(p => (p, derivation(p))).toList)
 	}
 
 /*
@@ -351,16 +348,18 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 			if (!basicMap.keySet.contains(p))
 		} yield (p, createIndirect(p, basicMap)))
 	}
-
-	private def createIndirect(p: BasicParameter,
-			basicMap: Map[NetworkModelParameter, MyParameter])
-	: IndirectParameter = {
-		val param = Map[MyParameter, Int]() ++
-			proto.parametrization(p.base, p.subject).map(
-				(x) => (basicMap(x._1), x._2)).filter((x) => x._2 != 0)
-		new IndirectParameter(param)
-	}
 */
+	private def indirectParameters: Seq[BasicParameter] = {
+		val ts = proto.treatmentList
+		ts.map(t => (ts - t).map(u => new BasicParameter(t, u))).reduceLeft((a, b) => a ++ b) -- proto.basicParameters.asInstanceOf[List[BasicParameter]]
+	}
+
+	private def derivation(p: BasicParameter)
+	: Derivation = {
+		val param = Map[Parameter, Int]() ++
+			proto.parametrization(p.base, p.subject).filter((x) => x._2 != 0)
+		new Derivation(param)
+	}
 
 	private def successArray(model: NetworkModel[DichotomousMeasurement, _],
 		study: Study[DichotomousMeasurement])
