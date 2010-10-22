@@ -36,14 +36,18 @@ with ConsistencyModel {
 		}
 	}
 
-	var rankCount: Array[Array[Int]] = null
+//	var rankCount: Array[Array[Int]] = null
 
 	def rankProbability(t: Treatment, r: Int) = {
+/*
 		val rIdx = proto.treatmentList.size - r
 		val tIdx = proto.treatmentList.indexOf(t)
 		rankCount(tIdx)(rIdx).toDouble / simulationIter.toDouble
+*/
+		0.0
 	}
 
+/*
 	override def output() {
 		super.output()
 		updateRankCounts()
@@ -65,4 +69,5 @@ with ConsistencyModel {
 			rankCount(j)(ranks(j) - 1) += 1
 		}
 	}
+*/
 }

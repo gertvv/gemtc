@@ -27,6 +27,8 @@ import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
 
+import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
+
 import org.drugis.mtc._
 
 class ContinuousDataIT extends ShouldMatchersForJUnit {
@@ -34,6 +36,8 @@ class ContinuousDataIT extends ShouldMatchersForJUnit {
 	val m = -1.362791 // mean(d)
 	val s = 0.982033 // sd(d)
 	val f = 0.05
+	val mean = new Mean()
+	val stdDev = new StandardDeviation()
 
 	def network = {
 		val is = classOf[ContinuousDataIT].getResourceAsStream("weltonBP.xml")
@@ -48,9 +52,12 @@ class ContinuousDataIT extends ShouldMatchersForJUnit {
 		run(model)
 		
 		model.isReady should be (true)
-		val d = model.getRelativeEffect(usual, psych)
-		d.getMean should be (m plusOrMinus f * s)
-		d.getStandardDeviation should be (s plusOrMinus f * s)
+		val d = model.getResults.findParameter(
+			model.getRelativeEffect(usual, psych))
+		mean.evaluate(model.getResults.getSamples(d, 0)) should be (
+			m plusOrMinus f * s)
+		stdDev.evaluate(model.getResults.getSamples(d, 0)) should be (
+			s plusOrMinus f * s)
 	}
 	
 	def run(model: MCMCModel) {

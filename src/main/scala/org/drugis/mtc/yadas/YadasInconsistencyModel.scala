@@ -39,4 +39,15 @@ with InconsistencyModel {
 			proto = NetworkModel(network)
 		}
 	}
+
+	def getInconsistencyVariance: Parameter = inconsistencyVar
+
+	// FIXME: solve below thing with JavaConversions
+	def getInconsistencyFactors: java.util.List[Parameter] = {
+		val list = new java.util.ArrayList[Parameter]()
+		for (param <- proto.inconsistencyParameters) {
+			list.add(param)
+		}
+		list
+	}
 }

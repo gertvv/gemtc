@@ -26,8 +26,11 @@ import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
+import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
 
 abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
+	val mean = new Mean()
+	val stdDev = new StandardDeviation()
 	val f = 0.05
 	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
@@ -77,26 +80,29 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		model.isReady should be (true)
 
 		val m = model
-		val dAB = m.getRelativeEffect(ta, tb)
-		val dBC = m.getRelativeEffect(tb, tc)
-		val wABC = m.getInconsistency(
-			new InconsistencyParameter(List(ta, tb, tc, ta)))
+		val dAB = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(ta, tb)), 0)
+		val dBC = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(tb, tc)), 0)
+		val wABC = model.getResults.getSamples(
+			model.getResults.findParameter(
+				new InconsistencyParameter(List(ta, tb, tc, ta))), 0)
 
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
 		// for testing against WinBUGS results).
 		val mAB = 0.5078252
 		val sAB = 0.8135523
-		dAB.getMean should be (mAB plusOrMinus f * sAB)
-		dAB.getStandardDeviation should be(sAB plusOrMinus f * sAB)
+		mean.evaluate(dAB) should be (mAB plusOrMinus f * sAB)
+		stdDev.evaluate(dAB) should be(sAB plusOrMinus f * sAB)
 		val mBC = -0.5224309
 		val sBC = 1.024877
-		dBC.getMean should be (mBC plusOrMinus f * sBC)
-		dBC.getStandardDeviation should be(sBC plusOrMinus f * sBC)
+		mean.evaluate(dBC) should be (mBC plusOrMinus f * sBC)
+		stdDev.evaluate(dBC) should be(sBC plusOrMinus f * sBC)
 		val mACB = 0.2015848
 		val sACB = 0.8444993
-		wABC.getMean should be (-mACB plusOrMinus f * sACB)
-		wABC.getStandardDeviation should be(sACB plusOrMinus f * sACB)
+		mean.evaluate(wABC) should be (-mACB plusOrMinus f * sACB)
+		stdDev.evaluate(wABC) should be(sACB plusOrMinus f * sACB)
 	}
 
 	@Test def testDerivedParameters() {
@@ -105,13 +111,15 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 
 		val m = model
 
-		val dBA = m.getRelativeEffect(tb, ta)
+		val dBA = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(tb, ta)), 0)
 		dBA should not be (null)
-		val dAC = m.getRelativeEffect(ta, tc)
+		val dAC = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(ta, tc)), 0)
 		val mAC = 0.1869791
 		val sAC = 0.9310103
-		dAC.getMean should be (mAC plusOrMinus f * sAC)
-		dAC.getStandardDeviation should be(sAC plusOrMinus f * sAC)
+		mean.evaluate(dAC) should be (mAC plusOrMinus f * sAC)
+		stdDev.evaluate(dAC) should be(sAC plusOrMinus f * sAC)
 	}
 
 	@Test def testInconsistencyFactors() {

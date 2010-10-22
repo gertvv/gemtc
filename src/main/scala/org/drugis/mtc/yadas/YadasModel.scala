@@ -22,7 +22,6 @@ package org.drugis.mtc.yadas
 import scala.collection.mutable.ArrayBuffer
 import org.drugis.common.threading.activity.Transition
 import org.drugis.common.threading.activity.DirectTransition
-import scala.collection.mutable.ArrayBuffer
 import org.drugis.common.threading.IterativeComputation
 import org.drugis.common.threading.IterativeTask
 import org.drugis.common.threading.SimpleSuspendableTask
@@ -36,64 +35,6 @@ import collection.JavaConversions._
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.math.stat.descriptive.moment.Mean
 import org.apache.commons.math.linear.ArrayRealVector
-
-abstract class ParameterWriter(val p: MCMCParameter, val i: Int) {
-	def output() {
-		write(p.getValue(i))
-	}
-
-	def write(x: Double): Unit
-}
-
-class DerivedParameter extends Parameter {
-	def calculate(results: MCMCResults, c: Int): ArrayBuffer[Double] = {
-		null
-	}
-	def calculate(results: MCMCResults, c: Int, i: Int): Double = {
-		null
-	}
-}
-
-class YadasResults extends MCMCResults {
-	private var results: List[List[ArrayBuffer[Double]]]
-	private var directParameters: List[Parameter]
-	private var derivedParameters: List[Parameter]
-
-	private class YadasParameterWriter(
-		val paramIdx: Int, val chainIdx: Int, mp: MCMCParameter, i: Int)
-	extends ParameterWriter(mp, i) {
-		private var idx: Int = 0
-
-		override def write(x: Double): Unit = {
-			results(paramIdx)(chainIdx)(idx) = x
-			idx += 1
-		}
-	}
-
-	def setDirectParameters(p: List[Parameter]): Unit {}
-	def setDerivedParameters(p: List[DerivedParameter]): Unit = {}
-	def setNumberOfChains(n: Int): Unit = {}
-	def setNumberOfIterations(n: Int): Unit = {}
-	/**
-	 * Writer to write samples from mp[i] to parameter p, chain c.
-	 */
-	def getParameterWriter(p: Parameter, c: Int, mp: MCMCParameter, i: Int)
-	: ParameterWriter = null
-
-	def getParameters: Array[Parameter] = null
-	def findParameter(p: Parameter): Int = null
-	def getNumberOfChains: Int = 0
-	def getNumberOfSamples: Int = 0
-	def getSample(p: Int, c: Int, i: Int): Double = 0.0
-	def getSamples(p: Int, c: Int): Array[Double] = null
-}
-
-/*
-class IndirectParameter(parameterization: Map[Parameter, Int])
-extends MyParameter {
-	override def getValue = parameterization.keySet.map(p => parameterization(p) * p.getValue).reduceLeft((a, b) => a + b)
-}
-*/
 
 abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	network: Network[M],
@@ -115,12 +56,14 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	private var parameterList: List[ParameterWriter] = null
 	private var updateList: List[MCMCUpdate] = null
 
-	private var randomEffectVar: Parameter = null
-	private var inconsistencyVar: Parameter = null
+	protected val randomEffectVar: Parameter = new RandomEffectsVariance()
+	protected val inconsistencyVar: Parameter = new InconsistencyVariance()
 
 	private var burnInIter = 20000
 	protected var simulationIter = 100000
 	private var reportingInterval = 100
+
+	private val results = new YadasResults()
 
 	private val buildModelPhase = new SimpleSuspendableTask(new Runnable() {
 		def run() {
@@ -170,17 +113,6 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 				"Treatment(s) not found")
 		}
 
-	def getInconsistencyFactors: java.util.List[InconsistencyParameter] = {
-		val list = new java.util.ArrayList[InconsistencyParameter]()
-		for (param <- proto.inconsistencyParameters) {
-			list.add(param)
-		}
-		list
-	}
-
-	def getInconsistency(param: InconsistencyParameter): Estimate =
-		parameters(param)
-
 	def getBurnInIterations: Int = burnInIter
 
 	def setBurnInIterations(it: Int) {
@@ -195,6 +127,9 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		simulationIter = it
 	}
 
+	def getRandomEffectsVariance: Parameter = randomEffectVar
+
+	def getResults: MCMCResults = results
 
 	private def validIt(it: Int) {
 		if (it <= 0 || it % 100 != 0) throw new IllegalArgumentException("Specified # iterations should be a positive multiple of 100");
@@ -381,34 +316,32 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 		updateList = params.map(p => tuner(p))
 
-		def paramList(p: MCMCParameter, n: Int): List[MyParameter] =
-			(0 until n).map(i => new DirectParameter(p, i)
+		def writerList(p: MCMCParameter, l: List[Parameter])
+		: List[ParameterWriter] =
+			(0 until l.size).map(i => results.getParameterWriter(l(i), 0, p, i)
 				).toList
 
-		val basicParam = paramList(basic, proto.basicParameters.size)
-		val inconsParam = paramList(incons, proto.inconsistencyParameters.size)
-		val sigmaParam = paramList(sigma, 1)
-		val sigmawParam = paramList(sigmaw, 1)
-		parameterList = basicParam ++ inconsParam ++ sigmaParam ++ sigmawParam
+		val parameters =
+			proto.basicParameters ++
+			proto.inconsistencyParameters ++
+			List(randomEffectVar, inconsistencyVar)
 
-		val basicParamPairs = {
-			for (i <- 0 until basicParam.size)
-			yield (proto.basicParameters(i), basicParam(i))
-		}
-		val inconsParamPairs = {
-			for (i <- 0 until inconsParam.size)
-			yield (proto.inconsistencyParameters(i), inconsParam(i))
-		}
+		results.setDirectParameters(parameters)
+		results.setNumberOfChains(1)
+		results.setNumberOfIterations(simulationIter)
 
-		parameters = parameterMap(
-			Map[NetworkModelParameter, MyParameter]() ++
-				basicParamPairs ++ inconsParamPairs)
-		parameterList = parameters.values.toList ++ sigmaParam ++ sigmawParam
-		
-		randomEffectVar = sigmaParam(0)
-		inconsistencyVar = sigmawParam(0)
+		val writers = 
+			writerList(basic, proto.basicParameters) ++
+			writerList(incons, proto.inconsistencyParameters) ++
+			writerList(sigma, List(randomEffectVar)) ++
+			writerList(sigmaw, List(inconsistencyVar))
+
+		parameterList = writers
+
+		// FIXME: create indirect
 	}
 
+/*
 	private def parameterMap(basicMap: Map[NetworkModelParameter, MyParameter])
 	:Map[NetworkModelParameter, MyParameter] = {
 		val ts = proto.treatmentList
@@ -427,6 +360,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 				(x) => (basicMap(x._1), x._2)).filter((x) => x._2 != 0)
 		new IndirectParameter(param)
 	}
+*/
 
 	private def successArray(model: NetworkModel[DichotomousMeasurement, _],
 		study: Study[DichotomousMeasurement])

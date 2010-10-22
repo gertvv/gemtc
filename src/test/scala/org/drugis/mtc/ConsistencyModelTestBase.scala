@@ -26,8 +26,11 @@ import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
+import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
 
 abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
+	val mean = new Mean()
+	val stdDev = new StandardDeviation()
 	val f = 0.05
 	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
@@ -77,20 +80,22 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 		model.isReady should be (true)
 
 		val m = model
-		val dAB = m.getRelativeEffect(ta, tb)
-		val dBC = m.getRelativeEffect(tb, tc)
+		val dAB = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(ta, tb)), 0)
+		val dBC = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(tb, tc)), 0)
 
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
 		// for testing against WinBUGS results).
 		val mAB = 0.530409
 		val sAB = 0.7925273
-		dAB.getMean should be (mAB plusOrMinus f * sAB)
-		dAB.getStandardDeviation should be(sAB plusOrMinus f * sAB)
+		mean.evaluate(dAB) should be (mAB plusOrMinus f * sAB)
+		stdDev.evaluate(dAB) should be(sAB plusOrMinus f * sAB)
 		val mBC = -0.4314525
 		val sBC = 0.951072
-		dBC.getMean should be (mBC plusOrMinus f * sBC)
-		dBC.getStandardDeviation should be(sBC plusOrMinus f * sBC)
+		mean.evaluate(dBC) should be (mBC plusOrMinus f * sBC)
+		stdDev.evaluate(dBC) should be(sBC plusOrMinus f * sBC)
 	}
 
 	@Test def testDerivedParameters() {
@@ -99,13 +104,15 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 
 		val m = model
 
-		val dBA = m.getRelativeEffect(tb, ta)
+		val dBA = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(tb, ta)), 0)
 		dBA should not be (null)
-		val dAC = m.getRelativeEffect(ta, tc)
+		val dAC = model.getResults.getSamples(
+			model.getResults.findParameter(m.getRelativeEffect(ta, tc)), 0)
 		val mAC = 0.09895649
 		val sAC = 0.7997789
-		dAC.getMean should be (mAC plusOrMinus f * sAC)
-		dAC.getStandardDeviation should be(sAC plusOrMinus f * sAC)
+		mean.evaluate(dAC) should be (mAC plusOrMinus f * sAC)
+		stdDev.evaluate(dAC) should be(sAC plusOrMinus f * sAC)
 	}
 	
 	def run(model: MCMCModel) {
