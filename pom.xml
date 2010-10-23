@@ -63,8 +63,9 @@
 	</build>
 
 	<modules>
-		<module>mtc-lib</module>
+		<module>mtc-mcmc</module>
 		<module>mtc-model</module>
+		<module>mtc-lib</module>
 		<module>mtc-main</module>
 	</modules>
 </project>

@@ -80,7 +80,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mtc-lib</artifactId>
+			<artifactId>mtc-mcmc</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
