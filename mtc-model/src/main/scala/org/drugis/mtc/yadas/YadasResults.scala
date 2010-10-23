@@ -20,8 +20,8 @@
 package org.drugis.mtc.yadas
 
 import scala.collection.mutable.ArrayBuffer
-import org.drugis.mtc.Parameter
-import org.drugis.mtc.MCMCResults
+import org.drugis.mtc.{Parameter,MCMCResults,
+	MCMCResultsListener,MCMCResultsEvent}
 import gov.lanl.yadas.MCMCParameter
 
 abstract class ParameterWriter(val p: MCMCParameter, val i: Int) {
@@ -55,7 +55,8 @@ class YadasResults extends MCMCResults {
 	private var derivedParameters: List[Parameter] = List()
 	private var derivations: List[Derivation] = List()
 	private var nChains: Int = 0
-	private var nSamples: Int = 0
+	private var reservedSamples: Int = 0
+	private var availableSamples: Int = 0
 
 	private class YadasParameterWriter(
 		val paramIdx: Int, val chainIdx: Int, mp: MCMCParameter, i: Int)
@@ -78,22 +79,27 @@ class YadasResults extends MCMCResults {
 		derivations = p.map(x => x._2)
 	}
 
-	def setNumberOfChains(n: Int): Unit = {
+	def setNumberOfChains(n: Int) {
 		nChains = n
 		initResults()
 	}
 
-	def setNumberOfIterations(n: Int): Unit = {
-		nSamples = n
+	def setNumberOfIterations(n: Int) {
+		reservedSamples = n
 		results = results.map(chain => chain.map(param => param.padTo(n, 0.0)))
 	}
 
-	def initResults(): Unit = {
+	def simulationFinished() {
+		availableSamples = reservedSamples
+		fireResultsChanged()
+	}
+
+	private def initResults(): Unit = {
 		results = (0 until nChains).map(x => newChain).toList
 	}
 
-	def newChain: List[ArrayBuffer[Double]] = {
-		directParameters.map(x => new ArrayBuffer[Double](nSamples).padTo(nSamples, 0.0))
+	private def newChain: List[ArrayBuffer[Double]] = {
+		directParameters.map(x => new ArrayBuffer[Double](reservedSamples).padTo(reservedSamples, 0.0))
 	}
 
 	/**
@@ -106,7 +112,7 @@ class YadasResults extends MCMCResults {
 	def findParameter(p: Parameter): Int = 
 		(directParameters ++ derivedParameters).findIndexOf(x => x == p)
 	def getNumberOfChains: Int = nChains
-	def getNumberOfSamples: Int = nSamples
+	def getNumberOfSamples: Int = availableSamples
 	def getSample(p: Int, c: Int, i: Int): Double = results(c)(p)(i)
 	def getSamples(p: Int, c: Int): Array[Double] =
 		if (p < directParameters.size) {
@@ -114,4 +120,20 @@ class YadasResults extends MCMCResults {
 		} else {
 			derivations(p - directParameters.size).calculate(this, c).toArray
 		}
+
+	val listeners = new ArrayBuffer[MCMCResultsListener]()
+
+	def addResultsListener(l: MCMCResultsListener) {
+		listeners += l
+	}
+
+	def removeResultsListener(l: MCMCResultsListener) {
+		listeners -= l
+	}
+
+	private def fireResultsChanged() {
+		for (l <- listeners) {
+			l.resultsEvent(new MCMCResultsEvent(this))
+		}
+	}
 }

@@ -24,7 +24,8 @@ import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
 
-import org.drugis.mtc.{Parameter, BasicParameter, Treatment}
+import org.drugis.mtc.{Parameter, BasicParameter, Treatment,
+	MCMCResultsListener, MCMCResultsEvent}
 import gov.lanl.yadas.MCMCParameter
 
 class YadasResultsTest extends ShouldMatchersForJUnit {
@@ -60,6 +61,8 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 		results.findParameter(paramx) should be (-1)
 		results.findParameter(param3) should be (2)
 		results.getNumberOfChains should be (1)
+		results.getNumberOfSamples should be (0)
+		results.simulationFinished()
 		results.getNumberOfSamples should be (10)
 		results.getSample(0, 0, 0) should be (0.0)
 		results.getSamples(0, 0).toList should be ((0 until 10).map(x => 0.0))
@@ -79,6 +82,7 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 			mcmcParam.setValue(Array[Double](0.0, i))
 			writer.output()
 		}
+		results.simulationFinished()
 		results.getSamples(1, 0).toList should be ((0 until 10).map(
 			x => x.toDouble))
 	}
@@ -92,10 +96,14 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 			mcmcParam.setValue(Array[Double](0.0, i))
 			writer.output()
 		}
+		results.simulationFinished()
 
 		val firstPart = (0 until 10).map(x => x.toDouble)
-		val secondPart = (0 until 10).map(x => 0.0)
+
 		results.setNumberOfIterations(20)
+		results.simulationFinished()
+		val secondPart = (0 until 10).map(x => 0.0)
+
 		results.getSamples(1, 0).toList should be (
 			(firstPart ++ secondPart).toList)
 	}
@@ -111,7 +119,20 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 			writer1.output()
 			writer2.output()
 		}
+		results.simulationFinished()
+
 		val expected = (0 until 10).map(i => 2 * (i + 1))
 		results.getSamples(2, 0).toList should be (expected.toList)
+	}
+
+	@Test def testEvent() {
+		var received = false
+		results.addResultsListener(new MCMCResultsListener() {
+			def resultsEvent(evt: MCMCResultsEvent) {
+				received = true;
+			}
+		})
+		results.simulationFinished()
+		received should be (true)
 	}
 }

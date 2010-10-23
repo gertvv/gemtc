@@ -46,4 +46,14 @@ public interface MCMCResults {
 	 * @return An array of getNumberOfSamples() samples.
 	 */
 	public double[] getSamples(int p, int c);
+
+	/**
+	 * Register a listener for changes to the results.
+	 */
+	public void addResultsListener(MCMCResultsListener l);
+
+	/**
+	 * Deregister a listener for changes to the results.
+	 */
+	public void removeResultsListener(MCMCResultsListener l);
 }
