@@ -1,5 +1,11 @@
 package org.drugis.mtc.summary;
 
-public class RankProbabilitySummaryTest {
+import org.junit.Ignore;
+import org.junit.Test;
 
+public class RankProbabilitySummaryTest {
+	@Test @Ignore
+	public void test() {
+		
+	}
 }
