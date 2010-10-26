@@ -8,6 +8,9 @@ import org.drugis.mtc.MCMCResultsEvent;
 import org.drugis.mtc.MCMCResultsListener;
 import org.drugis.mtc.Parameter;
 
+/**
+ * Summary of data assumed to be normally distributed; i.e., that have mean and standard deviation.
+ */
 public class NormalSummary extends AbstractObservable implements MCMCResultsListener {
 	public static final String PROPERTY_MEAN = "mean";
 	public static final String PROPERTY_STANDARD_DEVIATION = "standardDeviation";
