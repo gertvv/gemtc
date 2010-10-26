@@ -144,7 +144,7 @@ b <- c(2, 1, 1)"""
 		Set((ta, tb), (tb, tc)), ta)
 
 	def model = new JagsSyntaxModel(
-		NetworkModel(network, spanningTree))
+		InconsistencyNetworkModel(network, spanningTree))
 
 	@Test def testDataText() {
 		model.dataText should be (dataText)
@@ -462,7 +462,7 @@ b <- c(2, 1, 1)"""
 		ConsistencyNetworkModel(network, spanningTree, baselines))
 
 	def inconsModel = new JagsSyntaxModel(
-		NetworkModel(network, spanningTree))
+		InconsistencyNetworkModel(network, spanningTree))
 
 	@Test def testDataText() {
 		model.dataText should be (dataText)

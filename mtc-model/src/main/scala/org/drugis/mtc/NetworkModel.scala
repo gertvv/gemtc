@@ -228,7 +228,12 @@ object ConsistencyNetworkModel extends NetworkModelUtil {
 	}
 }
 
-object NetworkModel extends NetworkModelUtil {
+object NodeSplitNetworkModel extends NetworkModelUtil {
+	def apply[M <: Measurement](network: Network[M], split: BasicParameter)
+	:NetworkModel[M, NodeSplitParametrization[M]] = null
+}
+
+object InconsistencyNetworkModel extends NetworkModelUtil {
 	def apply[M <: Measurement](network: Network[M], tree: Tree[Treatment])
 	: NetworkModel[M, InconsistencyParametrization[M]] = {
 		val pmtz = new InconsistencyParametrization(network,
@@ -257,6 +262,9 @@ object NetworkModel extends NetworkModelUtil {
 			case Some(x) => x.assignment
 		}
 	}
+}
+
+object NetworkModel extends NetworkModelUtil {
 }
 
 trait NetworkModelUtil {

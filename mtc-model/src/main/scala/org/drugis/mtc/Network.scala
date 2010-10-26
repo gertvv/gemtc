@@ -102,7 +102,7 @@ class Network[M <: Measurement](
 		pmtz: InconsistencyParametrization[M])
 	: Boolean =
 		try {
-			NetworkModel.assignBaselines(pmtz)
+			InconsistencyNetworkModel.assignBaselines(pmtz)
 			true
 		} catch {
 			case _ => false

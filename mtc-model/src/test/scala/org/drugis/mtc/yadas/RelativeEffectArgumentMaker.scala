@@ -132,7 +132,7 @@ class RelativeEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 					</study>
 				</studies>
 			</network>)
-		val simpleModel = NetworkModel(simpleNet)
+		val simpleModel = InconsistencyNetworkModel(simpleNet)
 
 		val basic = Array(-1.0)
 		val incons: Array[Double] = Array()

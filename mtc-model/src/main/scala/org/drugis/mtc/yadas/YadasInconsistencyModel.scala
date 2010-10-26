@@ -36,7 +36,7 @@ with InconsistencyModel {
 
 	override protected def buildNetworkModel() {
 		if (proto == null) {
-			proto = NetworkModel(network)
+			proto = InconsistencyNetworkModel(network)
 		}
 	}
 

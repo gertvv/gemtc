@@ -38,7 +38,7 @@ class JAGSGenerator(options: Options) {
 		network: Network[M],
 		best: Tree[Treatment])
 	: NetworkModel[M, InconsistencyParametrization[M]] = {
-		NetworkModel(network, best)
+		InconsistencyNetworkModel(network, best)
 	}
 
 	def createJagsModel[M <: Measurement](

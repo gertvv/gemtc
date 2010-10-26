@@ -62,7 +62,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	@Test def testAssignBaselines() {
 		val pmtz = new InconsistencyParametrization(network,
 			new FundamentalGraphBasis(network.treatmentGraph, spanningTree))
-		val baselines = NetworkModel.assignBaselines(pmtz)
+		val baselines = InconsistencyNetworkModel.assignBaselines(pmtz)
 		baselines(studies(0)) should be (tb)
 		baselines(studies(1)) should be (td)
 		baselines(studies(2)) should be (ta)
@@ -85,7 +85,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testFactory() {
-		val model = NetworkModel(network, spanningTree)
+		val model = InconsistencyNetworkModel(network, spanningTree)
 		model.studyBaseline(studies(0)) should be (tb)
 		model.studyBaseline(studies(1)) should be (td)
 		model.studyBaseline(studies(2)) should be (ta)
@@ -96,7 +96,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testData() {
-		val data = NetworkModel(network, spanningTree).data
+		val data = InconsistencyNetworkModel(network, spanningTree).data
 		data.size should be (8)
 		data(0)._1 should be (studies(0))
 		data(1)._1 should be (studies(0))
@@ -117,7 +117,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testParameterVector() {
-		val model = NetworkModel(network, spanningTree)
+		val model = InconsistencyNetworkModel(network, spanningTree)
 		model.parameterVector should be (List[NetworkModelParameter](
 				new BasicParameter(ta, tb),
 				new BasicParameter(ta, tc),
@@ -127,7 +127,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testParameterVectorOnlyInconsistencies() {
-		val model = NetworkModel(network, new Tree[Treatment](
+		val model = InconsistencyNetworkModel(network, new Tree[Treatment](
 			Set((ta, tc), (tc, tb), (tb, td)), ta))
 		model.parameterVector should be (List[NetworkModelParameter](
 				new BasicParameter(ta, tc),
@@ -138,14 +138,14 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 
 	@Test def testRelativeEffects() {
-		val model = NetworkModel(network, spanningTree)
+		val model = InconsistencyNetworkModel(network, spanningTree)
 		// assignment of baselines is 1:B, 2:D, 3:A
 		model.relativeEffects should be (
 			List((tb, ta), (tb, tc), (td, tb), (td, tc), (ta, tc)))
 	}
 
 	@Test def testRelativeEffectIndex() {
-		val model = NetworkModel(network, spanningTree)
+		val model = InconsistencyNetworkModel(network, spanningTree)
 		model.relativeEffectIndex(studies(0)) should be (0)
 		model.relativeEffectIndex(studies(1)) should be (2)
 		model.relativeEffectIndex(studies(2)) should be (4)
@@ -215,14 +215,14 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 		</network>)
 
 	@Test def testVariancePrior() {
-		NetworkModel(networkDich).variancePrior should be (
+		InconsistencyNetworkModel(networkDich).variancePrior should be (
 			2.138684 plusOrMinus 0.000001)
-		NetworkModel(networkCont).variancePrior should be (
+		InconsistencyNetworkModel(networkCont).variancePrior should be (
 			28.5 plusOrMinus 0.000001)
 	}
 
 	@Test def testNoneModel() {
-		val model = NetworkModel(networkNone)
+		val model = InconsistencyNetworkModel(networkNone)
 		model.treatmentList should be (List(new Treatment("A"), new Treatment("B")))
 		model.studyList.size should be (3)
 	}
@@ -262,7 +262,7 @@ class AdditionalBaselineAssignmentTest extends ShouldMatchersForJUnit {
 	@Test def testAssignBaselines() {
 		val pmtz = new InconsistencyParametrization(network,
 			new FundamentalGraphBasis(network.treatmentGraph, spanningTree))
-		val baselines = NetworkModel.assignBaselines(pmtz)
+		val baselines = InconsistencyNetworkModel.assignBaselines(pmtz)
 		baselines should not be (null)
 	}
 }

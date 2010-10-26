@@ -68,7 +68,7 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 	var model: InconsistencyModel = null 
 
 	@Before def setUp() {
-		model = makeModel(NetworkModel(network, spanningTree))
+		model = makeModel(InconsistencyNetworkModel(network, spanningTree))
 	}
 
 	@Test def testIsNotReady() {
