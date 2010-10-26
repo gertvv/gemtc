@@ -20,5 +20,4 @@
 package org.drugis.mtc;
 
 public interface ConsistencyModel extends MixedTreatmentComparison {
-	public double rankProbability(Treatment t, int r);
 }
