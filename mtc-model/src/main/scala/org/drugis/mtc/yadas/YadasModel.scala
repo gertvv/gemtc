@@ -24,6 +24,9 @@ import org.drugis.common.threading.activity.Transition
 import org.drugis.common.threading.activity.DirectTransition
 import org.drugis.common.threading.IterativeComputation
 import org.drugis.common.threading.IterativeTask
+import org.drugis.common.threading.TaskListener
+import org.drugis.common.threading.event.TaskEvent
+import org.drugis.common.threading.event.TaskEvent.EventType
 import org.drugis.common.threading.SimpleSuspendableTask
 import org.drugis.common.threading.activity.ActivityModel
 import org.drugis.common.threading.activity.ActivityTask
@@ -336,6 +339,14 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 		results.setDerivedParameters(
 			indirectParameters.map(p => (p, derivation(p))).toList)
+
+		simulationPhase.addTaskListener(new TaskListener() {
+			def taskEvent(event: TaskEvent) {
+				if (event.getType() == EventType.TASK_FINISHED) {
+					results.simulationFinished()
+				}
+			}
+		})
 	}
 
 /*
