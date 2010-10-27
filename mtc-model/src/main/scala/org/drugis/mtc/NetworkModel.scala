@@ -266,6 +266,23 @@ object NodeSplitNetworkModel extends NetworkModelUtil {
 			case Some(x) => x.assignment
 		}
 	}
+
+	def getSplittableNodes[M <: Measurement](network: Network[M])
+	: Set[(Treatment, Treatment)] = {
+		val tree = SpanningTreeEnumerator.treeEnumerator(
+			network.treatmentGraph, 
+			treatmentList(network.treatments).first).head
+		val basis = new FundamentalGraphBasis(network.treatmentGraph, tree)
+
+		Set[(Treatment, Treatment)]() ++
+		basis.cycles.map(cycle => new Cycle(cycle).edgeSeq.map(order _)
+			).reduceLeft((a, b) => a ++ b)
+	}
+
+	private def order(e: (Treatment, Treatment)) = {
+		if (e._1 < e._2) e
+		else (e._2, e._1)
+	}
 }
 
 object InconsistencyNetworkModel extends NetworkModelUtil {
