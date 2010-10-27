@@ -260,14 +260,11 @@ object NodeSplitNetworkModel extends NetworkModelUtil {
 
 	def assignBaselines[M <: Measurement](pmtz: NodeSplitParametrization[M])
 	: Map[Study[M], Treatment] = {
-		throw new Exception("Assignment Not Implemented")
-/*
 		val alg = new DFS()
 		alg.search(BaselineSearchProblem(pmtz)) match {
 			case None => throw new Exception("No Assignment Found!")
 			case Some(x) => x.assignment
 		}
-*/
 	}
 }
 

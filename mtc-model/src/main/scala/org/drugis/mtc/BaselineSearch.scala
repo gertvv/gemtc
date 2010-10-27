@@ -29,9 +29,20 @@ object BaselineSearchProblem {
 	def apply[M <: Measurement](pmtz: ConsistencyParametrization[M]) =
 		new BaselineSearchProblem(pmtz.network, constraint(pmtz)_)
 
+	def apply[M <: Measurement](pmtz: NodeSplitParametrization[M]) =
+		new NodeSplitBaselineSearchProblem(pmtz.network, constraint(pmtz)_,
+			pmtz.splitNode)
+
 	private def completeConstraint[M <: Measurement](network: Network[M])(
 		edges: Set[(Treatment, Treatment)])
 	: Boolean = network.treatmentGraph.edgeSet == edges
+
+	private def constraint[M <: Measurement](
+		pmtz: NodeSplitParametrization[M])(
+		edges: Set[(Treatment, Treatment)])
+	: Boolean = {
+		pmtz.cycles.forall(cycle => cycleConstraint(cycle, edges))
+	}
 
 	private def constraint[M <: Measurement](
 		pmtz: ConsistencyParametrization[M])(
@@ -79,6 +90,31 @@ object BaselineSearchProblem {
 		val eg = new UndirectedGraph(edges)
 		cg.edgeSet.size - cg.intersection(eg).edgeSet.size
 	}
+}
+
+class NodeSplitBaselineSearchProblem[M <: Measurement](
+	network: Network[M],
+	constraint: (Set[(Treatment, Treatment)]) => Boolean,
+	splitNode: (Treatment, Treatment))
+extends BaselineSearchProblem[M](network, constraint) {
+	override def successors(s: BaselineSearchState[M])
+	: List[BaselineSearchState[M]] = {
+		if (s.studies.isEmpty) Nil
+		else {
+			val study = s.studies.head
+			val treatments =
+				if (containsSplitNode(study)) List(splitNode._1, splitNode._2)
+				else study.treatments.toList.sort((a, b) => a < b)
+			(for {t <- treatments
+				val assignment = s.assignment + ((study, t))
+			} yield new BaselineSearchState(s.studies.tail, assignment)
+			).toList
+		}
+	}
+
+	private def containsSplitNode(s: Study[M]) =
+		s.treatments.contains(splitNode._1) &&
+			s.treatments.contains(splitNode._2)
 }
 
 class BaselineSearchProblem[M <: Measurement](

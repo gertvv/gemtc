@@ -228,6 +228,62 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 	}
 }
 
+class NodeSplitNetworkModelTest extends ShouldMatchersForJUnit {
+	val network = Network.noneFromXML(<network type="none">
+			<treatments>
+				<treatment id="A"/>
+				<treatment id="B"/>
+				<treatment id="C"/>
+				<treatment id="D"/>
+			</treatments>
+			<studies>
+				<study id="1">
+					<measurement treatment="A" />
+					<measurement treatment="B" />
+					<measurement treatment="D" />
+				</study>
+				<study id="2">
+					<measurement treatment="A" />
+					<measurement treatment="C" />
+					<measurement treatment="D" />
+				</study>
+				<study id="3">
+					<measurement treatment="B" />
+					<measurement treatment="C" />
+					<measurement treatment="D" />
+				</study>
+			</studies>
+		</network>)
+	val ta = new Treatment("A")
+	val tb = new Treatment("B")
+	val tc = new Treatment("C")
+	val td = new Treatment("D")
+	val studies = network.studies.toList.sort((a, b) => a.id < b.id)
+
+	val spanningTree = new Tree[Treatment](
+		Set((td, tc), (td, tb), (td, ta)), td)
+
+	@Test def testAssignBaselines() {
+		val pmtz = new NodeSplitParametrization(network,
+			new FundamentalGraphBasis(network.treatmentGraph, spanningTree),
+			(td, tc))
+		val baselines = NodeSplitNetworkModel.assignBaselines(pmtz)
+		baselines(studies(0)) should be (ta)
+		baselines(studies(1)) should be (td)
+		baselines(studies(2)) should be (td)
+	}
+
+	@Test def testModelCreation() {
+		val model = NodeSplitNetworkModel(network, (td, tc))
+		val expectedTree = new Tree[Treatment](
+			Set((td, tc), (tc, tb), (tb, ta)), td)
+		model.basis.tree should be (expectedTree)
+		model.studyBaseline(studies(0)) should be (ta)
+		model.studyBaseline(studies(1)) should be (td)
+		model.studyBaseline(studies(2)) should be (tc)
+	}
+}
+
 class AdditionalBaselineAssignmentTest extends ShouldMatchersForJUnit {
 	val network = Network.dichFromXML(<network>
 			<treatments>
