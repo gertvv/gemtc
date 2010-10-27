@@ -20,6 +20,7 @@
 package org.drugis.mtc.yadas
 
 import org.drugis.common.threading.Task
+import org.drugis.common.threading.TaskUtil
 import org.drugis.common.threading.activity.ActivityTask
 import org.drugis.common.threading.ThreadHandler
 import org.scalatest.junit.ShouldMatchersForJUnit
@@ -53,7 +54,7 @@ class NodeSplitIT extends ShouldMatchersForJUnit {
 	@Test def testResult() {
 		val model = new YadasNodeSplitModel(network,
 			new BasicParameter(mpci, spci))
-		run(model)
+		TaskUtil.run(model.getActivityTask)
 
 		val direct = model.getResults.findParameter(new SplitParameter(mpci, spci, true))
 		val indirect = model.getResults.findParameter(new SplitParameter(mpci, spci, false))
@@ -66,18 +67,5 @@ class NodeSplitIT extends ShouldMatchersForJUnit {
 			mInd plusOrMinus f * sInd)
 		stdDev.evaluate(model.getResults.getSamples(indirect, 0)) should be (
 			sInd plusOrMinus f * sInd)
-	}
-	
-	def run(model: MCMCModel) {
-		val th = ThreadHandler.getInstance()
-		val task = model.getActivityTask()
-		th.scheduleTask(task)
-		waitUntilReady(task)
-	}
-	
-	def waitUntilReady(task: Task) {
-		while (!task.isFinished()) {
-			Thread.sleep(100);
-		}
 	}
 }

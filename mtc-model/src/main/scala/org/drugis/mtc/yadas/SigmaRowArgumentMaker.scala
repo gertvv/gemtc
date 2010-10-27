@@ -26,8 +26,11 @@ import gov.lanl.yadas.ArgumentMaker
  * ArgumentMaker for (a row of the) variance-covariance matrix of RE Gaussian.
  */
 class SigmaRowArgumentMaker[M <: Measurement](study: Study[M],
-		sigmaIdx: Int, rowIdx: Int)
+		sigmaIdx: Int, rowIdx: Int, splitIdx: Int)
 extends ArgumentMaker {
+	def this(study: Study[M], sigmaIdx: Int, rowIdx: Int) =
+		this(study, sigmaIdx, rowIdx, -1)
+
 	/**
 	 * Calculate "the argument": a row of the var/covar matrix.
 	 * data[sigmaIdx][0] should contain sqrt(sigma_0)
@@ -36,9 +39,10 @@ extends ArgumentMaker {
 	def getArgument(data: Array[Array[Double]]): Array[Double] = {
 		val sd = data(sigmaIdx)(0)
 		val vari = sd * sd
-		val cova = vari / 2
+		val cova = if (rowIdx == splitIdx) 0 else vari / 2
 		val arr = Array.make(study.treatments.size - 1, cova)
 		arr(rowIdx) = vari
+		if (splitIdx > -1 && rowIdx != splitIdx) arr(splitIdx) = 0
 		arr
 	}
 }
@@ -48,6 +52,14 @@ object SigmaMatrixArgumentMaker {
 	: List[ArgumentMaker] = {
 		(0 until (study.treatments.size - 1)).map(
 			rowIdx => new SigmaRowArgumentMaker(study, sigmaIdx, rowIdx)
+		).toList
+	}
+
+	def apply[M <: Measurement](study: Study[M],
+		splitIdx: Int, sigmaIdx: Int)
+	: List[ArgumentMaker] = {
+		(0 until (study.treatments.size - 1)).map(
+			rowIdx => new SigmaRowArgumentMaker(study, sigmaIdx, rowIdx, splitIdx)
 		).toList
 	}
 }	
