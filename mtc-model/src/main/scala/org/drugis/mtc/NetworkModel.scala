@@ -210,7 +210,7 @@ object ConsistencyNetworkModel extends NetworkModelUtil {
 
 	def apply[M <: Measurement](network: Network[M], base: Treatment)
 	: NetworkModel[M, ConsistencyParametrization[M]] = {
-		apply(network, network.bestSpanningTree(base))
+		apply(network, network.someSpanningTree(base))
 	}
 
 	def apply[M <: Measurement](network: Network[M])

@@ -94,8 +94,12 @@ class Network[M <: Measurement](
 		compare(a, b) > 0
 	}
 
+	def someSpanningTree(top: Treatment): Tree[Treatment] = {
+		searchSomeSpanningTree(top, new NullSpanningTreeSearchListener())
+	}
+
 	def bestSpanningTree(top: Treatment): Tree[Treatment] = {
-		searchSpanningTree(top, new NullSpanningTreeSearchListener())
+		searchBestSpanningTree(top, new NullSpanningTreeSearchListener())
 	}
 
 	private def baselineAssignmentExists(
@@ -103,6 +107,16 @@ class Network[M <: Measurement](
 	: Boolean =
 		try {
 			InconsistencyNetworkModel.assignBaselines(pmtz)
+			true
+		} catch {
+			case _ => false
+		}
+
+	private def baselineAssignmentExists(
+		pmtz: ConsistencyParametrization[M])
+	: Boolean =
+		try {
+			ConsistencyNetworkModel.assignBaselines(pmtz)
 			true
 		} catch {
 			case _ => false
@@ -141,8 +155,22 @@ class Network[M <: Measurement](
 		}
 	}
 
+	def searchSomeSpanningTree(top: Treatment, l: SpanningTreeSearchListener)
+	: Tree[Treatment] = {
+		for (tree <- treeEnumerator(top)) {
+			val pmtz = new ConsistencyParametrization(this, 
+				new FundamentalGraphBasis(treatmentGraph, tree))
+			if (baselineAssignmentExists(pmtz)) {
+				l.receive(tree, -1, true, Some(true), true)
+				return tree
+			} else {
+				l.receive(tree, -1, true, Some(false), false)
+			}
+		}
+		null
+	}
 
-	def searchSpanningTree(top: Treatment, l: SpanningTreeSearchListener)
+	def searchBestSpanningTree(top: Treatment, l: SpanningTreeSearchListener)
 	: Tree[Treatment] = {
 		// First, check if there is an assignment that covers the full graph
 		val completeBaseline = completeBaselineAssignment

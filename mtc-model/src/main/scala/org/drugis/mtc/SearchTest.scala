@@ -37,7 +37,7 @@ class SearchTestImpl(xmlFile: String) {
 	def run() {
 		val t0 = System.currentTimeMillis()
 		val listener = new SpanningTreeSearchListenerImpl()
-		val result = network.searchSpanningTree(top, listener)
+		val result = network.searchBestSpanningTree(top, listener)
 		val best = result
 		val model = InconsistencyNetworkModel(network, best)
 		val t1 = System.currentTimeMillis()
