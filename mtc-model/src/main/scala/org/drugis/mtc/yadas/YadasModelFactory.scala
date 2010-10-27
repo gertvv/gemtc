@@ -21,6 +21,8 @@ package org.drugis.mtc.yadas
 
 import org.drugis.mtc._
 
+import scala.collection.JavaConversions._
+
 /**
  * Construct MTC implementations based on YADAS 
  */
@@ -33,5 +35,16 @@ class YadasModelFactory extends ModelFactory {
 	def getInconsistencyModel[M <: Measurement](network: Network[M])
 	: InconsistencyModel = {
 		new YadasInconsistencyModel(network)
+	}
+
+	def getNodeSplitModel[M <: Measurement](network: Network[M], 
+		split: BasicParameter)
+	: NodeSplitModel = {
+		new YadasNodeSplitModel(network, split)
+	}
+
+	def getSplittableNodes[M <: Measurement](network: Network[M])
+	: java.util.List[BasicParameter] = {
+		NodeSplitNetworkModel.getSplittableNodes(network).map(e => new BasicParameter(e._1, e._2)).toList
 	}
 }

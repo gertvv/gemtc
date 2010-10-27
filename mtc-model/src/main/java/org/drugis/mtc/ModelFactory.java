@@ -19,6 +19,8 @@
 
 package org.drugis.mtc;
 
+import java.util.List;
+
 /**
  * Factory that creates MTC models from evidence networks.
  */
@@ -31,4 +33,13 @@ public interface ModelFactory {
 	 * Create a homogenous variance random effects inconsistency model.
 	 */
 	public <T extends Measurement> InconsistencyModel getInconsistencyModel(Network<T> network);
+	/**
+	 * Create a homogenous variance random effects node-splitting model.
+	 * @param split The node to split on.
+	 */
+	public <T extends Measurement> NodeSplitModel getNodeSplitModel(Network<T> network, BasicParameter split);
+	/**
+	 * Generate a list of nodes that are interesting to split.
+	 */
+	public <T extends Measurement> List<BasicParameter> getSplittableNodes(Network<T> network);
 }
