@@ -33,14 +33,14 @@ import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
 import org.drugis.mtc._
 
 class NodeSplitIT extends ShouldMatchersForJUnit {
-	val f = 0.05
+	val f = 0.15
 
 	def network = {
 		val is = classOf[NodeSplitIT].getResourceAsStream("vlaar-longterm.xml")
 		Network.dichFromXML(scala.xml.XML.load(is))
 	}
-	val mean = new Mean()
-	val stdDev = new StandardDeviation()
+	val meanCalc = new Mean()
+	val stdDevCalc = new StandardDeviation()
 
 	val ipci = new Treatment("iPCI");
 	val mpci = new Treatment("mPCI");
@@ -59,13 +59,21 @@ class NodeSplitIT extends ShouldMatchersForJUnit {
 		val direct = model.getResults.findParameter(new SplitParameter(mpci, spci, true))
 		val indirect = model.getResults.findParameter(new SplitParameter(mpci, spci, false))
 
-		mean.evaluate(model.getResults.getSamples(direct, 0)) should be (
-			mDir plusOrMinus f * sDir)
-		stdDev.evaluate(model.getResults.getSamples(direct, 0)) should be (
-			sDir plusOrMinus f * sDir)
-		mean.evaluate(model.getResults.getSamples(indirect, 0)) should be (
-			mInd plusOrMinus f * sInd)
-		stdDev.evaluate(model.getResults.getSamples(indirect, 0)) should be (
-			sInd plusOrMinus f * sInd)
+
+		mean(model, direct) should be (mDir plusOrMinus f * sDir)
+		stdDev(model, direct) should be (sDir plusOrMinus f * sDir)
+		mean(model, indirect) should be (mInd plusOrMinus f * sInd)
+		stdDev(model, indirect) should be (sInd plusOrMinus f * sInd)
 	}
+
+	private def mean(model: MCMCModel, p: Int): Double = { 
+		val n = model.getSimulationIterations / 2
+		meanCalc.evaluate(model.getResults.getSamples(p, 0), n, n)
+	}
+
+	private def stdDev(model: MCMCModel, p: Int): Double = { 
+		val n = model.getSimulationIterations / 2
+		stdDevCalc.evaluate(model.getResults.getSamples(p, 0), n, n)
+	}
+
 }
