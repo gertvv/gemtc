@@ -36,7 +36,8 @@ with NodeSplitModel {
 
 	override protected def buildNetworkModel() {
 		if (proto == null) {
-			proto = NodeSplitNetworkModel(network, splitNode)
+			proto = NodeSplitNetworkModel(network,
+				(splitNode.base, splitNode.subject))
 		}
 	}
 

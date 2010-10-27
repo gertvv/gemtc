@@ -229,8 +229,46 @@ object ConsistencyNetworkModel extends NetworkModelUtil {
 }
 
 object NodeSplitNetworkModel extends NetworkModelUtil {
-	def apply[M <: Measurement](network: Network[M], split: BasicParameter)
-	:NetworkModel[M, NodeSplitParametrization[M]] = null
+	def apply[M <: Measurement](network: Network[M],
+		split: (Treatment, Treatment),
+		tree: Tree[Treatment],
+		baselines: Map[Study[M], Treatment])
+	: NetworkModel[M, NodeSplitParametrization[M]] = {
+		val pmtz = new NodeSplitParametrization(network,
+			new FundamentalGraphBasis(network.treatmentGraph, tree), split)
+		new NetworkModel[M, NodeSplitParametrization[M]](
+			pmtz, baselines,
+			treatmentList(network.treatments),
+			studyList(network.studies))
+	}
+
+	def apply[M <: Measurement](network: Network[M],
+		split: (Treatment, Treatment), tree: Tree[Treatment])
+	: NetworkModel[M, NodeSplitParametrization[M]] = {
+		val pmtz = new NodeSplitParametrization(network,
+			new FundamentalGraphBasis(network.treatmentGraph, tree), split)
+		new NetworkModel[M, NodeSplitParametrization[M]](pmtz,
+			assignBaselines(pmtz),
+			treatmentList(network.treatments),
+			studyList(network.studies))
+	}
+
+	def apply[M <: Measurement](network: Network[M],
+		split: (Treatment, Treatment))
+	:NetworkModel[M, NodeSplitParametrization[M]] = 
+		apply(network, split, network.someSpanningTree(split._1, split._2))
+
+	def assignBaselines[M <: Measurement](pmtz: NodeSplitParametrization[M])
+	: Map[Study[M], Treatment] = {
+		throw new Exception("Assignment Not Implemented")
+/*
+		val alg = new DFS()
+		alg.search(BaselineSearchProblem(pmtz)) match {
+			case None => throw new Exception("No Assignment Found!")
+			case Some(x) => x.assignment
+		}
+*/
+	}
 }
 
 object InconsistencyNetworkModel extends NetworkModelUtil {

@@ -86,6 +86,9 @@ class Network[M <: Measurement](
 	def treeEnumerator(top: Treatment) =
 		SpanningTreeEnumerator.treeEnumerator(treatmentGraph, top)
 
+	def treeEnumerator(top: Treatment, req: Treatment) =
+		SpanningTreeEnumerator.treeEnumerator(treatmentGraph, top, req)
+
 	private def compare(a: Tree[Treatment], b: Tree[Treatment]): Int = {
 		countInconsistencies(a) - countInconsistencies(b)
 	}
@@ -94,16 +97,31 @@ class Network[M <: Measurement](
 		compare(a, b) > 0
 	}
 
+	/**
+	 * Find any spanning tree that has a baseline assignment
+	 */
 	def someSpanningTree(top: Treatment): Tree[Treatment] = {
 		searchSomeSpanningTree(top, new NullSpanningTreeSearchListener())
 	}
 
+	/**
+	 * Find any spanning tree that includes (top, req) and has a baseline
+	 * assignment where studies that include (top, req), either top or req is
+	 * the baseline.
+	 */
+	def someSpanningTree(top: Treatment, req: Treatment): Tree[Treatment] = {
+		searchSomeSpanningTree(top, req, new NullSpanningTreeSearchListener())
+	}
+
+	/**
+	 * Find the spanning tree with optimal ICDF and having a baseline
+	 * assignment.
+	 */
 	def bestSpanningTree(top: Treatment): Tree[Treatment] = {
 		searchBestSpanningTree(top, new NullSpanningTreeSearchListener())
 	}
 
-	private def baselineAssignmentExists(
-		pmtz: InconsistencyParametrization[M])
+	private def baselineAssignmentExists(pmtz: InconsistencyParametrization[M])
 	: Boolean =
 		try {
 			InconsistencyNetworkModel.assignBaselines(pmtz)
@@ -112,11 +130,19 @@ class Network[M <: Measurement](
 			case _ => false
 		}
 
-	private def baselineAssignmentExists(
-		pmtz: ConsistencyParametrization[M])
+	private def baselineAssignmentExists(pmtz: ConsistencyParametrization[M])
 	: Boolean =
 		try {
 			ConsistencyNetworkModel.assignBaselines(pmtz)
+			true
+		} catch {
+			case _ => false
+		}
+
+	private def baselineAssignmentExists(pmtz: NodeSplitParametrization[M])
+	: Boolean =
+		try {
+			NodeSplitNetworkModel.assignBaselines(pmtz)
 			true
 		} catch {
 			case _ => false
@@ -153,6 +179,22 @@ class Network[M <: Measurement](
 				if (expanded contains v) connectedNessCheck(f0, expanded)
 				else connectedNessCheck(f0 ::: verticesFrom(v), expanded + v)
 		}
+	}
+
+	def searchSomeSpanningTree(top: Treatment, req: Treatment,
+		 l: SpanningTreeSearchListener)
+	: Tree[Treatment] = {
+		for (tree <- treeEnumerator(top, req)) {
+			val pmtz = new NodeSplitParametrization(this, 
+				new FundamentalGraphBasis(treatmentGraph, tree), (top, req))
+			if (baselineAssignmentExists(pmtz)) {
+				l.receive(tree, -1, true, Some(true), true)
+				return tree
+			} else {
+				l.receive(tree, -1, true, Some(false), false)
+			}
+		}
+		null
 	}
 
 	def searchSomeSpanningTree(top: Treatment, l: SpanningTreeSearchListener)
