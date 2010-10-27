@@ -28,6 +28,13 @@ object SpanningTreeEnumerator {
 		new SpanningTreeIterable[T](g, r)
 
 	/**
+	 * Enumerate all spanning trees of g rooted at r that include (r, s).
+	 */
+	def treeEnumerator[T <% Ordered[T]](g: Graph[T], r: T, s: T)
+	: Iterable[Tree[T]] = 
+		new SpanningTreeWithEdgeIterable[T](g, r, s)
+
+	/**
 	 * Enumerate all spanning trees of the undirected graph g.
 	 */
 	def treeEnumerator[T <% Ordered[T]](g: UndirectedGraph[T])
@@ -38,11 +45,16 @@ object SpanningTreeEnumerator {
 	}
 }
 
+class SpanningTreeWithEdgeIterable[T <% Ordered[T]](
+		val graph: Graph[T], val root: T, val required: T)
+extends Iterable[Tree[T]] {
+	override def iterator: Iterator[Tree[T]] = new SpanningTreeIterator[T](graph, root, required)
+}
+
 class SpanningTreeIterable[T <% Ordered[T]](
 		val graph: Graph[T], val root: T)
 extends Iterable[Tree[T]] {
 	override def iterator: Iterator[Tree[T]] = new SpanningTreeIterator[T](graph, root)
-	override def elements: Iterator[Tree[T]] = new SpanningTreeIterator[T](graph, root)
 }
 
 /**
@@ -59,6 +71,16 @@ extends Iterator[Tree[T]] {
 			graph.edgesFrom(root).toList, // the fringe of unexplored edges
 			false // don't do bridge test
 		))
+
+	def this(graph: Graph[T], root: T, required: T) {
+		this(graph, root)
+		val state = new ProblemState(
+			queue.head.graph,
+			queue.head.tree,
+			(root, required) :: (queue.head.fringe - (root, required)),
+			false)
+		queue = deepenSucc(state)
+	}
 
 	def next: Tree[T] = {
 		if (hasNext) {

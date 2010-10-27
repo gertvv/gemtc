@@ -66,3 +66,20 @@ class SpanningTreeEnumeratorTest extends ShouldMatchersForJUnit {
 		found.size should be (16)
 	}
 }
+
+class SpanningTreeRequiredEdgeTest extends ShouldMatchersForJUnit {
+	@Test def testEnumerateUndirected() {
+		val g = new UndirectedGraph[String](Set[(String, String)](
+				("A", "B"), ("A", "C"), ("B", "D"), ("C", "D")
+			))
+
+		val found = SpanningTreeEnumerator.treeEnumerator(g, "A", "C")
+		(Set[Tree[String]]() ++ found) should be (
+			Set[Tree[String]](
+				new Tree(Set(("A", "C"), ("C", "D"), ("D", "B")), "A"),
+				new Tree(Set(("A", "B"), ("A", "C"), ("C", "D")), "A"),
+				new Tree(Set(("A", "B"), ("B", "D"), ("A", "C")), "A")
+			)
+		)
+	}
+}
