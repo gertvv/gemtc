@@ -27,6 +27,7 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 
 	public void resultsEvent(MCMCResultsEvent event) {
 		calculate();
+		firePropertyChange(PROPERTY_VALUE, null, this);
 	}
 	
 	public List<Treatment> getTreatments() {
