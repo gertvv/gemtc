@@ -113,7 +113,12 @@ class YadasResults extends MCMCResults {
 		(directParameters ++ derivedParameters).findIndexOf(x => x == p)
 	def getNumberOfChains: Int = nChains
 	def getNumberOfSamples: Int = availableSamples
-	def getSample(p: Int, c: Int, i: Int): Double = results(c)(p)(i)
+	def getSample(p: Int, c: Int, i: Int): Double =
+		if (p < directParameters.size) {
+			results(c)(p)(i)
+		} else {
+			derivations(p - directParameters.size).calculate(this, c, i)
+		}
 	def getSamples(p: Int, c: Int): Array[Double] =
 		if (p < directParameters.size) {
 			results(c)(p).toArray

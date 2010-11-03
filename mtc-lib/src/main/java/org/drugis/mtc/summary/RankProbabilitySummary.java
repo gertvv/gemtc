@@ -20,6 +20,8 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 	private int d_samples;
 
 	public RankProbabilitySummary(MCMCResults results, List<Treatment> treatments) {
+		d_results = results;
+		d_results.addResultsListener(this);
 		d_treatments = treatments;
 		d_n = treatments.size();
 		calculate();
