@@ -34,6 +34,7 @@ public class GelmanRubinAcceptanceTest {
 				new BasicParameter(t1, t2), new BasicParameter(t2, t3), new RandomEffectsVariance()	
 		};
 		d_results = new FileResults(is, d_parameters, 3, 10000);
+		d_results.makeSamplesAvailable();
 	}
 	
 	@Test
@@ -47,25 +48,22 @@ public class GelmanRubinAcceptanceTest {
 	@Test @Ignore
 	public void testResults500() throws IOException {
 		double[][] expected = readExpected("conv-0.5k.txt");
-		// d_results.makeSamplesAvailable(500); -- not yet implemented
-		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0]), EPSILON);
-		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1]), EPSILON);
-		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2]), EPSILON);
+		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 500), EPSILON);
+		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 500), EPSILON);
+		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 500), EPSILON);
 	}
 	
 	@Test @Ignore
 	public void testResults2k() throws IOException {
 		double[][] expected = readExpected("conv-2k.txt");
-		// d_results.makeSamplesAvailable(2000);
-		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0]), EPSILON);
-		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1]), EPSILON);
-		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2]), EPSILON);
+		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 2000), EPSILON);
+		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 2000), EPSILON);
+		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 2000), EPSILON);
 	}
 	
 	@Test @Ignore
 	public void testResults10k() throws IOException {
-		double[][] expected = readExpected("conv-10k.txt");
-		d_results.makeSamplesAvailable(); // all samples
+		double[][] expected = readExpected("conv-10k.txt"); // based on all samples
 		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0]), EPSILON);
 		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1]), EPSILON);
 		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2]), EPSILON);
