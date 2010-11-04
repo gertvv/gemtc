@@ -22,6 +22,7 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	private final Parameter d_parameter;
 	private double d_mean = 0.0;
 	private double d_stdev = 0.0;
+	private boolean d_defined = false;
 
 	public NormalSummary(MCMCResults results, Parameter parameter) {
 		d_results = results;
@@ -33,9 +34,13 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	public void resultsEvent(MCMCResultsEvent event) {
 		calculateResults();
 	}
+
+	private boolean isReady() {
+		return d_results.getNumberOfSamples() >= 4;
+	}
 	
 	public boolean isDefined() {
-		return d_results.getNumberOfSamples() >= 4;
+		return d_defined;
 	}
 	
 	public double getMean() {
@@ -47,10 +52,11 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	}
 	
 	private synchronized void calculateResults() {
-		if (!isDefined()) return;
+		if (!isReady()) return;
 		double[] samples = getSamples();
 		d_mean = s_mean.evaluate(samples);
 		d_stdev = s_stdev.evaluate(samples);
+		d_defined = true;
 		firePropertyChange(PROPERTY_MEAN, null, d_mean);
 		firePropertyChange(PROPERTY_STANDARD_DEVIATION, null, d_stdev);
 	}

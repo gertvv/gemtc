@@ -36,12 +36,12 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 		return Collections.unmodifiableList(d_treatments);
 	}
 
-	private boolean isDefined() {
+	private boolean isReady() {
 		return d_samples > 0;
 	}
 
 	public double getValue(Treatment t, int rank) {
-		if (!isDefined()) {
+		if (!isReady()) {
 			return 0.0;
 		}
 		int rIdx = d_n - rank;
