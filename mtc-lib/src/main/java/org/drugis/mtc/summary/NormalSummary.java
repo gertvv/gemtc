@@ -11,7 +11,7 @@ import org.drugis.mtc.Parameter;
 /**
  * Summary of data assumed to be normally distributed; i.e., that have mean and standard deviation.
  */
-public class NormalSummary extends AbstractObservable implements MCMCResultsListener {
+public class NormalSummary extends AbstractObservable implements MCMCResultsListener, Summary {
 	public static final String PROPERTY_MEAN = "mean";
 	public static final String PROPERTY_STANDARD_DEVIATION = "standardDeviation";
 	
@@ -39,7 +39,10 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 		return d_results.getNumberOfSamples() >= 4;
 	}
 	
-	public boolean isDefined() {
+	/* (non-Javadoc)
+	 * @see org.drugis.mtc.summary.Summary#getDefined()
+	 */
+	public boolean getDefined() {
 		return d_defined;
 	}
 	
@@ -53,22 +56,12 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	
 	private synchronized void calculateResults() {
 		if (!isReady()) return;
-		double[] samples = getSamples();
+		double[] samples = SummaryUtil.getSamples(d_results, d_parameter);
 		d_mean = s_mean.evaluate(samples);
 		d_stdev = s_stdev.evaluate(samples);
 		d_defined = true;
+		firePropertyChange(PROPERTY_DEFINED, null, d_defined);
 		firePropertyChange(PROPERTY_MEAN, null, d_mean);
 		firePropertyChange(PROPERTY_STANDARD_DEVIATION, null, d_stdev);
-	}
-
-	private double[] getSamples() {
-		int n = d_results.getNumberOfSamples() / 2;
-		int c = d_results.getNumberOfChains();
-		double[] samples = new double[n * c];
-		int p = d_results.findParameter(d_parameter);
-		for (int i = 0; i < c; ++i) {
-			System.arraycopy(d_results.getSamples(p, i), n, samples, i * n, n);
-		}
-		return samples;
 	}
 }

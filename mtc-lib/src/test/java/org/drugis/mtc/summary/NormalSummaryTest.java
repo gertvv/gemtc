@@ -40,10 +40,10 @@ public class NormalSummaryTest {
 	
 	@Test
 	public void testDefined() {
-		NormalSummary x = new NormalSummary(d_results, d_results.getParameters()[0]);
-		assertFalse(x.isDefined());
+		Summary x = new NormalSummary(d_results, d_results.getParameters()[0]);
+		assertFalse(x.getDefined());
 		d_results.makeSamplesAvailable();
-		assertTrue(x.isDefined());
+		assertTrue(x.getDefined());
 	}
 	
 	@Test
@@ -79,6 +79,7 @@ public class NormalSummaryTest {
 
 		assertAllAndOnly(
 				Arrays.asList(new String[] {
+						Summary.PROPERTY_DEFINED, 
 						NormalSummary.PROPERTY_MEAN, 
 						NormalSummary.PROPERTY_STANDARD_DEVIATION}),
 				properties);

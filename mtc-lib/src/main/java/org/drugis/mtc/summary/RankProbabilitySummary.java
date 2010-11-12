@@ -11,7 +11,7 @@ import org.drugis.mtc.RankCounter;
 import java.util.Collections;
 import java.util.List;
 
-public class RankProbabilitySummary extends AbstractObservable implements MCMCResultsListener {
+public class RankProbabilitySummary extends AbstractObservable implements MCMCResultsListener, Summary {
 	public static final String PROPERTY_VALUE = "value";
 	private List<Treatment> d_treatments;
 	private MCMCResults d_results;
@@ -29,6 +29,7 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 
 	public void resultsEvent(MCMCResultsEvent event) {
 		calculate();
+		firePropertyChange(PROPERTY_DEFINED, null, getDefined());
 		firePropertyChange(PROPERTY_VALUE, null, this);
 	}
 	
@@ -70,5 +71,9 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 				d_rankCount[j][ranks[j] - 1] += 1;
 			}
 		}
+	}
+
+	public boolean getDefined() {
+		return isReady(); 
 	}
 }

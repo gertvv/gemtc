@@ -1,6 +1,10 @@
 package org.drugis.mtc.summary;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.drugis.mtc.BasicParameter;
 import org.drugis.mtc.Parameter;
@@ -9,7 +13,11 @@ import org.drugis.mtc.util.FileResults;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.drugis.common.JUnitUtil.assertAllAndOnly;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import scala.actors.threadpool.Arrays;
 
@@ -55,5 +63,30 @@ public class RankProbabilitySummaryTest {
 		assertEquals(0.564, d_summary.getValue(d_tc, 3), 0.001);
 		assertEquals(0.237, d_summary.getValue(d_tc, 2), 0.001);
 		assertEquals(0.199, d_summary.getValue(d_tc, 1), 0.001);
+	}
+	
+	@Test
+	public void testDefined() {
+		Summary x = d_summary;
+		assertFalse(x.getDefined());
+		d_results.makeSamplesAvailable();
+		assertTrue(x.getDefined());
+	}
+	
+	@Test
+	public void testPropertyChangeOnAvailable() {
+		final List<String> properties = new ArrayList<String>();
+		d_summary.addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				properties.add(evt.getPropertyName());
+			}
+		});
+		d_results.makeSamplesAvailable();
+
+		assertAllAndOnly(
+				Arrays.asList(new String[] {
+						Summary.PROPERTY_DEFINED, 
+						RankProbabilitySummary.PROPERTY_VALUE}),
+				properties);
 	}
 }
