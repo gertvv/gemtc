@@ -27,6 +27,7 @@ import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
 import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
+import org.drugis.common.threading.TaskUtil.waitUntilReady
 
 abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 	val mean = new Mean()
@@ -120,11 +121,5 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 		val task = model.getActivityTask()
 		th.scheduleTask(task)
 		waitUntilReady(task)
-	}
-	
-	def waitUntilReady(task: Task) {
-		while (!task.isFinished()) {
-			Thread.sleep(100);
-		}
 	}
 }
