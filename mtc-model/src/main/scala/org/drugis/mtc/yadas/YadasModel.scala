@@ -22,6 +22,8 @@ package org.drugis.mtc.yadas
 import scala.collection.mutable.ArrayBuffer
 import org.drugis.common.threading.activity.Transition
 import org.drugis.common.threading.activity.DirectTransition
+import org.drugis.common.threading.activity.ForkTransition
+import org.drugis.common.threading.activity.JoinTransition
 import org.drugis.common.threading.IterativeComputation
 import org.drugis.common.threading.IterativeTask
 import org.drugis.common.threading.AbstractIterativeComputation
@@ -56,7 +58,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	protected var proto: NetworkModel[M, P] = null
 
-	val nChains = 1
+	val nChains = 2
 
 	protected var parameters: Map[NetworkModelParameter, Parameter] = null
 
@@ -88,7 +90,6 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	private class SimulationChain(val chain: Int)
 	extends AbstractIterativeComputation(simulationIter) {
 		def doStep() { update(chain); output(chain); }
-		override def toString = "simulation:" + chain
 	}
 
 	private class BurnInTask(val chain: Int)
@@ -101,24 +102,29 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		setReportingInterval(reportingInterval)
 	}
 
-	private val burnInPhase = new BurnInTask(0)
-	private val simulationPhase = new SimulationTask(0)
+	private val burnInPhase =
+		(0 until nChains).map(c => new BurnInTask(c)).toList
+	private val simulationPhase =
+		(0 until nChains).map(c => new SimulationTask(c)).toList
 
 	private val finalPhase = new NullTask();
+
+	private val transitions: ArrayBuffer[Transition] =
+			ArrayBuffer[Transition]( // transitions
+				new ForkTransition(buildModelPhase, asBuffer(burnInPhase)),
+				new JoinTransition(asBuffer(simulationPhase), finalPhase)
+			) ++ (0 until nChains).map(c =>
+					new DirectTransition(burnInPhase(c), simulationPhase(c)))
 
 	val activityModel = new ActivityModel(
 			buildModelPhase, // start
 			finalPhase, // end
-			ArrayBuffer[Transition]( // transitions
-				new DirectTransition(buildModelPhase, burnInPhase),
-				new DirectTransition(burnInPhase, simulationPhase),
-				new DirectTransition(simulationPhase, finalPhase)
-			)
+			transitions
 		)
 
 	val activityTask = new ActivityTask(activityModel, "MCMC model")
 	
-	def isReady = simulationPhase.isFinished()
+	def isReady = finalPhase.isFinished()
 
 	def getActivityTask: ActivityTask = activityTask
 	
@@ -222,13 +228,15 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 			List(randomEffectVar, inconsistencyVar)
 
 		results.setDirectParameters(parameters)
-		results.setNumberOfChains(1)
+		results.setNumberOfChains(nChains)
 		results.setNumberOfIterations(simulationIter)
 
 		results.setDerivedParameters(
 			indirectParameters.map(p => (p, derivation(p))).toList)
 		
-		createChain(0)
+		for (chain <- 0 until nChains) {
+			createChain(chain)
+		}
 
 		finalPhase.addTaskListener(new TaskListener() {
 			def taskEvent(event: TaskEvent) {
