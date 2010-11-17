@@ -24,10 +24,12 @@ import org.drugis.common.threading.activity.Transition
 import org.drugis.common.threading.activity.DirectTransition
 import org.drugis.common.threading.IterativeComputation
 import org.drugis.common.threading.IterativeTask
+import org.drugis.common.threading.AbstractIterativeComputation
 import org.drugis.common.threading.TaskListener
 import org.drugis.common.threading.event.TaskEvent
 import org.drugis.common.threading.event.TaskEvent.EventType
 import org.drugis.common.threading.SimpleSuspendableTask
+import org.drugis.common.threading.NullTask
 import org.drugis.common.threading.activity.ActivityModel
 import org.drugis.common.threading.activity.ActivityTask
 import org.drugis.mtc._
@@ -73,27 +75,33 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 			buildModel();
 		}
 	}, "building model")
-	
-	private val burnInPhase = new IterativeTask(new IterativeComputation() {
-		private var iter = 0
-		def initialize() {}
-		def finish() {}
-		def step() { update(); iter += 1; }
-		def getIteration(): Int = iter
-		def getTotalIterations(): Int = burnInIter
-	}, "burn-in")
-	burnInPhase.setReportingInterval(reportingInterval)
-	
-	private val simulationPhase = new IterativeTask(new IterativeComputation() {
-		private var iter = 0 
-		def initialize() {}
-		def finish() {}
-		def step() { update(); output(); iter += 1; }
-		def getIteration(): Int = iter
-		def getTotalIterations(): Int = simulationIter
-	}, "simulation")
-	simulationPhase.setReportingInterval(reportingInterval)
-	
+
+	private class BurnInChain(val chain: Integer)
+	extends AbstractIterativeComputation(burnInIter) {
+		def doStep() { update(chain); }
+	}
+
+	private class SimulationChain(val chain: Integer)
+	extends AbstractIterativeComputation(simulationIter) {
+		def doStep() { update(chain); output(chain); }
+		override def toString = "simulation:" + chain
+	}
+
+	private class BurnInTask(val chain: Integer)
+	extends IterativeTask(new BurnInChain(chain), "burn-in:" + chain) {
+		setReportingInterval(reportingInterval)
+	}
+
+	private class SimulationTask(val chain: Integer)
+	extends IterativeTask(new SimulationChain(chain), "simulation:" + chain) {
+		setReportingInterval(reportingInterval)
+	}
+
+	private val burnInPhase = new BurnInTask(0)
+	private val simulationPhase = new SimulationTask(0)
+
+	private val finalPhase = new NullTask();
+
 	val activityModel = new ActivityModel(
 			buildModelPhase, // start
 			simulationPhase, // end
@@ -458,13 +466,13 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		}
 	}
 
-	private def update() {
+	private def update(chain: Integer) {
 		for (u <- updateList) {
 			u.update()
 		}
 	}
 
-	protected def output() {
+	protected def output(chain: Integer) {
 		for (p <- parameterList) {
 			p.output()
 		}
