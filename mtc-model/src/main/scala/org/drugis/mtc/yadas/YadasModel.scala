@@ -56,10 +56,14 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	protected var proto: NetworkModel[M, P] = null
 
+	val nChains = 1
+
 	protected var parameters: Map[NetworkModelParameter, Parameter] = null
 
-	private var parameterList: List[ParameterWriter] = null
-	private var updateList: List[MCMCUpdate] = null
+	private val parameterList: Array[List[ParameterWriter]] = 
+		Array.fill(nChains)(null.asInstanceOf[List[ParameterWriter]])
+	private val updateList: Array[List[MCMCUpdate]] =
+		Array.fill(nChains)(null.asInstanceOf[List[MCMCUpdate]])
 
 	protected val randomEffectVar: Parameter = new RandomEffectsVariance()
 	protected val inconsistencyVar: Parameter = new InconsistencyVariance()
@@ -76,23 +80,23 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		}
 	}, "building model")
 
-	private class BurnInChain(val chain: Integer)
+	private class BurnInChain(val chain: Int)
 	extends AbstractIterativeComputation(burnInIter) {
 		def doStep() { update(chain); }
 	}
 
-	private class SimulationChain(val chain: Integer)
+	private class SimulationChain(val chain: Int)
 	extends AbstractIterativeComputation(simulationIter) {
 		def doStep() { update(chain); output(chain); }
 		override def toString = "simulation:" + chain
 	}
 
-	private class BurnInTask(val chain: Integer)
+	private class BurnInTask(val chain: Int)
 	extends IterativeTask(new BurnInChain(chain), "burn-in:" + chain) {
 		setReportingInterval(reportingInterval)
 	}
 
-	private class SimulationTask(val chain: Integer)
+	private class SimulationTask(val chain: Int)
 	extends IterativeTask(new SimulationChain(chain), "simulation:" + chain) {
 		setReportingInterval(reportingInterval)
 	}
@@ -104,10 +108,11 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	val activityModel = new ActivityModel(
 			buildModelPhase, // start
-			simulationPhase, // end
+			finalPhase, // end
 			ArrayBuffer[Transition]( // transitions
 				new DirectTransition(buildModelPhase, burnInPhase),
-				new DirectTransition(burnInPhase, simulationPhase)
+				new DirectTransition(burnInPhase, simulationPhase),
+				new DirectTransition(simulationPhase, finalPhase)
 			)
 		)
 
@@ -210,7 +215,31 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def buildModel() {
 		buildNetworkModel()
+
+		val parameters =
+			proto.basicParameters ++
+			proto.inconsistencyParameters ++
+			List(randomEffectVar, inconsistencyVar)
+
+		results.setDirectParameters(parameters)
+		results.setNumberOfChains(1)
+		results.setNumberOfIterations(simulationIter)
+
+		results.setDerivedParameters(
+			indirectParameters.map(p => (p, derivation(p))).toList)
 		
+		createChain(0)
+
+		finalPhase.addTaskListener(new TaskListener() {
+			def taskEvent(event: TaskEvent) {
+				if (event.getType() == EventType.TASK_FINISHED) {
+					results.simulationFinished()
+				}
+			}
+		})
+	}
+
+	private def createChain(chain: Int) {
 		// study baselines
 		val mu = Map[Study[M], MCMCParameter]() ++
 			proto.studyList.map(s => (s, new MCMCParameter(
@@ -338,21 +367,13 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		def tuner(param: MCMCParameter): MCMCUpdate =
 			new UpdateTuner(param, burnInIter / 50, 50, 1, Math.exp(-1))
 
-		updateList = params.map(p => tuner(p))
+		updateList(chain) = params.map(p => tuner(p))
 
 		def writerList(p: MCMCParameter, l: List[Parameter])
 		: List[ParameterWriter] =
-			(0 until l.size).map(i => results.getParameterWriter(l(i), 0, p, i)
+			(0 until l.size).map(i => results.getParameterWriter(l(i), chain,
+				p, i)
 				).toList
-
-		val parameters =
-			proto.basicParameters ++
-			proto.inconsistencyParameters ++
-			List(randomEffectVar, inconsistencyVar)
-
-		results.setDirectParameters(parameters)
-		results.setNumberOfChains(1)
-		results.setNumberOfIterations(simulationIter)
 
 		val writers = 
 			writerList(basic, proto.basicParameters) ++
@@ -360,18 +381,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 			writerList(sigma, List(randomEffectVar)) ++
 			writerList(sigmaw, List(inconsistencyVar))
 
-		parameterList = writers
-
-		results.setDerivedParameters(
-			indirectParameters.map(p => (p, derivation(p))).toList)
-
-		simulationPhase.addTaskListener(new TaskListener() {
-			def taskEvent(event: TaskEvent) {
-				if (event.getType() == EventType.TASK_FINISHED) {
-					results.simulationFinished()
-				}
-			}
-		})
+		parameterList(chain) = writers
 	}
 
 /*
@@ -466,14 +476,14 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		}
 	}
 
-	private def update(chain: Integer) {
-		for (u <- updateList) {
+	private def update(chain: Int) {
+		for (u <- updateList(chain)) {
 			u.update()
 		}
 	}
 
-	protected def output(chain: Integer) {
-		for (p <- parameterList) {
+	protected def output(chain: Int) {
+		for (p <- parameterList(chain)) {
 			p.output()
 		}
 	}
