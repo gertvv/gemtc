@@ -30,6 +30,7 @@ import org.junit.Before
 import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
 
 import org.drugis.mtc._
+import org.drugis.common.threading.TaskUtil.waitUntilReady
 
 class ContinuousDataIT extends ShouldMatchersForJUnit {
 	// data from Welton et. al., Am J Epidemiol 2009;169:1158–1165
@@ -65,11 +66,5 @@ class ContinuousDataIT extends ShouldMatchersForJUnit {
 		val task = model.getActivityTask()
 		th.scheduleTask(task)
 		waitUntilReady(task)
-	}
-	
-	def waitUntilReady(task: Task) {
-		while (!task.isFinished()) {
-			Thread.sleep(100);
-		}
 	}
 }
