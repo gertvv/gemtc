@@ -8,12 +8,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+import org.apache.commons.math.stat.descriptive.moment.Mean;
+import org.apache.commons.math.stat.descriptive.moment.Variance;
 import org.drugis.mtc.util.FileResults;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.drugis.mtc.*;
 import org.drugis.mtc.yadas.RandomEffectsVariance;
+import org.drugis.mtc.summary.SummaryUtil;;
 
 /**
  * Test for assessment of convergence based on gelman.diag(X) in the R package CODA.
@@ -23,7 +26,9 @@ public class GelmanRubinAcceptanceTest {
 	private static final double EPSILON = 0.0000001;
 	private Parameter[] d_parameters;
 	private FileResults d_results;
-
+	private Mean d_mean = new Mean();
+    private Variance d_var = new Variance();
+    
 	@Before
 	public void setUp() throws IOException {
 		InputStream is = GelmanRubinAcceptanceTest.class.getResourceAsStream("conv-samples.txt");
@@ -48,17 +53,17 @@ public class GelmanRubinAcceptanceTest {
 	@Test @Ignore
 	public void testResults500() throws IOException {
 		double[][] expected = readExpected("conv-0.5k.txt");
-		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 500), EPSILON);
-		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 500), EPSILON);
-		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 500), EPSILON);
+		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 1000), EPSILON);
+		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 1000), EPSILON);
+		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 1000), EPSILON);
 	}
 	
 	@Test @Ignore
 	public void testResults2k() throws IOException {
 		double[][] expected = readExpected("conv-2k.txt");
-		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 2000), EPSILON);
-		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 2000), EPSILON);
-		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 2000), EPSILON);
+		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 4000), EPSILON);
+		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 4000), EPSILON);
+		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 4000), EPSILON);
 	}
 	
 	@Test @Ignore
@@ -84,5 +89,41 @@ public class GelmanRubinAcceptanceTest {
 			}
 		}
 		return data;
+	}
+	
+	@Test
+	public void testOneChainMean() {
+		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
+		double[] samples = SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], 0);
+		assertEquals(d_mean.evaluate(samples), grc.oneChainMean(0), EPSILON);
+	}
+	
+	@Test
+	public void testOneChainVariance() {
+		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
+		double[] samples = SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], 0);
+		assertEquals(d_var.evaluate(samples), grc.oneChainVar(0), EPSILON);
+	}
+	
+	@Test
+	public void testAllChainsMean() {
+		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
+		double[] samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameters[0]);
+		assertEquals(d_mean.evaluate(samples), grc.allChainMean(), EPSILON);
+	}
+	
+	@Test
+	public void testVarBetweenChains() {
+		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
+		double[] chainMeans = new double[d_results.getNumberOfChains()];
+		for(int i=0; i < d_results.getNumberOfChains(); ++i) {
+			chainMeans[i] = d_mean.evaluate(SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], i));
+		}
+		assertEquals(d_var.evaluate(chainMeans) * d_results.getNumberOfSamples() / 2, grc.varBetweenChains(), EPSILON);
+	}
+	
+	@Test @Ignore
+	public void testVarBetweenShortChains() {
+		
 	}
 }

@@ -56,7 +56,7 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	
 	private synchronized void calculateResults() {
 		if (!isReady()) return;
-		double[] samples = SummaryUtil.getSamples(d_results, d_parameter);
+		double[] samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
 		d_mean = s_mean.evaluate(samples);
 		d_stdev = s_stdev.evaluate(samples);
 		d_defined = true;

@@ -77,7 +77,7 @@ public class QuantileSummary extends AbstractObservable implements MCMCResultsLi
 
 	private synchronized void calculateResults() {
 		if (!isReady()) return;
-		double[] samples = SummaryUtil.getSamples(d_results, d_parameter);
+		double[] samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
 		d_quantiles = new double[d_probabilities.length];
 		for(int i = 0; i < d_quantiles.length; i++) {
 			d_quantiles[i] = calculateQuantile(i, samples);
