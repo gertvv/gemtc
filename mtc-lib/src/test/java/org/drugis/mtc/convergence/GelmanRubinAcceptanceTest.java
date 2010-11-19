@@ -69,7 +69,7 @@ public class GelmanRubinAcceptanceTest {
 		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 4000), EPSILON);
 	}
 	
-	@Test @Ignore
+	@Test
 	public void testResults10k() throws IOException {
 		double[][] expected = readExpected("conv-10k.txt"); // based on all samples
 		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0]), EPSILON);
