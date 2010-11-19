@@ -39,6 +39,7 @@ public class FileResults implements MCMCResults {
 				d_samples[i / d_nSamples][j][i % d_nSamples] = Double.parseDouble(tok.nextToken());
 			}
 		}
+		is.close();
 	}
 
 	public Parameter[] getParameters() {

@@ -15,7 +15,7 @@ public class GelmanRubinConvergence {
 	private static Variance s_var = new Variance();
 
 	public GelmanRubinConvergence(MCMCResults results, Parameter parameter) {
-		assert(d_results.getNumberOfSamples() % 2 == 0);
+		assert(results.getNumberOfSamples() % 2 == 0);
 		d_results = results;
 		d_parameter = parameter;
 	}

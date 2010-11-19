@@ -47,6 +47,7 @@ public class GelmanRubinAcceptanceTest {
 	@Test
 	public void testReadFiles() throws IOException {
 		// currently only checks whether the samples can be read. can be removed once the other tests are un-ignored.
+		assertNotNull(d_results);
 		assertNotNull(readExpected("conv-0.5k.txt"));
 		assertNotNull(readExpected("conv-2k.txt"));
 		assertNotNull(readExpected("conv-10k.txt"));
