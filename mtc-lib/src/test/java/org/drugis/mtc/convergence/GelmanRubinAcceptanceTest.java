@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.apache.commons.math.stat.descriptive.moment.Variance;
 import org.drugis.mtc.util.FileResults;
+import org.drugis.mtc.util.WindowResults;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -124,6 +125,12 @@ public class GelmanRubinAcceptanceTest {
 	
 	@Test @Ignore
 	public void testVarBetweenShortChains() {
-		
+		WindowResults wr = new WindowResults(d_results, 900, 930);
+		GelmanRubinConvergence grc = new GelmanRubinConvergence(wr, d_parameters[0]);
+		double[] chainMeans = new double[wr.getNumberOfChains()];
+		for(int i=0; i < wr.getNumberOfChains(); ++i) {
+			chainMeans[i] = d_mean.evaluate(SummaryUtil.getOneChainLastHalfSamples(wr, d_parameters[0], i));
+		}
+		assertEquals(d_var.evaluate(chainMeans) * wr.getNumberOfSamples() / 2, grc.varBetweenChains(), EPSILON);
 	}
 }

@@ -1,5 +1,10 @@
 package org.drugis.mtc.summary;
 
+import static org.drugis.common.JUnitUtil.assertAllAndOnly;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -11,13 +16,7 @@ import org.drugis.mtc.Parameter;
 import org.drugis.mtc.Treatment;
 import org.drugis.mtc.util.FileResults;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.drugis.common.JUnitUtil.assertAllAndOnly;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import scala.actors.threadpool.Arrays;
 

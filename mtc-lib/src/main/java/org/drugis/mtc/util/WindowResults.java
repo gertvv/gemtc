@@ -1,6 +1,5 @@
 package org.drugis.mtc.util;
 
-import java.sql.NClob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +13,6 @@ public class WindowResults implements MCMCResults {
 	private final Parameter[] d_parameters;
 	private final int d_nChains;
 	private double[][][] d_samples;
-	private boolean d_available = false;
 	private List<MCMCResultsListener> d_listeners = new ArrayList<MCMCResultsListener>();
 
 	
@@ -29,7 +27,6 @@ public class WindowResults implements MCMCResults {
 		d_parameters = nested.getParameters();
 		d_nChains = nested.getNumberOfChains();
 		d_samples = new double[d_nChains][d_parameters.length][d_nSamples];
-//		double [] temp = new double[d_nSamples];
 		for(int c = 0; c < d_nChains; ++c) {
 			for(Parameter p: d_parameters) {
 				int par = findParameter(p);
@@ -39,8 +36,7 @@ public class WindowResults implements MCMCResults {
 	}
 
 	public void addResultsListener(MCMCResultsListener l) {
-		// TODO Auto-generated method stub
-		
+		d_listeners.add(l);
 	}
 
 	public int findParameter(Parameter p) {
@@ -48,23 +44,19 @@ public class WindowResults implements MCMCResults {
 	}
 
 	public int getNumberOfChains() {
-		// TODO Auto-generated method stub
-		return 0;
+		return d_nChains;
 	}
 
 	public int getNumberOfSamples() {
-		// TODO Auto-generated method stub
-		return 0;
+		return d_nSamples;
 	}
 
 	public Parameter[] getParameters() {
-		// TODO Auto-generated method stub
-		return null;
+		return d_parameters;
 	}
 
 	public double getSample(int p, int c, int i) {
-		// TODO Auto-generated method stub
-		return 0;
+		return d_samples[c][p][i];
 	}
 
 	public double[] getSamples(int p, int c) {
@@ -72,7 +64,6 @@ public class WindowResults implements MCMCResults {
 	}
 
 	public void removeResultsListener(MCMCResultsListener l) {
-		// TODO Auto-generated method stub
-		
+		d_listeners.remove(l);
 	}
 }

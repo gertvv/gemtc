@@ -1,14 +1,10 @@
 package org.drugis.mtc.convergence;
 
-import gov.lanl.yadas.PowerBondArray;
-
 import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.apache.commons.math.stat.descriptive.moment.Variance;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.summary.SummaryUtil;
-
-import scala.Math;
 
 public class GelmanRubinConvergence {
 	
@@ -53,4 +49,6 @@ public class GelmanRubinConvergence {
 		}
 		return (d_results.getNumberOfSamples() * var / 2) / (d_results.getNumberOfChains() - 1);
 	}
+	
+	
 }

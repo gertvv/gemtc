@@ -7,8 +7,6 @@ import org.drugis.mtc.MCMCResultsEvent;
 import org.drugis.mtc.MCMCResultsListener;
 import org.drugis.mtc.Parameter;
 
-import scala.actors.threadpool.Arrays;
-
 /**
  * Summary of data based on sample quantiles. A list (p_1, ..., p_n) of 
  * probabilities in [0, 1] is given, and the summary will estimate quantiles

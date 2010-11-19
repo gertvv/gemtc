@@ -1,21 +1,19 @@
 package org.drugis.mtc.summary;
 
-import static org.junit.Assert.*;
+import static org.drugis.common.JUnitUtil.assertAllAndOnly;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.drugis.common.JUnitUtil.assertAllAndOnly;;
 
 public class QuantileSummaryTest {
 	private static final double X_Q025 = 0.7401939;
