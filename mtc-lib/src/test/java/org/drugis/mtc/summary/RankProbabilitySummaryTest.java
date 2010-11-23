@@ -27,6 +27,7 @@ public class RankProbabilitySummaryTest {
 	private RankProbabilitySummary d_summary;
 	private FileResults d_results;
 	
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws IOException {
 		d_ta = new Treatment("A");
