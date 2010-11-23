@@ -21,7 +21,8 @@ public class GelmanRubinConvergence {
 	}
 	
 	public static double diagnose(MCMCResults results, Parameter parameter) {
-		return diagnose(results, parameter, results.getNumberOfSamples());
+		return (new GelmanRubinConvergence(results, parameter)).getCorrPSRF();
+		//return diagnose(results, parameter, results.getNumberOfSamples());
 	}
 	
 	/**
