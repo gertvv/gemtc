@@ -1,6 +1,8 @@
 package org.drugis.mtc.summary;
 
-public interface Summary {
+import com.jgoodies.binding.beans.Observable;
+
+public interface Summary extends Observable {
 	public static final String PROPERTY_DEFINED = "defined";
 	public abstract boolean getDefined();
 }
