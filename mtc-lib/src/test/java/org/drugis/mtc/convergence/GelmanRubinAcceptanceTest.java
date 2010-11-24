@@ -14,7 +14,6 @@ import org.drugis.mtc.Treatment;
 import org.drugis.mtc.util.FileResults;
 import org.drugis.mtc.yadas.RandomEffectsVariance;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -39,20 +38,20 @@ public class GelmanRubinAcceptanceTest {
 		d_results.makeSamplesAvailable();
 	}
 	
-	@Test @Ignore
+	@Test
 	public void testResults500() throws IOException {
 		double[][] expected = readExpected("conv-0.5k.txt");
-		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 1000), EPSILON);
-		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 1000), EPSILON);
-		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 1000), EPSILON);
+		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 500), EPSILON);
+		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 500), EPSILON);
+		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 500), EPSILON);
 	}
 	
-	@Test @Ignore
+	@Test
 	public void testResults2k() throws IOException {
 		double[][] expected = readExpected("conv-2k.txt");
-		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 4000), EPSILON);
-		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 4000), EPSILON);
-		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 4000), EPSILON);
+		assertEquals(expected[0][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[0], 2000), EPSILON);
+		assertEquals(expected[1][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[1], 2000), EPSILON);
+		assertEquals(expected[2][0], GelmanRubinConvergence.diagnose(d_results, d_parameters[2], 2000), EPSILON);
 	}
 	
 	@Test

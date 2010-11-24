@@ -6,6 +6,7 @@ import org.apache.commons.math.stat.descriptive.moment.Variance;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.summary.SummaryUtil;
+import org.drugis.mtc.util.WindowResults;
 
 public class GelmanRubinConvergence {
 	
@@ -20,16 +21,32 @@ public class GelmanRubinConvergence {
 		d_parameter = parameter;
 	}
 	
+	/**
+	 * Assess convergence, based on the 2nd half of the samples.
+	 */
 	public static double diagnose(MCMCResults results, Parameter parameter) {
 		return (new GelmanRubinConvergence(results, parameter)).getCorrPSRF();
-		//return diagnose(results, parameter, results.getNumberOfSamples());
 	}
 	
 	/**
-	 * Assess convergence, based on the (1st or 2nd?) half of nSamples.
+	 * Assess convergence diagnostic \hat{R}, restricting results to only the first nSamples.
 	 */
 	public static double diagnose(MCMCResults results, Parameter parameter, int nSamples) {
-		return 2.0;
+		return diagnose(new WindowResults(results, 0, nSamples), parameter);
+	}
+
+	/**
+	 * Calculate the pooled posterior variance estimate, \hat{V}.
+	 */
+	public static double calculatePooledVariance(MCMCResults results, Parameter parameter, int nSamples) {
+		return (new GelmanRubinConvergence(new WindowResults(results, 0, nSamples), parameter)).getVHat();
+	}
+
+	/**
+	 * Calculate the within-chain variance estimate, W.
+	 */
+	public static double calculateWithinChainVariance(MCMCResults results, Parameter parameter, int nSamples) {
+		return (new GelmanRubinConvergence(new WindowResults(results, 0, nSamples), parameter)).getWithinChainVar();
 	}
 	
 	public double oneChainMean(int c){
