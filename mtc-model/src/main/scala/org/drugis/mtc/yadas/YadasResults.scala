@@ -43,10 +43,12 @@ class Derivation(val pmtz: Map[Parameter, Int]) {
 
 class RandomEffectsVariance extends Parameter {
 	override def getName = "var.d"
+	override def toString = getName
 }
 
 class InconsistencyVariance extends Parameter {
 	override def getName = "var.w"
+	override def toString = getName
 }
 
 class YadasResults extends MCMCResults {

@@ -224,8 +224,10 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 		val parameters =
 			proto.basicParameters ++
-			proto.inconsistencyParameters ++
-			List(randomEffectVar, inconsistencyVar)
+			proto.inconsistencyParameters ++ {
+				if (isInconsistency) List(randomEffectVar, inconsistencyVar)
+				else List(randomEffectVar)
+			}
 
 		results.setDirectParameters(parameters)
 		results.setNumberOfChains(nChains)
@@ -386,8 +388,10 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		val writers = 
 			writerList(basic, proto.basicParameters) ++
 			writerList(incons, proto.inconsistencyParameters) ++
-			writerList(sigma, List(randomEffectVar)) ++
-			writerList(sigmaw, List(inconsistencyVar))
+			writerList(sigma, List(randomEffectVar)) ++ {
+				if (isInconsistency) writerList(sigmaw, List(inconsistencyVar))
+				else Nil
+			}
 
 		parameterList(chain) = writers
 	}
