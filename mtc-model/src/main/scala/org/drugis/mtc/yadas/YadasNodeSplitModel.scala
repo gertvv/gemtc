@@ -43,6 +43,8 @@ with NodeSplitModel {
 
 	def getSplitNode = splitNode
 
-	def getDirectEffect = null
-	def getIndirectEffect = null
+	def getDirectEffect =
+		new SplitParameter(splitNode.base, splitNode.subject, true)
+	def getIndirectEffect =
+		new SplitParameter(splitNode.base, splitNode.subject, false)
 }
