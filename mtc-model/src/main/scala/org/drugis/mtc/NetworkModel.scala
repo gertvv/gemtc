@@ -274,9 +274,13 @@ object NodeSplitNetworkModel extends NetworkModelUtil {
 			treatmentList(network.treatments).first).head
 		val basis = new FundamentalGraphBasis(network.treatmentGraph, tree)
 
-		Set[(Treatment, Treatment)]() ++
-		basis.cycles.map(cycle => new Cycle(cycle).edgeSeq.map(order _)
-			).reduceLeft((a, b) => a ++ b)
+		Set[(Treatment, Treatment)]() ++ (
+			if (basis.cycles.isEmpty) {
+				Set()
+			} else {
+				basis.cycles.map(cycle => new Cycle(cycle).edgeSeq.map(order _)
+					).reduceLeft((a, b) => a ++ b)
+			})
 	}
 
 	private def order(e: (Treatment, Treatment)) = {

@@ -319,6 +319,54 @@ class NodeSplitNetworkModelTest extends ShouldMatchersForJUnit {
 		NodeSplitNetworkModel.getSplittableNodes(network) should be (
 			Set((ta, tb), (ta, tc), (tb, tc)))
 	}
+
+	@Test def testSplittableNodesNone() {
+		val network = Network.noneFromXML(<network type="none">
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+					<treatment id="C"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A" />
+						<measurement treatment="B" />
+					</study>
+					<study id="2">
+						<measurement treatment="A" />
+						<measurement treatment="C" />
+					</study>
+				</studies>
+			</network>)
+
+		NodeSplitNetworkModel.getSplittableNodes(network) should be (Set())
+	}
+
+	@Test def testSplittableNodesOneCycle() {
+		val network = Network.noneFromXML(<network type="none">
+				<treatments>
+					<treatment id="A"/>
+					<treatment id="B"/>
+					<treatment id="C"/>
+				</treatments>
+				<studies>
+					<study id="1">
+						<measurement treatment="A" />
+						<measurement treatment="B" />
+					</study>
+					<study id="2">
+						<measurement treatment="A" />
+						<measurement treatment="C" />
+					</study>
+					<study id="3">
+						<measurement treatment="B" />
+						<measurement treatment="C" />
+					</study>
+				</studies>
+			</network>)
+
+		NodeSplitNetworkModel.getSplittableNodes(network)
+	}
 }
 
 class AdditionalBaselineAssignmentTest extends ShouldMatchersForJUnit {
