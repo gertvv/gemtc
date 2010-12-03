@@ -54,7 +54,7 @@ public class NodeSplitPValueSummary extends AbstractObservable implements
 		return d_defined;
 	}
 	
-	double getPvalue() {
+	public double getPvalue() {
 		return d_pvalue;
 	}
 
