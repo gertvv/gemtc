@@ -16,7 +16,7 @@ public class NodeSplitPValueSummary extends AbstractObservable implements
 	private boolean d_defined;
 	private double d_pvalue;
 
-	NodeSplitPValueSummary(MCMCResults r, Parameter dir, Parameter indir) {
+	public NodeSplitPValueSummary(MCMCResults r, Parameter dir, Parameter indir) {
 		d_results = r;
 		d_direct = dir;
 		d_indirect = indir;
