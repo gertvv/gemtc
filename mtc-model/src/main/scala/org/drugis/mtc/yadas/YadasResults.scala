@@ -138,6 +138,11 @@ class YadasResults extends MCMCResults {
 		listeners -= l
 	}
 
+	def clear() {
+		results = null
+		availableSamples = 0
+	}
+
 	private def fireResultsChanged() {
 		for (l <- listeners) {
 			l.resultsEvent(new MCMCResultsEvent(this))
