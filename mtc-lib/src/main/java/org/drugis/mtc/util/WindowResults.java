@@ -9,13 +9,11 @@ import org.drugis.mtc.MCMCResultsListener;
 import org.drugis.mtc.Parameter;
 
 public class WindowResults implements MCMCResults {
-	private final int d_nSamples;
+	private int d_nSamples;
 	private final Parameter[] d_parameters;
 	private final int d_nChains;
 	private double[][][] d_samples;
 	private List<MCMCResultsListener> d_listeners = new ArrayList<MCMCResultsListener>();
-
-	
 	
 	/**
 	 * Create a window on the nested results, that only shows the first nSamples.
@@ -65,5 +63,10 @@ public class WindowResults implements MCMCResults {
 
 	public void removeResultsListener(MCMCResultsListener l) {
 		d_listeners.remove(l);
+	}
+
+	public void clear() {
+		d_samples = null;
+		d_nSamples = 0;
 	}
 }
