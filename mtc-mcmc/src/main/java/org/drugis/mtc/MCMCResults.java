@@ -56,4 +56,9 @@ public interface MCMCResults {
 	 * Deregister a listener for changes to the results.
 	 */
 	public void removeResultsListener(MCMCResultsListener l);
+
+	/**
+	 * Clear the results.
+	 */
+	public void clear();
 }
