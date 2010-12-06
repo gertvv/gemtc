@@ -57,6 +57,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	}
 
 	protected var proto: NetworkModel[M, P] = null
+	protected var startingValues: List[StartingValueGenerator[M]] = null
 
 	val nChains = 2
 
@@ -128,7 +129,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	def getActivityTask: ActivityTask = activityTask
 	
-	def getRelativeEffect(base: Treatment, subj: Treatment): Parameter =
+	def getRelativeEffect(base: Treatment, subj: Treatment): BasicParameter =
 		new BasicParameter(base, subj)
 
 	def getBurnInIterations: Int = burnInIter
@@ -221,6 +222,10 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def buildModel() {
 		buildNetworkModel()
+		startingValues = {
+			for (chain <- 0 until nChains)
+			yield new PriorStartingValueGenerator(proto)
+		}.toList
 
 		val parameters =
 			proto.basicParameters ++
@@ -249,29 +254,42 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		})
 	}
 
+	private def basicParameter(p: NetworkModelParameter) = p match {
+		case b: BasicParameter => b
+		case s: SplitParameter => new BasicParameter(s.base, s.subject)
+		case _ => throw new IllegalStateException()
+	}
+
+	// FIXME: implement
+	private def inconsistencyStartingValue(p: InconsistencyParameter,
+		startVal: StartingValueGenerator[M], basicStart: List[Double]) = 0.0
+
 	private def createChain(chain: Int) {
+		val startVal = startingValues(chain)
+
 		// study baselines
 		val mu = Map[Study[M], MCMCParameter]() ++
 			proto.studyList.map(s => (s, new MCMCParameter(
-				Array(0.0),
+				Array(startVal.getBaselineEffect(s)),
 				Array(0.1),
 				null)))
 		// random effects
 		val delta = Map[Study[M], MCMCParameter]() ++
 			proto.studyList.map(s => (s, new MCMCParameter(
-				Array.make(reDim(s), 0.0),
+				proto.studyRelativeEffects(s).map(p => startVal.getRandomEffect(s, getRelativeEffect(p._1, p._2))).toArray,
 				Array.make(reDim(s), 0.1),
 				null)))
 		// basic parameters
+		val basicStart = proto.basicParameters.map(p => startVal.getRelativeEffect(basicParameter(p)))
 		val basic = new MCMCParameter(
-			Array.make(proto.basicParameters.size, 0.0),
+			basicStart.toArray,
 			Array.make(proto.basicParameters.size, 0.1),
 			null)
 		// inconsistency parameters
 		val incons =
 			if (isInconsistency)
 				new MCMCParameter(
-					Array.make(proto.inconsistencyParameters.size, 0.0),
+					proto.inconsistencyParameters.map(p => inconsistencyStartingValue(p, startVal, basicStart)).toArray,
 					Array.make(proto.inconsistencyParameters.size, 0.1),
 					null)
 			else
@@ -281,11 +299,11 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 					null)
 		// variance
 		val sigma = new MCMCParameter(
-			Array(0.25), Array(0.1), null)
+			Array(startVal.getRandomEffectsVariance()), Array(0.1), null)
 		// inconsistency variance
 		val sigmaw =
 			if (isInconsistency)
-				new MCMCParameter(Array(0.25), Array(0.1), null)
+				new MCMCParameter(Array(startVal.getRandomEffectsVariance()), Array(0.1), null)
 			else
 				new MCMCParameter(Array(0.0), Array(0.0), null)
 
