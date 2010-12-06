@@ -3,6 +3,7 @@ package org.drugis.mtc
 import org.scalatest.junit.ShouldMatchersForJUnit
 import org.junit.Assert._
 import org.junit.Test
+import org.junit.Ignore
 import org.junit.Before
 
 class DichotomousDataStartingValueGeneratorTest extends ShouldMatchersForJUnit {
