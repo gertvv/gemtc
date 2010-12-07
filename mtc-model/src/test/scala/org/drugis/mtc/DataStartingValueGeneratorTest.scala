@@ -6,7 +6,13 @@ import org.junit.Test
 import org.junit.Ignore
 import org.junit.Before
 
+import org.drugis.mtc.util.Statistics
+import org.drugis.mtc.util.EstimateWithPrecision
+import org.drugis.mtc.util.DerSimonianLairdPooling
+import scala.collection.JavaConversions._
+
 class DichotomousDataStartingValueGeneratorTest extends ShouldMatchersForJUnit {
+	val EPSILON = 0.0000001
 	val network = Network.dichFromXML(
 		<network type="dichotomous">
 			<treatments>
@@ -60,11 +66,58 @@ class DichotomousDataStartingValueGeneratorTest extends ShouldMatchersForJUnit {
 	val proto = InconsistencyNetworkModel(network, spanningTree)
 	val generator = new DichotomousDataStartingValueGenerator(proto)
 
-	@Test @Ignore def testGenerateBaselineEffect() {
+	@Test def testGenerateBaselineEffect() {
 		val m0 = network.study("Alves et al, 1999").measurements(fluox)
 		generator.getBaselineEffect(network.study("Alves et al, 1999")) should be (
 			Math.log(
 				(m0.responders + 0.5) / (m0.sampleSize - m0.responders + 0.5))
+			plusOrMinus EPSILON
 		)
+
+		val m1 = network.study("Ballus et al, 2000").measurements(parox)
+		generator.getBaselineEffect(network.study("Ballus et al, 2000")) should be (
+			Math.log(
+				(m1.responders + 0.5) / (m1.sampleSize - m1.responders + 0.5))
+			plusOrMinus EPSILON
+		)
+	}
+
+	@Test def testGenerateRandomEffect() {
+		val s = network.study("Dierick et al, 1996")
+		val lor = getLOR(s, fluox, venla)
+		generator.getRandomEffect(s, new BasicParameter(fluox, venla)) should be (
+			getLOR(s, fluox, venla).getPointEstimate plusOrMinus EPSILON
+		)
+	}
+
+	@Test def testGenerateRelativeEffect() {
+		val lors: java.util.List[EstimateWithPrecision] = getLORs(List(network.study("Alves et al, 1999"), network.study("Dierick et al, 1996")), fluox, venla)
+		val pooling = new DerSimonianLairdPooling(lors)
+
+		generator.getRelativeEffect(new BasicParameter(fluox, venla)) should be (
+			pooling.getPooled.getPointEstimate plusOrMinus EPSILON
+		)
+	}
+
+	@Test def testGenerateVariance() {
+		val varParox = (new DerSimonianLairdPooling(getLORs(filterStudies(fluox, parox), fluox, parox))).getPooled.getStandardError
+		val varSertr = (new DerSimonianLairdPooling(getLORs(filterStudies(fluox, sertr), fluox, sertr))).getPooled.getStandardError
+		val varVenla = (new DerSimonianLairdPooling(getLORs(filterStudies(fluox, venla), fluox, venla))).getPooled.getStandardError
+
+		generator.getRandomEffectsVariance() should be (
+			((varParox + varSertr + varVenla) / 3) plusOrMinus EPSILON
+		)
+	}
+
+	def filterStudies(t0: Treatment, t1: Treatment) = {
+		proto.studyList.filter(s => s.treatments.contains(t0) && s.treatments.contains(t1))
+	}
+
+	def getLORs(studies: List[Study[DichotomousMeasurement]], t0: Treatment, t1: Treatment): List[EstimateWithPrecision] = {
+		studies.map(s => getLOR(s, t0, t1))
+	}
+
+	def getLOR(s: Study[DichotomousMeasurement], t0: Treatment, t1: Treatment): EstimateWithPrecision = {
+		Statistics.logOddsRatio(s.measurements(t0).responders, s.measurements(t0).sampleSize, s.measurements(t1).responders, s.measurements(t1).sampleSize, true)
 	}
 }

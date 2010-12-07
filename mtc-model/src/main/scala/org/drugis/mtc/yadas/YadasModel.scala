@@ -222,7 +222,12 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def buildModel() {
 		buildNetworkModel()
-		startingValues = {
+		startingValues = if (dichotomous) {
+			List(new PriorStartingValueGenerator(proto),
+				new DichotomousDataStartingValueGenerator(
+				proto.asInstanceOf[NetworkModel[DichotomousMeasurement, Parametrization[DichotomousMeasurement]]]).asInstanceOf[StartingValueGenerator[M]]
+			)
+		} else {
 			for (chain <- 0 until nChains)
 			yield new PriorStartingValueGenerator(proto)
 		}.toList
