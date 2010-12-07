@@ -32,7 +32,7 @@ public class DerSimonianLairdPooling {
 		d_q = calculateQ(weights, pe);
 
 		final double[] adjWeights = calculateAdjustedWeights(weights, se, d_q);
-		d_pe = calculatePointEstimate(adjWeights, pe);
+		d_pe = weightedSum(adjWeights, pe);
 		d_se = calculateError(adjWeights);
 	}
 
@@ -66,7 +66,7 @@ public class DerSimonianLairdPooling {
 	}
 
 	private static double calculateQ(double[] weights, double[] pe) {
-		double theta = calculateTheta(weights, pe);
+		double theta = weightedSum(weights, pe);
 		double sum = 0;
 		for (int i = 0; i < weights.length; ++i) {
 			double dev = pe[i] - theta;
@@ -75,12 +75,12 @@ public class DerSimonianLairdPooling {
 		return sum;
 	}
 
-	private static double calculateTheta(double[] weights, double[] pe) {
+	private static double weightedSum(double[] w, double[] x) {
 		double sum = 0;
-		for (int i = 0; i < weights.length; ++i) {
-			sum += weights[i] * pe[i];
+		for (int i = 0; i < w.length; ++i) {
+			sum += w[i] * x[i];
 		}
-		return sum / sum(weights);
+		return sum / sum(w);
 	}
 
 	private static double sum(double[] l) {
@@ -121,11 +121,7 @@ public class DerSimonianLairdPooling {
 	}
 	
 	private static double calculatePointEstimate(double[] adjWeights, double[] pe) {
-		double sum = 0;
-		for (int i = 0; i < adjWeights.length; ++i) {
-			sum += adjWeights[i] * pe[i];
-		}
-		return sum / sum(adjWeights);
+		return weightedSum(adjWeights, pe);
 	}
 
 	private static double calculateError(double[] adjWeights) {
