@@ -11,7 +11,8 @@ import org.drugis.mtc.util.EstimateWithPrecision
 import org.drugis.mtc.util.DerSimonianLairdPooling
 import scala.collection.JavaConversions._
 
-class DichotomousDataStartingValueGeneratorTest extends ShouldMatchersForJUnit {
+class DichotomousDataStartingValueGeneratorTest
+extends ShouldMatchersForJUnit {
 	val EPSILON = 0.0000001
 	val network = Network.dichFromXML(
 		<network type="dichotomous">
@@ -119,5 +120,118 @@ class DichotomousDataStartingValueGeneratorTest extends ShouldMatchersForJUnit {
 
 	def getLOR(s: Study[DichotomousMeasurement], t0: Treatment, t1: Treatment): EstimateWithPrecision = {
 		Statistics.logOddsRatio(s.measurements(t0).responders, s.measurements(t0).sampleSize, s.measurements(t1).responders, s.measurements(t1).sampleSize, true)
+	}
+}
+
+class ContinuousDataStartingValueGeneratorTest
+extends ShouldMatchersForJUnit {
+	val EPSILON = 0.0000001
+	val network = Network.contFromXML(
+		<network type="continuous">
+			<treatments>
+				<treatment id="Fluvoxamine"></treatment>
+				<treatment id="Paroxetine"></treatment>
+				<treatment id="Sertraline"></treatment>
+			</treatments>
+			<studies>
+				<study id="Aberg-Wistedt et al, 2000">
+					<measurement 
+					standardDeviation="1.6" mean="-2.5" sample="177" treatment="Paroxetine">
+		</measurement>
+					<measurement 
+					standardDeviation="1.5" mean="-2.6" sample="176" treatment="Sertraline">
+		</measurement>
+				</study>
+				<study id="Kiev and Feiger, 1997">
+					<measurement 
+					standardDeviation="1.22" mean="-1.93" sample="30" treatment="Fluvoxamine">
+		</measurement>
+					<measurement 
+					standardDeviation="1.18" mean="-1.52" sample="30" treatment="Paroxetine">
+		</measurement>
+				</study>
+				<study id="Fictional">
+					<measurement 
+					standardDeviation="1.5" mean="-2.01" sample="35" treatment="Fluvoxamine">
+		</measurement>
+					<measurement 
+					standardDeviation="1.45" mean="-1.73" sample="39" treatment="Paroxetine">
+		</measurement>
+				</study>
+				<study id="Nemeroff et al, 1995">
+					<measurement 
+					standardDeviation="1.23" mean="-1.35" sample="49" treatment="Fluvoxamine">
+		</measurement>
+					<measurement 
+					standardDeviation="0.96" mean="-1.52" sample="46" treatment="Sertraline">
+		</measurement>
+				</study>
+			</studies>
+		</network>
+	)
+
+	val fluvo = new Treatment("Fluvoxamine")
+	val parox = new Treatment("Paroxetine")
+	val sertr = new Treatment("Sertraline")
+
+	val spanningTree = new Tree[Treatment](
+		Set((parox, fluvo), (parox, sertr)), parox)
+
+	val proto = ConsistencyNetworkModel(network, spanningTree)
+	val generator = new ContinuousDataStartingValueGenerator(proto)
+
+	@Test def testGenerateBaselineEffect() {
+		val s0 = "Aberg-Wistedt et al, 2000"
+		val m0 = network.study(s0).measurements(parox)
+		generator.getBaselineEffect(network.study(s0)) should be (
+			-2.5 plusOrMinus EPSILON
+		)
+
+		val s1 = "Kiev and Feiger, 1997"
+		val m1 = network.study(s1).measurements(fluvo)
+		generator.getBaselineEffect(network.study(s1)) should be (
+			-1.93 plusOrMinus EPSILON
+		)
+	}
+
+	@Test def testGenerateRandomEffect() {
+		val s = network.study("Kiev and Feiger, 1997")
+		val m0 = s.measurements(fluvo).mean
+		val m1 = s.measurements(parox).mean
+		generator.getRandomEffect(s, new BasicParameter(fluvo, parox)) should be (
+			(m1 - m0) plusOrMinus EPSILON
+		)
+	}
+
+	@Test def testGenerateRelativeEffect() {
+		val mds: java.util.List[EstimateWithPrecision] = getMDs(List(network.study("Kiev and Feiger, 1997"), network.study("Fictional")), fluvo, parox)
+		val pooling = new DerSimonianLairdPooling(mds)
+
+		generator.getRelativeEffect(new BasicParameter(fluvo, parox)) should be (
+			pooling.getPooled.getPointEstimate plusOrMinus EPSILON
+		)
+	}
+
+	@Test def testGenerateVariance() {
+		val varFluvo = (new DerSimonianLairdPooling(getMDs(filterStudies(parox, fluvo), parox, fluvo))).getPooled.getStandardError
+		val varSertr = (new DerSimonianLairdPooling(getMDs(filterStudies(parox, sertr), parox, sertr))).getPooled.getStandardError
+
+		generator.getRandomEffectsVariance() should be (
+			((varFluvo + varSertr) / 2) plusOrMinus EPSILON
+		)
+	}
+
+	def getMDs(studies: List[Study[ContinuousMeasurement]], t0: Treatment, t1: Treatment) = {
+		studies.map(s => getMD(s, t0, t1))
+	}
+
+	def getMD(s: Study[ContinuousMeasurement],  t0: Treatment, t1: Treatment) = {
+		val m0 = s.measurements(t0)
+		val m1 = s.measurements(t1)
+		Statistics.meanDifference(m0.mean, m0.stdDev, m0.sampleSize, m1.mean, m1.stdDev, m1.sampleSize)
+	}
+
+	def filterStudies(t0: Treatment, t1: Treatment) = {
+		proto.studyList.filter(s => s.treatments.contains(t0) && s.treatments.contains(t1))
 	}
 }
