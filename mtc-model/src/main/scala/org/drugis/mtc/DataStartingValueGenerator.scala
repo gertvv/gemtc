@@ -112,7 +112,7 @@ object DataStartingValueGenerator {
 		if (cls == classOf[DichotomousMeasurement]) {
 			new DichotomousDataStartingValueGenerator(model.asInstanceOf[NetworkModel[DichotomousMeasurement, Parametrization[DichotomousMeasurement]]]).asInstanceOf[StartingValueGenerator[M]]
 		} else if (cls == classOf[ContinuousMeasurement]) {
-			null
+			new ContinuousDataStartingValueGenerator(model.asInstanceOf[NetworkModel[ContinuousMeasurement, Parametrization[ContinuousMeasurement]]]).asInstanceOf[StartingValueGenerator[M]]
 		} else {
 			throw new IllegalStateException("Unknown measurement type " + cls)
 		}
