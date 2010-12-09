@@ -103,3 +103,18 @@ trait StartingValueGeneratorUtil[M <: Measurement] {
 		case _ => throw new IllegalStateException()
 	}
 }
+
+object DataStartingValueGenerator {
+	def apply[M <: Measurement, P <: Parametrization[M]](
+			model: NetworkModel[M, P])
+	: StartingValueGenerator[M] = {
+		val cls = model.network.measurementType
+		if (cls == classOf[DichotomousMeasurement]) {
+			new DichotomousDataStartingValueGenerator(model.asInstanceOf[NetworkModel[DichotomousMeasurement, Parametrization[DichotomousMeasurement]]]).asInstanceOf[StartingValueGenerator[M]]
+		} else if (cls == classOf[ContinuousMeasurement]) {
+			null
+		} else {
+			throw new IllegalStateException("Unknown measurement type " + cls)
+		}
+	}
+}
