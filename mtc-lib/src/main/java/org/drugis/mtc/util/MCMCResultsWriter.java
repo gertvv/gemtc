@@ -12,7 +12,7 @@ public class MCMCResultsWriter {
 
 	private MCMCResults d_results;
 
-	MCMCResultsWriter(MCMCResults r) {
+	public MCMCResultsWriter(MCMCResults r) {
 		d_results = r;
 	}
 
