@@ -261,7 +261,10 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	// FIXME: implement
 	private def inconsistencyStartingValue(p: InconsistencyParameter,
-		startVal: StartingValueGenerator[M], basicStart: List[Double]) = 0.0
+		startVal: StartingValueGenerator[M], basicStart: List[Double])
+	: Double = {
+		InconsistencyStartingValueGenerator(p, proto, startVal, basicStart)
+	}
 
 	private def createChain(chain: Int) {
 		val startVal = startingValues(chain)
@@ -413,17 +416,6 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		parameterList(chain) = writers
 	}
 
-/*
-	private def parameterMap(basicMap: Map[NetworkModelParameter, MyParameter])
-	:Map[NetworkModelParameter, MyParameter] = {
-		val ts = proto.treatmentList
-		basicMap ++ (
-		for {i <- 0 until (ts.size - 1); j <- (i + 1) until ts.size;
-			val p = new BasicParameter(ts(i), ts(j));
-			if (!basicMap.keySet.contains(p))
-		} yield (p, createIndirect(p, basicMap)))
-	}
-*/
 	private def indirectParameters: Seq[BasicParameter] = {
 		val ts = proto.treatmentList
 		ts.map(t => (ts - t).map(u => new BasicParameter(t, u))).reduceLeft((a, b) => a ++ b) -- proto.basicParameters.asInstanceOf[List[BasicParameter]]
