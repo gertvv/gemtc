@@ -15,6 +15,12 @@ import org.drugis.mtc.MCMCResultsListener;
 import org.drugis.mtc.Parameter;
 
 public class FileResults implements MCMCResults {
+	public static class MyParameter implements Parameter {
+		private String d_name;
+		public MyParameter(String name) { d_name = name; }
+		public String getName() { return d_name; }
+	}
+	
 	private final int d_nSamples;
 	private final Parameter[] d_parameters;
 	private final int d_nChains;
