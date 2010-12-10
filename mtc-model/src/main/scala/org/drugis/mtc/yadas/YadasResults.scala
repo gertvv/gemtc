@@ -33,11 +33,13 @@ abstract class ParameterWriter(val p: MCMCParameter, val i: Int) {
 }
 
 class Derivation(val pmtz: Map[Parameter, Int]) {
+	assert(!pmtz.isEmpty)
+
 	def calculate(results: MCMCResults, c: Int): Seq[Double] = {
 		(0 until results.getNumberOfSamples).map(i => calculate(results, c, i))
 	}
 	def calculate(results: MCMCResults, c: Int, i: Int): Double = {
-		pmtz.keySet.map(p => pmtz(p) * results.getSample(results.findParameter(p), c, i)).reduceLeft((a, b) => a + b)
+		pmtz.keySet.toList.map(p => pmtz(p) * results.getSample(results.findParameter(p), c, i)).reduceLeft((a, b) => a + b)
 	}
 }
 
@@ -115,18 +117,31 @@ class YadasResults extends MCMCResults {
 		(directParameters ++ derivedParameters).findIndexOf(x => x == p)
 	def getNumberOfChains: Int = nChains
 	def getNumberOfSamples: Int = availableSamples
-	def getSample(p: Int, c: Int, i: Int): Double =
+	def getSample(p: Int, c: Int, i: Int): Double = {
+		assertBounds(p, c)
 		if (p < directParameters.size) {
 			results(c)(p)(i)
 		} else {
 			derivations(p - directParameters.size).calculate(this, c, i)
 		}
-	def getSamples(p: Int, c: Int): Array[Double] =
+	}
+	def getSamples(p: Int, c: Int): Array[Double] = {
+		assertBounds(p, c)
 		if (p < directParameters.size) {
 			results(c)(p).toArray
 		} else {
 			derivations(p - directParameters.size).calculate(this, c).toArray
 		}
+	}
+
+	private def assertBounds(p: Int, c: Int) {
+		if (c < 0 || c >= nChains) {
+			throw new IndexOutOfBoundsException("Chain " + c + " is out of bounds (" + nChains + " chains)")
+		}
+		if (p < 0 || p >= directParameters.size + derivations.size) {
+			throw new IndexOutOfBoundsException("Parameter " + p + " is out of bounds (" + directParameters.size + " + " + derivations.size + " parameters)")
+		}
+	}
 
 	val listeners = new ArrayBuffer[MCMCResultsListener]()
 
