@@ -39,9 +39,11 @@ extends ArgumentMaker with ThetaMaker[DichotomousMeasurement] {
 	 * data[dIdx] should contain relative effects, one for each non-baseline
 	 */
 	def getArgument(data: Array[Array[Double]]): Array[Double] = {
-		Array.make(0, 0.0) ++ {
+		val rval = Array.make(0, 0.0) ++ {
 			for {t <- treatments} yield prob(t, data)
 		}
+		if (rval.length != treatments.size) throw new RuntimeException(rval + " does not match length " + treatments.size + " given data " + data)
+		else rval
 	}
 
 	private def ilogit(x: Double): Double = 1 / (1 + Math.exp(-x))

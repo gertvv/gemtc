@@ -499,7 +499,11 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def update(chain: Int) {
 		for (u <- updateList(chain)) {
-			u.update()
+			try {
+				u.update()
+			} catch {
+				case e => throw new RuntimeException("Failed to update " + u, e)
+			}
 		}
 	}
 
