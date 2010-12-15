@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.drugis</groupId>
 		<artifactId>mtc</artifactId>
-		<version>0.5-SNAPSHOT</version>
+		<version>0.6</version>
 	</parent>
 
 	<groupId>org.drugis</groupId>
 	<artifactId>mtc-model</artifactId>
-	<version>0.5-SNAPSHOT</version>
+	<version>0.6</version>
 	<name>mtc-model</name>
 
 	<distributionManagement>

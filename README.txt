@@ -66,6 +66,10 @@ To run an inconsistency model, replace --consistency with
 Versions
 --------
 
+0.6: Node-splitting models, assessment of convergence, starting value
+generation, allow access to samples (all for Yadas only, JAGS models
+have not advanced). Modularized into 4 libraries.
+
 0.4: Improved parametrization algorithm. Allow output of Network as XML.
 Check connectedness of network. Some issues fixed.
 
