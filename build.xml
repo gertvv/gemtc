@@ -10,9 +10,9 @@
 		<replaceregexp flags="s"
 			match=".*package org.drugis.mtc"
 			replace="${header}package org.drugis.mtc">
-			<fileset dir="src">
-				<include name="**/*.java" />
-				<include name="**/*.scala" />
+			<fileset dir=".">
+				<include name="*/src/**/*.java" />
+				<include name="*/src/**/*.scala" />
 			</fileset>
 		</replaceregexp>
 	</target>
