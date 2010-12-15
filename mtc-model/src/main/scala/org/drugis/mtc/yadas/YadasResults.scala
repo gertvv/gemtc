@@ -39,7 +39,11 @@ class Derivation(val pmtz: Map[Parameter, Int]) {
 		(0 until results.getNumberOfSamples).map(i => calculate(results, c, i))
 	}
 	def calculate(results: MCMCResults, c: Int, i: Int): Double = {
-		pmtz.keySet.toList.map(p => pmtz(p) * results.getSample(results.findParameter(p), c, i)).reduceLeft((a, b) => a + b)
+		try {
+			pmtz.keySet.toList.map(p => pmtz(p) * results.getSample(results.findParameter(p), c, i)).reduceLeft((a, b) => a + b)
+		} catch {
+			case e => throw new IllegalStateException("calculate failed for iteration = " + i + " formula = " + pmtz + " results.parameters = " + results.getParameters)
+		}
 	}
 }
 
