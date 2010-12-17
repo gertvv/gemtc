@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.drugis.mtc.test.ExampleResults;
 import org.junit.Before;
 import org.junit.Test;
 

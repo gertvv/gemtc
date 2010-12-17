@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 
 import org.drugis.mtc.Parameter;
+import org.drugis.mtc.test.FileResults;
 import org.junit.Test;
 
 public class MCMCResultsWriterTest {

@@ -33,7 +33,7 @@ import java.util.List;
 import org.drugis.mtc.BasicParameter;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.Treatment;
-import org.drugis.mtc.util.FileResults;
+import org.drugis.mtc.test.FileResults;
 import org.junit.Before;
 import org.junit.Test;
 

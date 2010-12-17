@@ -29,6 +29,7 @@ import org.drugis.mtc.BasicParameter;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.Treatment;
 import org.drugis.mtc.convergence.GelmanRubinAcceptanceTest;
+import org.drugis.mtc.test.FileResults;
 import org.drugis.mtc.yadas.RandomEffectsVariance;
 import org.junit.Before;
 import org.junit.Test;
