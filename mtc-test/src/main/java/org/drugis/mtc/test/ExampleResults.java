@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.drugis.mtc.summary;
+package org.drugis.mtc.test;
 
 import java.io.IOException;
 
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.Parameter;
-import org.drugis.mtc.util.FileResults;
+import org.drugis.mtc.test.FileResults;
 
 public class ExampleResults extends FileResults implements MCMCResults {
 	public static final int N_SAMPLES = 500;

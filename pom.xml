@@ -63,6 +63,7 @@
 
 	<modules>
 		<module>mtc-mcmc</module>
+		<module>mtc-test</module>
 		<module>mtc-model</module>
 		<module>mtc-lib</module>
 		<module>mtc-main</module>
