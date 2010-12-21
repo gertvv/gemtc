@@ -23,8 +23,38 @@ import org.drugis.mtc.util.DerSimonianLairdPooling
 import org.drugis.mtc.util.DichotomousDescriptives
 import org.drugis.mtc.util.EstimateWithPrecision
 import org.drugis.mtc.util.Statistics
+import org.apache.commons.math.random.RandomGenerator
 
 import scala.collection.JavaConversions._
+
+class RandomizedDichotomousDataStartingValueGenerator[
+		P <: Parametrization[DichotomousMeasurement]](
+model: NetworkModel[DichotomousMeasurement, P],
+val rng: RandomGenerator,
+val scale: Double)
+extends DichotomousDataStartingValueGenerator[P](model) {
+	override def getBaselineEffect(study: Study[M]) = {
+		val m = study.measurements(model.studyBaseline(study))
+		val mean = super.getBaselineEffect(study)
+		val se = Math.sqrt(1 / (m.responders + 0.5) + 1 / (m.sampleSize - m.responders + 0.5))
+		mean + rng.nextGaussian * scale * se
+	}
+
+	override def getRandomEffect(study: Study[M], p: BasicParameter) = {
+		val lor = getLogOddsRatio(study, p)
+		lor.getPointEstimate + rng.nextGaussian * scale * lor.getStandardError
+	}
+
+	override def getRelativeEffect(p: BasicParameter) = {
+		val lor = getPooled(p)
+		lor.getPointEstimate + rng.nextGaussian * scale * lor.getStandardError
+	}
+
+	override def getRandomEffectsVariance() = {
+		model.variancePrior * rng.nextDouble
+	}
+}
+
 
 class DichotomousDataStartingValueGenerator[
 		P <: Parametrization[DichotomousMeasurement]](
@@ -51,21 +81,47 @@ with StartingValueGeneratorUtil[DichotomousMeasurement] {
 		model.basicParameters.map(p => getPooled(basicParameter(p)).getStandardError).reduceLeft((a, b) => a + b) / model.basicParameters.size
 	}
 
-	private def getPooled(p: BasicParameter) = {
+	protected def getPooled(p: BasicParameter) = {
 		val estimates: java.util.List[EstimateWithPrecision] = getLogOddsRatios(p)
 		(new DerSimonianLairdPooling(estimates)).getPooled
 	}
 
-	private def getLogOddsRatios(p: BasicParameter)
+	protected def getLogOddsRatios(p: BasicParameter)
 	: List[EstimateWithPrecision] = {
 		model.studyList.filter(includes(p)).map(s => getLogOddsRatio(s, p))
 	}
 
-	private def getLogOddsRatio(s: Study[M], p: BasicParameter)
+	protected def getLogOddsRatio(s: Study[M], p: BasicParameter)
 	: EstimateWithPrecision = {
 		val m0 = s.measurements(p.base)
 		val m1 = s.measurements(p.subject)
 		Statistics.logOddsRatio(m0.responders, m0.sampleSize, m1.responders, m1.sampleSize, true)
+	}
+}
+
+class RandomizedContinuousDataStartingValueGenerator[
+		P <: Parametrization[ContinuousMeasurement]](
+model: NetworkModel[ContinuousMeasurement, P],
+val rng: RandomGenerator,
+val scale: Double)
+extends ContinuousDataStartingValueGenerator[P](model) {
+	override def getBaselineEffect(study: Study[M]) = {
+		val m = study.measurements(model.studyBaseline(study))
+		m.mean + rng.nextGaussian * scale * m.stdDev / Math.sqrt(m.sampleSize)
+	}
+
+	override def getRandomEffect(study: Study[M], p: BasicParameter) = {
+		val md = getMeanDifference(study, p)
+		md.getPointEstimate + rng.nextGaussian * scale * md.getStandardError
+	}
+
+	override def getRelativeEffect(p: BasicParameter) = {
+		val md = getPooled(p)
+		md.getPointEstimate + rng.nextGaussian * scale * md.getStandardError
+	}
+
+	override def getRandomEffectsVariance() = {
+		model.variancePrior * rng.nextDouble
 	}
 }
 
@@ -93,17 +149,17 @@ with StartingValueGeneratorUtil[ContinuousMeasurement] {
 		model.basicParameters.map(p => getPooled(basicParameter(p)).getStandardError).reduceLeft((a, b) => a + b) / model.basicParameters.size
 	}
 
-	private def getPooled(p: BasicParameter) = {
+	protected def getPooled(p: BasicParameter) = {
 		val estimates: java.util.List[EstimateWithPrecision] = getMeanDifferences(p)
 		(new DerSimonianLairdPooling(estimates)).getPooled
 	}
 
-	private def getMeanDifferences(p: BasicParameter)
+	protected def getMeanDifferences(p: BasicParameter)
 	: List[EstimateWithPrecision] = {
 		model.studyList.filter(includes(p)).map(s => getMeanDifference(s, p))
 	}
 
-	private def getMeanDifference(s: Study[M], p: BasicParameter)
+	protected def getMeanDifference(s: Study[M], p: BasicParameter)
 	: EstimateWithPrecision = {
 		val m0 = s.measurements(p.base)
 		val m1 = s.measurements(p.subject)
@@ -132,6 +188,21 @@ object DataStartingValueGenerator {
 			new DichotomousDataStartingValueGenerator(model.asInstanceOf[NetworkModel[DichotomousMeasurement, Parametrization[DichotomousMeasurement]]]).asInstanceOf[StartingValueGenerator[M]]
 		} else if (cls == classOf[ContinuousMeasurement]) {
 			new ContinuousDataStartingValueGenerator(model.asInstanceOf[NetworkModel[ContinuousMeasurement, Parametrization[ContinuousMeasurement]]]).asInstanceOf[StartingValueGenerator[M]]
+		} else {
+			throw new IllegalStateException("Unknown measurement type " + cls)
+		}
+	}
+}
+
+object RandomizedStartingValueGenerator {
+	def apply[M <: Measurement, P <: Parametrization[M]](
+			model: NetworkModel[M, P], rng: RandomGenerator, scale: Double)
+	: StartingValueGenerator[M] = {
+		val cls = model.network.measurementType
+		if (cls == classOf[DichotomousMeasurement]) {
+			new RandomizedDichotomousDataStartingValueGenerator(model.asInstanceOf[NetworkModel[DichotomousMeasurement, Parametrization[DichotomousMeasurement]]], rng, scale).asInstanceOf[StartingValueGenerator[M]]
+		} else if (cls == classOf[ContinuousMeasurement]) {
+			new RandomizedContinuousDataStartingValueGenerator(model.asInstanceOf[NetworkModel[ContinuousMeasurement, Parametrization[ContinuousMeasurement]]], rng, scale).asInstanceOf[StartingValueGenerator[M]]
 		} else {
 			throw new IllegalStateException("Unknown measurement type " + cls)
 		}

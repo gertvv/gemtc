@@ -42,6 +42,7 @@ import collection.JavaConversions._
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.math.stat.descriptive.moment.Mean
 import org.apache.commons.math.linear.ArrayRealVector
+import org.apache.commons.math.random.JDKRandomGenerator
 
 abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	network: Network[M],
@@ -59,7 +60,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	protected var proto: NetworkModel[M, P] = null
 	protected var startingValues: List[StartingValueGenerator[M]] = null
 
-	val nChains = 2
+	val nChains = 4
 
 	protected var parameters: Map[NetworkModelParameter, Parameter] = null
 
@@ -222,9 +223,14 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def buildModel() {
 		buildNetworkModel()
+		val rng = new JDKRandomGenerator()
+		val scale = 1.8
 		startingValues =
+			(0 until nChains).map(_ => RandomizedStartingValueGenerator(proto, rng, scale)).toList
+		/*
 			List(new PriorStartingValueGenerator(proto),
 				DataStartingValueGenerator(proto))
+		*/
 
 		val parameters =
 			proto.basicParameters ++

@@ -24,11 +24,13 @@ import org.junit.Assert._
 import org.junit.Test
 import org.junit.Ignore
 import org.junit.Before
+import org.easymock.EasyMock
 
 import org.drugis.mtc.util.Statistics
 import org.drugis.mtc.util.EstimateWithPrecision
 import org.drugis.mtc.util.DerSimonianLairdPooling
 import scala.collection.JavaConversions._
+import org.apache.commons.math.random.RandomGenerator
 
 class DichotomousDataStartingValueGeneratorTest
 extends ShouldMatchersForJUnit {
@@ -102,12 +104,58 @@ extends ShouldMatchersForJUnit {
 		)
 	}
 
+	private def mockRandom(value: Double) = {
+		val rng = EasyMock.createMock(classOf[RandomGenerator])
+		EasyMock.expect(rng.nextGaussian()).andReturn(value)
+		EasyMock.replay(rng)
+		rng
+	}
+
+	@Test def testRandomizedBaselineEffect1() {
+		val m0 = network.study("Alves et al, 1999").measurements(fluox)
+		val rng = mockRandom(1.0)
+		val rgenerator = new RandomizedDichotomousDataStartingValueGenerator(proto, rng, 1.0)
+		rgenerator.getBaselineEffect(network.study("Alves et al, 1999")) should be (
+			Math.log(
+				(m0.responders + 0.5) / (m0.sampleSize - m0.responders + 0.5)) +
+			Math.sqrt(1 / (m0.responders + 0.5) + (1 / (m0.sampleSize - m0.responders + 0.5)))
+			plusOrMinus EPSILON
+		)
+		EasyMock.verify(rng)
+	}
+
+	@Test def testRandomizedBaselineEffect2() {
+		val rng = mockRandom(0.23)
+		val m0 = network.study("Ballus et al, 2000").measurements(parox)
+
+		val rgenerator = new RandomizedDichotomousDataStartingValueGenerator(proto, rng, 2.0)
+		rgenerator.getBaselineEffect(network.study("Ballus et al, 2000")) should be (
+			Math.log(
+				(m0.responders + 0.5) / (m0.sampleSize - m0.responders + 0.5)) +
+			0.46 * Math.sqrt(1 / (m0.responders + 0.5) + (1 / (m0.sampleSize - m0.responders + 0.5)))
+			plusOrMinus EPSILON
+		)
+		EasyMock.verify(rng)
+	}
+
 	@Test def testGenerateRandomEffect() {
 		val s = network.study("Dierick et al, 1996")
 		val lor = getLOR(s, fluox, venla)
 		generator.getRandomEffect(s, new BasicParameter(fluox, venla)) should be (
 			getLOR(s, fluox, venla).getPointEstimate plusOrMinus EPSILON
 		)
+	}
+
+	@Test def testRandomizedRandomEffect() {
+		val rng = mockRandom(-0.34)
+		val s = network.study("Dierick et al, 1996")
+		val lor = getLOR(s, fluox, venla)
+		val rgenerator = new RandomizedDichotomousDataStartingValueGenerator(proto, rng, 2.0)
+		rgenerator.getRandomEffect(s, new BasicParameter(fluox, venla)) should be (
+			getLOR(s, fluox, venla).getPointEstimate - 2.0 * 0.34 * getLOR(s, fluox, venla).getStandardError
+			plusOrMinus EPSILON
+		)
+		EasyMock.verify(rng)
 	}
 
 	@Test def testGenerateRelativeEffect() {
@@ -119,6 +167,20 @@ extends ShouldMatchersForJUnit {
 		)
 	}
 
+	@Test def testRandomizedRelativeEffect() {
+		val lors: java.util.List[EstimateWithPrecision] = getLORs(List(network.study("Alves et al, 1999"), network.study("Dierick et al, 1996")), fluox, venla)
+		val pooling = new DerSimonianLairdPooling(lors)
+
+		val rng = mockRandom(0.12)
+		val rgenerator = new RandomizedDichotomousDataStartingValueGenerator(proto, rng, 1.5)
+
+		rgenerator.getRelativeEffect(new BasicParameter(fluox, venla)) should be (
+			pooling.getPooled.getPointEstimate + 1.5 * 0.12 * pooling.getPooled.getStandardError
+			plusOrMinus EPSILON
+		)
+		EasyMock.verify(rng)
+	}
+
 	@Test def testGenerateVariance() {
 		val varParox = (new DerSimonianLairdPooling(getLORs(filterStudies(fluox, parox), fluox, parox))).getPooled.getStandardError
 		val varSertr = (new DerSimonianLairdPooling(getLORs(filterStudies(fluox, sertr), fluox, sertr))).getPooled.getStandardError
@@ -127,6 +189,17 @@ extends ShouldMatchersForJUnit {
 		generator.getRandomEffectsVariance() should be (
 			((varParox + varSertr + varVenla) / 3) plusOrMinus EPSILON
 		)
+	}
+
+	@Test def testRandomizedVariance() {
+		val rng = EasyMock.createMock(classOf[RandomGenerator])
+		EasyMock.expect(rng.nextDouble()).andReturn(0.83)
+		EasyMock.replay(rng)
+
+		val rgenerator = new RandomizedDichotomousDataStartingValueGenerator(proto, rng, 1.5)
+		rgenerator.getRandomEffectsVariance() should be (
+			proto.variancePrior * 0.83 plusOrMinus EPSILON)
+		EasyMock.verify(rng)
 	}
 
 	def filterStudies(t0: Treatment, t1: Treatment) = {
