@@ -224,7 +224,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 	private def buildModel() {
 		buildNetworkModel()
 		val rng = new JDKRandomGenerator()
-		val scale = 1.8
+		val scale = 2.5
 		startingValues =
 			(0 until nChains).map(_ => RandomizedStartingValueGenerator(proto, rng, scale)).toList
 		/*
