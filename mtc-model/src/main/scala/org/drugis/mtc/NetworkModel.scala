@@ -159,30 +159,35 @@ class NetworkModel[M <: Measurement, P <: Parametrization[M]](
 			else
 				throw new IllegalStateException("Unknown measurement type " +
 						cls)
-		2 * iqr(means)
+		range(means)
 	}
 
-	private def iqr(x: List[Double]): Double = {
-		// Percentile implementation corresponds to type=6 quantile in R
-		val p25 = new Percentile(25)
-		val p75 = new Percentile(75)
-		p75.evaluate(x.toArray) - p25.evaluate(x.toArray)
+	private def range(x: List[Double]): Double = {
+		val min = x.reduceLeft(Math.min)
+		val max = x.reduceLeft(Math.max)
+		max - min
 	}
 
 	private def dichMeans(): List[Double] = {
-		for {m <- data} yield
-			logOdds(m._2.asInstanceOf[DichotomousMeasurement])
+		for {
+			s <- studyList;
+			t1 <- s.treatments;
+			t2 <- (s.treatments - t1)
+		} yield
+			Math.abs(logOdds(s.measurements(t1).asInstanceOf[DichotomousMeasurement]) - logOdds(s.measurements(t2).asInstanceOf[DichotomousMeasurement]))
 	}
 
 	private def logOdds(m: DichotomousMeasurement): Double = {
-		val p = (if (m.responders == 0) 0.5 else m.responders.toDouble) /
-			m.sampleSize.toDouble
-		Math.log(p / (1 - p))
+		Math.log((m.responders + 0.5) / (m.sampleSize - m.responders + 0.5))
 	}
 
 	private def contMeans(): List[Double] = {
-		for {m <- data} yield
-			m._2.asInstanceOf[ContinuousMeasurement].mean
+		for {
+			s <- studyList;
+			t1 <- s.treatments;
+			t2 <- (s.treatments - t1)
+		} yield
+			Math.abs(s.measurements(t1).asInstanceOf[ContinuousMeasurement].mean - s.measurements(t2).asInstanceOf[ContinuousMeasurement].mean)
 	}
 }
 

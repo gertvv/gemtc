@@ -155,6 +155,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 			<treatments>
 				<treatment id="A"/>
 				<treatment id="B"/>
+				<treatment id="C"/>
 			</treatments>
 			<studies>
 				<study id="1">
@@ -168,6 +169,7 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 				<study id="3">
 					<measurement treatment="A" responders="20" sample="100" />
 					<measurement treatment="B" responders="28" sample="100" />
+					<measurement treatment="C" responders="30" sample="100" />
 				</study>
 			</studies>
 		</network>)
@@ -216,9 +218,9 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 
 	@Test def testVariancePrior() {
 		InconsistencyNetworkModel(networkDich).variancePrior should be (
-			2.138684 plusOrMinus 0.000001)
+			0.43414982369413 plusOrMinus 0.000001)
 		InconsistencyNetworkModel(networkCont).variancePrior should be (
-			28.5 plusOrMinus 0.000001)
+			7.0 plusOrMinus 0.000001)
 	}
 
 	@Test def testNoneModel() {
