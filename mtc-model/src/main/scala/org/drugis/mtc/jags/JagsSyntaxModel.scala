@@ -98,6 +98,15 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			footer).mkString("\n")
 	}
 
+	def initialValuesText(gen: StartingValueGenerator[M]): String = {
+		List(
+			initMetaParameters(gen),
+			initBaselineEffects(gen),
+			initRelativeEffects(gen),
+			initVarianceParameters(gen)).mkString("\n")
+	}
+
+
 	def scriptText(prefix: String): String = 
 		List(
 			"model in '" + prefix + ".model'",
@@ -167,8 +176,12 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		if (study.treatments.size == 2) twoArmDeltas(study)
 		else multiArmDeltas(study)
 
+	private def nonBaselineList(study: Study[M]) = {
+		(study.treatments - base(study)).toList.sorted
+	}
+
 	private def twoArmDeltas(study: Study[M]) = {
-		val treatments = (study.treatments - base(study)).toList
+		val treatments = nonBaselineList(study)
 		List(
 			"\t# Random effects in study " + study.id,
 			"\tre[" + idx(study) + ", 1] ~ " +
@@ -184,7 +197,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	}
 
 	private def multiArmDeltas(study: Study[M]) = {
-		val treatments = (study.treatments - base(study)).toList
+		val treatments = nonBaselineList(study)
 		List(
 			"\t# Random effects in study " + study.id,
 			paramArray(study, treatments),
@@ -245,6 +258,49 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			List("\t# Meta-parameters") ++
 			(for {param <- model.parameterVector} yield format(param))
 		).mkString("\n")
+
+	private def initMetaParameters(g: StartingValueGenerator[M]): String =
+		{
+			for {param <- model.parameterVector} yield init(param, g)
+		}.mkString("\n")
+
+	private def init(p: NetworkModelParameter, g: StartingValueGenerator[M])
+	: String = "`" + p.toString + "` <-\n" + g.getRelativeEffect(p.asInstanceOf[BasicParameter])
+
+	private def initBaselineEffects(g: StartingValueGenerator[M]): String = {
+		"`mu` <-\nc(" + {
+			{
+				for {s <- model.studyList} yield g.getBaselineEffect(s)
+			}.mkString(",")
+		} + ")"
+	}
+
+	private def initRelativeEffects(g: StartingValueGenerator[M]): String = {
+		val reDim = model.studyList.map(s => s.treatments.size).reduceLeft(Math.max) - 1
+		"`re` <-\nstructure(c(" + {
+			{
+				for {i <- 0 until reDim; s <- model.studyList} yield {
+					init(s, i, g)
+				}
+			}.mkString(",")
+		} + "), .Dim = c(" + model.studyList.size + "L," + reDim + "L))"
+	}
+
+	private def init(s: Study[M], idx: Int, g: StartingValueGenerator[M])
+	: String = {
+		if (idx < s.treatments.size - 1) {
+			val p = new BasicParameter(base(s), nonBaselineList(s)(idx))
+			g.getRandomEffect(s, p).toString
+		} else "NA"
+	}
+
+	private def initVarianceParameters(g: StartingValueGenerator[M]): String = {
+		{
+			if (inconsistency) 
+				"`sd.w` <-\n" + g.getRandomEffectsVariance() + "\n"
+			else ""
+		} + "`sd.d` <-\n" + g.getRandomEffectsVariance()
+	}
 
 	private def format(p: NetworkModelParameter): String = 
 		"\t" + p.toString + " ~ " + normal("0", variance(p))

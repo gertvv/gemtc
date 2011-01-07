@@ -84,6 +84,7 @@ b <- c(2, 1, 1)"""
 	tau.2 <- inverse(var.2)
 }"""
 
+
 	val scriptText =
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
@@ -217,6 +218,18 @@ b <- c(2, 1, 1)"""
 	tau.2 <- inverse(var.2)
 }"""
 
+	val initText =
+		""" |`d.A.B` <-
+			|0.0
+			|`d.B.C` <-
+			|0.0
+			|`mu` <-
+			|c(0.0,0.0,0.0)
+			|`re` <-
+			|structure(c(0.0,0.0,0.0,0.0,NA,NA), .Dim = c(3L,2L))
+			|`sd.d` <-
+			|0.5012338759470988""".stripMargin
+
 	val scriptText =
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
@@ -280,8 +293,9 @@ b <- c(2, 1, 1)"""
 		(network.study("03"), ta)
 	)
 
-	def model = new JagsSyntaxModel(
-		ConsistencyNetworkModel(network, spanningTree, baselines))
+	val proto = ConsistencyNetworkModel(network, spanningTree, baselines)
+
+	def model = new JagsSyntaxModel(proto)
 
 	@Test def testDataText() {
 		model.dataText should be (dataText)
@@ -289,6 +303,10 @@ b <- c(2, 1, 1)"""
 
 	@Test def testModelText() {
 		model.modelText should be (modelText)
+	}
+
+	@Test def testInitText() {
+		model.initialValuesText(new PriorStartingValueGenerator(proto)) should be (initText)
 	}
 
 	@Test def testScriptText() {
