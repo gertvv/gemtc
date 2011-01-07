@@ -77,15 +77,13 @@ class JAGSGenerator(options: Options) {
 		modelOut.println(syntaxModel.modelText)
 		modelOut.close()
 
+		val nChains = 4
+
 		val scriptOut = new PrintStream(options.baseName + ".script")
-		scriptOut.println(syntaxModel.scriptText(options.baseName))
+		scriptOut.println(syntaxModel.scriptText(options.baseName, nChains))
 		scriptOut.close()
 
-		val analysisOut = new PrintStream(options.baseName + ".analysis.R")
-		analysisOut.println(syntaxModel.analysisText(options.baseName))
-		analysisOut.close()
-
-		for (i <- 1 to 4) {
+		for (i <- 1 to nChains) {
 			val paramOut = new PrintStream(options.baseName + ".param" + i)
 			paramOut.println(syntaxModel.initialValuesText(initialGen))
 			paramOut.close()

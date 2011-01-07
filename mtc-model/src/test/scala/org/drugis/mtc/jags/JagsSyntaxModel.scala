@@ -88,10 +88,13 @@ b <- c(2, 1, 1)"""
 	val scriptText =
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
-			|compile
+			|compile, nchains(3)
+			|parameters in 'jags.param1', chain(1)
+			|parameters in 'jags.param2', chain(2)
+			|parameters in 'jags.param3', chain(3)
 			|initialize
 			|
-			|update 30000
+			|adapt 30000
 			|
 			|monitor d.A.B
 			|monitor d.B.C
@@ -101,7 +104,7 @@ b <- c(2, 1, 1)"""
 			|
 			|update 20000
 			|
-			|monitors to 'jags.R'""".stripMargin
+			|coda *, stem('jags')""".stripMargin
 
 	val analysisText =
 		"""	|source('jags.R')
@@ -158,7 +161,7 @@ b <- c(2, 1, 1)"""
 	}
 
 	@Test def testScriptText() {
-		model.scriptText("jags") should be (scriptText)
+		model.scriptText("jags", 3) should be (scriptText)
 	}
 
 	@Test def testAnalysisText() {
@@ -233,10 +236,13 @@ b <- c(2, 1, 1)"""
 	val scriptText =
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
-			|compile
+			|compile, nchains(3)
+			|parameters in 'jags.param1', chain(1)
+			|parameters in 'jags.param2', chain(2)
+			|parameters in 'jags.param3', chain(3)
 			|initialize
 			|
-			|update 30000
+			|adapt 30000
 			|
 			|monitor d.A.B
 			|monitor d.B.C
@@ -244,7 +250,7 @@ b <- c(2, 1, 1)"""
 			|
 			|update 20000
 			|
-			|monitors to 'jags.R'""".stripMargin
+			|coda *, stem('jags')""".stripMargin
 
 	val analysisText =
 		"""	|source('jags.R')
@@ -310,7 +316,7 @@ b <- c(2, 1, 1)"""
 	}
 
 	@Test def testScriptText() {
-		model.scriptText("jags") should be (scriptText)
+		model.scriptText("jags", 3) should be (scriptText)
 	}
 
 	@Test def testAnalysisText() {
@@ -424,10 +430,13 @@ b <- c(2, 1, 1)"""
 	val scriptText =
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
-			|compile
+			|compile, nchains(3)
+			|parameters in 'jags.param1', chain(1)
+			|parameters in 'jags.param2', chain(2)
+			|parameters in 'jags.param3', chain(3)
 			|initialize
 			|
-			|update 30000
+			|adapt 30000
 			|
 			|monitor d.A.B
 			|monitor d.B.C
@@ -435,7 +444,7 @@ b <- c(2, 1, 1)"""
 			|
 			|update 20000
 			|
-			|monitors to 'jags.R'""".stripMargin
+			|coda *, stem('jags')""".stripMargin
 
 	val analysisText =
 		"""	|source('jags.R')
@@ -499,7 +508,7 @@ b <- c(2, 1, 1)"""
 	}
 
 	@Test def testScriptText() {
-		model.scriptText("jags") should be (scriptText)
+		model.scriptText("jags", 3) should be (scriptText)
 	}
 
 	@Test def testAnalysisText() {

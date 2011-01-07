@@ -107,21 +107,26 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	}
 
 
-	def scriptText(prefix: String): String = 
-		List(
+	def scriptText(prefix: String, chains: Int): String = 
+		(List(
 			"model in '" + prefix + ".model'",
 			"data in '" + prefix + ".data'",
-			"compile",
+			"compile, nchains(" + chains + ")") ++
+		{
+			for {i <- 1 to chains} yield "parameters in '" + prefix +
+				".param" + i + "', chain(" + i + ")"
+		} ++
+		List(
 			"initialize",
 			empty,
-			"update 30000",
+			"adapt 30000",
 			empty,
 			monitors,
 			empty,
 			"update 20000",
 			empty,
-			"monitors to '" + prefix + ".R'"
-		).mkString("\n")
+			"coda *, stem('" + prefix + "')"
+		)).mkString("\n")
 
 	def analysisText(prefix: String): String =
 		List(
