@@ -28,7 +28,7 @@ Requirements
 
 drugis.org MTC is written in a mixture of Java and Scala, and requires
 Java 5 (JRE 1.5) to run (http://java.com). To run the generated models,
-you need JAGS 1.0.3 (http://sourceforge.net/projects/mcmc-jags/) and you
+you need JAGS 1.0.4 (http://sourceforge.net/projects/mcmc-jags/) and you
 may want to use R (http://r-project.org) to perform post-processing and
 analysis. Future versions may include scripts to aid in the process.
 
@@ -45,18 +45,23 @@ start -> run -> type 'cmd' -> ok).
 
  $ cd directory_with_data_file_and_mtc
 
- $ java -jar mtc-0.2.jar --consistency cardiovasc.xml cardiovasc_cons
+ $ java -jar mtc-0.6.1.jar --consistency cardiovasc.xml cv.cons
 
     ... some output follows ...   
 
- $ jags cardiovasc_cons.script
+ $ jags cv.cons.script
 
     ... running model ...
 
  $ R
 
- > source('cardiovasc_cons.R')
- > summary(trace)
+  > library(coda)
+  > data <- as.mcmc.list(lapply(1:4, function(i) {
+        read.coda(
+            paste("cv.conschain", i, ".txt", sep=""),
+            "cv.consindex.txt")
+    }))
+ > summary(data)
 
     ... summary of simulation results ...
 
@@ -65,6 +70,8 @@ To run an inconsistency model, replace --consistency with
 
 Versions
 --------
+
+0.6.1: Starting value generation for JAGS models.
 
 0.6: Node-splitting models, assessment of convergence, starting value
 generation, allow access to samples (all for Yadas only, JAGS models
