@@ -89,12 +89,12 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
 		// for testing against WinBUGS results).
-		val mAB = 0.530409
-		val sAB = 0.7925273
+		val mAB = 0.4965705
+		val sAB = 0.4798996
 		mean.evaluate(dAB) should be (mAB plusOrMinus f * sAB)
 		stdDev.evaluate(dAB) should be(sAB plusOrMinus f * sAB)
-		val mBC = -0.4314525
-		val sBC = 0.951072
+		val mBC = -0.4095144
+		val sBC = 0.593866
 		mean.evaluate(dBC) should be (mBC plusOrMinus f * sBC)
 		stdDev.evaluate(dBC) should be(sBC plusOrMinus f * sBC)
 	}
@@ -110,8 +110,8 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 		dBA should not be (null)
 		val dAC = model.getResults.getSamples(
 			model.getResults.findParameter(m.getRelativeEffect(ta, tc)), 0)
-		val mAC = 0.09895649
-		val sAC = 0.7997789
+		val mAC = 0.08705606
+		val sAC = 0.5046929
 		mean.evaluate(dAC) should be (mAC plusOrMinus f * sAC)
 		stdDev.evaluate(dAC) should be(sAC plusOrMinus f * sAC)
 	}

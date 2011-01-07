@@ -92,18 +92,18 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
 		// for testing against WinBUGS results).
-		val mAB = 0.5078252
-		val sAB = 0.8135523
+		val mAB = 0.4713884
+		val sAB = 0.4838365
 		mean.evaluate(dAB) should be (mAB plusOrMinus f * sAB)
 		stdDev.evaluate(dAB) should be(sAB plusOrMinus f * sAB)
-		val mBC = -0.5224309
-		val sBC = 1.024877
+		val mBC = -0.4645146
+		val sBC = 0.6111192
 		mean.evaluate(dBC) should be (mBC plusOrMinus f * sBC)
 		stdDev.evaluate(dBC) should be(sBC plusOrMinus f * sBC)
-		val mACB = 0.2015848
-		val sACB = 0.8444993
-		mean.evaluate(wABC) should be (-mACB plusOrMinus f * sACB)
-		stdDev.evaluate(wABC) should be(sACB plusOrMinus f * sACB)
+		val mABC = -0.1466253
+		val sABC = 0.4568596
+		mean.evaluate(wABC) should be (mABC plusOrMinus f * sABC)
+		stdDev.evaluate(wABC) should be(sABC plusOrMinus f * sABC)
 	}
 
 	@Test def testDerivedParameters() {
@@ -117,8 +117,8 @@ abstract class InconsistencyModelTestBase extends ShouldMatchersForJUnit {
 		dBA should not be (null)
 		val dAC = model.getResults.getSamples(
 			model.getResults.findParameter(m.getRelativeEffect(ta, tc)), 0)
-		val mAC = 0.1869791
-		val sAC = 0.9310103
+		val mAC = 0.1534991
+		val sAC = 0.5514409
 		mean.evaluate(dAC) should be (mAC plusOrMinus f * sAC)
 		stdDev.evaluate(dAC) should be(sAC plusOrMinus f * sAC)
 	}
