@@ -21,6 +21,7 @@ package org.drugis.mtc
 
 import org.drugis.mtc.jags._
 import java.io.PrintStream
+import org.apache.commons.math.random.JDKRandomGenerator
 
 class Options(val xmlFile: String, val baseName: String,
 	val isInconsistency: Boolean) {
@@ -43,28 +44,22 @@ class JAGSGenerator(options: Options) {
 
 	def createJagsModel[M <: Measurement](
 		netw: Network[M], best: Tree[Treatment])
-	: JagsSyntaxModel[_,_] =
+	: (JagsSyntaxModel[M, _], StartingValueGenerator[M]) =
 		if (options.isInconsistency) {
-			new JagsSyntaxModel(createInconsistencyModel(netw, best))
+			val model = createInconsistencyModel(netw, best)
+			(new JagsSyntaxModel(model),
+			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), 2.5))
 		} else {
-			new JagsSyntaxModel(createConsistencyModel(netw, best))
+			val model = createConsistencyModel(netw, best)
+			(new JagsSyntaxModel(model),
+			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), 2.5))
 		}
 
-	def run() {
-		val xml = scala.xml.XML.loadFile(options.xmlFile)
-		val network = Network.fromXML(xml)
-		val top = network.treatments.toList.sort((a, b) => a < b).first 
-		println("Identifying spanning tree:")
-		val best = network.bestSpanningTree(top)
-
-		val syntaxModel: JagsSyntaxModel[_, _] =
-			if (network.measurementType == classOf[DichotomousMeasurement]) {
-				createJagsModel(network.asInstanceOf[Network[DichotomousMeasurement]], best)
-			} else if (network.measurementType == classOf[ContinuousMeasurement]) {
-				createJagsModel(network.asInstanceOf[Network[ContinuousMeasurement]], best)
-			} else {
-				null
-			}
+	def generateModel[M <: Measurement](
+			netw: Network[M], best: Tree[Treatment]) {
+		val models = createJagsModel(netw, best)
+		val syntaxModel = models._1 
+		val initialGen = models._2
 
 		println("\tgraph {")
 		for (e <- best.edgeSet) {
@@ -89,6 +84,28 @@ class JAGSGenerator(options: Options) {
 		val analysisOut = new PrintStream(options.baseName + ".analysis.R")
 		analysisOut.println(syntaxModel.analysisText(options.baseName))
 		analysisOut.close()
+
+		for (i <- 1 to 4) {
+			val paramOut = new PrintStream(options.baseName + ".param" + i)
+			paramOut.println(syntaxModel.initialValuesText(initialGen))
+			paramOut.close()
+		}
+	}
+
+	def run() {
+		val xml = scala.xml.XML.loadFile(options.xmlFile)
+		val network = Network.fromXML(xml)
+		val top = network.treatments.toList.sort((a, b) => a < b).first 
+		println("Identifying spanning tree:")
+		val best = network.bestSpanningTree(top)
+
+		if (network.measurementType == classOf[DichotomousMeasurement]) {
+			generateModel(network.asInstanceOf[Network[DichotomousMeasurement]], best)
+		} else if (network.measurementType == classOf[ContinuousMeasurement]) {
+			generateModel(network.asInstanceOf[Network[ContinuousMeasurement]], best)
+		} else {
+			println("Unsupported measurement type")
+		}
 	}
 }
 

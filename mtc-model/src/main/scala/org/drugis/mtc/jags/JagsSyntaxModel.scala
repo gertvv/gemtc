@@ -22,7 +22,7 @@ package org.drugis.mtc.jags
 import org.drugis.mtc._
 
 class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
-		model: NetworkModel[M, P]
+		val model: NetworkModel[M, P]
 ) {
 	val dichotomous: Boolean = {
 		val cls = model.network.measurementType
