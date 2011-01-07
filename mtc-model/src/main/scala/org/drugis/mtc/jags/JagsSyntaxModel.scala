@@ -259,13 +259,26 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			(for {param <- model.parameterVector} yield format(param))
 		).mkString("\n")
 
-	private def initMetaParameters(g: StartingValueGenerator[M]): String =
-		{
-			for {param <- model.parameterVector} yield init(param, g)
-		}.mkString("\n")
+	private def initMetaParameters(g: StartingValueGenerator[M]): String = {
+		val basic = {
+			for {basicParam <- model.basicParameters}
+			yield g.getRelativeEffect(basicParam.asInstanceOf[BasicParameter])
+		}
 
-	private def init(p: NetworkModelParameter, g: StartingValueGenerator[M])
-	: String = "`" + p.toString + "` <-\n" + g.getRelativeEffect(p.asInstanceOf[BasicParameter])
+		
+		{
+			for {param <- model.parameterVector} yield init(param, g, basic)
+		}.mkString("\n")
+	}
+
+	private def init(p: NetworkModelParameter, g: StartingValueGenerator[M],
+			bl: List[Double])
+	: String = "`" + p.toString + "` <-\n" + (p match {
+		case b: BasicParameter => bl(model.basicParameters.findIndexOf(_ == b))
+		case i: InconsistencyParameter =>
+			InconsistencyStartingValueGenerator(i, model, g, bl)
+		case _ => throw new IllegalStateException("Unsupported parameter " + p)
+	})
 
 	private def initBaselineEffects(g: StartingValueGenerator[M]): String = {
 		"`mu` <-\nc(" + {
