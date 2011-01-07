@@ -167,13 +167,16 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		if (study.treatments.size == 2) twoArmDeltas(study)
 		else multiArmDeltas(study)
 
-	private def twoArmDeltas(study: Study[M]) =
+	private def twoArmDeltas(study: Study[M]) = {
+		val treatments = (study.treatments - base(study)).toList
 		List(
 			"\t# Random effects in study " + study.id,
+			"\tre[" + idx(study) + ", 1] ~ " +
+				normal(express(study, subj(study)), "tau.d"),
 			"\t" + zeroDelta(study, base(study)),
-			"\t" + delta(study, subj(study)) + " ~ " +
-				normal(express(study, subj(study)), "tau.d")
+			deltasArray(study, treatments)
 		).mkString("\n")
+	}
 
 	private def subj(study: Study[M]) = {
 		require(study.treatments.size == 2)

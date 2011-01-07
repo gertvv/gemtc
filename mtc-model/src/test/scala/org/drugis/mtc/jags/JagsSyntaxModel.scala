@@ -47,11 +47,13 @@ b <- c(2, 1, 1)"""
 	delta[1, 2, 1] <- re[1, 1]
 	delta[1, 2, 3] <- re[1, 2]
 	# Random effects in study 02
+	re[2, 1] ~ dnorm(d.A.B, tau.d)
 	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] ~ dnorm(d.A.B, tau.d)
+	delta[2, 1, 2] <- re[2, 1]
 	# Random effects in study 03
+	re[3, 1] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
 	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
+	delta[3, 1, 3] <- re[3, 1]
 
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
@@ -184,11 +186,13 @@ b <- c(2, 1, 1)"""
 	delta[1, 2, 1] <- re[1, 1]
 	delta[1, 2, 3] <- re[1, 2]
 	# Random effects in study 02
+	re[2, 1] ~ dnorm(d.A.B, tau.d)
 	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] ~ dnorm(d.A.B, tau.d)
+	delta[2, 1, 2] <- re[2, 1]
 	# Random effects in study 03
+	re[3, 1] ~ dnorm(d.A.B + d.B.C, tau.d)
 	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C, tau.d)
+	delta[3, 1, 3] <- re[3, 1]
 
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
@@ -317,11 +321,13 @@ b <- c(2, 1, 1)"""
 	delta[1, 2, 1] <- re[1, 1]
 	delta[1, 2, 3] <- re[1, 2]
 	# Random effects in study 02
+	re[2, 1] ~ dnorm(d.A.B, tau.d)
 	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] ~ dnorm(d.A.B, tau.d)
+	delta[2, 1, 2] <- re[2, 1]
 	# Random effects in study 03
+	re[3, 1] ~ dnorm(d.A.B + d.B.C, tau.d)
 	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C, tau.d)
+	delta[3, 1, 3] <- re[3, 1]
 
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
@@ -360,11 +366,13 @@ b <- c(2, 1, 1)"""
 	delta[1, 2, 1] <- re[1, 1]
 	delta[1, 2, 3] <- re[1, 2]
 	# Random effects in study 02
+	re[2, 1] ~ dnorm(d.A.B, tau.d)
 	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] ~ dnorm(d.A.B, tau.d)
+	delta[2, 1, 2] <- re[2, 1]
 	# Random effects in study 03
+	re[3, 1] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
 	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
+	delta[3, 1, 3] <- re[3, 1]
 
 	# For each (study, treatment), model effect
 	for (i in 1:length(s)) {
