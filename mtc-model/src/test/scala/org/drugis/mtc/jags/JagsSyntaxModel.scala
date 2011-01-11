@@ -161,7 +161,7 @@ b <- c(2, 1, 1)"""
 	}
 
 	@Test def testScriptText() {
-		model.scriptText("jags", 3) should be (scriptText)
+		model.scriptText("jags", 3, 30000, 20000) should be (scriptText)
 	}
 
 	@Test def testAnalysisText() {
@@ -316,7 +316,7 @@ b <- c(2, 1, 1)"""
 	}
 
 	@Test def testScriptText() {
-		model.scriptText("jags", 3) should be (scriptText)
+		model.scriptText("jags", 3, 30000, 20000) should be (scriptText)
 	}
 
 	@Test def testAnalysisText() {
@@ -508,7 +508,7 @@ b <- c(2, 1, 1)"""
 	}
 
 	@Test def testScriptText() {
-		model.scriptText("jags", 3) should be (scriptText)
+		model.scriptText("jags", 3, 30000, 20000) should be (scriptText)
 	}
 
 	@Test def testAnalysisText() {

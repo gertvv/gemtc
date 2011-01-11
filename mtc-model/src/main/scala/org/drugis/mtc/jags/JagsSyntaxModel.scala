@@ -107,7 +107,8 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	}
 
 
-	def scriptText(prefix: String, chains: Int): String = 
+	def scriptText(prefix: String, chains: Int, tuning: Int, simulation: Int)
+	: String = 
 		(List(
 			"model in '" + prefix + ".model'",
 			"data in '" + prefix + ".data'",
@@ -119,11 +120,11 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		List(
 			"initialize",
 			empty,
-			"adapt 30000",
+			"adapt " + tuning,
 			empty,
 			monitors,
 			empty,
-			"update 20000",
+			"update " + simulation,
 			empty,
 			"coda *, stem('" + prefix + "')"
 		)).mkString("\n")

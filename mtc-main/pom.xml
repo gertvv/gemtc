@@ -38,6 +38,11 @@
 			<name>drugis.org Maven2 Repository</name>
 			<url>http://drugis.org/mvn</url>
 		</repository>
+		<repository>
+			<id>dist.swo2.org</id>
+			<name>wso2 Maven2 Repository</name>
+			<url>http://dist.wso2.org/maven2</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -80,6 +85,11 @@
 			<groupId>org.drugis</groupId>
 			<artifactId>common-lib</artifactId>
 			<version>0.4</version>
+		</dependency>
+		<dependency>	
+			<groupId>jargs</groupId>
+			<artifactId>jargs</artifactId>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>

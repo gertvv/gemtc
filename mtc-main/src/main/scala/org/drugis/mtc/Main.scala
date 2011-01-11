@@ -22,9 +22,19 @@ package org.drugis.mtc
 import org.drugis.mtc.jags._
 import java.io.PrintStream
 import org.apache.commons.math.random.JDKRandomGenerator
+import jargs.gnu.CmdLineParser
+
+object ModelType extends Enumeration {
+	type ModelType = Value
+	val CONSISTENCY = Value("consistency")
+	val INCONSISTENCY = Value("inconsistency")
+}
+
+import ModelType._
 
 class Options(val xmlFile: String, val baseName: String,
-	val isInconsistency: Boolean) {
+	val modelType: ModelType, val scale: Double,
+	val tuningIter: Int, val simulationIter: Int) {
 }
 
 class JAGSGenerator(options: Options) {
@@ -45,14 +55,14 @@ class JAGSGenerator(options: Options) {
 	def createJagsModel[M <: Measurement](
 		netw: Network[M], best: Tree[Treatment])
 	: (JagsSyntaxModel[M, _], StartingValueGenerator[M]) =
-		if (options.isInconsistency) {
+		if (options.modelType == INCONSISTENCY) {
 			val model = createInconsistencyModel(netw, best)
 			(new JagsSyntaxModel(model),
-			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), 2.5))
+			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), options.scale))
 		} else {
 			val model = createConsistencyModel(netw, best)
 			(new JagsSyntaxModel(model),
-			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), 2.5))
+			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), options.scale))
 		}
 
 	def generateModel[M <: Measurement](
@@ -80,7 +90,7 @@ class JAGSGenerator(options: Options) {
 		val nChains = 4
 
 		val scriptOut = new PrintStream(options.baseName + ".script")
-		scriptOut.println(syntaxModel.scriptText(options.baseName, nChains))
+		scriptOut.println(syntaxModel.scriptText(options.baseName, nChains, options.tuningIter, options.simulationIter))
 		scriptOut.close()
 
 		for (i <- 1 to nChains) {
@@ -108,8 +118,9 @@ class JAGSGenerator(options: Options) {
 }
 
 object Main {
-	val usage = """Usage: java -jar ${MTC_JAR} [--consistency|--inconsistency] <xml-file> <output>
-		|   When unspecified, the default is --inconsistency.
+	val usage = """Usage: java -jar ${MTC_JAR} [--type=consistency|inconsistency] [--scale=<f>] [--tuning=<n>] [--simulation=<m>]<xml-file> <output>
+		|   When unspecified, the default is --type=consistency --scale=2.5
+		|	 --tuning=30000 --simulation=20000.
 		|This will generate a JAGS model from the specified XML file, which can
 		|subsequently be run using the output.script file.""".stripMargin
 
@@ -122,18 +133,36 @@ object Main {
 	}
 
 	def parseArguments(args: Array[String]): Option[Options] = {
-		if (args.size == 2) {
-			Some(new Options(args(0), args(1), true))
-		} else if (args.size == 3) {
-			if (args(0) == "--consistency") {
-				Some(new Options(args(1), args(2), false))
-			} else if (args(0) == "--inconsistency") {
-				Some(new Options(args(1), args(2), true))
+		val parser = new CmdLineParser()
+		val argType = parser.addStringOption("type")
+		val argScale = parser.addDoubleOption("scale")
+		val argTuning = parser.addIntegerOption("tuning")
+		val argSimulation = parser.addIntegerOption("simulation")
+		
+		try {
+			parser.parse(args)
+
+			val modelType = ModelType.valueOf(
+				parser.getOptionValue(argType, "consistency").asInstanceOf[String])
+			val scale = parser.getOptionValue(argScale, 2.5).asInstanceOf[Double]
+			val tuning = parser.getOptionValue(argTuning, 30000).asInstanceOf[Int]
+			val simulation = parser.getOptionValue(argSimulation, 20000).asInstanceOf[Int]
+			val otherArgs = parser.getRemainingArgs()
+
+			if (otherArgs.length != 2) {
+				System.err.println("2 non-option arguments expected, got " + otherArgs.length)
+				None
 			} else {
+				modelType match {
+					case None => None
+					case Some(x) => Some(new Options(otherArgs(0), otherArgs(1), x, scale, tuning, simulation))
+				}
+			}
+		} catch {
+			case e: CmdLineParser.OptionException => {
+				System.err.println(e.getMessage())
 				None
 			}
-		} else {
-			None
 		}
 	}
 }
