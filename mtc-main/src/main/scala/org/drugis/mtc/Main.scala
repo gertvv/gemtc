@@ -26,8 +26,9 @@ import jargs.gnu.CmdLineParser
 
 object ModelType extends Enumeration {
 	type ModelType = Value
-	val CONSISTENCY = Value("consistency")
-	val INCONSISTENCY = Value("inconsistency")
+	val consistency = Value("consistency")
+	val inconsistency = Value("inconsistency")
+	val nodesplit = Value("nodesplit")
 }
 
 import ModelType._
@@ -37,80 +38,86 @@ class Options(val xmlFile: String, val baseName: String,
 	val tuningIter: Int, val simulationIter: Int) {
 }
 
+class ModelSpecification[M <: Measurement](
+	val model: JagsSyntaxModel[M, _],
+	val generator: StartingValueGenerator[M],
+	val nameSuffix: String) {
+}
+
 class JAGSGenerator(options: Options) {
-	def createConsistencyModel[M <: Measurement](
-		network: Network[M],
-		best: Tree[Treatment])
-	: NetworkModel[M, ConsistencyParametrization[M]] = {
-		ConsistencyNetworkModel(network, best)
+	def createJagsModel[M <: Measurement, P <: Parametrization[M]](
+		model: NetworkModel[M, P], suffix: String)
+	: ModelSpecification[M] = {
+		new ModelSpecification(new JagsSyntaxModel(model),
+			RandomizedStartingValueGenerator(model,
+				new JDKRandomGenerator(), options.scale), suffix)
 	}
 
-	def createInconsistencyModel[M <: Measurement](
-		network: Network[M],
-		best: Tree[Treatment])
-	: NetworkModel[M, InconsistencyParametrization[M]] = {
-		InconsistencyNetworkModel(network, best)
-	}
-
-	def createJagsModel[M <: Measurement](
-		netw: Network[M], best: Tree[Treatment])
-	: (JagsSyntaxModel[M, _], StartingValueGenerator[M]) =
-		if (options.modelType == INCONSISTENCY) {
-			val model = createInconsistencyModel(netw, best)
-			(new JagsSyntaxModel(model),
-			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), options.scale))
-		} else {
-			val model = createConsistencyModel(netw, best)
-			(new JagsSyntaxModel(model),
-			RandomizedStartingValueGenerator(model, new JDKRandomGenerator(), options.scale))
+	def createJagsModels[M <: Measurement](netw: Network[M])
+	: List[ModelSpecification[M]] = {
+		options.modelType match {
+			case ModelType.consistency => {
+				val model = ConsistencyNetworkModel(netw)
+				List(createJagsModel(model, ".cons"))
+			}
+			case ModelType.inconsistency => {
+				val model = InconsistencyNetworkModel(netw)
+				List(createJagsModel(model, ".inco"))
+			}
+			case ModelType.nodesplit => {
+				NodeSplitNetworkModel.getSplittableNodes(netw) map (n => {
+					val model = NodeSplitNetworkModel(netw, n)
+					createJagsModel(model, ".splt." + n._1.id + "." + n._2.id)
+				}) toList
+			}
 		}
+	}
 
-	def generateModel[M <: Measurement](
-			netw: Network[M], best: Tree[Treatment]) {
-		val models = createJagsModel(netw, best)
-		val syntaxModel = models._1 
-		val initialGen = models._2
-
+	def writeModel[M <: Measurement](spec: ModelSpecification[M]) {
+		println("Identified spanning tree:")
 		println("\tgraph {")
-		for (e <- best.edgeSet) {
+		for (e <- spec.model.model.basis.tree.edgeSet) {
 			println("\t\t" + e._1.id + " -- " + e._2.id)
 		}
 		println("\t}")
 
-		println("Writing JAGS scripts: " + options.baseName + ".*")
+		println("Writing JAGS scripts: " + options.baseName + spec.nameSuffix + ".*")
 
-		val dataOut = new PrintStream(options.baseName + ".data")
-		dataOut.println(syntaxModel.dataText)
+		val dataOut = new PrintStream(options.baseName + spec.nameSuffix + ".data")
+		dataOut.println(spec.model.dataText)
 		dataOut.close()
 
-		val modelOut = new PrintStream(options.baseName + ".model")
-		modelOut.println(syntaxModel.modelText)
+		val modelOut = new PrintStream(options.baseName + spec.nameSuffix + ".model")
+		modelOut.println(spec.model.modelText)
 		modelOut.close()
 
 		val nChains = 4
 
-		val scriptOut = new PrintStream(options.baseName + ".script")
-		scriptOut.println(syntaxModel.scriptText(options.baseName, nChains, options.tuningIter, options.simulationIter))
+		val scriptOut = new PrintStream(options.baseName + spec.nameSuffix + ".script")
+		scriptOut.println(spec.model.scriptText(options.baseName + spec.nameSuffix, nChains, options.tuningIter, options.simulationIter))
 		scriptOut.close()
 
 		for (i <- 1 to nChains) {
-			val paramOut = new PrintStream(options.baseName + ".param" + i)
-			paramOut.println(syntaxModel.initialValuesText(initialGen))
+			val paramOut = new PrintStream(options.baseName + spec.nameSuffix + ".param" + i)
+			paramOut.println(spec.model.initialValuesText(spec.generator))
 			paramOut.close()
+		}
+	}
+
+	def generateModel[M <: Measurement](netw: Network[M]) {
+		for (spec <- createJagsModels(netw)) {
+			writeModel(spec)
 		}
 	}
 
 	def run() {
 		val xml = scala.xml.XML.loadFile(options.xmlFile)
 		val network = Network.fromXML(xml)
-		val top = network.treatments.toList.sort((a, b) => a < b).first 
-		println("Identifying spanning tree:")
-		val best = network.bestSpanningTree(top)
 
 		if (network.measurementType == classOf[DichotomousMeasurement]) {
-			generateModel(network.asInstanceOf[Network[DichotomousMeasurement]], best)
+			generateModel(network.asInstanceOf[Network[DichotomousMeasurement]])
 		} else if (network.measurementType == classOf[ContinuousMeasurement]) {
-			generateModel(network.asInstanceOf[Network[ContinuousMeasurement]], best)
+			generateModel(network.asInstanceOf[Network[ContinuousMeasurement]])
 		} else {
 			println("Unsupported measurement type")
 		}
