@@ -178,9 +178,26 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			study <- model.studyList
 		} yield studyDeltas(study)).mkString("\n")
 
-	private def studyDeltas(study: Study[M]): String = 
+	// FIXME: copied from YadasModel, create common base or Util trait
+	private def invert[T](e: (T, T)) = (e._2, e._1)
+
+	// FIXME: copied from YadasModel, create common base or Util trait
+	private def splitNode(study: Study[M])
+	: Option[(Treatment, Treatment)] = model.parametrization match {
+		case splt: NodeSplitParametrization[M] => {
+			val re = model.studyRelativeEffects(study)
+			val splitNode = splt.splitNode
+			if (re.contains(splitNode)) Some(splitNode)
+			else if (re.contains(invert(splitNode))) Some(invert(splitNode))
+			else None
+		}
+		case _ => None
+	}
+
+	private def studyDeltas(study: Study[M]): String = {
 		if (study.treatments.size == 2) twoArmDeltas(study)
 		else multiArmDeltas(study)
+	}
 
 	private def nonBaselineList(study: Study[M]) = {
 		(study.treatments - base(study)).toList.sorted
@@ -193,7 +210,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			"\tre[" + idx(study) + ", 1] ~ " +
 				normal(express(study, subj(study)), "tau.d"),
 			"\t" + zeroDelta(study, base(study)),
-			deltasArray(study, treatments)
+			deltasArray(study, treatments, 1)
 		).mkString("\n")
 	}
 
@@ -204,12 +221,38 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def multiArmDeltas(study: Study[M]) = {
 		val treatments = nonBaselineList(study)
-		List(
-			"\t# Random effects in study " + study.id,
-			paramArray(study, treatments),
-			randomEffectArray(study, treatments.size),
-			"\t" + zeroDelta(study, base(study)),
-			deltasArray(study, treatments)).mkString("\n")
+		splitNode(study) match {
+			case None => {
+				List(
+					"\t# Random effects in study " + study.id,
+					paramArray(study, treatments),
+					randomEffectArray(study, treatments.size, 1),
+					"\t" + zeroDelta(study, base(study)),
+					deltasArray(study, treatments, 1)).mkString("\n")
+			}
+			case Some(p) => {
+				val t = p._2;
+				{List("\t# Random effects in study " + study.id) ++ {
+					if (treatments.size == 2) Nil
+					else List(paramArray(study, treatments - t))
+				} ++ List(
+					"\tre[" + idx(study) + ", 1] ~ " +
+						normal(express(study, t), "tau.d"),
+					{
+						if (treatments.size == 2) {
+							"\tre[" + idx(study) + ", 2] ~ " +
+								normal(express(study, (treatments - t)(0)), "tau.d")
+						} else {
+							randomEffectArray(study, treatments.size - 1, 2)
+						}
+					},
+					"\t" + zeroDelta(study, base(study)),
+					"\t" + delta(study, t) + " <- " +
+						"re[" + idx(study) + ", 1]",
+					deltasArray(study, treatments - t, 2))
+				}.mkString("\n")
+			}
+		}
 	}
 
 	private def paramArray(study: Study[M], treatments: List[Treatment]) = 
@@ -218,14 +261,14 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		} yield "\td[" + idx(study) + ", " + k + "] <- " +
 			express(study, treatments(k - 1))).mkString("\n")
 
-	private def randomEffectArray(study: Study[M], n: Int) = 
-		"\tre[" + idx(study) + ", 1:" + n + "] ~ " +
+	private def randomEffectArray(study: Study[M], n: Int, n0: Int) = 
+		"\tre[" + idx(study) + ", " + n0 + ":" + (n0 + n - 1) + "] ~ " +
 			"dmnorm(d[" + idx(study) + ", 1:" + n + "], tau." + n + ")"
 
-	private def deltasArray(study: Study[M], treatments: List[Treatment]) = 
+	private def deltasArray(study: Study[M], treatments: List[Treatment], k0: Int) = 
 		(for {k <- 1 to treatments.size} yield
 			"\t" + delta(study, treatments(k - 1)) + " <- " +
-			"re[" + idx(study) + ", " + k + "]").mkString("\n")
+			"re[" + idx(study) + ", " + (k + k0 - 1) + "]").mkString("\n")
 
 	private def normal(mean: String, tau: String) =
 		"dnorm(" + mean + ", " + tau + ")"
@@ -265,10 +308,17 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			(for {param <- model.parameterVector} yield format(param))
 		).mkString("\n")
 
+	private def asBasic(p: NetworkModelParameter): BasicParameter = p match {
+		case b: BasicParameter => b
+		case s: SplitParameter => new BasicParameter(s.base, s.subject)
+		case _ => throw new IllegalArgumentException("Cannot convert " + p +
+			" to a BasicParameter")
+	}
+
 	private def initMetaParameters(g: StartingValueGenerator[M]): String = {
 		val basic = {
 			for {basicParam <- model.basicParameters}
-			yield g.getRelativeEffect(basicParam.asInstanceOf[BasicParameter])
+			yield g.getRelativeEffect(asBasic(basicParam))
 		}
 
 		
@@ -281,6 +331,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			bl: List[Double])
 	: String = "`" + p.toString + "` <-\n" + (p match {
 		case b: BasicParameter => bl(model.basicParameters.findIndexOf(_ == b))
+		case s: SplitParameter => bl(model.basicParameters.findIndexOf(_ == s))
 		case i: InconsistencyParameter =>
 			InconsistencyStartingValueGenerator(i, model, g, bl)
 		case _ => throw new IllegalStateException("Unsupported parameter " + p)
@@ -336,11 +387,18 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			|	var.x <- sd.x * sd.x
 			|	tau.x <- 1 / var.x""").stripMargin.replaceAll("x", name)
 
+	private def varDim(s: Study[M]): Int = {
+		splitNode(s) match {
+			case Some(_) => s.treatments.size - 2 
+			case None => s.treatments.size - 1
+		}
+	}
+
 	private def combinedVars: List[String] = 
 		for {
-			n <- model.network.studies.map(a => a.treatments.size).toList;
-			if (n > 2)
-		} yield "\n" + tauMatrix(n - 1)
+			n <- model.network.studies.map(a => varDim(a)).toList;
+			if (n > 1)
+		} yield "\n" + tauMatrix(n)
 
 	private def tauMatrix(dim: Int)  =
 		if (dim == 2)

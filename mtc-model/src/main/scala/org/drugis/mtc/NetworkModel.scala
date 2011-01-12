@@ -44,7 +44,7 @@ class SplitParameter(
 	val direct: Boolean)
 extends NetworkModelParameter {
 	override def toString =  "d." + base.id + "." + subject.id +
-		{ if (direct) ".Dir" else ".Ind" }
+		{ if (direct) ".dir" else ".ind" }
 
 	override def equals(other: Any): Boolean = other match {
 		case p: SplitParameter =>

@@ -519,3 +519,140 @@ b <- c(2, 1, 1)"""
 		inconsModel.modelText should be (inconsModelText)
 	}
 }
+
+class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
+	val dataText = """s <- c(1, 1, 1, 2, 2, 3, 3)
+t <- c(1, 2, 3, 1, 2, 1, 3)
+r <- c(9, 23, 10, 79, 77, 18, 21)
+n <- c(140, 140, 138, 702, 694, 671, 535)
+b <- c(2, 1, 1)"""
+
+	val modelText = """model {
+	# Study baseline effects
+	for (i in 1:length(b)) {
+		mu[i] ~ dnorm(0, .001)
+	}
+
+	# Random effects in study 01
+	re[1, 1] ~ dnorm(-d.A.B.dir, tau.d)
+	re[1, 2] ~ dnorm(d.B.C, tau.d)
+	delta[1, 2, 2] <- 0
+	delta[1, 2, 1] <- re[1, 1]
+	delta[1, 2, 3] <- re[1, 2]
+	# Random effects in study 02
+	re[2, 1] ~ dnorm(d.A.B.dir, tau.d)
+	delta[2, 1, 1] <- 0
+	delta[2, 1, 2] <- re[2, 1]
+	# Random effects in study 03
+	re[3, 1] ~ dnorm(d.A.B.ind + d.B.C, tau.d)
+	delta[3, 1, 1] <- 0
+	delta[3, 1, 3] <- re[3, 1]
+
+	# For each (study, treatment), model effect
+	for (i in 1:length(s)) {
+		logit(p[s[i], t[i]]) <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
+		r[i] ~ dbin(p[s[i], t[i]], n[i])
+	}
+
+	# Meta-parameters
+	d.A.B.dir ~ dnorm(0, .001)
+	d.A.B.ind ~ dnorm(0, .001)
+	d.B.C ~ dnorm(0, .001)
+
+	# Random effect variance
+	sd.d ~ dunif(0.00001, 1.0024677518941976)
+	var.d <- sd.d * sd.d
+	tau.d <- 1 / var.d
+}"""
+
+	val initText =
+		""" |`d.A.B.dir` <-
+			|0.0
+			|`d.A.B.ind` <-
+			|0.0
+			|`d.B.C` <-
+			|0.0
+			|`mu` <-
+			|c(0.0,0.0,0.0)
+			|`re` <-
+			|structure(c(0.0,0.0,0.0,0.0,NA,NA), .Dim = c(3L,2L))
+			|`sd.d` <-
+			|0.5012338759470988""".stripMargin
+
+	val scriptText =
+		"""	|model in 'jags.model'
+			|data in 'jags.data'
+			|compile, nchains(3)
+			|parameters in 'jags.param1', chain(1)
+			|parameters in 'jags.param2', chain(2)
+			|parameters in 'jags.param3', chain(3)
+			|initialize
+			|
+			|adapt 30000
+			|
+			|monitor d.A.B.dir
+			|monitor d.A.B.ind
+			|monitor d.B.C
+			|monitor var.d
+			|
+			|update 20000
+			|
+			|coda *, stem('jags')""".stripMargin
+
+	def network = Network.dichFromXML(
+		<network description="Smoking cessation rates">
+			<treatments>
+				<treatment id="A">No Contact</treatment>
+				<treatment id="B">Self-help</treatment>
+				<treatment id="C">Individual Counseling</treatment>
+			</treatments>
+			<studies>
+				<study id="01">
+					<measurement treatment="A" responders="9" sample="140" />
+					<measurement treatment="B" responders="23" sample="140" />
+					<measurement treatment="C" responders="10" sample="138" />
+				</study>
+				<study id="02">
+					<measurement treatment="A" responders="79" sample="702" />
+					<measurement treatment="B" responders="77" sample="694" />
+				</study>
+				<study id="03">
+					<measurement treatment="A" responders="18" sample="671" />
+					<measurement treatment="C" responders="21" sample="535" />
+				</study>
+			</studies>
+		</network>)
+
+	val ta = new Treatment("A")
+	val tb = new Treatment("B")
+	val tc = new Treatment("C")
+
+	val spanningTree = new Tree[Treatment](
+		Set((ta, tb), (tb, tc)), ta)
+
+	val baselines = Map[Study[DichotomousMeasurement], Treatment](
+		(network.study("01"), tb),
+		(network.study("02"), ta),
+		(network.study("03"), ta)
+	)
+
+	val proto = NodeSplitNetworkModel(network, (ta, tb), spanningTree, baselines)
+
+	def model = new JagsSyntaxModel(proto)
+
+	@Test def testDataText() {
+		model.dataText should be (dataText)
+	}
+
+	@Test def testModelText() {
+		model.modelText should be (modelText)
+	}
+
+	@Test def testInitText() {
+		model.initialValuesText(new PriorStartingValueGenerator(proto)) should be (initText)
+	}
+
+	@Test def testScriptText() {
+		model.scriptText("jags", 3, 30000, 20000) should be (scriptText)
+	}
+}
