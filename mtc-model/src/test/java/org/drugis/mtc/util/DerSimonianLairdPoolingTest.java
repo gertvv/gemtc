@@ -19,6 +19,8 @@
 
 package org.drugis.mtc.util;
 
+import org.drugis.common.stat.*;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

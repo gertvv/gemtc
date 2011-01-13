@@ -20,9 +20,9 @@
 package org.drugis.mtc
 
 import org.drugis.mtc.util.DerSimonianLairdPooling
-import org.drugis.mtc.util.DichotomousDescriptives
-import org.drugis.mtc.util.EstimateWithPrecision
-import org.drugis.mtc.util.Statistics
+import org.drugis.common.stat.DichotomousDescriptives
+import org.drugis.common.stat.EstimateWithPrecision
+import org.drugis.common.stat.Statistics
 import org.apache.commons.math.random.RandomGenerator
 
 import scala.collection.JavaConversions._

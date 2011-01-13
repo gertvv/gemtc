@@ -26,8 +26,8 @@ import org.junit.Ignore
 import org.junit.Before
 import org.easymock.EasyMock
 
-import org.drugis.mtc.util.Statistics
-import org.drugis.mtc.util.EstimateWithPrecision
+import org.drugis.common.stat.Statistics
+import org.drugis.common.stat.EstimateWithPrecision
 import org.drugis.mtc.util.DerSimonianLairdPooling
 import scala.collection.JavaConversions._
 import org.apache.commons.math.random.RandomGenerator

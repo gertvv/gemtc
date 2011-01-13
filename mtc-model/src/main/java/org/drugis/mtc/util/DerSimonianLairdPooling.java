@@ -22,6 +22,8 @@ package org.drugis.mtc.util;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.drugis.common.stat.EstimateWithPrecision;
+
 /**
  * DerSimonian-Laird random effects meta-analysis.
  * Takes a list of point estimates and standard errors, and gives a pooled
