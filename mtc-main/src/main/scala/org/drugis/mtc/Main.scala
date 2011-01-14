@@ -125,9 +125,14 @@ class JAGSGenerator(options: Options) {
 }
 
 object Main {
-	val usage = """Usage: java -jar ${MTC_JAR} [--type=consistency|inconsistency] [--scale=<f>] [--tuning=<n>] [--simulation=<m>]<xml-file> <output>
-		|   When unspecified, the default is --type=consistency --scale=2.5
-		|	 --tuning=30000 --simulation=20000.
+	val usage = """
+		|Usage: java -jar ${MTC_JAR} \
+		|      [--type=consistency|inconsistency|nodesplit] \
+		|      [--scale=<f>] [--tuning=<n>] [--simulation=<m>] \
+		|      <xmlfile> [<output>]
+		|When unspecified, the default is --type=consistency --scale=2.5
+		|   --tuning=30000 --simulation=20000 <xmlfile> ${<xmlfile>%.xml}.
+		|
 		|This will generate a JAGS model from the specified XML file, which can
 		|subsequently be run using the output.script file.""".stripMargin
 
@@ -156,13 +161,18 @@ object Main {
 			val simulation = parser.getOptionValue(argSimulation, 20000).asInstanceOf[Int]
 			val otherArgs = parser.getRemainingArgs()
 
-			if (otherArgs.length != 2) {
-				System.err.println("2 non-option arguments expected, got " + otherArgs.length)
+			if (otherArgs.length < 1 || otherArgs.length > 2) {
+				System.err.println("1 or 2 non-option arguments expected, got " + otherArgs.length)
 				None
 			} else {
+				val xmlFile = otherArgs(0)
+				val baseName = {
+					if (otherArgs.length == 2) otherArgs(1)
+					else xmlFile.stripSuffix(".xml")
+				}
 				modelType match {
 					case None => None
-					case Some(x) => Some(new Options(otherArgs(0), otherArgs(1), x, scale, tuning, simulation))
+					case Some(x) => Some(new Options(xmlFile, baseName, x, scale, tuning, simulation))
 				}
 			}
 		} catch {
