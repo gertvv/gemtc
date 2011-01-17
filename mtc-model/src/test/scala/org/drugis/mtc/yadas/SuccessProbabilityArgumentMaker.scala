@@ -25,6 +25,7 @@ import org.junit.Test
 import org.junit.Before
 
 import org.drugis.mtc._
+import org.drugis.common.stat.Statistics._
 
 class SuccessProbabilityArgumentMakerTest extends ShouldMatchersForJUnit {
 	val ta = new Treatment("A")
@@ -56,8 +57,6 @@ class SuccessProbabilityArgumentMakerTest extends ShouldMatchersForJUnit {
 		Map[Study[DichotomousMeasurement], Treatment](
 			(study1, ta), (study2, tb), (study3, ta), (study4, td)),
 		treatmentList, studyList)
-
-	def ilogit(x: Double) = 1 / (1 + Math.exp(-x))
 
 	@Test def testGetArgument1() {
 		val baselines = Array(1.0)

@@ -25,6 +25,7 @@ import org.junit.Test
 import org.junit.Before
 
 import org.drugis.mtc._
+import org.drugis.common.stat.Statistics._
 
 class RealEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 	val ta = new Treatment("A")
@@ -56,8 +57,6 @@ class RealEffectArgumentMakerTest extends ShouldMatchersForJUnit {
 		Map[Study[DichotomousMeasurement], Treatment](
 			(study1, ta), (study2, tb), (study3, ta), (study4, tc)),
 		treatmentList, studyList)
-
-	def ilogit(x: Double) = 1 / (1 + Math.exp(-x))
 
 	@Test def testGetArgument() {
 		val baselines = Array(1.0, 2.0, 1.5, 3.0)

@@ -21,6 +21,7 @@ package org.drugis.mtc.yadas
 
 import org.drugis.mtc._
 import gov.lanl.yadas.ArgumentMaker
+import org.drugis.common.stat.Statistics._
 
 /**
  * ArgumentMaker for individual treatment success probabilities within studies.
@@ -45,8 +46,6 @@ extends ArgumentMaker with ThetaMaker[DichotomousMeasurement] {
 		if (rval.length != treatments.size) throw new RuntimeException(rval + " does not match length " + treatments.size + " given data " + data)
 		else rval
 	}
-
-	private def ilogit(x: Double): Double = 1 / (1 + Math.exp(-x))
 
 	private def prob(t: Treatment, data: Array[Array[Double]])
 	: Double = {
