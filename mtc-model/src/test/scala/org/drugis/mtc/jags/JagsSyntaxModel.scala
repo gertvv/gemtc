@@ -107,16 +107,11 @@ b <- c(2, 1, 1)"""
 			|coda *, stem('jags')""".stripMargin
 
 	val analysisText =
-		"""	|source('jags.R')
-			|attach(trace)
-			|data <- list()
-			|data$d.A.B <- d.A.B
-			|data$d.A.C <- d.A.B + d.B.C + -w.A.B.C
-			|data$d.B.C <- d.B.C
-			|data$w.A.B.C <- w.A.B.C
-			|data$var.d <- var.d
-			|data$var.w <- var.w
-			|detach(trace)""".stripMargin
+		"""	|deriv <- list(
+			|	`d.A.C` = function(x) { x[, "d.A.B"] + x[, "d.B.C"] + -x[, "w.A.B.C"] }
+			|	)
+			|# source('mtc.R')
+			|# data <- append.derived(read.mtc('jags'), deriv)""".stripMargin
 
 	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
@@ -253,14 +248,11 @@ b <- c(2, 1, 1)"""
 			|coda *, stem('jags')""".stripMargin
 
 	val analysisText =
-		"""	|source('jags.R')
-			|attach(trace)
-			|data <- list()
-			|data$d.A.B <- d.A.B
-			|data$d.A.C <- d.A.B + d.B.C
-			|data$d.B.C <- d.B.C
-			|data$var.d <- var.d
-			|detach(trace)""".stripMargin
+		"""	|deriv <- list(
+			|	`d.A.C` = function(x) { x[, "d.A.B"] + x[, "d.B.C"] }
+			|	)
+			|# source('mtc.R')
+			|# data <- append.derived(read.mtc('jags'), deriv)""".stripMargin
 
 	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">
@@ -447,14 +439,11 @@ b <- c(2, 1, 1)"""
 			|coda *, stem('jags')""".stripMargin
 
 	val analysisText =
-		"""	|source('jags.R')
-			|attach(trace)
-			|data <- list()
-			|data$d.A.B <- d.A.B
-			|data$d.A.C <- d.A.B + d.B.C
-			|data$d.B.C <- d.B.C
-			|data$var.d <- var.d
-			|detach(trace)""".stripMargin
+		"""	|deriv <- list(
+			|	`d.A.C` = function(x) { x[, "d.A.B"] + x[, "d.B.C"] }
+			|	)
+			|# source('mtc.R')
+			|# data <- append.derived(read.mtc('jags'), deriv)""".stripMargin
 
 	def network = Network.contFromXML(
 		<network type="continuous">

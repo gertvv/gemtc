@@ -131,12 +131,11 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 
 	def analysisText(prefix: String): String =
 		List(
-			"source('" + prefix + ".R')",
-			"attach(trace)",
-			"data <- list()",
-			standardizeParameters("data"),
-			standardizeVariances("data"),
-			"detach(trace)"
+			"deriv <- list(",
+			derivations,
+			"\t)",
+			"# source('mtc.R')",
+			"# data <- append.derived(read.mtc('" + prefix + "'), deriv)"
 		).mkString("\n")
 
 	private def monitors =
@@ -274,16 +273,21 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def base(study: Study[M]) = model.studyBaseline(study)
 
-	private def expressParam(p: NetworkModelParameter, v: Int): String = 
+	private def expressParam(p: NetworkModelParameter, v: Int,
+		f: String => String): String = 
 		v match {
-			case  1 => p.toString
-			case -1 => "-" + p.toString
+			case  1 => f(p.toString)
+			case -1 => "-" + f(p.toString)
 			case  _ => throw new Exception("Unexpected value!")
 		}
 
-	private def expressParams(params: Map[NetworkModelParameter, Int])
+	private def expressParams(params: Map[NetworkModelParameter, Int],
+		f: String => String)
 	: String =
-		(for {(p, v) <- params} yield expressParam(p, v)).mkString(" + ")
+		(for {(p, v) <- params} yield expressParam(p, v, f)).mkString(" + ")
+
+	private def expressParams(params: Map[NetworkModelParameter, Int])
+	: String = expressParams(params, (x) => x)
 
 	def express(study: Study[M], effect: Treatment) = {
 		val base = model.studyBaseline(study)
@@ -422,28 +426,11 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		) ++ combinedVars).mkString("\n")
 
 
-	private def standardizeParameters(frame: String) =
-		(standardParameters(frame) ++ standardInconsistencies(frame)
-		).mkString("\n")
-
-	private def standardParameters(frame: String) = 
+	private def derivations = 
 		(for {edge <- model.network.edgeVector
 			val p = new BasicParameter(edge._1, edge._2)
-			val e = expressParams(model.parametrization(edge._1, edge._2))
-		 } yield frame + "$" + p + " <- " + e)
-
-	private def standardInconsistencies(frame: String) = 
-		(for {param <- model.parameterVector;
-			if (param.isInstanceOf[InconsistencyParameter])
-		} yield frame + "$" + param + " <- " + param)
-			
-
-	private def standardizeVariances(frame: String) = 
-		if (inconsistency)
-			List(
-				frame + "$var.d <- var.d",
-				frame + "$var.w <- var.w"
-			).mkString("\n")
-		else
-			frame + "$var.d <- var.d"
+			val e = expressParams(model.parametrization(edge._1, edge._2),
+				(x) => "x[, \"" + x + "\"]")
+			if (!model.basicParameters.contains(p))
+		 } yield "\t`" + p + "` = function(x) { " + e + " }").mkString(",\n")
 }

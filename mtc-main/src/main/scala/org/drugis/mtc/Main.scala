@@ -102,6 +102,18 @@ class JAGSGenerator(options: Options) {
 			paramOut.println(spec.model.initialValuesText(spec.generator))
 			paramOut.close()
 		}
+
+		def writeAnalysis(model: JagsSyntaxModel[M, _]) {
+			val analysisOut = new PrintStream(options.baseName + spec.nameSuffix + ".analysis.R")
+			analysisOut.println(spec.model.analysisText(options.baseName + spec.nameSuffix))
+			analysisOut.close()
+		}
+
+		options.modelType match {
+			case ModelType.consistency => writeAnalysis(spec.model)
+			case ModelType.inconsistency => writeAnalysis(spec.model)
+			case _ =>
+		}
 	}
 
 	def generateModel[M <: Measurement](netw: Network[M]) {
