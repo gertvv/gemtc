@@ -1,7 +1,7 @@
 /*
  * This file is part of drugis.org MTC.
  * MTC is distributed from http://drugis.org/mtc.
- * Copyright (C) 2009-2010 Gert van Valkenhoef.
+ * Copyright (C) 2009-2011 Gert van Valkenhoef.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
