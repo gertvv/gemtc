@@ -426,11 +426,15 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		) ++ combinedVars).mkString("\n")
 
 
-	private def derivations = 
-		(for {edge <- model.network.edgeVector
-			val p = new BasicParameter(edge._1, edge._2)
-			val e = expressParams(model.parametrization(edge._1, edge._2),
+	private def derivations = {
+		val n = model.treatmentList.size
+		val t = model.treatmentList
+		(for {i <- 0 until (n - 1); j <- (i + 1) until n
+			val p = new BasicParameter(t(i), t(j))
+			val p2 = new BasicParameter(t(j), t(i))
+			val e = expressParams(model.parametrization(t(i), t(j)),
 				(x) => "x[, \"" + x + "\"]")
-			if (!model.basicParameters.contains(p))
+			if (!model.basicParameters.contains(p) && !model.basicParameters.contains(p2))
 		 } yield "\t`" + p + "` = function(x) { " + e + " }").mkString(",\n")
+	}
 }
