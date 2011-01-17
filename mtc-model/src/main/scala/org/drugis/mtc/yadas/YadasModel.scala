@@ -177,20 +177,6 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 		map.map(x => x._2)
 	}
 
-	private def invert[T](e: (T, T)) = (e._2, e._1)
-
-	private def splitNode(study: Study[M])
-	: Option[(Treatment, Treatment)] = proto.parametrization match {
-		case splt: NodeSplitParametrization[M] => {
-			val re = proto.studyRelativeEffects(study)
-			val splitNode = splt.splitNode
-			if (re.contains(splitNode)) Some(splitNode)
-			else if (re.contains(invert(splitNode))) Some(invert(splitNode))
-			else None
-		}
-		case _ => None
-	}
-
 	private def relativeEffectBond(study: Study[M], delta: MCMCParameter,
 			basic: MCMCParameter, incons: MCMCParameter, sigma: MCMCParameter,
 			isInconsistency: Boolean) = {
@@ -207,7 +193,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 				new Gaussian()
 			)
 		} else {
-			val sigmaArgument = splitNode(study) match {
+			val sigmaArgument = proto.splitNode(study) match {
 				case Some(node) => SigmaMatrixArgumentMaker(study, proto.studyRelativeEffects(study).findIndexOf(x => x == node), 3)
 				case None => SigmaMatrixArgumentMaker(study, 3)
 			}

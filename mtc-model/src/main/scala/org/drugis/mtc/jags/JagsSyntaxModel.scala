@@ -178,21 +178,6 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			study <- model.studyList
 		} yield studyDeltas(study)).mkString("\n")
 
-	// FIXME: copied from YadasModel, create common base or Util trait
-	private def invert[T](e: (T, T)) = (e._2, e._1)
-
-	// FIXME: copied from YadasModel, create common base or Util trait
-	private def splitNode(study: Study[M])
-	: Option[(Treatment, Treatment)] = model.parametrization match {
-		case splt: NodeSplitParametrization[M] => {
-			val re = model.studyRelativeEffects(study)
-			val splitNode = splt.splitNode
-			if (re.contains(splitNode)) Some(splitNode)
-			else if (re.contains(invert(splitNode))) Some(invert(splitNode))
-			else None
-		}
-		case _ => None
-	}
 
 	private def studyDeltas(study: Study[M]): String = {
 		if (study.treatments.size == 2) twoArmDeltas(study)
@@ -221,7 +206,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def multiArmDeltas(study: Study[M]) = {
 		val treatments = nonBaselineList(study)
-		splitNode(study) match {
+		model.splitNode(study) match {
 			case None => {
 				List(
 					"\t# Random effects in study " + study.id,
@@ -238,20 +223,24 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 				} ++ List(
 					"\tre[" + idx(study) + ", 1] ~ " +
 						normal(express(study, t), "tau.d"),
-					{
-						if (treatments.size == 2) {
-							"\tre[" + idx(study) + ", 2] ~ " +
-								normal(express(study, (treatments - t)(0)), "tau.d")
-						} else {
-							randomEffectArray(study, treatments.size - 1, 2)
-						}
-					},
+					nonSplitEffectArray(study, t),
 					"\t" + zeroDelta(study, base(study)),
 					"\t" + delta(study, t) + " <- " +
 						"re[" + idx(study) + ", 1]",
 					deltasArray(study, treatments - t, 2))
 				}.mkString("\n")
 			}
+		}
+	}
+
+	private def nonSplitEffectArray(study: Study[M], t: Treatment)
+	: String = {
+		val treatments = nonBaselineList(study) - t
+		if (treatments.size == 1) {
+			"\tre[" + idx(study) + ", 2] ~ " +
+				normal(express(study, treatments(0)), "tau.d")
+		} else {
+			randomEffectArray(study, treatments.size, 2)
 		}
 	}
 
@@ -388,7 +377,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			|	tau.x <- 1 / var.x""").stripMargin.replaceAll("x", name)
 
 	private def varDim(s: Study[M]): Int = {
-		splitNode(s) match {
+		model.splitNode(s) match {
 			case Some(_) => s.treatments.size - 2 
 			case None => s.treatments.size - 1
 		}

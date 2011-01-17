@@ -149,6 +149,28 @@ class NetworkModel[M <: Measurement, P <: Parametrization[M]](
 				&& !(studyBaseline(study) == t))
 			} yield (studyBaseline(study), t)
 
+	
+	/**
+	 * Swap the members of a pair
+	 */
+	def swap[T](e: (T, T)) = (e._2, e._1)
+
+	/**
+	 * Get the node in study that is to be split (or None).
+	 */
+	def splitNode(study: Study[M])
+	: Option[(Treatment, Treatment)] = parametrization match {
+		case splt: NodeSplitParametrization[M] => {
+			val re = studyRelativeEffects(study)
+			val splitNode = splt.splitNode
+			if (re.contains(splitNode)) Some(splitNode)
+			else if (re.contains(swap(splitNode))) Some(swap(splitNode))
+			else None
+		}
+		case _ => None
+	}
+
+
 	def variancePrior: Double = {
 		val cls = network.measurementType
 		val means =
