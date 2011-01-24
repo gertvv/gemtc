@@ -49,3 +49,78 @@ append.derived <- function(data, deriv) {
 	}
 	as.mcmc.list(lapply(data, function(chain) { derivChain(chain, deriv) }))
 }
+
+# Identity function
+id <- function(x) { x }
+
+# Get formatted quantiles
+format.quantile <- function (data, probs=c(0.5, 0.025, 0.975), transform=id) {
+    sprintf("%0.2f", transform(quantile(data, probs)))
+}
+
+# Get formatted relative effects
+re.format <- function(data, transform) {
+	xs <- format.quantile(data, transform=transform)
+    paste(xs[1], " (", xs[2], ", ", xs[3], ")", sep="")
+}
+# Get formatted relative effects
+re.formatMean <- function(data, transform) {
+    xs <- format.quantile(data, c(0.5), transform)
+    xs[1]
+}
+# Get formatted relative effects
+re.formatCI <- function(data, transform) {
+    xs <- format.quantile(data, c(0.025, 0.975), transform)
+    paste("(", xs[1], ", ", xs[2], ")", sep="")
+}
+
+# Get the treatment comparison due to this parameter
+get.treatments <- function(param) {
+		parts <- unlist(strsplit(param, "\\."))
+		if (parts[1] == "d") parts[c(-1)]
+		else c()
+}
+
+# Get the treatments compared in this dataset
+find.treatments <- function(data) {
+	x <- unlist(lapply(colnames(data[[1]]), get.treatments))
+	levels(as.factor(x))
+}
+
+# Takes MTC data (with all derived values) and formats a LaTeX summary table.
+# By default it is assumed the data are log odds-ratios. To print linear scale
+# summary tables, set transform=id.
+# surround.tex gives an example of how to embed the table in your LaTeX
+# document.
+write.summaryTable <- function(data, file="", transform=exp, treatments=find.treatments(data)) {
+	formatEffect <- function(t1, t2, i) {
+		param <- paste("d", t1, t2, sep=".")
+		myData <- NULL
+		if (sum(colnames(data[[1]]) == param) == 0) {
+			param <- paste("d", t2, t1, sep=".")
+			myData <- -unlist(lapply(data, function(chain) { chain[,param] }))
+		} else {
+			myData <- unlist(lapply(data, function(chain) { chain[,param] }))
+		}
+		if (i == 1) re.formatMean(myData, transform)
+		else paste("\\tiny{", re.formatCI(myData, transform), "}", sep="")
+	}
+	formatCell <- function(t1, t2, i) {
+		if (t1 == t2) {
+			if (i == 1) paste("\\multirow{2}{*}{", t1, "}", sep="")
+			else ""
+		}
+		else formatEffect(t1, t2, i)
+	}
+	formatRowX <- function(t1, i) {
+		paste(lapply(treatments, function(t2) { formatCell(t1, t2, i) }), collapse=" & ")
+	}
+	formatRow <- function(t1) {
+		paste(formatRowX(t1, 1), formatRowX(t1, 2), "", sep="\\\\\n")
+	}
+	colSpec <- paste(lapply(treatments, function(x) { "c" }), collapse="|")
+	tabStart <- paste("\\begin{tabular}{", colSpec, "}", sep="")
+	tabEnd <- "\\end{tabular}"
+	tabContent <- paste(lapply(treatments, formatRow), collapse="\\hline\n")
+	cat(paste(tabStart, tabContent, tabEnd, sep="\n"), file=file)
+}
