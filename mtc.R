@@ -10,10 +10,23 @@ read.mtc <- function(stem) {
     }))
 }
 
+# Get all data for the relevant parameter, merging the chains
+get.parameter <- function(data, param) {
+	unlist(lapply(data, function(chain) { chain[,param] }))
+}
+
+split.dir <- function(t1, t2) {
+	paste("d.", t1, ".", t2, ".dir", sep="")
+}
+
+split.ind <- function(t1, t2) {
+	paste("d.", t1, ".", t2, ".ind", sep="")
+}
+
 # Calculate the node-split P value for split node d.t1.t2
 nodeSplitP <- function(data, t1, t2) {
-	dir <- paste("d.", t1, ".", t2, ".dir", sep="")
-	ind <- paste("d.", t1, ".", t2, ".ind", sep="")
+	dir <- split.dir(t1, t2)
+	ind <- split.ind(t1, t2)
 
 	cnt <- function(chain) { chain[,dir] > chain[,ind] }
 
@@ -33,7 +46,9 @@ nodeSplitSummary <- function(stem) {
 		str <- paste(x[1], x[2], sep=".")
 		data <- read.mtc(paste(stem, ".splt.", str, sep=""))
 		p <- nodeSplitP(data, x[1], x[2])
-		list(node=str, psrf=max(gelman.diag(data)$psrf), P=p)
+		dir <- quantile(get.parameter(data, split.dir(x[1], x[2])), probs=c(0.5, 0.025, 0.975))
+		ind <- quantile(get.parameter(data, split.ind(x[1], x[2])), probs=c(0.5, 0.025, 0.975))
+		list(node=paste("d.", str, sep=""), psrf=max(gelman.diag(data)$psrf), P=p, dir=dir, ind=ind)
 	})
 }
 
@@ -52,6 +67,10 @@ append.derived <- function(data, deriv) {
 
 # Identity function
 id <- function(x) { x }
+
+format.numbers <- function(x, transform=id) {
+	sprintf("%0.2f", transform(x))
+}
 
 # Get formatted quantiles
 format.quantile <- function (data, probs=c(0.5, 0.025, 0.975), transform=id) {
@@ -123,4 +142,26 @@ write.summaryTable <- function(data, file="", transform=exp, treatments=find.tre
 	tabEnd <- "\\end{tabular}"
 	tabContent <- paste(lapply(treatments, formatRow), collapse="\\hline\n")
 	cat(paste(tabStart, tabContent, tabEnd, sep="\n"), file=file)
+}
+
+write.nodeSplitSummaryTable <- function(stem) {
+	formatRow <- function(row) {
+		# node, psrf, P
+		t <- get.treatments(row$node)
+		psrf <- sprintf("%0.2f", row$psrf)
+		p <- sprintf("%0.2f", row$P)
+		dir <- format.numbers(row$dir)
+		dir <- paste(dir[1], " (", dir[2], ", ", dir[3], ")", sep="", collapse="")
+		ind <- format.numbers(row$ind)
+		ind <- paste(ind[1], " (", ind[2], ", ", ind[3], ")", sep="", collapse="")
+		paste(t[1], t[2], psrf, dir, ind, p, sep=" & ")
+		
+	}
+	data <- nodeSplitSummary(stem)
+	file <- paste(stem, "splt", "tex", sep=".")
+	tabStart <- "\\begin{tabular}{ll|r|r|r|r}"
+	tabHead <- "X & Y & PSRF & direct & indirect & P\\\\\n\\hline\n"
+	tabContent <- paste(lapply(data, formatRow), collapse="\\\\\n")
+	tabEnd <- "\\end{tabular}"
+	cat(paste(tabStart, tabHead, tabContent, tabEnd, sep="\n"), file=file)
 }
