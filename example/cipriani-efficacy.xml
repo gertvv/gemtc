@@ -1,6 +1,5 @@
 <!-- Efficacy data from
 	Cipriani et al. Lancet 2009;373:746-758. -->
-<?xml version="1.0" ?>
 <network>
   <treatments>
     <treatment id="paroxetine"/>
