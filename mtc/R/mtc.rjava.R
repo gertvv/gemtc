@@ -28,13 +28,6 @@ print.mtcModel <- function(x, ...) {
 	cat("\n")
 }
 
-# Initialize rJava
-library(rJava)
-.jinit()
-
-# Initialize JAGS
-library(rjags)
-
 # Add MTC to classpath (FIXME)
 .jaddClassPath("/home/gert/Documents/repositories/mtc/mtc-0.8/mtc-0.8.jar")
 

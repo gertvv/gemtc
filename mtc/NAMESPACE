@@ -1,0 +1,6 @@
+import("rJava")
+import("rjags")
+export("mtcNetwork")
+export("mtcModel")
+export("mtcJags")
+export("append.derived")
