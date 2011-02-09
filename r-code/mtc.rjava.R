@@ -1,6 +1,6 @@
 ## mtcNetwork class methods
 print.mtcNetwork <- function(x, ...) {
-	cat(asXML.mtcNetwork(x))
+	cat(mtcNetwork.asXML(x))
 	cat("\n")
 }
 
@@ -31,6 +31,9 @@ print.mtcModel <- function(x, ...) {
 # Initialize rJava
 library(rJava)
 .jinit()
+
+# Initialize JAGS
+library(rjags)
 
 # Add MTC to classpath (FIXME)
 .jaddClassPath("/home/gert/Documents/repositories/mtc/mtc-0.8/mtc-0.8.jar")
@@ -86,29 +89,58 @@ mtcNetwork.supportingStudies <- function(network, t1, t2) {
 	.setToArray(set)
 }
 
+# Read JAGS/R input string format to an environment
+jagsFormatToList <- function(str) {
+	tmpFile <- tempfile()
+	cat(paste(str, "\n", collapse=""), file=tmpFile)
+	env <- new.env()
+	sys.source(tmpFile, env)
+	unlink(tmpFile)
+	as.list(env)
+}
+
+# Extract monitored vars from JAGS script (HACK)
+extractVars <- function(script) {
+	lines <- unlist(strsplit(script, "\n"))
+	monitors <- lines[grepl("^monitor ", lines)]
+	sub("monitor ", "", monitors)
+}
+
+# Create JAGS model, generate required texts
+generateJags <- function(jagsModel, generator, nchain) {
+	modelTxt <- .jcall(jagsModel, "S", "modelText")
+	data <- jagsFormatToList(.jcall(jagsModel, "S", "dataText"))
+	inits <- lapply(1:nchain, function(i) {jagsFormatToList(.jcall(jagsModel, "S", "initialValuesText", generator))})
+	vars <- extractVars(.jcall(jagsModel, "S", "scriptText", "baseName", integer(1), integer(1), integer(1)))
+	analysis <- jagsFormatToList(.jcall(jagsModel, "S", "analysisText", "baseName"))
+	list(model=modelTxt, data=data, inits=inits, vars=vars, analysis=analysis)
+}
+
 # Create the specific model (consistency/inconsistency/nodesplit)
 # FIXME: support nodesplit
-mtcModel <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5) {
+mtcModel <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5, nchain=4) {
 	class <- paste("org/drugis/mtc/", type, "NetworkModel", sep="")
 	model <- .jcall(class, "Lorg/drugis/mtc/NetworkModel;", "apply", network$value)
 	rng <- .jnew("org/apache/commons/math/random/JDKRandomGenerator")
 	generator <- .jcall("org/drugis/mtc/RandomizedStartingValueGenerator", "Lorg/drugis/mtc/StartingValueGenerator;", "apply", model, .jcast(rng, "org/apache/commons/math/random/RandomGenerator"), factor)
 	jagsModel <- .jnew("org/drugis/mtc/jags/JagsSyntaxModel", model)
-	rval <- list(model=model, generator=generator, jags=jagsModel, type=type)
+	rval <- list(model=model, jagsModel=jagsModel, jags=generateJags(jagsModel, generator, nchain), type=type)
 	class(rval) <- "mtcModel"
 	rval
 }
 
 
-
-# Create JAGS model, generate required texts
-dataTxt <- .jcall(jagsModel, "S", "dataText")
-modelTxt <- .jcall(jagsModel, "S", "modelText")
-initTxt <- .jcall(jagsModel, "S", "initialValuesText", generator) # for each chain
-
-# Let rJags parse the texts (FIXME)
-modelFile <- file()
-cat(modelTxt, file=modelFile)
-jags.model(modelFile) # FIXME: file connections not supported by JAGS 1.0.2?
-close(modelFile)
-
+# Run the model using JAGS
+mtcJags <- function(mtcModel, nadapt=30000, nsamples=20000) {
+	modelFile <- tempfile()
+	cat(paste(mtcModel$jags$model, "\n", collapse=""), file=modelFile)
+	data <- mtcModel$jags$data
+	inits <- mtcModel$jags$inits
+	jags <- jags.model(modelFile, data=data, inits=inits, nchain=length(inits), n.adapt=nadapt)
+	unlink(modelFile)
+	data <- coda.samples(jags, variable.names=mtcModel$jags$vars, n.iter=nsamples)
+	for(i in 1:length(data)) { 
+		colnames(data[[i]]) <- mtcModel$jags$vars
+	}
+	data
+}
