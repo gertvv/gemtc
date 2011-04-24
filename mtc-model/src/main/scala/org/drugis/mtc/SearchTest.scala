@@ -123,5 +123,18 @@ object StructurePrint {
 		val xml = scala.xml.XML.loadFile(xmlFile)
 		val network = Network.fromXML(xml)
 		println(network.treatmentGraph.dotString)
+		println()
+
+		val studyTypes = Set() ++ {
+			network.studies.map(s => s.treatmentGraph.vertexSet)
+		}
+
+		println("Study types: ")
+		for (ts <- studyTypes) {
+			val cnt = network.studies.filter(s =>
+				s.treatmentGraph.vertexSet == ts).size
+			println("\t(" + ts.map(t => t.id).mkString(", ") + "): " + cnt)
+		}
+		println("Total studies: " + network.studies.size)
 	}
 }
