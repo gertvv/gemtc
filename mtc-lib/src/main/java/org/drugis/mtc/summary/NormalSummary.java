@@ -19,6 +19,8 @@
 
 package org.drugis.mtc.summary;
 
+import java.util.List;
+
 import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
 import org.drugis.common.beans.AbstractObservable;
@@ -75,9 +77,9 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	
 	private synchronized void calculateResults() {
 		if (!isReady()) return;
-		double[] samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
-		d_mean = s_mean.evaluate(samples);
-		d_stdev = s_stdev.evaluate(samples);
+		List<Double> samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
+		d_mean = SummaryUtil.evaluate(s_mean, samples);
+		d_stdev = SummaryUtil.evaluate(s_stdev, samples);
 		d_defined = true;
 		firePropertyChange(PROPERTY_DEFINED, null, d_defined);
 		firePropertyChange(PROPERTY_MEAN, null, d_mean);

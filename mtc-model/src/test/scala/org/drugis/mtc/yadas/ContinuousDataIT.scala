@@ -31,6 +31,7 @@ import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
 
 import org.drugis.mtc._
 import org.drugis.common.threading.TaskUtil.waitUntilReady
+import org.drugis.mtc.ResultsUtil._
 
 class ContinuousDataIT extends ShouldMatchersForJUnit {
 	// data from Welton et. al., Am J Epidemiol 2009;169:1158–1165
@@ -55,9 +56,9 @@ class ContinuousDataIT extends ShouldMatchersForJUnit {
 		model.isReady should be (true)
 		val d = model.getResults.findParameter(
 			model.getRelativeEffect(usual, psych))
-		mean.evaluate(model.getResults.getSamples(d, 0)) should be (
+		mean.evaluate(getSamples(model.getResults, d, 0)) should be (
 			m plusOrMinus f * s)
-		stdDev.evaluate(model.getResults.getSamples(d, 0)) should be (
+		stdDev.evaluate(getSamples(model.getResults, d, 0)) should be (
 			s plusOrMinus f * s)
 	}
 	

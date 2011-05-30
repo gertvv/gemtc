@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.apache.commons.math.stat.correlation.Covariance;
 import org.apache.commons.math.stat.descriptive.moment.Mean;
@@ -60,24 +61,24 @@ public class GelmanRubinTest {
 	@Test
 	public void testOneChainMean() {
 		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
-		double[] samples = SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], 0);
-		assertEquals(d_mean.evaluate(samples), grc.oneChainMean(0), EPSILON);
+		List<Double> samples = SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], 0);
+		assertEquals(SummaryUtil.evaluate(d_mean, samples), grc.oneChainMean(0), EPSILON);
 		assertEquals(0.4675014, grc.oneChainMean(0), EPSILON);
 	}
 	
 	@Test
 	public void testOneChainVariance() {
 		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
-		double[] samples = SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], 0);
-		assertEquals(d_var.evaluate(samples), grc.oneChainVar(0), EPSILON);
+		List<Double> samples = SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], 0);
+		assertEquals(SummaryUtil.evaluate(d_var, samples), grc.oneChainVar(0), EPSILON);
 		assertEquals( 0.02467504, grc.oneChainVar(0), EPSILON);
 	}
 	
 	@Test
 	public void testAllChainsMean() {
 		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
-		double[] samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameters[0]);
-		assertEquals(d_mean.evaluate(samples), grc.allChainMean(), EPSILON);
+		List<Double> samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameters[0]);
+		assertEquals(SummaryUtil.evaluate(d_mean, samples), grc.allChainMean(), EPSILON);
 		assertEquals(0.4711288, grc.allChainMean(), EPSILON);
 	}
 	
@@ -86,7 +87,7 @@ public class GelmanRubinTest {
 		GelmanRubinConvergence grc = new GelmanRubinConvergence(d_results, d_parameters[0]);
 		double[] chainMeans = new double[d_results.getNumberOfChains()];
 		for(int i=0; i < d_results.getNumberOfChains(); ++i) {
-			chainMeans[i] = d_mean.evaluate(SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], i));
+			chainMeans[i] = SummaryUtil.evaluate(d_mean, SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], i));
 		}
 		assertEquals(d_var.evaluate(chainMeans) * d_results.getNumberOfSamples() / 2, grc.getBetweenChainVar(), EPSILON);
 		assertEquals(0.05104937, grc.getBetweenChainVar(), EPSILON);
@@ -98,7 +99,7 @@ public class GelmanRubinTest {
 		GelmanRubinConvergence grc = new GelmanRubinConvergence(wr, d_parameters[0]);
 		double[] chainMeans = new double[wr.getNumberOfChains()];
 		for(int i=0; i < wr.getNumberOfChains(); ++i) {
-			chainMeans[i] = d_mean.evaluate(SummaryUtil.getOneChainLastHalfSamples(wr, d_parameters[0], i));
+			chainMeans[i] = SummaryUtil.evaluate(d_mean, SummaryUtil.getOneChainLastHalfSamples(wr, d_parameters[0], i));
 		}
 		assertEquals(d_var.evaluate(chainMeans) * wr.getNumberOfSamples() / 2, grc.getBetweenChainVar(), EPSILON);
 	}
@@ -125,7 +126,7 @@ public class GelmanRubinTest {
 
 		for(int i=0; i<m; ++i) {
 			w += grc.oneChainVar(i);
-			chainMeans[i] = d_mean.evaluate(SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], i));
+			chainMeans[i] = SummaryUtil.evaluate(d_mean, SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameters[0], i));
 		}
 		w /= m;
 		double b = d_var.evaluate(chainMeans) * d_results.getNumberOfSamples() / 2;

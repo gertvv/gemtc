@@ -69,15 +69,15 @@ public class GelmanRubinConvergence {
 	}
 	
 	public double oneChainMean(int c){
-		return s_mean.evaluate(SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameter, c));
+		return SummaryUtil.evaluate(s_mean, SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameter, c));
 	}
 
 	public double oneChainVar(int c) {
-		return s_var.evaluate(SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameter, c));
+		return SummaryUtil.evaluate(s_var, SummaryUtil.getOneChainLastHalfSamples(d_results, d_parameter, c));
 	}
 	
 	public double allChainMean() {
-		return s_mean.evaluate(SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter));
+		return SummaryUtil.evaluate(s_mean, SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter));
 	}
 
 	public double getBetweenChainVar() {
