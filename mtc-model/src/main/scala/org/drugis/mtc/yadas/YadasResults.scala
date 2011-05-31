@@ -129,14 +129,6 @@ class YadasResults extends MCMCResults {
 			derivations(p - directParameters.size).calculate(this, c, i)
 		}
 	}
-	def getSamples(p: Int, c: Int): Array[Double] = {
-		assertBounds(p, c)
-		if (p < directParameters.size) {
-			results(c)(p).toArray
-		} else {
-			derivations(p - directParameters.size).calculate(this, c).toArray
-		}
-	}
 
 	private def assertBounds(p: Int, c: Int) {
 		if (c < 0 || c >= nChains) {

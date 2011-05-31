@@ -19,6 +19,9 @@
 
 package org.drugis.mtc.summary;
 
+import java.util.List;
+import java.util.Arrays;
+
 import org.apache.commons.math.stat.descriptive.rank.Percentile;
 import org.drugis.common.beans.AbstractObservable;
 import org.drugis.mtc.MCMCResults;
@@ -92,9 +95,23 @@ public class QuantileSummary extends AbstractObservable implements MCMCResultsLi
 		return q.evaluate(samples);
 	}
 
+	@Deprecated
+	private double[] getSamples() {
+		// FIXME: we really should not do copying of these arrays, as they have about 200,000 elements.
+		// Worse yet, commons math makes yet another copy.
+		// To fix this, we need to implement our own Quantile.
+		List<Double> list = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
+		double[] arr = new double[list.size()];
+		for (int i = 0; i < list.size(); ++i) {
+			arr[i] = list.get(i);
+		}
+		Arrays.sort(arr); // sort so the copy/sort done by Percentile has less impact
+		return arr;
+	}
+
 	private synchronized void calculateResults() {
 		if (!isReady()) return;
-		double[] samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
+		double[] samples = getSamples();
 		d_quantiles = new double[d_probabilities.length];
 		for(int i = 0; i < d_quantiles.length; i++) {
 			d_quantiles[i] = calculateQuantile(i, samples);

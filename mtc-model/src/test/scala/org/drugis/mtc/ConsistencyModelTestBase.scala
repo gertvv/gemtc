@@ -28,6 +28,7 @@ import org.junit.Test
 import org.junit.Before
 import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
 import org.drugis.common.threading.TaskUtil.waitUntilReady
+import org.drugis.mtc.ResultsUtil._
 
 abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 	val mean = new Mean()
@@ -81,10 +82,10 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 		model.isReady should be (true)
 
 		val m = model
-		val dAB = model.getResults.getSamples(
-			model.getResults.findParameter(m.getRelativeEffect(ta, tb)), 0)
-		val dBC = model.getResults.getSamples(
-			model.getResults.findParameter(m.getRelativeEffect(tb, tc)), 0)
+		val dAB = getSamples(model.getResults,
+			m.getRelativeEffect(ta, tb), 0)
+		val dBC = getSamples(model.getResults,
+			m.getRelativeEffect(tb, tc), 0)
 
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .15 sd as acceptable margin (same as JAGS does
@@ -105,11 +106,11 @@ abstract class ConsistencyModelTestBase extends ShouldMatchersForJUnit {
 
 		val m = model
 
-		val dBA = model.getResults.getSamples(
-			model.getResults.findParameter(m.getRelativeEffect(tb, ta)), 0)
+		val dBA = getSamples(model.getResults,
+			m.getRelativeEffect(tb, ta), 0)
 		dBA should not be (null)
-		val dAC = model.getResults.getSamples(
-			model.getResults.findParameter(m.getRelativeEffect(ta, tc)), 0)
+		val dAC = getSamples(model.getResults,
+			m.getRelativeEffect(ta, tc), 0)
 		val mAC = 0.08705606
 		val sAC = 0.5046929
 		mean.evaluate(dAC) should be (mAC plusOrMinus f * sAC)

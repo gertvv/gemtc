@@ -57,14 +57,6 @@ public interface MCMCResults {
 	 * @return A sample.
 	 */
 	public double getSample(int p, int c, int i);
-	
-	/**
-	 * Get all MCMC samples for a parameter within a chain.
-	 * @param p The parameter index.
-	 * @param c The chain index.
-	 * @return An array of getNumberOfSamples() samples.
-	 */
-	public double[] getSamples(int p, int c);
 
 	/**
 	 * Register a listener for changes to the results.

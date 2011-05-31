@@ -31,6 +31,7 @@ import org.junit.Before
 import org.apache.commons.math.stat.descriptive.moment.{Mean, StandardDeviation}
 
 import org.drugis.mtc._
+import org.drugis.mtc.ResultsUtil._
 
 class NodeSplitIT extends ShouldMatchersForJUnit {
 	val f = 0.15
@@ -68,12 +69,12 @@ class NodeSplitIT extends ShouldMatchersForJUnit {
 
 	private def mean(model: MCMCModel, p: Int): Double = { 
 		val n = model.getSimulationIterations / 2
-		meanCalc.evaluate(model.getResults.getSamples(p, 0), n, n)
+		meanCalc.evaluate(getSamples(model.getResults, p, 0), n, n)
 	}
 
 	private def stdDev(model: MCMCModel, p: Int): Double = { 
 		val n = model.getSimulationIterations / 2
-		stdDevCalc.evaluate(model.getResults.getSamples(p, 0), n, n)
+		stdDevCalc.evaluate(getSamples(model.getResults, p, 0), n, n)
 	}
 
 }

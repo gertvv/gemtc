@@ -65,12 +65,9 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 		results.simulationFinished()
 		results.getNumberOfSamples should be (10)
 		results.getSample(0, 0, 0) should be (0.0)
-		results.getSamples(0, 0).toList should be ((0 until 10).map(x => 0.0))
 		intercept[IndexOutOfBoundsException] { results.getSample(0, 0, 10) }
 		intercept[IndexOutOfBoundsException] { results.getSample(0, 1, 3) }
 		intercept[IndexOutOfBoundsException] { results.getSample(3, 0, 3) }
-		intercept[IndexOutOfBoundsException] { results.getSamples(0, 1) }
-		intercept[IndexOutOfBoundsException] { results.getSamples(3, 0) }
 	}
 
 	@Test def testWriters() {
@@ -83,8 +80,9 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 			writer.output()
 		}
 		results.simulationFinished()
-		results.getSamples(1, 0).toList should be ((0 until 10).map(
-			x => x.toDouble))
+		for (i <- (0 until 10)) {
+			results.getSample(1, 0, i) should be (i.toDouble)
+		}
 	}
 
 	@Test def testAdditionalIterationsPreservesSamples() {
@@ -102,10 +100,13 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 
 		results.setNumberOfIterations(20)
 		results.simulationFinished()
-		val secondPart = (0 until 10).map(x => 0.0)
 
-		results.getSamples(1, 0).toList should be (
-			(firstPart ++ secondPart).toList)
+		for (i <- (0 until 10)) {
+			results.getSample(1, 0, i) should be (i.toDouble)
+		}
+		for (i <- (10 until 20)) {
+			results.getSample(1, 0, i) should be (0.0)
+		}
 	}
 
 	@Test def testDerivedSamples() {
@@ -121,8 +122,9 @@ class YadasResultsTest extends ShouldMatchersForJUnit {
 		}
 		results.simulationFinished()
 
-		val expected = (0 until 10).map(i => 2 * (i + 1))
-		results.getSamples(2, 0).toList should be (expected.toList)
+		for (i <- (0 until 10)) {
+			results.getSample(2, 0, i) should be ((2 * (i + 1)).toDouble)
+		}
 	}
 
 	@Test def testEvent() {

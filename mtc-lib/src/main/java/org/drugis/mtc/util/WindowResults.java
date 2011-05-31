@@ -28,10 +28,8 @@ import org.drugis.mtc.MCMCResultsListener;
 import org.drugis.mtc.Parameter;
 
 public class WindowResults implements MCMCResults {
-	private int d_nSamples;
-	private final Parameter[] d_parameters;
-	private final int d_nChains;
-	private double[][][] d_samples;
+	private final MCMCResults d_nested;
+	private final int d_start, d_end;
 	private List<MCMCResultsListener> d_listeners = new ArrayList<MCMCResultsListener>();
 	
 	/**
@@ -40,16 +38,9 @@ public class WindowResults implements MCMCResults {
 	 * @param nSamples
 	 */
 	public WindowResults(MCMCResults nested, int start, int end) {
-		d_nSamples = end - start;
-		d_parameters = nested.getParameters();
-		d_nChains = nested.getNumberOfChains();
-		d_samples = new double[d_nChains][d_parameters.length][d_nSamples];
-		for(int c = 0; c < d_nChains; ++c) {
-			for(Parameter p: d_parameters) {
-				int par = findParameter(p);
-				System.arraycopy(nested.getSamples(par, c), start, d_samples[c][par], 0, d_nSamples);
-			}
-		}
+		d_nested = nested;
+		d_start = start;
+		d_end = end;
 	}
 
 	public void addResultsListener(MCMCResultsListener l) {
@@ -57,27 +48,26 @@ public class WindowResults implements MCMCResults {
 	}
 
 	public int findParameter(Parameter p) {
-		return Arrays.asList(d_parameters).indexOf(p);
+		return d_nested.findParameter(p);
 	}
 
 	public int getNumberOfChains() {
-		return d_nChains;
+		return d_nested.getNumberOfChains();
 	}
 
 	public int getNumberOfSamples() {
-		return d_nSamples;
+		return d_end - d_start;
 	}
 
 	public Parameter[] getParameters() {
-		return d_parameters;
+		return d_nested.getParameters();
 	}
 
 	public double getSample(int p, int c, int i) {
-		return d_samples[c][p][i];
-	}
-
-	public double[] getSamples(int p, int c) {
-		return d_samples[c][p];
+		if (i >= getNumberOfSamples()) {
+			throw new IndexOutOfBoundsException("Index " + i + " out of bounds: " + getNumberOfSamples());
+		}
+		return d_nested.getSample(p, c, i + d_start);
 	}
 
 	public void removeResultsListener(MCMCResultsListener l) {
@@ -85,7 +75,6 @@ public class WindowResults implements MCMCResults {
 	}
 
 	public void clear() {
-		d_samples = null;
-		d_nSamples = 0;
+		throw new UnsupportedOperationException();
 	}
 }

@@ -19,6 +19,8 @@
 
 package org.drugis.mtc.summary;
 
+import java.util.List;
+
 import org.drugis.common.beans.AbstractObservable;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MCMCResultsEvent;
@@ -60,12 +62,12 @@ public class NodeSplitPValueSummary extends AbstractObservable implements
 
 	private void calculatePValue() {
 		int nDirLargerThanIndir = 0;
-		double [] directSamples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_direct);
-		double [] indirectSamples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_indirect);
-		for (int i = 0; i < directSamples.length; ++i) {
-			if (directSamples[i] > indirectSamples[i]) ++nDirLargerThanIndir;
+		List<Double> directSamples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_direct);
+		List<Double> indirectSamples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_indirect);
+		for (int i = 0; i < directSamples.size(); ++i) {
+			if (directSamples.get(i) > indirectSamples.get(i)) ++nDirLargerThanIndir;
 		}
-		double prop = (double) nDirLargerThanIndir / (double) directSamples.length;
+		double prop = (double) nDirLargerThanIndir / (double) directSamples.size();
 		d_pvalue = 2.0 * Math.min(prop, 1.0 - prop);
 	}
 
