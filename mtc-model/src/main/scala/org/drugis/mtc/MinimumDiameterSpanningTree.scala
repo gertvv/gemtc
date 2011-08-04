@@ -23,7 +23,17 @@ package org.drugis.mtc
  * Find the minimum diameter spanning tree
  */
 object MinimumDiameterSpanningTree {
-	def apply[T <% Ordered[T]](graph: UndirectedGraph[T]): Tree[T] = null
+	def apply[T <% Ordered[T]](graph: UndirectedGraph[T]): Tree[T] = {
+		val sp = ShortestPath.calculate(graph)
+		val x = AbsoluteOneCenter(graph, sp)
+		val paths = (graph.vertexSet - x.u - x.v).map(w => Graph.pathEdges(shortestPath(sp, x, w)))
+		val xEdge = {
+			if (x.t < 0.5) (x.u, x.v)
+			else (x.v, x.u)
+		}
+		val edges = paths.reduceLeft((a, b) => a ++ b) + xEdge
+		new Tree(edges, xEdge._1)
+	}
 
 	def shortestPath[T <% Ordered[T]](sp: ShortestPath[T], x: PointCenter[T], w: T): List[T] = {
 		val Some(d1) = sp.distance(x.u, w)

@@ -117,4 +117,13 @@ class MinimumDiameterSpanningTreeTest extends ShouldMatchersForJUnit {
 		MinimumDiameterSpanningTree.shortestPath(sp, PointCenter("B", "C", 0.9), "A") should be (List("B", "A"))
 		MinimumDiameterSpanningTree.shortestPath(sp, PointCenter("B", "C", 1.0), "A") should be (List("B", "A"))
 	}
+
+	@Test def testMinDiamTree() {
+		val edges = Set[(String, String)](("A", "B"), ("A", "C"), ("A", "D"), ("A", "E"), ("B", "C"), ("C", "D"), ("D", "E"))
+		val graph = new UndirectedGraph[String](edges)
+		val sp = ShortestPath.calculate(graph)
+		MinimumDiameterSpanningTree(graph) should be (new Tree(
+			Set(("A", "B"), ("A", "C"), ("A", "D"), ("A", "E")), "A"
+		))
+	}
 }

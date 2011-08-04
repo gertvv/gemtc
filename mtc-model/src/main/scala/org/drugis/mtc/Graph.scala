@@ -19,6 +19,18 @@
 
 package org.drugis.mtc
 
+
+object Graph {
+	def pathEdges[T <% Ordered[T]](p: List[T]): Set[(T, T)] = {
+		def aux(p: List[T]): List[(T, T)] = p match {
+			case Nil => Nil
+			case x :: Nil => Nil
+			case x :: l => (x, l.head) :: aux(l)
+		}
+		Set[(T, T)]() ++ aux(p)
+	}
+}
+
 class Graph[T <% Ordered[T]](edges: Set[(T, T)], vertexPrint: (T) => String) {
 	val edgeSet: Set[(T, T)] = edges
 	val vertexSet: Set[T] = vertices(edges)
@@ -180,18 +192,9 @@ extends Graph[T](edges) {
 		val a = commonAncestor(w, v)
 
 		val c = new UndirectedGraph[T](
-			pathEdges(path(a, w)) ++ pathEdges(path(a, v)) + e, vertexPrint)
+			Graph.pathEdges(path(a, w)) ++ Graph.pathEdges(path(a, v)) + e, vertexPrint)
 		if (c.edgeSet.size <= 1) new UndirectedGraph[T](Set[(T, T)]())
 		else c
-	}
-
-	private def pathEdges(p: List[T]): Set[(T, T)] = {
-		def aux(p: List[T]): List[(T, T)] = p match {
-			case Nil => Nil
-			case x :: Nil => Nil
-			case x :: l => (x, l.head) :: aux(l)
-		}
-		Set[(T, T)]() ++ aux(p)
 	}
 
 	/**
