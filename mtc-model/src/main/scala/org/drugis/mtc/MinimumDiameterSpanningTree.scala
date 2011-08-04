@@ -31,7 +31,11 @@ object MinimumDiameterSpanningTree {
 			if (x.t < 0.5) (x.u, x.v)
 			else (x.v, x.u)
 		}
-		val edges = paths.reduceLeft((a, b) => a ++ b) + xEdge
+		val edges = {
+			if (paths.size > 1) paths.reduceLeft((a, b) => a ++ b) + xEdge
+			else if (paths.size == 1) paths.toList.apply(0) + xEdge
+			else Set(xEdge)
+		}
 		new Tree(edges, xEdge._1)
 	}
 
