@@ -24,10 +24,10 @@ package org.drugis.mtc
  */
 class ShortestPath[T <% Ordered[T]](_graph: Graph[T]) {
 	private val graph: Graph[T] = _graph.directedGraph
-	private val index = graph.vertexSet.toList.sorted(new Ordering[T] {
+	val index = graph.vertexSet.toList.sorted(new Ordering[T] {
 		def compare(x: T, y: T) = x compareTo y
 	})
-	private val n = graph.vertexSet.size
+	val n = graph.vertexSet.size
 	private val dist = Array.ofDim[Int](n, n)
 	private val next = Array.ofDim[Int](n, n)
 
@@ -77,6 +77,18 @@ class ShortestPath[T <% Ordered[T]](_graph: Graph[T]) {
 		val x = dist(index.indexOf(v))(index.indexOf(u))
 		if (x == -1) None
 		else Some(x)
+	}
+
+	private def distanceByIndex(i: Int, j: Int): Double = {
+		val x = dist(i)(j)
+		if (x == -1) Double.PositiveInfinity
+		else x.toDouble
+	}
+
+	def distanceMatrix: List[List[Double]] = {
+		(0 until n).map(i =>
+			(0 until n).map(j => distanceByIndex(i, j)).toList
+		).toList
 	}
 
 	def path(u: T, v: T): Option[List[T]] = {
