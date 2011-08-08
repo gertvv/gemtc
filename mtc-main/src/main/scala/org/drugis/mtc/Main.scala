@@ -73,13 +73,22 @@ class JAGSGenerator(options: Options) {
 		}
 	}
 
-	def writeModel[M <: Measurement](spec: ModelSpecification[M]) {
+	def generateTree(netw: Network[_]) {
+		val tree = MinimumDiameterSpanningTree(netw.treatmentGraph)
+		printTree(tree)
+	}
+
+	def printTree(tree: Tree[Treatment]) {
 		println("Identified spanning tree:")
 		println("\tgraph {")
-		for (e <- spec.model.model.basis.tree.edgeSet) {
+		for (e <- tree.edgeSet) {
 			println("\t\t" + e._1.id + " -- " + e._2.id)
 		}
 		println("\t}")
+	}
+
+	def writeModel[M <: Measurement](spec: ModelSpecification[M]) {
+		printTree(spec.model.model.basis.tree)
 
 		println("Writing JAGS scripts: " + options.baseName + spec.nameSuffix + ".*")
 
@@ -131,7 +140,8 @@ class JAGSGenerator(options: Options) {
 		} else if (network.measurementType == classOf[ContinuousMeasurement]) {
 			generateModel(network.asInstanceOf[Network[ContinuousMeasurement]])
 		} else {
-			println("Unsupported measurement type")
+			println("Unsupported measurement type, only generating spanning tree")
+			generateTree(network)
 		}
 	}
 }

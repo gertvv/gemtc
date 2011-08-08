@@ -237,12 +237,12 @@ object ConsistencyNetworkModel extends NetworkModelUtil {
 
 	def apply[M <: Measurement](network: Network[M], base: Treatment)
 	: NetworkModel[M, ConsistencyParametrization[M]] = {
-		apply(network, network.someSpanningTree(base))
+		apply(network, network.minimumDiameterSpanningTree) // FIXME: don't ignore base
 	}
 
 	def apply[M <: Measurement](network: Network[M])
 	: NetworkModel[M, ConsistencyParametrization[M]] = {
-		apply(network, treatmentList(network.treatments).first)
+		apply(network, network.minimumDiameterSpanningTree)
 	}
 
 	def assignBaselines[M <: Measurement](pmtz: ConsistencyParametrization[M])
