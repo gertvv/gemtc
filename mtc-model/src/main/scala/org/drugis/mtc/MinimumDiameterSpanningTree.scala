@@ -28,7 +28,10 @@ object MinimumDiameterSpanningTree {
 		val x = AbsoluteOneCenter(graph, sp)
 		val paths = (graph.vertexSet - x.u - x.v).map(w => Graph.pathEdges(shortestPath(sp, x, w)))
 		val xEdge = {
-			if (x.t < 0.5) (x.u, x.v)
+			if (x.t == 0.5) {
+				if (x.u < x.v) (x.u, x.v)
+				else (x.v, x.u)
+			} else if (x.t < 0.5) (x.u, x.v)
 			else (x.v, x.u)
 		}
 		val edges = {
