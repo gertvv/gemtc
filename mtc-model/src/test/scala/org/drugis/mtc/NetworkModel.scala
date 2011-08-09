@@ -223,6 +223,14 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 			7.0 plusOrMinus 0.000001)
 	}
 
+	@Test def testNormalPrior() {
+		InconsistencyNetworkModel(networkDich).normalPrior should be (
+			42.4093656180699 plusOrMinus 0.00000001)
+		InconsistencyNetworkModel(networkCont).normalPrior should be (
+			11025.00 plusOrMinus 0.000001)
+
+	}
+
 	@Test def testNoneModel() {
 		val model = InconsistencyNetworkModel(networkNone)
 		model.treatmentList should be (List(new Treatment("A"), new Treatment("B")))

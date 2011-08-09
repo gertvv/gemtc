@@ -184,6 +184,11 @@ class NetworkModel[M <: Measurement, P <: Parametrization[M]](
 		range(means)
 	}
 
+	def normalPrior: Double = {
+		val x = variancePrior * 15
+		return x * x;
+	}
+
 	private def range(x: List[Double]): Double = {
 		val min = x.reduceLeft(Math.min)
 		val max = x.reduceLeft(Math.max)

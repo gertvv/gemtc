@@ -20,6 +20,7 @@
 package org.drugis.mtc.jags
 
 import org.drugis.mtc._
+import java.text.DecimalFormat
 
 class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		val model: NetworkModel[M, P]
@@ -33,6 +34,8 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		else
 			throw new IllegalStateException("Unknown measurement type " + cls)
 	}
+
+	val format = new DecimalFormat("0.0##E0")
 
 	val inconsistency: Boolean = model.parametrization match {
 		case i: InconsistencyParametrization[M] => true
@@ -82,6 +85,9 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	private def vectorStr(name: String, vector: List[_]): String = {
 		name + " <- c(" + vector.mkString(", ") + ")"
 	}
+
+	private val varPrior = format.format(model.variancePrior)
+	private val effPrior = format.format(1/model.normalPrior)
 
 	def modelText: String = {
 		List(
@@ -155,8 +161,8 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	private val baselineEffects = 
 	"""	|	# Study baseline effects
 		|	for (i in 1:length(b)) {
-		|		mu[i] ~ dnorm(0, .001)
-		|	}""".stripMargin
+		|		mu[i] ~ dnorm(0, XXX)
+		|	}""".stripMargin.replace("XXX", effPrior)
 	private val individualEffects = 
 		if (dichotomous)
 	"""	|	# For each (study, treatment), model effect
@@ -170,7 +176,6 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		|		p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
 		|		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
 		|	}""".stripMargin
-	private val varPrior = model.variancePrior
 
 	private def deltas: String = 
 		(for {
@@ -369,14 +374,14 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		"\t" + p.toString + " ~ " + normal("0", variance(p))
 
 	private def variance(p: NetworkModelParameter): String = p match {
-		case b: BasicParameter => ".001"
-		case s: SplitParameter => ".001"
+		case b: BasicParameter => effPrior 
+		case s: SplitParameter => effPrior 
 		case i: InconsistencyParameter => "tau.w"
 		case _ => throw new RuntimeException("Unhandled Parameter type")
 	}
 
 	private def basicVar(name: String) = (
-		"""	|	sd.x ~ dunif(0.00001, """ + varPrior + """)
+		"""	|	sd.x ~ dunif(0, """ + varPrior + """)
 			|	var.x <- sd.x * sd.x
 			|	tau.x <- 1 / var.x""").stripMargin.replaceAll("x", name)
 
