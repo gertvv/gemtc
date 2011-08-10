@@ -89,14 +89,10 @@ public class MainWindow extends JFrame {
 		tabbedPane.setTabPlacement(JTabbedPane.TOP);
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
-		JList treatmentList = new JList(new String[] { "Fluoxetine", "Paroxetine", "Sertraline" });
-		JScrollPane treatmentPane = new JScrollPane(treatmentList);
-		
+		JComponent treatmentPane = new ListEditor("treatment", new String[] { "Fluoxetine", "Paroxetine", "Sertraline" });
 		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
 
-		JList studyList = new JList(new String[] { "Chouinard et al 1999", "Fava et al 2002" });
-		JScrollPane studyPane = new JScrollPane(studyList);
-
+		JComponent studyPane = new ListEditor("study", new String[] { "Chouinard et al 1999", "Fava et al 2002" });
 		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
 
 		return tabbedPane;
