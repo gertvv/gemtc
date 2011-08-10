@@ -42,6 +42,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import org.drugis.common.ImageLoader;
 
+import com.jgoodies.binding.list.ObservableList;
+import com.jgoodies.binding.list.ArrayListModel;
+import java.util.Arrays;
+
+import org.drugis.mtc.gui.ListEditor.ListActions;
+
 public class MainWindow extends JFrame {
 	public static void main(String[] args) {
 		ImageLoader.setImagePath("/org/drugis/mtc/gui/");
@@ -89,10 +95,28 @@ public class MainWindow extends JFrame {
 		tabbedPane.setTabPlacement(JTabbedPane.TOP);
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
-		JComponent treatmentPane = new ListEditor("treatment", new String[] { "Fluoxetine", "Paroxetine", "Sertraline" });
+		TreatmentModel fluox = new TreatmentModel();
+		fluox.setId("Fluox");
+		fluox.setDescription("Fluoxetine");
+		TreatmentModel parox = new TreatmentModel();
+		parox.setId("Parox");
+		parox.setDescription("Paroxetine");
+		ObservableList<TreatmentModel> treatmentList = new ArrayListModel<TreatmentModel>(
+			Arrays.asList(fluox, parox));
+		JComponent treatmentPane = new ListEditor(treatmentList, new TreatmentActions(this));
 		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
 
-		JComponent studyPane = new ListEditor("study", new String[] { "Chouinard et al 1999", "Fava et al 2002" });
+		ObservableList<String> studyList = new ArrayListModel<String>(
+			Arrays.asList("Chouinard et al 1999", "Fava et al 2002"));
+		ListActions<String> studyActions = new ListActions<String>() {
+			public String getTypeName() { return "study"; }
+			public void addAction(ObservableList<String> list) {}
+			public void editAction(ObservableList<String> list, String item) {}
+			public void deleteAction(ObservableList<String> list, String item) {}
+			public String getLabel(String item) { return item; }
+			public String getTooltip(String item) { return item; }
+		};
+		JComponent studyPane = new ListEditor(studyList, studyActions);
 		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
 
 		return tabbedPane;
