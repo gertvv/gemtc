@@ -106,17 +106,12 @@ public class MainWindow extends JFrame {
 		JComponent treatmentPane = new ListEditor(treatmentList, new TreatmentActions(this));
 		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
 
-		ObservableList<String> studyList = new ArrayListModel<String>(
-			Arrays.asList("Chouinard et al 1999", "Fava et al 2002"));
-		ListActions<String> studyActions = new ListActions<String>() {
-			public String getTypeName() { return "study"; }
-			public void addAction(ObservableList<String> list) {}
-			public void editAction(ObservableList<String> list, String item) {}
-			public void deleteAction(ObservableList<String> list, String item) {}
-			public String getLabel(String item) { return item; }
-			public String getTooltip(String item) { return item; }
-		};
-		JComponent studyPane = new ListEditor(studyList, studyActions);
+		StudyModel ch = new StudyModel();
+		ch.setId("Chouinard et al 1999");
+		StudyModel fa = new StudyModel();
+		fa.setId("Fava et al 2002");
+		ObservableList<StudyModel> studyList = new ArrayListModel<StudyModel>(Arrays.asList(ch, fa));
+		JComponent studyPane = new ListEditor(studyList, new StudyActions(this));
 		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
 
 		return tabbedPane;
