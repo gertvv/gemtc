@@ -20,6 +20,7 @@
 package org.drugis.mtc.gui;
 
 import java.util.Collections;
+import java.util.Arrays;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -47,6 +48,29 @@ public class StudyModelTest {
 		TreatmentModel t = new TreatmentModel();
 		m.getTreatments().add(t);
 		assertEquals(Collections.singletonList(t), m.getTreatments());
+	}
+
+	@Test
+	public void testSampleSize() {
+		StudyModel m = new StudyModel();
+		TreatmentModel t1 = new TreatmentModel();
+		TreatmentModel t2 = new TreatmentModel();
+		TreatmentModel t3 = new TreatmentModel();
+		m.getTreatments().add(t1);
+		assertEquals(0, m.getSampleSize(t1));
+		m.setSampleSize(t1, 5);
+		assertEquals(5, m.getSampleSize(t1));
+		m.getTreatments().addAll(Arrays.asList(t2, t3));
+		assertEquals(0, m.getSampleSize(t2));
+		assertEquals(0, m.getSampleSize(t3));
+		m.setSampleSize(t2, 8);
+		m.setSampleSize(t3, 9);
+		assertEquals(8, m.getSampleSize(t2));
+		assertEquals(9, m.getSampleSize(t3));
+
+		m.getTreatments().remove(t2);
+		assertEquals(5, m.getSampleSize(t1));
+		assertEquals(9, m.getSampleSize(t3));
 	}
 
 	@Test

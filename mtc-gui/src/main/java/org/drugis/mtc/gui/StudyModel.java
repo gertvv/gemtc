@@ -21,10 +21,16 @@ package org.drugis.mtc.gui;
 
 //import org.drugis.mtc.Treatment;
 //import org.drugis.mtc.Study;
+import java.util.List;
+import java.util.ArrayList;
+
 import org.drugis.common.beans.AbstractObservable;
 
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.list.ArrayListModel;
+
+import javax.swing.event.ListDataListener;
+import javax.swing.event.ListDataEvent;
 
 /**
  * Editable model for Study.
@@ -34,6 +40,27 @@ public class StudyModel extends AbstractObservable {
 
 	private String d_id = "";
 	private ObservableList<TreatmentModel> d_treatments = new ArrayListModel<TreatmentModel>();
+	private List<Integer> d_sampleSize = new ArrayList<Integer>();
+	private List<Integer> d_responders = new ArrayList<Integer>();
+
+	public StudyModel() {
+		d_treatments.addListDataListener(new ListDataListener() {
+			public void contentsChanged(ListDataEvent e) {
+			}
+			public void intervalAdded(ListDataEvent e) {
+				for (int i = e.getIndex0(); i <= e.getIndex1(); ++i) {
+					d_sampleSize.add(i, 0);
+					d_responders.add(i, 0);
+				}
+			}
+			public void intervalRemoved(ListDataEvent e) {
+				for (int i = e.getIndex1(); i >= e.getIndex0(); --i) {
+					d_sampleSize.remove(i);
+					d_responders.remove(i);
+				}
+			}
+		});
+	}
 
 	public void setId(String id) {
 		String oldVal = d_id;
@@ -49,7 +76,30 @@ public class StudyModel extends AbstractObservable {
 		return d_treatments;
 	}
 
-	//public Study build(MeasurementsModel ...) {
+
+	public int getResponders(TreatmentModel t) {
+		return d_responders.get(d_treatments.indexOf(t));
+	}
+
+	public void setResponders(TreatmentModel t, int r) {
+		d_responders.set(d_treatments.indexOf(t), r);
+	}
+
+	public int getSampleSize(TreatmentModel t) {
+		return d_sampleSize.get(d_treatments.indexOf(t));
+	}
+
+	public void setSampleSize(TreatmentModel t, int n) {
+		d_sampleSize.set(d_treatments.indexOf(t), n);
+	}
+
+	//public double getMean(TreatmentModel t) {
+	//}
+
+	//public double getStdDev(TreatmentModel t) {
+	//}
+
+	//public Study build() {
 	//	return new Treatment(d_id, d_desc);
 	//}
 }

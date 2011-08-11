@@ -143,7 +143,7 @@ public class MainWindow extends JFrame {
 					setText(value.toString());
 					setBackground(Color.WHITE);
 				}
-			}	
+			}
 		});
 		return new JScrollPane(table);
 	}
