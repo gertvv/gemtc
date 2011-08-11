@@ -54,6 +54,9 @@ public class MainWindow extends JFrame {
 		new MainWindow().setVisible(true);
 	}
 
+	ObservableList<TreatmentModel> d_treatments;
+	ObservableList<StudyModel> d_studies;
+
 	public MainWindow() {
 		super("drugis.org MTC");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -103,11 +106,15 @@ public class MainWindow extends JFrame {
 		parox.setDescription("Paroxetine");
 		ObservableList<TreatmentModel> treatmentList = new ArrayListModel<TreatmentModel>(
 			Arrays.asList(fluox, parox));
+		d_treatments = treatmentList;
 		StudyModel ch = new StudyModel();
 		ch.setId("Chouinard et al 1999");
+		ch.getTreatments().addAll(treatmentList);
 		StudyModel fa = new StudyModel();
 		fa.setId("Fava et al 2002");
+		fa.getTreatments().addAll(treatmentList);
 		ObservableList<StudyModel> studyList = new ArrayListModel<StudyModel>(Arrays.asList(ch, fa));
+		d_studies = studyList;
 
 		JComponent treatmentPane = new ListEditor(treatmentList, new TreatmentActions(this, studyList));
 		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
@@ -119,22 +126,19 @@ public class MainWindow extends JFrame {
 	}
 
 	public JComponent buildDataPane() {
-		String [] columnNames = { "", "Responders", "Sample size" };
-		String [][] data = {
-			{"Chouinard et al 1999", null, null},
-			{"Fluoxetine", "37", "101"},
-			{"Paroxetine", "35", "102"},
-			{"Fava et al 2002", null, null},
-			{"Fluoxetine", "38", "88"},
-			{"Paroxetine", "40", "99"}
-		};
-		JTable table = new JTable(data, columnNames);
+		JTable table = new JTable(new MeasurementTableModel(d_studies));
 		table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 			@Override
 			public void setValue(Object value) {
 				if (value == null) {
 					setText("");
 					setBackground(Color.LIGHT_GRAY);
+				} else if (value instanceof StudyModel) {
+					setText(((StudyModel)value).getId());
+					setBackground(Color.LIGHT_GRAY);
+				} else if (value instanceof TreatmentModel) {
+					setText(((TreatmentModel)value).getId());
+					setBackground(Color.WHITE);
 				} else {
 					setText(value.toString());
 					setBackground(Color.WHITE);
