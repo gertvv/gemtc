@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import javax.swing.WindowConstants;
 import javax.swing.JFrame;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -32,10 +33,13 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
+import com.jgoodies.binding.beans.PropertyConnector;
+import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.list.ObservableList;
 
@@ -80,6 +84,12 @@ class StudyActions implements ListActions<StudyModel> {
 	}
 
 	public void addAction(ObservableList<StudyModel> list) {
+		if (d_treatments.size() < 2) {
+			JOptionPane.showMessageDialog(d_parent,
+				"Before you can create any studies, you have to create at least two treatments.",
+				"Unable to create study", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 		StudyModel model = new StudyModel();
 		showEditDialog(model);
 		list.add(model);
@@ -105,6 +115,7 @@ class StudyActions implements ListActions<StudyModel> {
 	private void showEditDialog(StudyModel model) {
 		final JDialog dialog = new JDialog(d_parent, "Study");
 		dialog.setModal(true);
+		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		//dialog.setMinimumSize(new Dimension(300, 200));
 
 		dialog.setLayout(new BorderLayout());
@@ -113,7 +124,8 @@ class StudyActions implements ListActions<StudyModel> {
 		JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		panel.add(new JLabel("ID: "));
-		JTextField field1 = BasicComponentFactory.createTextField(new PropertyAdapter<StudyModel>(model, StudyModel.PROPERTY_ID), false);
+		ValueModel idModel = new PropertyAdapter<StudyModel>(model, StudyModel.PROPERTY_ID, true);
+		JTextField field1 = BasicComponentFactory.createTextField(idModel, false);
 		field1.setColumns(25);
 		panel.add(field1);
 		dialog.add(panel, BorderLayout.NORTH);
@@ -124,8 +136,12 @@ class StudyActions implements ListActions<StudyModel> {
 		}
 		dialog.add(treatmentPanel, BorderLayout.CENTER);
 
+		ValueModel idNotEmpty = new StringNotEmptyModel(idModel);
+		ValueModel treatmentsSelected = new ListMinimumSizeModel(model.getTreatments(), 2);
+		ValueModel complete = new BooleanAndModel(idNotEmpty, treatmentsSelected);
 
 		JButton okButton = new JButton("OK");
+		PropertyConnector.connectAndUpdate(complete, okButton, "enabled");
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				dialog.dispose();

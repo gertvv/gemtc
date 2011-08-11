@@ -25,25 +25,31 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import javax.swing.WindowConstants;
 import javax.swing.JFrame;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
+import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
+import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.list.ObservableList;
+import com.jgoodies.binding.value.ValueModel;
 
 import org.drugis.mtc.gui.ListEditor.ListActions;
 
 class TreatmentActions implements ListActions<TreatmentModel> {
 	private JFrame d_parent;
+	private ObservableList<StudyModel> d_studies;
 
-	public TreatmentActions(JFrame parent) {
+	public TreatmentActions(JFrame parent, ObservableList<StudyModel> studies) {
 		d_parent = parent;
+		d_studies = studies;
 	}
 
 	public String getTypeName() {
@@ -61,9 +67,24 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		}
 	}
 	public void deleteAction(ObservableList<TreatmentModel> list, TreatmentModel item) {
+		if (used(item)) {
+			JOptionPane.showMessageDialog(d_parent,
+				"This treatment is being used by one or more studies. You can't delete it.",
+				"Unable to delete", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 		if (item != null) {
 			list.remove(item);
 		}
+	}
+
+	private boolean used(TreatmentModel item) {
+		for (StudyModel s : d_studies) {
+			if (s.getTreatments().contains(item)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getLabel(TreatmentModel item) {
@@ -76,15 +97,16 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 	private void showEditDialog(TreatmentModel model) {
 		final JDialog dialog = new JDialog(d_parent, "Treatment");
 		dialog.setModal(true);
+		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		//dialog.setMinimumSize(new Dimension(300, 200));
 
 		dialog.setLayout(new BorderLayout());
 
-
 		JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		panel.add(new JLabel("ID: "));
-		JTextField field1 = BasicComponentFactory.createTextField(new PropertyAdapter<TreatmentModel>(model, TreatmentModel.PROPERTY_ID), false);
+		ValueModel idModel = new PropertyAdapter<TreatmentModel>(model, TreatmentModel.PROPERTY_ID, true);
+		JTextField field1 = BasicComponentFactory.createTextField(idModel, false);
 		field1.setColumns(25);
 		panel.add(field1);
 		panel.add(new JLabel("Description: "));
@@ -95,6 +117,7 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		dialog.add(panel, BorderLayout.CENTER);
 
 		JButton okButton = new JButton("OK");
+		PropertyConnector.connectAndUpdate(new StringNotEmptyModel(idModel), okButton, "enabled");
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				dialog.dispose();

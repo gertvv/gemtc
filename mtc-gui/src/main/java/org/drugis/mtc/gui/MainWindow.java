@@ -103,14 +103,15 @@ public class MainWindow extends JFrame {
 		parox.setDescription("Paroxetine");
 		ObservableList<TreatmentModel> treatmentList = new ArrayListModel<TreatmentModel>(
 			Arrays.asList(fluox, parox));
-		JComponent treatmentPane = new ListEditor(treatmentList, new TreatmentActions(this));
-		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
-
 		StudyModel ch = new StudyModel();
 		ch.setId("Chouinard et al 1999");
 		StudyModel fa = new StudyModel();
 		fa.setId("Fava et al 2002");
 		ObservableList<StudyModel> studyList = new ArrayListModel<StudyModel>(Arrays.asList(ch, fa));
+
+		JComponent treatmentPane = new ListEditor(treatmentList, new TreatmentActions(this, studyList));
+		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
+
 		JComponent studyPane = new ListEditor(studyList, new StudyActions(this, treatmentList));
 		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
 
