@@ -181,6 +181,9 @@ public class MeasurementTableModelTest {
 
 	@Test
 	public void testEditing() {
+		d_model.setValueAt(37, 1, 1);
+		assertEquals(37, d_studies.get(0).getResponders(d_treatments.get(0)));
+		assertEquals(37, d_model.getValueAt(1, 1));
 	}
 }
 

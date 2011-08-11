@@ -130,6 +130,15 @@ public class MeasurementTableModel extends AbstractTableModel {
 	}
 
 	@Override
+	public Class<?> getColumnClass(int col) {
+		if (col == 0) {
+			return Object.class;
+		} else {
+			return Integer.class;
+		}
+	}
+
+	@Override
 	public String getColumnName(int col) {
 		if (col == 0) {
 			return "";
@@ -158,15 +167,19 @@ public class MeasurementTableModel extends AbstractTableModel {
 		if (i < 0) {
 			return null;
 		}
+		StudyModel s = d_studies.get(i);
 		if (row == d_studyIndex.get(i)) { // study description row
 			if (col == 0) {
-				return d_studies.get(i);
+				return s;
 			} else {
 				return null;
 			}
 		} else {
+			TreatmentModel t = s.getTreatments().get(row - d_studyIndex.get(i) - 1);
 			if (col == 0) {
-				return d_studies.get(i).getTreatments().get(row - d_studyIndex.get(i) - 1);
+				return t;
+			} else if (col == 1) {
+				return s.getResponders(t);
 			} else {
 				return 0;
 			}
@@ -185,5 +198,20 @@ public class MeasurementTableModel extends AbstractTableModel {
 		}
 
 		return true;
+	}
+
+	@Override
+	public void setValueAt(Object val, int row, int col) {
+		int i = findStudyIndex(row);
+		if (col == 0 || i < 0 || row == d_studyIndex.get(i)) {
+			return;
+		}
+		int j = row - d_studyIndex.get(i) - 1;
+
+		StudyModel s = d_studies.get(i);
+		TreatmentModel t = s.getTreatments().get(j);
+		if (col == 1) {
+			s.setResponders(t, (Integer)val);
+		}
 	}
 }

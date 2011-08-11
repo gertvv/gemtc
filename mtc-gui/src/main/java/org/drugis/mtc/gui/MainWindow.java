@@ -127,20 +127,26 @@ public class MainWindow extends JFrame {
 
 	public JComponent buildDataPane() {
 		JTable table = new JTable(new MeasurementTableModel(d_studies));
-		table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+		table.setDefaultRenderer(Integer.class, new DefaultTableCellRenderer() {
 			@Override
 			public void setValue(Object value) {
 				if (value == null) {
 					setText("");
 					setBackground(Color.LIGHT_GRAY);
-				} else if (value instanceof StudyModel) {
+				} else {
+					setText(value.toString());
+					setBackground(Color.WHITE);
+				}
+			}
+		});
+		table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+			@Override
+			public void setValue(Object value) {
+				if (value instanceof StudyModel) {
 					setText(((StudyModel)value).getId());
 					setBackground(Color.LIGHT_GRAY);
 				} else if (value instanceof TreatmentModel) {
 					setText(((TreatmentModel)value).getId());
-					setBackground(Color.WHITE);
-				} else {
-					setText(value.toString());
 					setBackground(Color.WHITE);
 				}
 			}
