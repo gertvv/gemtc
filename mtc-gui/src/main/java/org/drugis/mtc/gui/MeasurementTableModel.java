@@ -33,6 +33,18 @@ public class MeasurementTableModel extends AbstractTableModel {
 	private ObservableList<StudyModel> d_studies;
 	private List<Integer> d_studyIndex = new ArrayList<Integer>();
 
+	private ListDataListener d_treatmentListener = new ListDataListener() {
+		public void contentsChanged(ListDataEvent e) {
+			throw new UnsupportedOperationException();
+		}
+		public void intervalAdded(ListDataEvent e) {
+			treatmentsAdded(findStudy(e.getSource()), e.getIndex0(), e.getIndex1());
+		}
+		public void intervalRemoved(ListDataEvent e) {
+			treatmentsRemoved(findStudy(e.getSource()), e.getIndex0(), e.getIndex1());
+		}
+	};
+
 	public MeasurementTableModel(ObservableList<StudyModel> studies) {
 		d_studies = studies;
 		d_studyIndex.add(0);
@@ -50,16 +62,21 @@ public class MeasurementTableModel extends AbstractTableModel {
 		});
 	}
 
+	private void updateStudiesFrom(int idx, int delta) {
+		for (int i = idx; i < d_studyIndex.size(); ++i) {
+			d_studyIndex.set(i, d_studyIndex.get(i) + delta);
+		}
+	}
+
 	private void studiesAdded(int start, int end) {
 		int startIdx = d_studyIndex.get(start);
 		int len = 0;
 		for (int i = start; i <= end; ++i) {
 			d_studyIndex.add(i, startIdx + len);
 			len += d_studies.get(i).getTreatments().size() + 1;
+			d_studies.get(i).getTreatments().addListDataListener(d_treatmentListener);
 		}
-		for (int i = end + 1; i < d_studyIndex.size(); ++i) {
-			d_studyIndex.set(i, d_studyIndex.get(i) + len);
-		}
+		updateStudiesFrom(end + 1, len);
 		fireTableRowsInserted(startIdx, startIdx + len - 1);
 	}
 
@@ -69,10 +86,37 @@ public class MeasurementTableModel extends AbstractTableModel {
 		for (int i = end; i >= start; --i) {
 			d_studyIndex.remove(i);
 		}
-		for (int i = start; i < d_studyIndex.size(); ++i) {
-			d_studyIndex.set(i, d_studyIndex.get(i) - len);
-		}
+		updateStudiesFrom(start, -len);
 		fireTableRowsDeleted(startIdx, startIdx + len - 1);
+	}
+
+	private void treatmentsAdded(int study, int start, int end) {
+		if (study < 0) {
+			throw new IllegalStateException();
+		}
+		start += d_studyIndex.get(study) + 1;
+		end += d_studyIndex.get(study) + 1;
+		updateStudiesFrom(study + 1, end - start + 1);
+		fireTableRowsInserted(start, end);
+	}
+
+	private void treatmentsRemoved(int study, int start, int end) {
+		if (study < 0) {
+			throw new IllegalStateException();
+		}
+		start += d_studyIndex.get(study) + 1;
+		end += d_studyIndex.get(study) + 1;
+		updateStudiesFrom(study + 1, start - end - 1);
+		fireTableRowsDeleted(start, end);
+	}
+
+	private int findStudy(Object source) {
+		for (int i = 0; i < d_studies.size(); ++i) {
+			if (d_studies.get(i).getTreatments() == source) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	@Override

@@ -114,6 +114,39 @@ public class MeasurementTableModelTest {
 	}
 
 	@Test
+	public void testAddTreatmentMiddleEventChaining() {
+		TableModelEvent event = new TableModelEvent(d_model, 2, 2, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT);
+		TableModelListener mock = createStrictMock(TableModelListener.class);
+		d_model.addTableModelListener(mock);
+		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
+		replay(mock);
+
+		d_studies.get(0).getTreatments().add(1, d_treatments.get(1));
+		verify(mock);
+
+		assertEquals(d_treatments.get(0), d_model.getValueAt(1, 0));
+		assertEquals(d_treatments.get(1), d_model.getValueAt(2, 0));
+		assertEquals(d_treatments.get(2), d_model.getValueAt(3, 0));
+		assertEquals(d_studies.get(1), d_model.getValueAt(4, 0));
+	}
+
+	@Test
+	public void testRemoveTreatmentMiddleEventChaining() {
+		TableModelEvent event = new TableModelEvent(d_model, 2, 2, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE);
+		TableModelListener mock = createStrictMock(TableModelListener.class);
+		d_model.addTableModelListener(mock);
+		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
+		replay(mock);
+
+		d_studies.get(0).getTreatments().remove(1);
+		verify(mock);
+
+		assertEquals(d_studies.get(0), d_model.getValueAt(0, 0));
+		assertEquals(d_treatments.get(0), d_model.getValueAt(1, 0));
+		assertEquals(d_studies.get(1), d_model.getValueAt(2, 0));
+	}
+
+	@Test
 	public void testRemoveStudyMiddleEventChaining() {
 		StudyModel study = new StudyModel();
 		study.getTreatments().add(d_treatments.get(1));
