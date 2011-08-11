@@ -111,7 +111,7 @@ public class MainWindow extends JFrame {
 		StudyModel fa = new StudyModel();
 		fa.setId("Fava et al 2002");
 		ObservableList<StudyModel> studyList = new ArrayListModel<StudyModel>(Arrays.asList(ch, fa));
-		JComponent studyPane = new ListEditor(studyList, new StudyActions(this));
+		JComponent studyPane = new ListEditor(studyList, new StudyActions(this, treatmentList));
 		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
 
 		return tabbedPane;

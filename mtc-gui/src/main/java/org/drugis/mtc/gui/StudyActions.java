@@ -31,19 +31,48 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
+import javax.swing.JCheckBox;
 import javax.swing.BorderFactory;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
+import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.list.ObservableList;
 
 import org.drugis.mtc.gui.ListEditor.ListActions;
 
 class StudyActions implements ListActions<StudyModel> {
 	private JFrame d_parent;
+	private ObservableList<TreatmentModel> d_treatments;
 
-	public StudyActions(JFrame parent) {
+	private static class TreatmentSelectedModel extends AbstractValueModel {
+		private StudyModel d_study;
+		private TreatmentModel d_treatment;
+
+		public TreatmentSelectedModel(StudyModel study, TreatmentModel treatment) {
+			d_study = study;
+			d_treatment = treatment;
+		}
+
+		public Boolean getValue() {
+			return d_study.getTreatments().contains(d_treatment);
+		}
+
+		public void setValue(Object obj) {
+			boolean oldVal = getValue();
+			boolean val = (Boolean)obj;
+			if (val && !oldVal) {
+				d_study.getTreatments().add(d_treatment);
+			} else if (!val && oldVal) {
+				d_study.getTreatments().remove(d_treatment);
+			}
+			fireValueChange(oldVal, val);
+		}
+	}
+
+	public StudyActions(JFrame parent, ObservableList<TreatmentModel> treatments) {
 		d_parent = parent;
+		d_treatments = treatments;
 	}
 
 	public String getTypeName() {
@@ -87,12 +116,14 @@ class StudyActions implements ListActions<StudyModel> {
 		JTextField field1 = BasicComponentFactory.createTextField(new PropertyAdapter<StudyModel>(model, StudyModel.PROPERTY_ID), false);
 		field1.setColumns(25);
 		panel.add(field1);
-		//panel.add(new JLabel("Description: "));
-		//JTextField field2 = BasicComponentFactory.createTextField(new PropertyAdapter<StudyModel>(model, StudyModel.PROPERTY_DESCRIPTION), false);
-		//field2.setColumns(25);
-		//panel.add(field2);
+		dialog.add(panel, BorderLayout.NORTH);
 
-		dialog.add(panel, BorderLayout.CENTER);
+		JPanel treatmentPanel = new JPanel(new GridLayout(0, 3, 5, 5));
+		for (TreatmentModel t : d_treatments) {
+			treatmentPanel.add(BasicComponentFactory.createCheckBox(new TreatmentSelectedModel(model, t), t.getId()));
+		}
+		dialog.add(treatmentPanel, BorderLayout.CENTER);
+
 
 		JButton okButton = new JButton("OK");
 		okButton.addActionListener(new ActionListener() {
