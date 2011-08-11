@@ -22,6 +22,8 @@ package org.drugis.mtc.gui;
 import com.jgoodies.binding.list.ArrayListModel;
 import com.jgoodies.binding.list.ObservableList;
 import java.util.Arrays;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -85,7 +87,47 @@ public class MeasurementTableModelTest {
 	}
 
 	@Test
-	public void testEventChaining() {
+	public void testAddStudyAtEndEventChaining() {
+		TableModelEvent event = new TableModelEvent(d_model, 4, 4, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT);
+		TableModelListener mock = createStrictMock(TableModelListener.class);
+		d_model.addTableModelListener(mock);
+		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
+		replay(mock);
+
+		d_studies.add(new StudyModel());
+		verify(mock);
+	}
+
+	@Test
+	public void testAddStudyMiddleEventChaining() {
+		TableModelEvent event = new TableModelEvent(d_model, 3, 5, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT);
+		TableModelListener mock = createStrictMock(TableModelListener.class);
+		d_model.addTableModelListener(mock);
+		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
+		replay(mock);
+
+		StudyModel study = new StudyModel();
+		study.getTreatments().add(d_treatments.get(1));
+		study.getTreatments().add(d_treatments.get(2));
+		d_studies.add(1, study);
+		verify(mock);
+	}
+
+	@Test
+	public void testRemoveStudyMiddleEventChaining() {
+		StudyModel study = new StudyModel();
+		study.getTreatments().add(d_treatments.get(1));
+		study.getTreatments().add(d_treatments.get(2));
+		d_studies.add(1, study);
+
+		TableModelEvent event = new TableModelEvent(d_model, 3, 5, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE);
+		TableModelListener mock = createStrictMock(TableModelListener.class);
+		d_model.addTableModelListener(mock);
+		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
+		replay(mock);
+
+		d_studies.remove(1);
+		verify(mock);
 	}
 
 	@Test
