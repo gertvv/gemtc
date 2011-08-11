@@ -99,47 +99,47 @@ public class MeasurementTableModel extends AbstractTableModel {
 		throw new IndexOutOfBoundsException();
 	}
 
-	@Override
-	public Object getValueAt(int row, int col) {
-		for (int i = 0; i <= d_studies.size(); ++i) {
+	private int findStudyIndex(int row) {
+		for (int i = 0; i < d_studies.size(); ++i) {
 			if (row >= d_studyIndex.get(i) && row < d_studyIndex.get(i + 1)) { // found the study
-				if (row == d_studyIndex.get(i)) { // study description row
-					if (col == 0) {
-						return d_studies.get(i);
-					} else {
-						return null;
-					}
-				} else {
-					if (col == 0) {
-						return d_studies.get(i).getTreatments().get(row - d_studyIndex.get(i) - 1);
-					} else {
-						return 0;
-					}
-				}
+				return i;
 			}
 		}
-		return null;
+		return -1;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		int i = findStudyIndex(row);
+		if (i < 0) {
+			return null;
+		}
+		if (row == d_studyIndex.get(i)) { // study description row
+			if (col == 0) {
+				return d_studies.get(i);
+			} else {
+				return null;
+			}
+		} else {
+			if (col == 0) {
+				return d_studies.get(i).getTreatments().get(row - d_studyIndex.get(i) - 1);
+			} else {
+				return 0;
+			}
+		}
 	}
 
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		int cnt = 0;
-		for (StudyModel s : d_studies) {
-			if (cnt == row) {
-				return false;
-			}
-			++cnt;
-			for (TreatmentModel t : s.getTreatments()) {
-				if (cnt == row) {
-					if (col == 0) {
-						return false;
-					} else {
-						return true;
-					}
-				}
-				++cnt;
-			}
+		if (col == 0) {
+			return false;
 		}
-		return false;
+
+		int i = findStudyIndex(row);
+		if (i < 0 || row == d_studyIndex.get(i)) {
+			return false;
+		}
+
+		return true;
 	}
 }
