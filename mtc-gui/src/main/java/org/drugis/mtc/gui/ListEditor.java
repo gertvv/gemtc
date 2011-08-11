@@ -36,6 +36,8 @@ import javax.swing.BoxLayout;
 import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 
+import javax.swing.ListModel;
+
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.value.ValueModel;
@@ -49,6 +51,7 @@ public class ListEditor<E> extends JPanel {
 		public void deleteAction(ObservableList<T> list, T item);
 		public String getLabel(T item);
 		public String getTooltip(T item);
+		public ListModel listPresentation(ObservableList<T> list);
 	}
 
 	private ObservableList<E> d_list;
@@ -66,7 +69,7 @@ public class ListEditor<E> extends JPanel {
 
 	void initComponents() {
 		// The listView
-		final JList listView = new JList(d_list);
+		final JList listView = new JList(d_actions.listPresentation(d_list));
 		listView.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
 			 public Component getListCellRendererComponent(JList list, Object obj, int index, boolean isSelected, boolean cellHasFocus) {

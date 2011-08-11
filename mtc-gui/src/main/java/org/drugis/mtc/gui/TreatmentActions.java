@@ -35,6 +35,8 @@ import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 
+import javax.swing.ListModel;
+
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.beans.PropertyConnector;
@@ -92,6 +94,10 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 	}
 	public String getTooltip(TreatmentModel item) {
 		return item.getDescription();
+	}
+
+	public ListModel listPresentation(ObservableList<TreatmentModel> list) {
+		return new ContentAwareListModel(list, new String[] { TreatmentModel.PROPERTY_ID, TreatmentModel.PROPERTY_DESCRIPTION });
 	}
 
 	private void showEditDialog(TreatmentModel model) {

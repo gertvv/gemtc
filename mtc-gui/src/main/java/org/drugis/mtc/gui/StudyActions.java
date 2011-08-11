@@ -36,6 +36,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 
+import javax.swing.ListModel;
+
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.beans.PropertyConnector;
@@ -110,6 +112,10 @@ class StudyActions implements ListActions<StudyModel> {
 	}
 	public String getTooltip(StudyModel item) {
 		return item.getId();
+	}
+
+	public ListModel listPresentation(ObservableList<StudyModel> list) {
+		return new ContentAwareListModel(list, new String[] { StudyModel.PROPERTY_ID });
 	}
 
 	private void showEditDialog(StudyModel model) {

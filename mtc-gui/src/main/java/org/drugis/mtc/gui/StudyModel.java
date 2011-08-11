@@ -46,6 +46,7 @@ public class StudyModel extends AbstractObservable {
 	public StudyModel() {
 		d_treatments.addListDataListener(new ListDataListener() {
 			public void contentsChanged(ListDataEvent e) {
+				throw new UnsupportedOperationException();
 			}
 			public void intervalAdded(ListDataEvent e) {
 				for (int i = e.getIndex0(); i <= e.getIndex1(); ++i) {

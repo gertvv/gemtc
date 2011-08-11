@@ -126,7 +126,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public JComponent buildDataPane() {
-		JTable table = new JTable(new MeasurementTableModel(d_studies));
+		JTable table = new JTable(new MeasurementTableModel(d_studies, d_treatments));
 		table.setDefaultRenderer(Integer.class, new DefaultTableCellRenderer() {
 			@Override
 			public void setValue(Object value) {

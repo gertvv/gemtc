@@ -29,9 +29,14 @@ import com.jgoodies.binding.list.ObservableList;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListDataEvent;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+
 public class MeasurementTableModel extends AbstractTableModel {
 	private ObservableList<StudyModel> d_studies;
 	private List<Integer> d_studyIndex = new ArrayList<Integer>();
+	private ListPropertyChangeProxy d_studyIdProxy;
+	private ListPropertyChangeProxy d_treatmentIdProxy;
 
 	private ListDataListener d_treatmentListener = new ListDataListener() {
 		public void contentsChanged(ListDataEvent e) {
@@ -45,7 +50,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 		}
 	};
 
-	public MeasurementTableModel(ObservableList<StudyModel> studies) {
+	public MeasurementTableModel(ObservableList<StudyModel> studies, ObservableList<TreatmentModel> treatments) {
 		d_studies = studies;
 		d_studyIndex.add(0);
 		studiesAdded(0, studies.size() - 1);
@@ -60,6 +65,39 @@ public class MeasurementTableModel extends AbstractTableModel {
 				studiesRemoved(e.getIndex0(), e.getIndex1());
 			}
 		});
+
+		d_studyIdProxy = new ListPropertyChangeProxy(d_studies, new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getPropertyName().equals(StudyModel.PROPERTY_ID)) {
+					studyIdChanged((StudyModel)evt.getSource());
+				}
+			}
+		});
+
+		d_treatmentIdProxy = new ListPropertyChangeProxy(treatments, new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getPropertyName().equals(StudyModel.PROPERTY_ID)) {
+					treatmentIdChanged((TreatmentModel)evt.getSource());
+				}
+			}
+		});
+	}
+
+	private void studyIdChanged(StudyModel study) {
+		for (int i = 0; i < d_studies.size(); ++i) {
+			if (d_studies.get(i) == study) {
+				fireTableCellUpdated(d_studyIndex.get(i), 0);
+			}
+		}
+	}
+
+	private void treatmentIdChanged(TreatmentModel t) {
+		for (int i = 0; i < d_studies.size(); ++i) {
+			int j = d_studies.get(i).getTreatments().indexOf(t);
+			if (j > 0) {
+				fireTableCellUpdated(d_studyIndex.get(i) + j + 1, 0);
+			}
+		}
 	}
 
 	private void updateStudiesFrom(int idx, int delta) {
@@ -180,10 +218,11 @@ public class MeasurementTableModel extends AbstractTableModel {
 				return t;
 			} else if (col == 1) {
 				return s.getResponders(t);
-			} else {
-				return 0;
+			} else if (col == 2) {
+				return s.getSampleSize(t);
 			}
 		}
+		return null;
 	}
 
 	@Override
@@ -212,6 +251,8 @@ public class MeasurementTableModel extends AbstractTableModel {
 		TreatmentModel t = s.getTreatments().get(j);
 		if (col == 1) {
 			s.setResponders(t, (Integer)val);
+		} else if (col == 2) {
+			s.setSampleSize(t, (Integer)val);
 		}
 	}
 }
