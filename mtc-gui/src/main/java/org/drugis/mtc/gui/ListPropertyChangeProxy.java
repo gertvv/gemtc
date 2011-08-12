@@ -63,7 +63,7 @@ public class ListPropertyChangeProxy<T extends Observable> {
 	}
 
 	public void removed(int start, int end) {
-		for (int i = end; i >= start; ++i) {
+		for (int i = end; i >= start; --i) {
 			d_copy.get(i).removePropertyChangeListener(d_listener);
 			d_copy.remove(i);
 		}
