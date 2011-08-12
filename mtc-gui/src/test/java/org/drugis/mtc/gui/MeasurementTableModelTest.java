@@ -38,6 +38,7 @@ public class MeasurementTableModelTest {
 	ObservableList<StudyModel> d_studies;
 	ValueHolder d_measurementType;
 	MeasurementTableModel d_model;
+	private static double EPSILON = 0.00000001;
 
 	@Before
 	public void setUp() {
@@ -234,6 +235,31 @@ public class MeasurementTableModelTest {
 		d_model.setValueAt(37, 1, 1);
 		assertEquals(37, d_studies.get(0).getResponders(d_treatments.get(0)));
 		assertEquals(37, d_model.getValueAt(1, 1));
+		d_model.setValueAt(50, 1, 2);
+		assertEquals(50, d_studies.get(0).getSampleSize(d_treatments.get(0)));
+		assertEquals(50, d_model.getValueAt(1, 2));
+
+		d_measurementType.setValue(MeasurementType.CONTINUOUS);
+		assertEquals(50, d_model.getValueAt(1, 3));
+
+		d_model.setValueAt(1.0, 1, 1);
+		assertEquals(1.0, (Double)d_studies.get(0).getMean(d_treatments.get(0)), EPSILON);
+		assertEquals(1.0, (Double)d_model.getValueAt(1, 1), EPSILON);
+		d_model.setValueAt(0.5, 1, 2);
+		assertEquals(0.5, (Double)d_studies.get(0).getStdDev(d_treatments.get(0)), EPSILON);
+		assertEquals(0.5, (Double)d_model.getValueAt(1, 2), EPSILON);
+		d_model.setValueAt(40, 1, 3);
+		assertEquals(40, d_studies.get(0).getSampleSize(d_treatments.get(0)));
+		assertEquals(40, d_model.getValueAt(1, 3));
+		
+		d_measurementType.setValue(MeasurementType.NONE);
+		d_measurementType.setValue(MeasurementType.DICHOTOMOUS);
+		assertEquals(37, d_model.getValueAt(1, 1));
+		assertEquals(40, d_model.getValueAt(1, 2));
+		d_measurementType.setValue(MeasurementType.CONTINUOUS);
+		assertEquals(1.0, (Double)d_model.getValueAt(1, 1), EPSILON);
+		assertEquals(0.5, (Double)d_model.getValueAt(1, 2), EPSILON);
+		assertEquals(40, d_model.getValueAt(1, 3));
 	}
 }
 

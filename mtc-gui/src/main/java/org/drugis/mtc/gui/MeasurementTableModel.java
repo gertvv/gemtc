@@ -247,11 +247,30 @@ public class MeasurementTableModel extends AbstractTableModel {
 			TreatmentModel t = s.getTreatments().get(row - d_studyIndex.get(i) - 1);
 			if (col == 0) {
 				return t;
-			} else if (col == 1) {
-				return s.getResponders(t);
-			} else if (col == 2) {
-				return s.getSampleSize(t);
+			} else {
+				return getValue(s, t, col);
 			}
+		}
+	}
+
+	private Object getValue(StudyModel s, TreatmentModel t, int col) {
+		switch (getMeasurementType()) {
+			case DICHOTOMOUS:
+				if (col == 1) {
+					return s.getResponders(t);
+				} else if (col == 2) {
+					return s.getSampleSize(t);
+				}
+				break;
+			case CONTINUOUS:
+				if (col == 1) {
+					return s.getMean(t);
+				} else if (col == 2) {
+					return s.getStdDev(t);
+				} else if (col == 3) {
+					return s.getSampleSize(t);
+				}
+				break;
 		}
 		return null;
 	}
@@ -280,10 +299,27 @@ public class MeasurementTableModel extends AbstractTableModel {
 
 		StudyModel s = d_studies.get(i);
 		TreatmentModel t = s.getTreatments().get(j);
-		if (col == 1) {
-			s.setResponders(t, (Integer)val);
-		} else if (col == 2) {
-			s.setSampleSize(t, (Integer)val);
+		setValueAt(s, t, col, val);
+	}
+
+	private void setValueAt(StudyModel s, TreatmentModel t, int col, Object val) {
+		switch (getMeasurementType()) {
+			case DICHOTOMOUS:
+				if (col == 1) {
+					s.setResponders(t, (Integer)val);
+				} else if (col == 2) {
+					s.setSampleSize(t, (Integer)val);
+				}
+				break;
+			case CONTINUOUS:
+				if (col == 1) {
+					s.setMean(t, (Double)val);
+				} else if (col == 2) {
+					s.setStdDev(t, (Double)val);
+				} else if (col == 3) {
+					s.setSampleSize(t, (Integer)val);
+				}
+				break;
 		}
 	}
 }

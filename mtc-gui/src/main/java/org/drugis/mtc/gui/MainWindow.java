@@ -38,6 +38,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import org.drugis.common.ImageLoader;
@@ -132,7 +133,7 @@ public class MainWindow extends JFrame {
 
 	public JComponent buildDataPane() {
 		JTable table = new JTable(new MeasurementTableModel(d_studies, d_treatments, d_measurementType));
-		table.setDefaultRenderer(Integer.class, new DefaultTableCellRenderer() {
+		TableCellRenderer numberRenderer = new DefaultTableCellRenderer() {
 			@Override
 			public void setValue(Object value) {
 				if (value == null) {
@@ -143,7 +144,9 @@ public class MainWindow extends JFrame {
 					setBackground(Color.WHITE);
 				}
 			}
-		});
+		};
+		table.setDefaultRenderer(Integer.class, numberRenderer);
+		table.setDefaultRenderer(Double.class, numberRenderer);
 		table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 			@Override
 			public void setValue(Object value) {
