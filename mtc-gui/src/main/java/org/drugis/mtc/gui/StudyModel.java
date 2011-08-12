@@ -42,6 +42,8 @@ public class StudyModel extends AbstractObservable {
 	private ObservableList<TreatmentModel> d_treatments = new ArrayListModel<TreatmentModel>();
 	private List<Integer> d_sampleSize = new ArrayList<Integer>();
 	private List<Integer> d_responders = new ArrayList<Integer>();
+	private List<Double> d_mean = new ArrayList<Double>();
+	private List<Double> d_stdDev = new ArrayList<Double>();
 
 	public StudyModel() {
 		d_treatments.addListDataListener(new ListDataListener() {
@@ -52,12 +54,16 @@ public class StudyModel extends AbstractObservable {
 				for (int i = e.getIndex0(); i <= e.getIndex1(); ++i) {
 					d_sampleSize.add(i, 0);
 					d_responders.add(i, 0);
+					d_mean.add(i, 0.0);
+					d_stdDev.add(i, 0.0);
 				}
 			}
 			public void intervalRemoved(ListDataEvent e) {
 				for (int i = e.getIndex1(); i >= e.getIndex0(); --i) {
 					d_sampleSize.remove(i);
 					d_responders.remove(i);
+					d_mean.remove(i);
+					d_stdDev.remove(i);
 				}
 			}
 		});
@@ -94,11 +100,21 @@ public class StudyModel extends AbstractObservable {
 		d_sampleSize.set(d_treatments.indexOf(t), n);
 	}
 
-	//public double getMean(TreatmentModel t) {
-	//}
+	public double getMean(TreatmentModel t) {
+		d_mean.get(d_treatments.indexOf(t));
+	}
 
-	//public double getStdDev(TreatmentModel t) {
-	//}
+	public void setMean(TreatmentModel t, double m) {
+		d_mean.set(d_treatments.indexOf(t), m);
+	}
+
+	public double getStdDev(TreatmentModel t) {
+		d_stdDev.get(d_treatments.indexOf(t));
+	}
+
+	public void setStdDev(TreatmentModel t, double s) {
+		d_stdDev.set(d_treatments.indexOf(t), s);
+	}
 
 	//public Study build() {
 	//	return new Treatment(d_id, d_desc);
