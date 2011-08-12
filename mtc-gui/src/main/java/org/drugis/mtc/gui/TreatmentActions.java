@@ -60,12 +60,12 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 
 	public void addAction(ObservableList<TreatmentModel> list) {
 		TreatmentModel model = new TreatmentModel();
-		showEditDialog(model);
+		showEditDialog(list, model);
 		list.add(model);
 	}
 	public void editAction(ObservableList<TreatmentModel> list, TreatmentModel item) {
 		if (item != null) {
-			showEditDialog(item);
+			showEditDialog(list, item);
 		}
 	}
 	public void deleteAction(ObservableList<TreatmentModel> list, TreatmentModel item) {
@@ -100,7 +100,7 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		return new ContentAwareListModel(list, new String[] { TreatmentModel.PROPERTY_ID, TreatmentModel.PROPERTY_DESCRIPTION });
 	}
 
-	private void showEditDialog(TreatmentModel model) {
+	private void showEditDialog(ObservableList<TreatmentModel> list, TreatmentModel model) {
 		final JDialog dialog = new JDialog(d_parent, "Treatment");
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -123,7 +123,9 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		dialog.add(panel, BorderLayout.CENTER);
 
 		JButton okButton = new JButton("OK");
-		PropertyConnector.connectAndUpdate(new StringNotEmptyModel(idModel), okButton, "enabled");
+		ValueModel notEmpty = new StringNotEmptyModel(idModel);
+		ValueModel unique = new PropertyUniqueModel(list, model, TreatmentModel.PROPERTY_ID);
+		PropertyConnector.connectAndUpdate(new BooleanAndModel(notEmpty, unique), okButton, "enabled");
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				dialog.dispose();

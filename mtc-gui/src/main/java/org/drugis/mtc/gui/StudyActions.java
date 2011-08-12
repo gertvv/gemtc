@@ -93,12 +93,12 @@ class StudyActions implements ListActions<StudyModel> {
 			return;
 		}
 		StudyModel model = new StudyModel();
-		showEditDialog(model);
+		showEditDialog(list, model);
 		list.add(model);
 	}
 	public void editAction(ObservableList<StudyModel> list, StudyModel item) {
 		if (item != null) {
-			showEditDialog(item);
+			showEditDialog(list, item);
 		}
 	}
 	public void deleteAction(ObservableList<StudyModel> list, StudyModel item) {
@@ -118,7 +118,7 @@ class StudyActions implements ListActions<StudyModel> {
 		return new ContentAwareListModel(list, new String[] { StudyModel.PROPERTY_ID });
 	}
 
-	private void showEditDialog(StudyModel model) {
+	private void showEditDialog(ObservableList<StudyModel> list, StudyModel model) {
 		final JDialog dialog = new JDialog(d_parent, "Study");
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -143,8 +143,9 @@ class StudyActions implements ListActions<StudyModel> {
 		dialog.add(treatmentPanel, BorderLayout.CENTER);
 
 		ValueModel idNotEmpty = new StringNotEmptyModel(idModel);
+		ValueModel idUnique = new PropertyUniqueModel(list, model, StudyModel.PROPERTY_ID);
 		ValueModel treatmentsSelected = new ListMinimumSizeModel(model.getTreatments(), 2);
-		ValueModel complete = new BooleanAndModel(idNotEmpty, treatmentsSelected);
+		ValueModel complete = new BooleanAndModel(treatmentsSelected, new BooleanAndModel(idNotEmpty, idUnique));
 
 		JButton okButton = new JButton("OK");
 		PropertyConnector.connectAndUpdate(complete, okButton, "enabled");
