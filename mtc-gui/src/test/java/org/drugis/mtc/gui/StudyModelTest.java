@@ -19,8 +19,16 @@
 
 package org.drugis.mtc.gui;
 
+import org.drugis.mtc.Treatment;
+import org.drugis.mtc.Study;
+import org.drugis.mtc.NoneMeasurement;
+import org.drugis.mtc.DichotomousMeasurement;
+import org.drugis.mtc.ContinuousMeasurement;
+
 import java.util.Collections;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -74,7 +82,21 @@ public class StudyModelTest {
 	}
 
 	@Test
-	public void testBuild() {
-	// FIXME
+	public void testBuildNone() {
+		StudyModel model = new StudyModel();
+		model.setId("Bla et al, 2003");
+		TreatmentModel t1 = new TreatmentModel();
+		t1.setId("T1");
+		TreatmentModel t2 = new TreatmentModel();
+		t2.setId("T2");
+		TreatmentModel t3 = new TreatmentModel();
+		t3.setId("T3");
+		model.getTreatments().add(t1);
+		model.getTreatments().add(t2);
+
+		List<TreatmentModel> tm = new ArrayList<TreatmentModel>(Arrays.asList(t1, t2, t3));
+		List<Treatment> ts = new ArrayList<Treatment>(Arrays.asList(t1.build(), t2.build(), t3.build()));
+
+		Study<NoneMeasurement> study = model.buildNone(ts);
 	}
 }

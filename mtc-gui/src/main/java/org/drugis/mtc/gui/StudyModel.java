@@ -19,8 +19,12 @@
 
 package org.drugis.mtc.gui;
 
-//import org.drugis.mtc.Treatment;
-//import org.drugis.mtc.Study;
+import org.drugis.mtc.Treatment;
+import org.drugis.mtc.Study;
+import org.drugis.mtc.NoneMeasurement;
+import org.drugis.mtc.DichotomousMeasurement;
+import org.drugis.mtc.ContinuousMeasurement;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -116,8 +120,9 @@ public class StudyModel extends AbstractObservable {
 		d_stdDev.set(d_treatments.indexOf(t), s);
 	}
 
-	//public Study build() {
-	//	return new Treatment(d_id, d_desc);
-	//}
+	public Study<NoneMeasurement> buildNone(List<Treatment> ts) {
+		//return new Study<NoneMeasurement>(d_id, new scala.collection.immutable.Set());
+		return null;
+	}
 }
 
