@@ -19,6 +19,8 @@
 
 package org.drugis.mtc.gui;
 
+import com.jgoodies.binding.value.ValueModel;
+import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.list.ArrayListModel;
 import com.jgoodies.binding.list.ObservableList;
 import java.util.Arrays;
@@ -34,6 +36,7 @@ import static org.easymock.EasyMock.*;
 public class MeasurementTableModelTest {
 	ObservableList<TreatmentModel> d_treatments;
 	ObservableList<StudyModel> d_studies;
+	ValueHolder d_measurementType;
 	MeasurementTableModel d_model;
 
 	@Before
@@ -54,7 +57,9 @@ public class MeasurementTableModelTest {
 		study1.setId("study2");
 		d_studies = new ArrayListModel<StudyModel>(Arrays.asList(study1, study2));
 
-		d_model = new MeasurementTableModel(d_studies, d_treatments);
+		d_measurementType = new ValueHolder(d_measurementType);
+
+		d_model = new MeasurementTableModel(d_studies, d_treatments, d_measurementType);
 	}
 
 	@Test

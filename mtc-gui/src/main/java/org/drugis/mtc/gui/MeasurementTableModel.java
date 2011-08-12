@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 import com.jgoodies.binding.list.ObservableList;
+import com.jgoodies.binding.value.ValueModel;
 
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListDataEvent;
@@ -33,6 +34,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
 public class MeasurementTableModel extends AbstractTableModel {
+	private ValueModel d_measurementType;
 	private ObservableList<StudyModel> d_studies;
 	private List<Integer> d_studyIndex = new ArrayList<Integer>();
 	private ListPropertyChangeProxy d_studyIdProxy;
@@ -50,8 +52,12 @@ public class MeasurementTableModel extends AbstractTableModel {
 		}
 	};
 
-	public MeasurementTableModel(ObservableList<StudyModel> studies, ObservableList<TreatmentModel> treatments) {
+	public MeasurementTableModel(
+			ObservableList<StudyModel> studies,
+			ObservableList<TreatmentModel> treatments,
+			ValueModel measurementType) {
 		d_studies = studies;
+		d_measurementType = measurementType;
 		d_studyIndex.add(0);
 		studiesAdded(0, studies.size() - 1);
 		d_studies.addListDataListener(new ListDataListener() {

@@ -42,8 +42,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import org.drugis.common.ImageLoader;
 
+import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.list.ArrayListModel;
+import com.jgoodies.binding.list.SelectionInList;
+import com.jgoodies.binding.value.ValueModel;
+import com.jgoodies.binding.value.ValueHolder;
 import java.util.Arrays;
 
 import org.drugis.mtc.gui.ListEditor.ListActions;
@@ -56,6 +60,7 @@ public class MainWindow extends JFrame {
 
 	ObservableList<TreatmentModel> d_treatments;
 	ObservableList<StudyModel> d_studies;
+	ValueModel d_measurementType = new ValueHolder(MeasurementType.DICHOTOMOUS);
 
 	public MainWindow() {
 		super("drugis.org MTC");
@@ -126,7 +131,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public JComponent buildDataPane() {
-		JTable table = new JTable(new MeasurementTableModel(d_studies, d_treatments));
+		JTable table = new JTable(new MeasurementTableModel(d_studies, d_treatments, d_measurementType));
 		table.setDefaultRenderer(Integer.class, new DefaultTableCellRenderer() {
 			@Override
 			public void setValue(Object value) {
@@ -157,7 +162,8 @@ public class MainWindow extends JFrame {
 	public JComponent buildInfoPane() {
 		JPanel panel = new JPanel(new FlowLayout());
 		panel.add(new JLabel("A "));
-		panel.add(new JComboBox(new String[] { "dichotomous", "continuous", "(none)" }));
+		SelectionInList typeSelect = new SelectionInList(MeasurementType.values(), d_measurementType);
+		panel.add(BasicComponentFactory.createComboBox(typeSelect));
 		panel.add(new JLabel(" dataset about "));
 		panel.add(new JTextField("HAM-D responders at 8 weeks (severe depression)", 20));
 		return panel;
