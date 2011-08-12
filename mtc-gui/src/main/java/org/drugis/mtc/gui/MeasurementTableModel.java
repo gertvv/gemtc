@@ -168,9 +168,21 @@ public class MeasurementTableModel extends AbstractTableModel {
 		return d_studyIndex.get(d_studies.size());
 	}
 
+	private MeasurementType getMeasurementType() {
+		return (MeasurementType)d_measurementType.getValue();
+	}
+
 	@Override
 	public int getColumnCount() {
-		return 3;
+		switch (getMeasurementType()) {
+			case DICHOTOMOUS:
+				return 3;
+			case CONTINUOUS:
+				return 4;
+			case NONE:
+				return 1;
+		}
+		throw new IllegalStateException();
 	}
 
 	@Override
@@ -178,22 +190,29 @@ public class MeasurementTableModel extends AbstractTableModel {
 		if (col == 0) {
 			return Object.class;
 		} else {
-			return Integer.class;
+			if (getMeasurementType().equals(MeasurementType.DICHOTOMOUS) || col == 3) {
+				return Integer.class;
+			} else {
+				return Double.class;
+			}
 		}
 	}
 
+	private final String[] d_dichNames = { "", "Responders", "Sample size" };
+	private final String[] d_contNames = { "", "Mean", "Standard deviation", "Sample size" };
+	private final String[] d_noneNames = { "" };
+
 	@Override
 	public String getColumnName(int col) {
-		if (col == 0) {
-			return "";
+		switch (getMeasurementType()) {
+			case DICHOTOMOUS:
+				return d_dichNames[col];
+			case CONTINUOUS:
+				return d_contNames[col];
+			case NONE:
+				return d_noneNames[col];
 		}
-		if (col == 1) {
-			return "Responders";
-		}
-		if (col == 2) {
-			return "Sample size";
-		}
-		throw new IndexOutOfBoundsException();
+		throw new IllegalStateException();
 	}
 
 	private int findStudyIndex(int row) {

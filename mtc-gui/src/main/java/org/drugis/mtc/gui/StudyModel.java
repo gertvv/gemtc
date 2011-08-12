@@ -101,7 +101,7 @@ public class StudyModel extends AbstractObservable {
 	}
 
 	public double getMean(TreatmentModel t) {
-		d_mean.get(d_treatments.indexOf(t));
+		return d_mean.get(d_treatments.indexOf(t));
 	}
 
 	public void setMean(TreatmentModel t, double m) {
@@ -109,7 +109,7 @@ public class StudyModel extends AbstractObservable {
 	}
 
 	public double getStdDev(TreatmentModel t) {
-		d_stdDev.get(d_treatments.indexOf(t));
+		return d_stdDev.get(d_treatments.indexOf(t));
 	}
 
 	public void setStdDev(TreatmentModel t, double s) {

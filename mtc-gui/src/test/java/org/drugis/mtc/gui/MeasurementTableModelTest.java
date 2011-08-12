@@ -57,7 +57,7 @@ public class MeasurementTableModelTest {
 		study1.setId("study2");
 		d_studies = new ArrayListModel<StudyModel>(Arrays.asList(study1, study2));
 
-		d_measurementType = new ValueHolder(d_measurementType);
+		d_measurementType = new ValueHolder(MeasurementType.DICHOTOMOUS);
 
 		d_model = new MeasurementTableModel(d_studies, d_treatments, d_measurementType);
 	}
@@ -65,9 +65,45 @@ public class MeasurementTableModelTest {
 	@Test
 	public void testInitialColumns() {
 		assertEquals(3, d_model.getColumnCount());
+
 		assertEquals("", d_model.getColumnName(0));
 		assertEquals("Responders", d_model.getColumnName(1));
 		assertEquals("Sample size", d_model.getColumnName(2));
+
+		assertEquals(Object.class, d_model.getColumnClass(0));
+		assertEquals(Integer.class, d_model.getColumnClass(1));
+		assertEquals(Integer.class, d_model.getColumnClass(2));
+	}
+
+	@Test
+	public void testNoneColumns() {
+		d_measurementType.setValue(MeasurementType.NONE);
+
+		assertEquals(1, d_model.getColumnCount());
+		assertEquals("", d_model.getColumnName(0));
+		assertEquals(Object.class, d_model.getColumnClass(0));
+	}
+
+	@Test
+	public void testContinuousColumns() {
+		d_measurementType.setValue(MeasurementType.CONTINUOUS);
+
+		assertEquals(4, d_model.getColumnCount());
+
+		assertEquals("", d_model.getColumnName(0));
+		assertEquals("Mean", d_model.getColumnName(1));
+		assertEquals("Standard deviation", d_model.getColumnName(2));
+		assertEquals("Sample size", d_model.getColumnName(3));
+
+		assertEquals(Object.class, d_model.getColumnClass(0));
+		assertEquals(Double.class, d_model.getColumnClass(1));
+		assertEquals(Double.class, d_model.getColumnClass(2));
+		assertEquals(Integer.class, d_model.getColumnClass(3));
+	}
+
+	@Test
+	public void testMeasurementTypeEvents() {
+		fail();
 	}
 
 	@Test
