@@ -54,7 +54,7 @@ public class MeasurementTableModelTest {
 		study1.setId("study2");
 		d_studies = new ArrayListModel<StudyModel>(Arrays.asList(study1, study2));
 
-		d_model = new MeasurementTableModel(d_studies);
+		d_model = new MeasurementTableModel(d_studies, d_treatments);
 	}
 
 	@Test
