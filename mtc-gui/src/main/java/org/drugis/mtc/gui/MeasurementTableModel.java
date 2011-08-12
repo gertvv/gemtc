@@ -58,6 +58,12 @@ public class MeasurementTableModel extends AbstractTableModel {
 			ValueModel measurementType) {
 		d_studies = studies;
 		d_measurementType = measurementType;
+		d_measurementType.addValueChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				fireTableStructureChanged();
+			}
+		});
+
 		d_studyIndex.add(0);
 		studiesAdded(0, studies.size() - 1);
 		d_studies.addListDataListener(new ListDataListener() {

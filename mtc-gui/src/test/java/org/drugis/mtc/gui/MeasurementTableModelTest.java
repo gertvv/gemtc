@@ -103,7 +103,16 @@ public class MeasurementTableModelTest {
 
 	@Test
 	public void testMeasurementTypeEvents() {
-		fail();
+		TableModelEvent event = new TableModelEvent(d_model, -1, -1, -1, TableModelEvent.UPDATE);
+		TableModelListener mock = createStrictMock(TableModelListener.class);
+		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
+		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
+		replay(mock);
+
+		d_model.addTableModelListener(mock);
+		d_measurementType.setValue(MeasurementType.CONTINUOUS);
+		d_measurementType.setValue(MeasurementType.NONE);
+		verify(mock);
 	}
 
 	@Test
