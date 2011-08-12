@@ -48,15 +48,12 @@ public class ContentAwareListModel<T extends Observable> extends AbstractListMod
 
 		d_nested.addListDataListener(new ListDataListener() {
 			public void intervalRemoved(ListDataEvent e) {
-				System.out.println("Interval removed " + e.getIndex0() + "-" + e.getIndex1());
 				fireIntervalRemoved(ContentAwareListModel.this, e.getIndex0(), e.getIndex1());
 			}
 			public void intervalAdded(ListDataEvent e) {
-				System.out.println("Interval added " + e.getIndex0() + "-" + e.getIndex1());
 				fireIntervalAdded(ContentAwareListModel.this, e.getIndex0(), e.getIndex1());
 			}
 			public void contentsChanged(ListDataEvent e) {
-				System.out.println("Interval changed " + e.getIndex0() + "-" + e.getIndex1());
 				fireContentsChanged(ContentAwareListModel.this, e.getIndex0(), e.getIndex1());
 			}
 		});
