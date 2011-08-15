@@ -19,39 +19,38 @@
 
 package org.drugis.mtc.gui;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.WindowConstants;
-import javax.swing.JFrame;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
-
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.ListModel;
+import javax.swing.WindowConstants;
+
+import org.drugis.mtc.gui.ListEditor.ListActions;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.beans.PropertyConnector;
-import com.jgoodies.binding.value.ValueModel;
-import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.list.ObservableList;
-
-import org.drugis.mtc.gui.ListEditor.ListActions;
+import com.jgoodies.binding.value.AbstractValueModel;
+import com.jgoodies.binding.value.ValueModel;
 
 class StudyActions implements ListActions<StudyModel> {
 	private JFrame d_parent;
 	private ObservableList<TreatmentModel> d_treatments;
 
 	private static class TreatmentSelectedModel extends AbstractValueModel {
+		private static final long serialVersionUID = -8538914749123577488L;
+
 		private StudyModel d_study;
 		private TreatmentModel d_treatment;
 
@@ -115,7 +114,7 @@ class StudyActions implements ListActions<StudyModel> {
 	}
 
 	public ListModel listPresentation(ObservableList<StudyModel> list) {
-		return new ContentAwareListModel(list, new String[] { StudyModel.PROPERTY_ID });
+		return new ContentAwareListModel<StudyModel>(list, new String[] { StudyModel.PROPERTY_ID });
 	}
 
 	private void showEditDialog(ObservableList<StudyModel> list, StudyModel model) {
@@ -143,7 +142,7 @@ class StudyActions implements ListActions<StudyModel> {
 		dialog.add(treatmentPanel, BorderLayout.CENTER);
 
 		ValueModel idNotEmpty = new StringNotEmptyModel(idModel);
-		ValueModel idUnique = new PropertyUniqueModel(list, model, StudyModel.PROPERTY_ID);
+		ValueModel idUnique = new PropertyUniqueModel<StudyModel>(list, model, StudyModel.PROPERTY_ID);
 		ValueModel treatmentsSelected = new ListMinimumSizeModel(model.getTreatments(), 2);
 		ValueModel complete = new BooleanAndModel(treatmentsSelected, new BooleanAndModel(idNotEmpty, idUnique));
 

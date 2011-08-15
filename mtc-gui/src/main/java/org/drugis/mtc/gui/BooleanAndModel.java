@@ -29,6 +29,7 @@ import com.jgoodies.binding.value.AbstractValueModel;
  * Listens to two nested ValueModels, and converts to true iff both are true. Converts to null if either one is null, or not a Boolean.
  */
 public class BooleanAndModel extends AbstractValueModel {
+	private static final long serialVersionUID = 8591942709442108053L;
 	private ValueModel d_bool1;
 	private ValueModel d_bool2;
 	private Boolean d_val;

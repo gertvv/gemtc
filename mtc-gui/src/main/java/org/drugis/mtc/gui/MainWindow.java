@@ -20,40 +20,38 @@
 package org.drugis.mtc.gui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Dimension;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.util.Arrays;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
-import javax.swing.JToolBar;
 import javax.swing.JButton;
-import javax.swing.JTabbedPane;
-import javax.swing.JScrollPane;
-import javax.swing.JList;
-import javax.swing.JSplitPane;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.JToolBar;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 import org.drugis.common.ImageLoader;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
-import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.list.ArrayListModel;
+import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.list.SelectionInList;
-import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.binding.value.ValueHolder;
-import java.util.Arrays;
-
-import org.drugis.mtc.gui.ListEditor.ListActions;
+import com.jgoodies.binding.value.ValueModel;
 
 public class MainWindow extends JFrame {
+	private static final long serialVersionUID = -5199299195474870618L;
+
 	public static void main(String[] args) {
 		ImageLoader.setImagePath("/org/drugis/mtc/gui/");
 		new MainWindow().setVisible(true);
@@ -122,10 +120,10 @@ public class MainWindow extends JFrame {
 		ObservableList<StudyModel> studyList = new ArrayListModel<StudyModel>(Arrays.asList(ch, fa));
 		d_studies = studyList;
 
-		JComponent treatmentPane = new ListEditor(treatmentList, new TreatmentActions(this, studyList));
+		JComponent treatmentPane = new ListEditor<TreatmentModel>(treatmentList, new TreatmentActions(this, studyList));
 		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
 
-		JComponent studyPane = new ListEditor(studyList, new StudyActions(this, treatmentList));
+		JComponent studyPane = new ListEditor<StudyModel>(studyList, new StudyActions(this, treatmentList));
 		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
 
 		return tabbedPane;
@@ -134,6 +132,8 @@ public class MainWindow extends JFrame {
 	public JComponent buildDataPane() {
 		JTable table = new JTable(new MeasurementTableModel(d_studies, d_treatments, d_measurementType));
 		TableCellRenderer numberRenderer = new DefaultTableCellRenderer() {
+			private static final long serialVersionUID = -1979169367189416419L;
+
 			@Override
 			public void setValue(Object value) {
 				if (value == null) {
@@ -148,6 +148,8 @@ public class MainWindow extends JFrame {
 		table.setDefaultRenderer(Integer.class, numberRenderer);
 		table.setDefaultRenderer(Double.class, numberRenderer);
 		table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+			private static final long serialVersionUID = -3402316110673827477L;
+
 			@Override
 			public void setValue(Object value) {
 				if (value instanceof StudyModel) {
@@ -165,7 +167,7 @@ public class MainWindow extends JFrame {
 	public JComponent buildInfoPane() {
 		JPanel panel = new JPanel(new FlowLayout());
 		panel.add(new JLabel("A "));
-		SelectionInList typeSelect = new SelectionInList(MeasurementType.values(), d_measurementType);
+		SelectionInList<MeasurementType> typeSelect = new SelectionInList<MeasurementType>(MeasurementType.values(), d_measurementType);
 		panel.add(BasicComponentFactory.createComboBox(typeSelect));
 		panel.add(new JLabel(" dataset about "));
 		panel.add(new JTextField("HAM-D responders at 8 weeks (severe depression)", 20));

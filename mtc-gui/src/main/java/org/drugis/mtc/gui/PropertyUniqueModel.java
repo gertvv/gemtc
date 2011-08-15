@@ -34,6 +34,8 @@ import com.jgoodies.binding.value.AbstractValueModel;
  * The list is assumed to be static for the lifetime of this model.
  */
 public class PropertyUniqueModel<T extends Observable> extends AbstractValueModel {
+	private static final long serialVersionUID = 3238328450875732496L;
+
 	private List<T> d_list;
 	private T d_item;
 	private PropertyDescriptor d_property;

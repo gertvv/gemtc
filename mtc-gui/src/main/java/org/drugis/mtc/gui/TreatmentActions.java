@@ -19,31 +19,29 @@
 
 package org.drugis.mtc.gui;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.WindowConstants;
-import javax.swing.JFrame;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
-
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.ListModel;
+import javax.swing.WindowConstants;
+
+import org.drugis.mtc.gui.ListEditor.ListActions;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.ValueModel;
-
-import org.drugis.mtc.gui.ListEditor.ListActions;
 
 class TreatmentActions implements ListActions<TreatmentModel> {
 	private JFrame d_parent;
@@ -97,7 +95,7 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 	}
 
 	public ListModel listPresentation(ObservableList<TreatmentModel> list) {
-		return new ContentAwareListModel(list, new String[] { TreatmentModel.PROPERTY_ID, TreatmentModel.PROPERTY_DESCRIPTION });
+		return new ContentAwareListModel<TreatmentModel>(list, new String[] { TreatmentModel.PROPERTY_ID, TreatmentModel.PROPERTY_DESCRIPTION });
 	}
 
 	private void showEditDialog(ObservableList<TreatmentModel> list, TreatmentModel model) {
@@ -124,7 +122,7 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 
 		JButton okButton = new JButton("OK");
 		ValueModel notEmpty = new StringNotEmptyModel(idModel);
-		ValueModel unique = new PropertyUniqueModel(list, model, TreatmentModel.PROPERTY_ID);
+		ValueModel unique = new PropertyUniqueModel<TreatmentModel>(list, model, TreatmentModel.PROPERTY_ID);
 		PropertyConnector.connectAndUpdate(new BooleanAndModel(notEmpty, unique), okButton, "enabled");
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {

@@ -19,22 +19,19 @@
 
 package org.drugis.mtc.gui;
 
-import org.drugis.mtc.Treatment;
-import org.drugis.mtc.Study;
-import org.drugis.mtc.NoneMeasurement;
-import org.drugis.mtc.DichotomousMeasurement;
-import org.drugis.mtc.ContinuousMeasurement;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import org.drugis.common.beans.AbstractObservable;
+import org.drugis.mtc.NoneMeasurement;
+import org.drugis.mtc.Study;
+import org.drugis.mtc.Treatment;
 
-import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.list.ArrayListModel;
-
-import javax.swing.event.ListDataListener;
-import javax.swing.event.ListDataEvent;
+import com.jgoodies.binding.list.ObservableList;
 
 /**
  * Editable model for Study.

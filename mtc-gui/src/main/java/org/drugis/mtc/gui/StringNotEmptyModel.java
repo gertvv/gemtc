@@ -29,6 +29,8 @@ import com.jgoodies.binding.value.AbstractValueModel;
  * Listens to a nested ValueModel, and converts it to true iff nested is a non-empty String.
  */
 public class StringNotEmptyModel extends AbstractValueModel {
+	private static final long serialVersionUID = -7062635813334832465L;
+
 	private ValueModel d_nested;
 	private boolean d_val;
 

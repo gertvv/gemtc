@@ -44,6 +44,8 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.binding.value.ValueHolder;
 
 public class ListEditor<E> extends JPanel {
+	private static final long serialVersionUID = -6197531310579690286L;
+
 	public interface ListActions<T> {
 		public String getTypeName();
 		public void addAction(ObservableList<T> list);
@@ -71,6 +73,9 @@ public class ListEditor<E> extends JPanel {
 		// The listView
 		final JList listView = new JList(d_actions.listPresentation(d_list));
 		listView.setCellRenderer(new DefaultListCellRenderer() {
+			private static final long serialVersionUID = -378970043153846339L;
+
+			@SuppressWarnings("unchecked")
 			@Override
 			 public Component getListCellRendererComponent(JList list, Object obj, int index, boolean isSelected, boolean cellHasFocus) {
 				String label = d_actions.getLabel((E) obj);
@@ -99,12 +104,14 @@ public class ListEditor<E> extends JPanel {
 		}));
 		buttonPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 		buttonPanel.add(createButton("Edit", true, new ActionListener() {
+			@SuppressWarnings("unchecked")
 			public void actionPerformed(ActionEvent evt) {
 				d_actions.editAction(d_list, (E)listView.getSelectedValue());
 			}
 		}));
 		buttonPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 		buttonPanel.add(createButton("Delete", true, new ActionListener() {
+			@SuppressWarnings("unchecked")
 			public void actionPerformed(ActionEvent evt) {
 				d_actions.deleteAction(d_list, (E)listView.getSelectedValue());
 			}

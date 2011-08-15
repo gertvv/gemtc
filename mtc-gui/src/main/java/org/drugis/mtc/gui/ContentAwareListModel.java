@@ -19,27 +19,27 @@
 
 package org.drugis.mtc.gui;
 
-import com.jgoodies.binding.list.ObservableList;
-import com.jgoodies.binding.beans.Observable;
-
-import javax.swing.ListModel;
-import javax.swing.AbstractListModel;
-import javax.swing.event.ListDataListener;
-import javax.swing.event.ListDataEvent;
-
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.swing.AbstractListModel;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+
+import com.jgoodies.binding.beans.Observable;
+import com.jgoodies.binding.list.ObservableList;
 
 /**
  * ListModel that wraps an ObservableList. Will fire events when the ObservableList does.
  * In addition, it will fireContentsChanged when certain properties of the contained Observables change.
  */
 public class ContentAwareListModel<T extends Observable> extends AbstractListModel {
-	private ObservableList d_nested;
-	private ListPropertyChangeProxy<T> d_proxy;
+	private static final long serialVersionUID = 8722229007151818730L;
+	
+	private ObservableList<T> d_nested;
+	@SuppressWarnings("unused") private ListPropertyChangeProxy<T> d_proxy;
 	private List<String> d_properties;
 
 	public ContentAwareListModel(ObservableList<T> list, String[] properties) {
@@ -58,7 +58,7 @@ public class ContentAwareListModel<T extends Observable> extends AbstractListMod
 			}
 		});
 
-		d_proxy = new ListPropertyChangeProxy(d_nested, new PropertyChangeListener() {
+		d_proxy = new ListPropertyChangeProxy<T>(d_nested, new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (d_properties.contains(evt.getPropertyName())) {
 					int idx = d_nested.indexOf(evt.getSource());

@@ -29,6 +29,7 @@ import com.jgoodies.binding.value.AbstractValueModel;
  * Listens to a ListModel, and converts it to true iff list.getSize() &gt;= minSize.
  */
 public class ListMinimumSizeModel extends AbstractValueModel {
+	private static final long serialVersionUID = 175443101060439182L;
 	private ListModel d_list;
 	private int d_minSize;
 	private boolean d_val;

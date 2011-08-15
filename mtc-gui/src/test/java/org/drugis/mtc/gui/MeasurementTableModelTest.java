@@ -19,19 +19,24 @@
 
 package org.drugis.mtc.gui;
 
-import com.jgoodies.binding.value.ValueModel;
-import com.jgoodies.binding.value.ValueHolder;
-import com.jgoodies.binding.list.ArrayListModel;
-import com.jgoodies.binding.list.ObservableList;
+import static org.easymock.EasyMock.createStrictMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import org.junit.Test;
 import org.junit.Before;
-import static org.junit.Assert.*;
-import org.drugis.common.JUnitUtil;
-import static org.easymock.EasyMock.*;
+import org.junit.Test;
+
+import com.jgoodies.binding.list.ArrayListModel;
+import com.jgoodies.binding.list.ObservableList;
+import com.jgoodies.binding.value.ValueHolder;
 
 public class MeasurementTableModelTest {
 	ObservableList<TreatmentModel> d_treatments;

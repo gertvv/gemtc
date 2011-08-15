@@ -34,11 +34,13 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
 public class MeasurementTableModel extends AbstractTableModel {
+	private static final long serialVersionUID = -1186064425875064988L;
+
 	private ValueModel d_measurementType;
 	private ObservableList<StudyModel> d_studies;
 	private List<Integer> d_studyIndex = new ArrayList<Integer>();
-	private ListPropertyChangeProxy d_studyIdProxy;
-	private ListPropertyChangeProxy d_treatmentIdProxy;
+	@SuppressWarnings("unused") private ListPropertyChangeProxy<StudyModel> d_studyIdProxy;
+	@SuppressWarnings("unused") private ListPropertyChangeProxy<TreatmentModel> d_treatmentIdProxy;
 
 	private ListDataListener d_treatmentListener = new ListDataListener() {
 		public void contentsChanged(ListDataEvent e) {
@@ -78,7 +80,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 			}
 		});
 
-		d_studyIdProxy = new ListPropertyChangeProxy(d_studies, new PropertyChangeListener() {
+		d_studyIdProxy = new ListPropertyChangeProxy<StudyModel>(d_studies, new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName().equals(StudyModel.PROPERTY_ID)) {
 					studyIdChanged((StudyModel)evt.getSource());
@@ -86,7 +88,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 			}
 		});
 
-		d_treatmentIdProxy = new ListPropertyChangeProxy(treatments, new PropertyChangeListener() {
+		d_treatmentIdProxy = new ListPropertyChangeProxy<TreatmentModel>(treatments, new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName().equals(StudyModel.PROPERTY_ID)) {
 					treatmentIdChanged((TreatmentModel)evt.getSource());
@@ -169,7 +171,6 @@ public class MeasurementTableModel extends AbstractTableModel {
 		return -1;
 	}
 
-	@Override
 	public int getRowCount() {
 		return d_studyIndex.get(d_studies.size());
 	}
@@ -178,7 +179,6 @@ public class MeasurementTableModel extends AbstractTableModel {
 		return (MeasurementType)d_measurementType.getValue();
 	}
 
-	@Override
 	public int getColumnCount() {
 		switch (getMeasurementType()) {
 			case DICHOTOMOUS:
@@ -230,7 +230,6 @@ public class MeasurementTableModel extends AbstractTableModel {
 		return -1;
 	}
 
-	@Override
 	public Object getValueAt(int row, int col) {
 		int i = findStudyIndex(row);
 		if (i < 0) {
