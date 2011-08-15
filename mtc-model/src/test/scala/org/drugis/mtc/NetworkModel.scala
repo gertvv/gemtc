@@ -24,6 +24,53 @@ import org.junit.Assert._
 import org.junit.Test
 import org.junit.Before
 
+class ConsistencyNetworkModelTest extends ShouldMatchersForJUnit {
+	val network = Network.noneFromXML(<network>
+		<treatments>
+			<treatment id="A"/>
+			<treatment id="B"/>
+			<treatment id="C"/>
+			<treatment id="D"/>
+			<treatment id="E"/>
+			<treatment id="F"/>
+		</treatments>
+		<studies>
+			<study id="1">
+				<measurement treatment="C"/>
+				<measurement treatment="F"/>
+			</study>
+			<study id="2">
+				<measurement treatment="B"/>
+				<measurement treatment="C"/>
+				<measurement treatment="D"/>
+			</study>
+			<study id="3">
+				<measurement treatment="A"/>
+				<measurement treatment="E"/>
+				<measurement treatment="F"/>
+			</study>
+		</studies>
+	</network>)
+
+	val ta = new Treatment("A")
+	val tb = new Treatment("B")
+	val tc = new Treatment("C")
+	val td = new Treatment("D")
+	val te = new Treatment("E")
+	val tf = new Treatment("F")
+	val studies = network.studies.toList.sort((a, b) => a.id < b.id)
+
+	@Test def testModelCreation() {
+		val model = ConsistencyNetworkModel(network)
+		val expectedTree = new Tree[Treatment](
+			Set((tc, tf), (tc, tb), (tc, td), (tf, te), (tf, ta)), tc)
+		model.basis.tree should be (expectedTree)
+		model.studyBaseline(studies(0)) should be (tc)
+		model.studyBaseline(studies(1)) should be (tc)
+		model.studyBaseline(studies(2)) should be (tf)
+	}
+}
+
 class NetworkModelTest extends ShouldMatchersForJUnit {
 	val network = Network.dichFromXML(<network>
 			<treatments>
@@ -221,6 +268,14 @@ class NetworkModelTest extends ShouldMatchersForJUnit {
 			0.43414982369413 plusOrMinus 0.000001)
 		InconsistencyNetworkModel(networkCont).variancePrior should be (
 			7.0 plusOrMinus 0.000001)
+	}
+
+	@Test def testNormalPrior() {
+		InconsistencyNetworkModel(networkDich).normalPrior should be (
+			42.4093656180699 plusOrMinus 0.00000001)
+		InconsistencyNetworkModel(networkCont).normalPrior should be (
+			11025.00 plusOrMinus 0.000001)
+
 	}
 
 	@Test def testNoneModel() {

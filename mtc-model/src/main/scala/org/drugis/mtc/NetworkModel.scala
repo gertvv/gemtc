@@ -184,6 +184,11 @@ class NetworkModel[M <: Measurement, P <: Parametrization[M]](
 		range(means)
 	}
 
+	def normalPrior: Double = {
+		val x = variancePrior * 15
+		return x * x;
+	}
+
 	private def range(x: List[Double]): Double = {
 		val min = x.reduceLeft(Math.min)
 		val max = x.reduceLeft(Math.max)
@@ -237,20 +242,28 @@ object ConsistencyNetworkModel extends NetworkModelUtil {
 
 	def apply[M <: Measurement](network: Network[M], base: Treatment)
 	: NetworkModel[M, ConsistencyParametrization[M]] = {
-		apply(network, network.someSpanningTree(base))
+		apply(network, network.minimumDiameterSpanningTree) // FIXME: don't ignore base
 	}
 
 	def apply[M <: Measurement](network: Network[M])
 	: NetworkModel[M, ConsistencyParametrization[M]] = {
-		apply(network, treatmentList(network.treatments).first)
+		apply(network, network.minimumDiameterSpanningTree)
 	}
 
 	def assignBaselines[M <: Measurement](pmtz: ConsistencyParametrization[M])
 	: Map[Study[M], Treatment] = {
-		val alg = new DFS()
-		alg.search(BaselineSearchProblem(pmtz)) match {
-			case None => throw new Exception("No Assignment Found!")
-			case Some(x) => x.assignment
+		Map() ++ pmtz.network.studies.map(s => (s, maxDegreeVertex(pmtz, s)))
+	}
+
+	private def maxDegreeVertex[M <: Measurement](pmtz: ConsistencyParametrization[M], study: Study[M]) = {
+		val ts = study.treatmentGraph.vertexSet.toList.sortWith(_ < _)
+		if (ts.size == 2) ts(0)
+		else {
+			val isect = study.treatmentGraph.directedGraph.intersection(pmtz.basis.tree)
+			def degree(t: Treatment): Int = {
+				isect.edgeSet.filter(e => { e._1 == t || e._2 == t }).size
+			}
+			ts.sortWith((a, b) => { val d = degree(a) - degree(b); if (d == 0) a < b else d > 0 })(0)
 		}
 	}
 }

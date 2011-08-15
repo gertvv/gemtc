@@ -334,7 +334,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 					Array[ArgumentMaker](
 						new IdentityArgument(0),
 						new ConstantArgument(0, 1),
-						new ConstantArgument(Math.sqrt(1000), 1)
+						new ConstantArgument(Math.sqrt(proto.normalPrior), 1)
 					),
 					new Gaussian()
 				)
@@ -346,7 +346,7 @@ abstract class YadasModel[M <: Measurement, P <: Parametrization[M]](
 				Array[ArgumentMaker](
 					new IdentityArgument(0),
 					new ConstantArgument(0, proto.basicParameters.size),
-					new ConstantArgument(Math.sqrt(1000), proto.basicParameters.size)
+					new ConstantArgument(Math.sqrt(proto.normalPrior), proto.basicParameters.size)
 				),
 				new Gaussian()
 			)

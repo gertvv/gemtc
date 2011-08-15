@@ -36,7 +36,7 @@ b <- c(2, 1, 1)"""
 	val modelText = """model {
 	# Study baseline effects
 	for (i in 1:length(b)) {
-		mu[i] ~ dnorm(0, .001)
+		mu[i] ~ dnorm(0, 4.423E-3)
 	}
 
 	# Random effects in study 01
@@ -62,17 +62,17 @@ b <- c(2, 1, 1)"""
 	}
 
 	# Meta-parameters
-	d.A.B ~ dnorm(0, .001)
-	d.B.C ~ dnorm(0, .001)
+	d.A.B ~ dnorm(0, 4.423E-3)
+	d.B.C ~ dnorm(0, 4.423E-3)
 	w.A.B.C ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
-	sd.w ~ dunif(0.00001, 1.0024677518941976)
+	sd.w ~ dunif(0, 1.002E0)
 	var.w <- sd.w * sd.w
 	tau.w <- 1 / var.w
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 1.0024677518941976)
+	sd.d ~ dunif(0, 1.002E0)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 
@@ -174,7 +174,7 @@ b <- c(2, 1, 1)"""
 	val modelText = """model {
 	# Study baseline effects
 	for (i in 1:length(b)) {
-		mu[i] ~ dnorm(0, .001)
+		mu[i] ~ dnorm(0, 4.423E-3)
 	}
 
 	# Random effects in study 01
@@ -200,11 +200,11 @@ b <- c(2, 1, 1)"""
 	}
 
 	# Meta-parameters
-	d.A.B ~ dnorm(0, .001)
-	d.B.C ~ dnorm(0, .001)
+	d.A.B ~ dnorm(0, 4.423E-3)
+	d.B.C ~ dnorm(0, 4.423E-3)
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 1.0024677518941976)
+	sd.d ~ dunif(0, 1.002E0)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 
@@ -326,7 +326,7 @@ b <- c(2, 1, 1)"""
 	val modelText = """model {
 	# Study baseline effects
 	for (i in 1:length(b)) {
-		mu[i] ~ dnorm(0, .001)
+		mu[i] ~ dnorm(0, 4.444E-3)
 	}
 
 	# Random effects in study 01
@@ -352,11 +352,11 @@ b <- c(2, 1, 1)"""
 	}
 
 	# Meta-parameters
-	d.A.B ~ dnorm(0, .001)
-	d.B.C ~ dnorm(0, .001)
+	d.A.B ~ dnorm(0, 4.444E-3)
+	d.B.C ~ dnorm(0, 4.444E-3)
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 1.0)
+	sd.d ~ dunif(0, 1.0E0)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 
@@ -371,7 +371,7 @@ b <- c(2, 1, 1)"""
 	val inconsModelText = """model {
 	# Study baseline effects
 	for (i in 1:length(b)) {
-		mu[i] ~ dnorm(0, .001)
+		mu[i] ~ dnorm(0, 4.444E-3)
 	}
 
 	# Random effects in study 01
@@ -397,17 +397,17 @@ b <- c(2, 1, 1)"""
 	}
 
 	# Meta-parameters
-	d.A.B ~ dnorm(0, .001)
-	d.B.C ~ dnorm(0, .001)
+	d.A.B ~ dnorm(0, 4.444E-3)
+	d.B.C ~ dnorm(0, 4.444E-3)
 	w.A.B.C ~ dnorm(0, tau.w)
 
 	# Inconsistency variance
-	sd.w ~ dunif(0.00001, 1.0)
+	sd.w ~ dunif(0, 1.0E0)
 	var.w <- sd.w * sd.w
 	tau.w <- 1 / var.w
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 1.0)
+	sd.d ~ dunif(0, 1.0E0)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 
@@ -519,7 +519,7 @@ b <- c(2, 1, 1)"""
 	val modelText = """model {
 	# Study baseline effects
 	for (i in 1:length(b)) {
-		mu[i] ~ dnorm(0, .001)
+		mu[i] ~ dnorm(0, 4.423E-3)
 	}
 
 	# Random effects in study 01
@@ -544,12 +544,12 @@ b <- c(2, 1, 1)"""
 	}
 
 	# Meta-parameters
-	d.A.B.dir ~ dnorm(0, .001)
-	d.A.B.ind ~ dnorm(0, .001)
-	d.B.C ~ dnorm(0, .001)
+	d.A.B.dir ~ dnorm(0, 4.423E-3)
+	d.A.B.ind ~ dnorm(0, 4.423E-3)
+	d.B.C ~ dnorm(0, 4.423E-3)
 
 	# Random effect variance
-	sd.d ~ dunif(0.00001, 1.0024677518941976)
+	sd.d ~ dunif(0, 1.002E0)
 	var.d <- sd.d * sd.d
 	tau.d <- 1 / var.d
 }"""

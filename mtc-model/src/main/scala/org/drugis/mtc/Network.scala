@@ -104,6 +104,10 @@ class Network[M <: Measurement](
 		searchSomeSpanningTree(top, new NullSpanningTreeSearchListener())
 	}
 
+	def minimumDiameterSpanningTree(): Tree[Treatment] = {
+		MinimumDiameterSpanningTree(treatmentGraph)
+	}
+
 	/**
 	 * Find any spanning tree that includes (top, req) and has a baseline
 	 * assignment where studies that include (top, req), either top or req is

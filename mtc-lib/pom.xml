@@ -5,12 +5,11 @@
 	<parent>
 		<groupId>org.drugis</groupId>
 		<artifactId>mtc</artifactId>
-		<version>0.8.1-SNAPSHOT</version>
+		<version>0.8.2-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.drugis</groupId>
 	<artifactId>mtc-lib</artifactId>
-	<version>0.8.1-SNAPSHOT</version>
 	<name>mtc-lib</name>
 
 	<distributionManagement>
@@ -49,7 +48,7 @@
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-lib</artifactId>
-			<version>0.4.2</version>
+			<version>0.4.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.drugis</groupId>

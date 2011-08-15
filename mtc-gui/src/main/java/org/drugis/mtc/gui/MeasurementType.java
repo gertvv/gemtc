@@ -17,14 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.drugis.mtc
+package org.drugis.mtc.gui;
 
-object ResultsUtil {
-	def getSamples(r: MCMCResults, p: Int, c: Int): Array[Double] = {
-		(0 until r.getNumberOfSamples).map(
-			i => r.getSample(p, c, i)).toArray
+public enum MeasurementType {
+	DICHOTOMOUS("dichotomous"),
+	CONTINUOUS("continuous"),
+	NONE("(none)");
+
+	private final String d_str;
+
+	MeasurementType(String str) {
+		d_str = str;
 	}
-	def getSamples(r: MCMCResults, p: Parameter, c: Int): Array[Double] = {
-		getSamples(r, r.findParameter(p), c)
+
+	@Override
+	public String toString() {
+		return d_str;
 	}
 }

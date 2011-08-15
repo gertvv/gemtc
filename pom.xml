@@ -2,13 +2,9 @@
 <project>
 	<modelVersion>4.0.0</modelVersion>
 
-	<properties>
-		<projectVersion>0.8.1-SNAPSHOT</projectVersion>
-	</properties>
-
 	<groupId>org.drugis</groupId>
 	<artifactId>mtc</artifactId>
-	<version>0.8.1-SNAPSHOT</version>
+	<version>0.8.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>drugis-mtc</name>
 
@@ -67,5 +63,6 @@
 		<module>mtc-model</module>
 		<module>mtc-lib</module>
 		<module>mtc-main</module>
+		<module>mtc-gui</module>
 	</modules>
 </project>

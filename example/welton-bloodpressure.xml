@@ -1,5 +1,7 @@
 <!-- Continuous analysis from
-	Welton et al., Am J Epidemiol 2009;169:1158-1165 -->
+	Welton et al., Am J Epidemiol 2009;169:1158-1165
+This is the "single intervention effect" model for diastolic blood pressure with the correlation between pre- and post-measures assumed 0.5.
+-->
 <network type="continuous">
 	<treatments>
 		<treatment id="usual" />
@@ -73,4 +75,9 @@ s[]	year[]	new[]	trt[]	usual[]	edu[]	beh[]	cog[]	relax[]	support[]	n[]	diff[]	sd
 
 56	2003	1	6	1	0	0	0	0	1	331	0.4	10.211	10.211
 56	2003	1	1	1	0	0	0	0	0	348	2.8	11.897	11.897
+-->
+<!--
+	 node	 mean	 sd	 MC error	2.5%	median	97.5%	start	sample
+	d	-1.368	0.9772	0.008467	-3.312	-1.377	0.6232	20001	40000
+	sd.d	2.125	1.238	0.02434	0.2296	1.966	5.085	20001	40000
 -->
