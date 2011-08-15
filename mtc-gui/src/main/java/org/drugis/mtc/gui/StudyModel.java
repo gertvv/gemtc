@@ -20,12 +20,16 @@
 package org.drugis.mtc.gui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import org.drugis.common.beans.AbstractObservable;
+import org.drugis.mtc.ContinuousMeasurement;
+import org.drugis.mtc.DichotomousMeasurement;
 import org.drugis.mtc.NoneMeasurement;
 import org.drugis.mtc.Study;
 import org.drugis.mtc.Treatment;
@@ -118,8 +122,36 @@ public class StudyModel extends AbstractObservable {
 	}
 
 	public Study<NoneMeasurement> buildNone(List<Treatment> ts) {
-		//return new Study<NoneMeasurement>(d_id, new scala.collection.immutable.Set());
-		return null;
+		Map<Treatment, NoneMeasurement> map = new HashMap<Treatment, NoneMeasurement>();
+		for (TreatmentModel tm : d_treatments) {
+			Treatment t = getTreatment(ts, tm);
+			map.put(t, new NoneMeasurement(t));
+		}
+		return new Study<NoneMeasurement>(d_id, ScalaUtil.toScalaMap(map));
+	}
+	
+	public Study<DichotomousMeasurement> buildDichotomous(List<Treatment> ts) {
+		Map<Treatment, DichotomousMeasurement> map = new HashMap<Treatment, DichotomousMeasurement>();
+		for (int i = 0; i < d_treatments.size(); ++i) {
+			TreatmentModel tm = d_treatments.get(i);
+			Treatment t = getTreatment(ts, tm);
+			map.put(t, new DichotomousMeasurement(t, d_responders.get(i), d_sampleSize.get(i)));
+		}
+		return new Study<DichotomousMeasurement>(d_id, ScalaUtil.toScalaMap(map));
+	}
+	
+	public Study<ContinuousMeasurement> buildContinuous(List<Treatment> ts) {
+		Map<Treatment, ContinuousMeasurement> map = new HashMap<Treatment, ContinuousMeasurement>();
+		for (int i = 0; i < d_treatments.size(); ++i) {
+			TreatmentModel tm = d_treatments.get(i);
+			Treatment t = getTreatment(ts, tm);
+			map.put(t, new ContinuousMeasurement(t, d_mean.get(i), d_stdDev.get(i), d_sampleSize.get(i)));
+		}
+		return new Study<ContinuousMeasurement>(d_id, ScalaUtil.toScalaMap(map));
+	}
+	
+	private Treatment getTreatment(List<Treatment> ts, TreatmentModel tm) {
+		return ts.get(ts.indexOf(new Treatment(tm.getId())));
 	}
 }
 

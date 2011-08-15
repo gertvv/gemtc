@@ -24,7 +24,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.drugis.common.JUnitUtil;
 import org.drugis.mtc.NoneMeasurement;
@@ -91,9 +93,13 @@ public class StudyModelTest {
 		model.getTreatments().add(t1);
 		model.getTreatments().add(t2);
 
-		List<TreatmentModel> tm = new ArrayList<TreatmentModel>(Arrays.asList(t1, t2, t3));
 		List<Treatment> ts = new ArrayList<Treatment>(Arrays.asList(t1.build(), t2.build(), t3.build()));
-
+		
+		Map<Treatment, NoneMeasurement> expectedMap = new HashMap<Treatment, NoneMeasurement>();
+		expectedMap.put(ts.get(0), new NoneMeasurement(ts.get(0)));
+		expectedMap.put(ts.get(1), new NoneMeasurement(ts.get(1)));
+		Study<NoneMeasurement> expected = new Study<NoneMeasurement>("Bla et al, 2003", ScalaUtil.toScalaMap(expectedMap));
 		Study<NoneMeasurement> study = model.buildNone(ts);
+		assertEquals(expected, study);
 	}
 }

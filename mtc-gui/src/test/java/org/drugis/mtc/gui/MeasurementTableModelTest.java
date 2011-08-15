@@ -38,6 +38,8 @@ import com.jgoodies.binding.list.ArrayListModel;
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.ValueHolder;
 
+import static org.drugis.mtc.gui.MeasurementTableModel.*;
+
 public class MeasurementTableModelTest {
 	ObservableList<TreatmentModel> d_treatments;
 	ObservableList<StudyModel> d_studies;
@@ -72,9 +74,9 @@ public class MeasurementTableModelTest {
 	public void testInitialColumns() {
 		assertEquals(3, d_model.getColumnCount());
 
-		assertEquals("", d_model.getColumnName(0));
-		assertEquals("Responders", d_model.getColumnName(1));
-		assertEquals("Sample size", d_model.getColumnName(2));
+		assertEquals(COLNAME_ID, d_model.getColumnName(0));
+		assertEquals(COLNAME_RESPONDERS, d_model.getColumnName(1));
+		assertEquals(COLNAME_SAMPLESIZE, d_model.getColumnName(2));
 
 		assertEquals(Object.class, d_model.getColumnClass(0));
 		assertEquals(Integer.class, d_model.getColumnClass(1));
@@ -86,7 +88,7 @@ public class MeasurementTableModelTest {
 		d_measurementType.setValue(MeasurementType.NONE);
 
 		assertEquals(1, d_model.getColumnCount());
-		assertEquals("", d_model.getColumnName(0));
+		assertEquals(COLNAME_ID, d_model.getColumnName(0));
 		assertEquals(Object.class, d_model.getColumnClass(0));
 	}
 
@@ -96,10 +98,10 @@ public class MeasurementTableModelTest {
 
 		assertEquals(4, d_model.getColumnCount());
 
-		assertEquals("", d_model.getColumnName(0));
-		assertEquals("Mean", d_model.getColumnName(1));
-		assertEquals("Standard deviation", d_model.getColumnName(2));
-		assertEquals("Sample size", d_model.getColumnName(3));
+		assertEquals(COLNAME_ID, d_model.getColumnName(0));
+		assertEquals(COLNAME_MEAN, d_model.getColumnName(1));
+		assertEquals(COLNAME_STDDEV, d_model.getColumnName(2));
+		assertEquals(COLNAME_SAMPLESIZE, d_model.getColumnName(3));
 
 		assertEquals(Object.class, d_model.getColumnClass(0));
 		assertEquals(Double.class, d_model.getColumnClass(1));

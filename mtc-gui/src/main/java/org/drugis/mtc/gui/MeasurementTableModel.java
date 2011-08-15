@@ -34,6 +34,12 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
 public class MeasurementTableModel extends AbstractTableModel {
+	public static final String COLNAME_STDDEV = "Standard deviation";
+	public static final String COLNAME_MEAN = "Mean";
+	public static final String COLNAME_SAMPLESIZE = "Sample size";
+	public static final String COLNAME_RESPONDERS = "Responders";
+	public static final String COLNAME_ID = "";
+
 	private static final long serialVersionUID = -1186064425875064988L;
 
 	private ValueModel d_measurementType;
@@ -95,6 +101,10 @@ public class MeasurementTableModel extends AbstractTableModel {
 				}
 			}
 		});
+	}
+
+	public MeasurementTableModel(DataSetModel model) {
+		this(model.getStudies(), model.getTreatments(), model.getMeasurementType());
 	}
 
 	private void studyIdChanged(StudyModel study) {
@@ -204,9 +214,9 @@ public class MeasurementTableModel extends AbstractTableModel {
 		}
 	}
 
-	private final String[] d_dichNames = { "", "Responders", "Sample size" };
-	private final String[] d_contNames = { "", "Mean", "Standard deviation", "Sample size" };
-	private final String[] d_noneNames = { "" };
+	private final String[] d_dichNames = { COLNAME_ID, COLNAME_RESPONDERS, COLNAME_SAMPLESIZE };
+	private final String[] d_contNames = { COLNAME_ID, COLNAME_MEAN, COLNAME_STDDEV, COLNAME_SAMPLESIZE };
+	private final String[] d_noneNames = { COLNAME_ID };
 
 	@Override
 	public String getColumnName(int col) {

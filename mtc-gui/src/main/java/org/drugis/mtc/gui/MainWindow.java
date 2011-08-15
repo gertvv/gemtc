@@ -20,34 +20,20 @@
 package org.drugis.mtc.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.util.Arrays;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import org.drugis.common.ImageLoader;
-
-import com.jgoodies.binding.adapter.BasicComponentFactory;
-import com.jgoodies.binding.list.ArrayListModel;
-import com.jgoodies.binding.list.ObservableList;
-import com.jgoodies.binding.list.SelectionInList;
-import com.jgoodies.binding.value.ValueHolder;
-import com.jgoodies.binding.value.ValueModel;
+import org.drugis.mtc.Measurement;
+import org.drugis.mtc.Network;
 
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -5199299195474870618L;
@@ -57,31 +43,38 @@ public class MainWindow extends JFrame {
 		new MainWindow().setVisible(true);
 	}
 
-	ObservableList<TreatmentModel> d_treatments;
-	ObservableList<StudyModel> d_studies;
-	ValueModel d_measurementType = new ValueHolder(MeasurementType.DICHOTOMOUS);
+	DataSetModel d_model;
 
 	public MainWindow() {
 		super("drugis.org MTC");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		setMinimumSize(new Dimension(750, 550));
+		initDataSet();
 
 		initComponents();
+	}
+
+	private void initDataSet() {
+//		InputStream is = MainWindow.class.getResourceAsStream("luades-smoking.xml");
+		InputStream is;
+		try {
+			is = new FileInputStream("/home/gert/Documents/repositories/mtc/mtc-gui/src/main/resources/org/drugis/mtc/gui/luades-smoking.xml");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		Network<? extends Measurement> network = Network.fromXML(scala.xml.XML.load(is));
+		d_model = DataSetModel.build(network);
 	}
 
 	private void initComponents() {
 		setLayout(new BorderLayout());
 		initToolBar();
-		JComponent entityPane = buildEntityPane();
-		JComponent infoPane = buildInfoPane();
-		JComponent dataPane = buildDataPane();
-		JPanel rightPane = new JPanel(new BorderLayout());
-		rightPane.add(infoPane, BorderLayout.NORTH);
-		rightPane.add(dataPane, BorderLayout.CENTER);
-		JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, entityPane, rightPane);
-		mainPane.setDividerLocation(200);
-		add(mainPane, BorderLayout.CENTER);
+
+		JComponent mainPane = new DataSetView(this, d_model);
+		add(mainPane , BorderLayout.CENTER);
 	}
 
 	private void initToolBar() {
@@ -96,81 +89,5 @@ public class MainWindow extends JFrame {
         add(toolbar, BorderLayout.NORTH);
 	}
 
-	private JComponent buildEntityPane() {
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.setMinimumSize(new Dimension(200, 400));
-		tabbedPane.setTabPlacement(JTabbedPane.TOP);
-		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
-		TreatmentModel fluox = new TreatmentModel();
-		fluox.setId("Fluox");
-		fluox.setDescription("Fluoxetine");
-		TreatmentModel parox = new TreatmentModel();
-		parox.setId("Parox");
-		parox.setDescription("Paroxetine");
-		ObservableList<TreatmentModel> treatmentList = new ArrayListModel<TreatmentModel>(
-			Arrays.asList(fluox, parox));
-		d_treatments = treatmentList;
-		StudyModel ch = new StudyModel();
-		ch.setId("Chouinard et al 1999");
-		ch.getTreatments().addAll(treatmentList);
-		StudyModel fa = new StudyModel();
-		fa.setId("Fava et al 2002");
-		fa.getTreatments().addAll(treatmentList);
-		ObservableList<StudyModel> studyList = new ArrayListModel<StudyModel>(Arrays.asList(ch, fa));
-		d_studies = studyList;
-
-		JComponent treatmentPane = new ListEditor<TreatmentModel>(treatmentList, new TreatmentActions(this, studyList));
-		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
-
-		JComponent studyPane = new ListEditor<StudyModel>(studyList, new StudyActions(this, treatmentList));
-		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
-
-		return tabbedPane;
-	}
-
-	public JComponent buildDataPane() {
-		JTable table = new JTable(new MeasurementTableModel(d_studies, d_treatments, d_measurementType));
-		TableCellRenderer numberRenderer = new DefaultTableCellRenderer() {
-			private static final long serialVersionUID = -1979169367189416419L;
-
-			@Override
-			public void setValue(Object value) {
-				if (value == null) {
-					setText("");
-					setBackground(Color.LIGHT_GRAY);
-				} else {
-					setText(value.toString());
-					setBackground(Color.WHITE);
-				}
-			}
-		};
-		table.setDefaultRenderer(Integer.class, numberRenderer);
-		table.setDefaultRenderer(Double.class, numberRenderer);
-		table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-			private static final long serialVersionUID = -3402316110673827477L;
-
-			@Override
-			public void setValue(Object value) {
-				if (value instanceof StudyModel) {
-					setText(((StudyModel)value).getId());
-					setBackground(Color.LIGHT_GRAY);
-				} else if (value instanceof TreatmentModel) {
-					setText(((TreatmentModel)value).getId());
-					setBackground(Color.WHITE);
-				}
-			}
-		});
-		return new JScrollPane(table);
-	}
-
-	public JComponent buildInfoPane() {
-		JPanel panel = new JPanel(new FlowLayout());
-		panel.add(new JLabel("A "));
-		SelectionInList<MeasurementType> typeSelect = new SelectionInList<MeasurementType>(MeasurementType.values(), d_measurementType);
-		panel.add(BasicComponentFactory.createComboBox(typeSelect));
-		panel.add(new JLabel(" dataset about "));
-		panel.add(new JTextField("HAM-D responders at 8 weeks (severe depression)", 20));
-		return panel;
-	}
 }
