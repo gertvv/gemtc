@@ -21,17 +21,22 @@ package org.drugis.mtc.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.drugis.common.ImageLoader;
+import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.mtc.Measurement;
 import org.drugis.mtc.Network;
 
@@ -44,6 +49,7 @@ public class MainWindow extends JFrame {
 	}
 
 	DataSetModel d_model;
+	private JTabbedPane d_mainPane;
 
 	public MainWindow() {
 		super("drugis.org MTC");
@@ -73,16 +79,49 @@ public class MainWindow extends JFrame {
 		setLayout(new BorderLayout());
 		initToolBar();
 
-		JComponent mainPane = new DataSetView(this, d_model);
-		add(mainPane , BorderLayout.CENTER);
+		d_mainPane = new JTabbedPane();
+//		JComponent mainPane = new DataSetView(this, d_model);
+		add(d_mainPane , BorderLayout.CENTER);
 	}
 
 	private void initToolBar() {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
 
-		toolbar.add(new JButton("New", ImageLoader.getIcon("newfile.gif")));
-		toolbar.add(new JButton("Open", ImageLoader.getIcon("openfile.gif")));
+		JButton newButton = new JButton("New", ImageLoader.getIcon("newfile.gif"));
+		newButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DataSetModel model = new DataSetModel();
+				DataSetView view = new DataSetView(MainWindow.this, model);
+				d_mainPane.add("new file", view);
+			}
+		});
+		toolbar.add(newButton);
+		JButton openButton = new JButton("Open", ImageLoader.getIcon("openfile.gif"));
+		openButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new FileLoadDialog(MainWindow.this, "xml", "XML files") {
+					public void doAction(String path, String extension) {
+						InputStream is;
+						try {
+							is = new FileInputStream(path);
+						} catch (FileNotFoundException e) {
+							throw new RuntimeException(e);
+						}
+						Network<? extends Measurement> network = Network.fromXML(scala.xml.XML.load(is));
+						final DataSetModel model = DataSetModel.build(network);
+						final String title = (new File(path)).getName();
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								DataSetView view = new DataSetView(MainWindow.this, model);
+								d_mainPane.add(title, view);
+							}
+						});
+					}
+				};
+			}
+		});
+		toolbar.add(openButton);
 		toolbar.add(new JButton("Save", ImageLoader.getIcon("savefile.gif")));
 		toolbar.add(new JButton("Generate", ImageLoader.getIcon("generate.gif")));
 
