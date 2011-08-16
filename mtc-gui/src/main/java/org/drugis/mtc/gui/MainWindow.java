@@ -32,26 +32,36 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.apache.commons.math.random.JDKRandomGenerator;
 import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
+import org.drugis.mtc.ConsistencyNetworkModel$;
+import org.drugis.mtc.RandomizedStartingValueGenerator$;
 import org.drugis.mtc.Measurement;
 import org.drugis.mtc.Network;
+import org.drugis.mtc.NetworkModel;
+import org.drugis.mtc.StartingValueGenerator;
+import org.drugis.mtc.jags.JagsSyntaxModel;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
+import com.jgoodies.binding.beans.PropertyConnector;
+import com.jgoodies.binding.list.ArrayListModel;
+import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueModel;
 
@@ -101,7 +111,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JTabbedPane d_mainPane;
-	private List<DataSetModel> d_models = new ArrayList<DataSetModel>();
+	private ObservableList<DataSetModel> d_models = new ArrayListModel<DataSetModel>();
 
 	public MainWindow() {
 		super("drugis.org MTC");
@@ -173,7 +183,7 @@ public class MainWindow extends JFrame {
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					final DataSetModel model = d_models.get(d_mainPane.getSelectedIndex());
+					final DataSetModel model = getActiveModel();
 					if (model.getFile() == null) {
 						new FileSaveDialog(MainWindow.this, "xml", "XML files") {
 							public void doAction(String path, String extension) {
@@ -194,10 +204,57 @@ public class MainWindow extends JFrame {
 		return saveButton;
 	}
 
+	@SuppressWarnings("unchecked")
 	private JButton createGenerateButton() {
 		JButton button = new JButton("Generate", ImageLoader.getIcon("generate.gif"));
-		button.setEnabled(false);
+		button.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent arg0) {
+				final DataSetModel model = getActiveModel();
+				if (model.getTreatments().size() < 2 || model.getStudies().size() < 2) {
+					JOptionPane.showMessageDialog(MainWindow.this, "You need to define at least two studies and treatments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				Network network;
+				try {
+					network = model.build();
+				} catch (IllegalArgumentException e) {
+					JOptionPane.showMessageDialog(MainWindow.this, "Error: " + e.getMessage(), "Cannot generate model", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				final NetworkModel nm = ConsistencyNetworkModel$.MODULE$.apply(network);
+				final JagsSyntaxModel jagsSyntaxModel = new JagsSyntaxModel(nm);
+				final String name = model.getFile() == null ? "unnamed" : model.getFile().getName().replaceFirst(".xml$", "");
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						showSyntaxModel(nm, jagsSyntaxModel, name);	
+					}
+				});
+				
+			}
+			
+		});
+		PropertyConnector.connectAndUpdate(new ListMinimumSizeModel(d_models, 1), button, "enabled");
 		return button;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void showSyntaxModel(NetworkModel nm, JagsSyntaxModel jagsSyntaxModel, String name) {
+		JDialog dialog = new JDialog(this, "Jags consistency model: " + name);
+		JTabbedPane tabbedPane = new JTabbedPane();
+		
+		tabbedPane.addTab("Model", new JScrollPane(new JTextArea(jagsSyntaxModel.modelText())));
+		tabbedPane.addTab("Data", new JScrollPane(new JTextArea(jagsSyntaxModel.dataText())));
+		final int chains = 4;
+		tabbedPane.addTab("Script", new JScrollPane(new JTextArea(jagsSyntaxModel.scriptText(name, chains, 20000, 40000))));
+		StartingValueGenerator gen = RandomizedStartingValueGenerator$.MODULE$.apply(nm, new JDKRandomGenerator(), 2.5);
+		for (int i = 1; i <= 4; ++i) {
+			tabbedPane.addTab("Inits " + i, new JScrollPane(new JTextArea(jagsSyntaxModel.initialValuesText(gen))));
+		}
+		
+		dialog.add(tabbedPane);
+		dialog.pack();
+		dialog.setVisible(true);
 	}
 	
 	private DataSetModel readFromFile(final File file) {
@@ -222,6 +279,15 @@ public class MainWindow extends JFrame {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	private DataSetModel getActiveModel() {
+		int idx = d_mainPane.getSelectedIndex();
+		if (idx >= 0) {
+			return d_models.get(idx);
+		} else {
+			return null;
 		}
 	}
 }
