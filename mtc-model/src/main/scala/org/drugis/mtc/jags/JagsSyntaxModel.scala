@@ -86,8 +86,9 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		name + " <- c(" + vector.mkString(", ") + ")"
 	}
 
-	private val varPrior = format.format(model.variancePrior)
-	private val effPrior = format.format(1/model.normalPrior)
+	private def rewrite(s: String): String = s.replaceFirst("E", "*10^")
+	private val varPrior = rewrite(format.format(model.variancePrior))
+	private val effPrior = rewrite(format.format(1/model.normalPrior))
 
 	def modelText: String = {
 		List(
