@@ -23,13 +23,22 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -37,10 +46,53 @@ import javax.swing.WindowConstants;
 
 import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileLoadDialog;
+import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.mtc.Measurement;
 import org.drugis.mtc.Network;
 
+import com.jgoodies.binding.adapter.BasicComponentFactory;
+import com.jgoodies.binding.beans.PropertyAdapter;
+import com.jgoodies.binding.value.AbstractValueModel;
+import com.jgoodies.binding.value.ValueModel;
+
 public class MainWindow extends JFrame {
+	public class FileNameModel extends AbstractValueModel {
+		private static final long serialVersionUID = -8194830838726012699L;
+
+		private ValueModel d_file;
+		private String d_value;
+
+		public FileNameModel(DataSetModel dataSet) {
+			d_file = new PropertyAdapter<DataSetModel>(dataSet, DataSetModel.PROPERTY_FILE, true);
+			d_file.addValueChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent arg0) {
+					String oldValue = d_value;
+					d_value = calc();
+					fireValueChange(oldValue, d_value);
+				}
+			});
+			d_value = calc();
+		}
+
+		private String calc() {
+			if (d_file.getValue() == null) {
+				return "new file";
+			} else {
+				return ((File)d_file.getValue()).getName();
+			}
+		}
+
+		public Object getValue() {
+			return d_value;
+		}
+
+		public void setValue(Object newValue) {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
+
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static void main(String[] args) {
@@ -48,85 +100,128 @@ public class MainWindow extends JFrame {
 		new MainWindow().setVisible(true);
 	}
 
-	DataSetModel d_model;
 	private JTabbedPane d_mainPane;
+	private List<DataSetModel> d_models = new ArrayList<DataSetModel>();
 
 	public MainWindow() {
 		super("drugis.org MTC");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		setMinimumSize(new Dimension(750, 550));
-		initDataSet();
-
-		initComponents();
-	}
-
-	private void initDataSet() {
-//		InputStream is = MainWindow.class.getResourceAsStream("luades-smoking.xml");
-		InputStream is;
-		try {
-			is = new FileInputStream("/home/gert/Documents/repositories/mtc/mtc-gui/src/main/resources/org/drugis/mtc/gui/luades-smoking.xml");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		Network<? extends Measurement> network = Network.fromXML(scala.xml.XML.load(is));
-		d_model = DataSetModel.build(network);
-	}
-
-	private void initComponents() {
 		setLayout(new BorderLayout());
-		initToolBar();
-
+		
 		d_mainPane = new JTabbedPane();
-//		JComponent mainPane = new DataSetView(this, d_model);
+		add(createToolBar(), BorderLayout.NORTH);
 		add(d_mainPane , BorderLayout.CENTER);
 	}
-
-	private void initToolBar() {
+	
+	private void addModel(DataSetModel model) {
+		int index = d_models.size();
+		d_models.add(model);
+		DataSetView view = new DataSetView(MainWindow.this, model);
+		JComponent tabHeader = BasicComponentFactory.createLabel(new FileNameModel(model));
+		d_mainPane.add(view);
+		d_mainPane.setTabComponentAt(index, tabHeader);
+	}
+	
+	private JToolBar createToolBar() {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
 
+		toolbar.add(createNewButton());
+		toolbar.add(createOpenButton());
+		toolbar.add(createSaveButton());
+		toolbar.add(createGenerateButton());
+
+        return toolbar;
+	}
+
+	private JButton createNewButton() {
 		JButton newButton = new JButton("New", ImageLoader.getIcon("newfile.gif"));
 		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DataSetModel model = new DataSetModel();
-				DataSetView view = new DataSetView(MainWindow.this, model);
-				d_mainPane.add("new file", view);
+				addModel(new DataSetModel());
 			}
 		});
-		toolbar.add(newButton);
+		return newButton;
+	}
+
+	private JButton createOpenButton() {
 		JButton openButton = new JButton("Open", ImageLoader.getIcon("openfile.gif"));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new FileLoadDialog(MainWindow.this, "xml", "XML files") {
 					public void doAction(String path, String extension) {
-						InputStream is;
-						try {
-							is = new FileInputStream(path);
-						} catch (FileNotFoundException e) {
-							throw new RuntimeException(e);
-						}
-						Network<? extends Measurement> network = Network.fromXML(scala.xml.XML.load(is));
-						final DataSetModel model = DataSetModel.build(network);
-						final String title = (new File(path)).getName();
+						final File file = new File(path);
+						final DataSetModel model = readFromFile(file);
+						model.setFile(file);
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								DataSetView view = new DataSetView(MainWindow.this, model);
-								d_mainPane.add(title, view);
+								addModel(model);
 							}
 						});
 					}
 				};
 			}
 		});
-		toolbar.add(openButton);
-		toolbar.add(new JButton("Save", ImageLoader.getIcon("savefile.gif")));
-		toolbar.add(new JButton("Generate", ImageLoader.getIcon("generate.gif")));
-
-        add(toolbar, BorderLayout.NORTH);
+		return openButton;
 	}
 
 
+	private JButton createSaveButton() {
+		JButton saveButton = new JButton("Save", ImageLoader.getIcon("savefile.gif"));
+		saveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					final DataSetModel model = d_models.get(d_mainPane.getSelectedIndex());
+					if (model.getFile() == null) {
+						new FileSaveDialog(MainWindow.this, "xml", "XML files") {
+							public void doAction(String path, String extension) {
+								File file = new File(path);
+								writeToFile(model, file);
+								model.setFile(file);
+							}
+	
+						};
+					} else {
+						writeToFile(model, model.getFile());
+					}
+				} catch (IllegalArgumentException e) {
+					JOptionPane.showMessageDialog(MainWindow.this, "Error: " + e.getMessage(), "File could not be saved.", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		return saveButton;
+	}
+
+	private JButton createGenerateButton() {
+		JButton button = new JButton("Generate", ImageLoader.getIcon("generate.gif"));
+		button.setEnabled(false);
+		return button;
+	}
+	
+	private DataSetModel readFromFile(final File file) {
+		InputStream is;
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+		Network<? extends Measurement> network = Network.fromXML(scala.xml.XML.load(is));
+		return DataSetModel.build(network);
+	}
+	
+	private void writeToFile(final DataSetModel model, final File file) {
+		OutputStreamWriter os;
+		try {
+			os = new OutputStreamWriter(new FileOutputStream(file));
+			os.write(model.build().toPrettyXML());
+			os.write("\n");
+			os.close();
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

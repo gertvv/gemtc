@@ -1,11 +1,13 @@
 package org.drugis.mtc.gui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.drugis.common.beans.AbstractObservable;
 import org.drugis.mtc.ContinuousMeasurement;
 import org.drugis.mtc.DichotomousMeasurement;
 import org.drugis.mtc.Network;
@@ -21,11 +23,13 @@ import com.jgoodies.binding.value.ValueModel;
 /**
  * Editable model for an MTC data set.
  */
-public class DataSetModel {
+public class DataSetModel extends AbstractObservable {
+	public static final String PROPERTY_FILE = "file";
 	private ValueModel d_description = new ValueHolder("???");
 	private ValueModel d_type = new ValueHolder(MeasurementType.DICHOTOMOUS);
 	private ObservableList<TreatmentModel> d_treatments = new ArrayListModel<TreatmentModel>();
 	private ObservableList<StudyModel> d_studies = new ArrayListModel<StudyModel>();
+	private File d_file = null;
 	
 	public ValueModel getDescription() {
 		return d_description;
@@ -151,5 +155,15 @@ public class DataSetModel {
 			model.getStudies().add(sm);
 		}
 		Collections.sort(model.getStudies(), new StudyIdComparator());
+	}
+
+	public void setFile(File file) {
+		File oldValue = d_file;
+		d_file = file;
+		firePropertyChange(PROPERTY_FILE, oldValue, d_file);
+	}
+
+	public File getFile() {
+		return d_file;
 	}
 }

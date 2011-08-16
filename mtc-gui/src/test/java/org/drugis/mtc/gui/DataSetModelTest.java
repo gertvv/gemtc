@@ -2,12 +2,14 @@ package org.drugis.mtc.gui;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.drugis.common.JUnitUtil;
 import org.drugis.mtc.ContinuousMeasurement;
 import org.drugis.mtc.DichotomousMeasurement;
 import org.drugis.mtc.Network;
@@ -120,5 +122,10 @@ public class DataSetModelTest {
 		Elem expectedXML = expected.toXML();
 		assertEquals(expectedXML, model.build().toXML());
 		assertEquals(expectedXML, DataSetModel.build(Network.fromXML(expectedXML)).build().toXML()); // round-trip
+	}
+	
+	@Test
+	public void testFile() {
+		JUnitUtil.testSetter(new DataSetModel(), DataSetModel.PROPERTY_FILE, null, new File("/"));
 	}
 }
