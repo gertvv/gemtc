@@ -314,6 +314,20 @@ b <- c(2, 1, 1)"""
 	@Test def testAnalysisText() {
 		model.analysisText("jags") should be (analysisText)
 	}
+
+	@Test def testRelativeEffectMatrix() {
+		val exp =
+			"""|	d[1,1] <- 0
+			   |	d[1,2] <- d.A.B
+			   |	d[1,3] <- d.A.B + d.B.C
+			   |	d[2,1] <- -d.A.B
+			   |	d[2,2] <- 0
+			   |	d[2,3] <- d.B.C
+			   |	d[3,1] <- -d.A.B + -d.B.C
+			   |	d[3,2] <- -d.B.C
+			   |	d[3,3] <- 0""".stripMargin
+		model.relativeEffectMatrix should be (exp)
+	}
 }
 
 class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {

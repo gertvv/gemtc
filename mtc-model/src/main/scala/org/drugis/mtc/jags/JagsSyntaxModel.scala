@@ -443,4 +443,16 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			if (!model.basicParameters.contains(p) && !model.basicParameters.contains(p2))
 		 } yield "\t`" + p + "` = function(x) { " + e + " }").mkString(",\n")
 	}
+
+	def relativeEffectMatrix: String = {
+		def express(i: Int, j: Int) = {
+			val t = model.treatmentList
+			if (i == j) "0"
+			else expressParams(model.parametrization(t(i), t(j)), (x) => x)
+		}
+		val n = model.treatmentList.size
+		(for {i <- 0 until n; j <- 0 until n}
+			yield "\td[" + (i + 1) + "," + (j + 1) + "] <- " + express(i, j)
+		).mkString("\n")
+	}
 }
