@@ -47,6 +47,7 @@ import javax.swing.WindowConstants;
 
 import org.apache.commons.math.random.JDKRandomGenerator;
 import org.drugis.common.ImageLoader;
+import org.drugis.common.gui.FileDialog;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.mtc.ConsistencyNetworkModel$;
@@ -160,7 +161,8 @@ public class MainWindow extends JFrame {
 		JButton openButton = new JButton("Open", ImageLoader.getIcon("openfile.gif"));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				new FileLoadDialog(MainWindow.this, "xml", "XML files") {
+				System.err.println("HELLO");
+				FileDialog dialog = new FileLoadDialog(MainWindow.this, "xml", "XML files") {
 					public void doAction(String path, String extension) {
 						final File file = new File(path);
 						final DataSetModel model = readFromFile(file);
@@ -172,6 +174,7 @@ public class MainWindow extends JFrame {
 						});
 					}
 				};
+				dialog.setVisible(true);
 			}
 		});
 		return openButton;
@@ -185,14 +188,14 @@ public class MainWindow extends JFrame {
 				try {
 					final DataSetModel model = getActiveModel();
 					if (model.getFile() == null) {
-						new FileSaveDialog(MainWindow.this, "xml", "XML files") {
+						FileDialog dialog = new FileSaveDialog(MainWindow.this, "xml", "XML files") {
 							public void doAction(String path, String extension) {
 								File file = new File(path);
 								writeToFile(model, file);
 								model.setFile(file);
 							}
-	
 						};
+						dialog.setVisible(true);
 					} else {
 						writeToFile(model, model.getFile());
 					}
