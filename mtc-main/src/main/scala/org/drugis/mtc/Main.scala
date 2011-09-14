@@ -35,7 +35,8 @@ import ModelType._
 
 class Options(val xmlFile: String, val baseName: String,
 	val modelType: ModelType, val scale: Double,
-	val tuningIter: Int, val simulationIter: Int) {
+	val tuningIter: Int, val simulationIter: Int,
+	val suppress: Boolean) {
 }
 
 class ModelSpecification[M <: Measurement](
@@ -78,17 +79,31 @@ class JAGSGenerator(options: Options) {
 		printTree(tree)
 	}
 
+	def printGraph(graph: UndirectedGraph[Treatment]) {
+		println("Evidence graph:")
+		printEdgeSet(graph.edgeSet)
+	}
+
 	def printTree(tree: Tree[Treatment]) {
 		println("Identified spanning tree:")
+		printEdgeSet(tree.edgeSet)
+	}
+
+	def printEdgeSet(edgeSet: Set[(Treatment, Treatment)]) {
 		println("\tgraph {")
-		for (e <- tree.edgeSet) {
+		for (e <- edgeSet) {
 			println("\t\t" + e._1.id + " -- " + e._2.id)
 		}
 		println("\t}")
 	}
 
 	def writeModel[M <: Measurement](spec: ModelSpecification[M]) {
+		printGraph(spec.model.model.network.treatmentGraph)
 		printTree(spec.model.model.basis.tree)
+
+		if (options.suppress) {
+			return;
+		}
 
 		println("Writing JAGS scripts: " + options.baseName + spec.nameSuffix + ".*")
 
@@ -151,6 +166,7 @@ object Main {
 		|Usage: java -jar ${MTC_JAR} \
 		|      [--type=consistency|inconsistency|nodesplit] \
 		|      [--scale=<f>] [--tuning=<n>] [--simulation=<m>] \
+		|      [--suppress]
 		|      <xmlfile> [<output>]
 		|When unspecified, the default is --type=consistency --scale=2.5
 		|   --tuning=30000 --simulation=20000 <xmlfile> ${<xmlfile>%.xml}.
@@ -172,6 +188,7 @@ object Main {
 		val argScale = parser.addDoubleOption("scale")
 		val argTuning = parser.addIntegerOption("tuning")
 		val argSimulation = parser.addIntegerOption("simulation")
+		val argSuppress = parser.addBooleanOption("suppress")
 		
 		try {
 			parser.parse(args)
@@ -181,6 +198,7 @@ object Main {
 			val scale = parser.getOptionValue(argScale, 2.5).asInstanceOf[Double]
 			val tuning = parser.getOptionValue(argTuning, 30000).asInstanceOf[Int]
 			val simulation = parser.getOptionValue(argSimulation, 20000).asInstanceOf[Int]
+			val suppress = parser.getOptionValue(argSuppress, false).asInstanceOf[Boolean]
 			val otherArgs = parser.getRemainingArgs()
 
 			if (otherArgs.length < 1 || otherArgs.length > 2) {
@@ -194,7 +212,7 @@ object Main {
 				}
 				modelType match {
 					case None => None
-					case Some(x) => Some(new Options(xmlFile, baseName, x, scale, tuning, simulation))
+					case Some(x) => Some(new Options(xmlFile, baseName, x, scale, tuning, simulation, suppress))
 				}
 			}
 		} catch {
