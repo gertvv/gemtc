@@ -328,6 +328,11 @@ b <- c(2, 1, 1)"""
 			   |	d[3,3] <- 0""".stripMargin
 		model.relativeEffectMatrix should be (exp)
 	}
+
+	@Test def testBla() {
+		println(model.bugsSyntaxModel)
+	}
+
 }
 
 class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {

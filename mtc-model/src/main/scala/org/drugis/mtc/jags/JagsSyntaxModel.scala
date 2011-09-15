@@ -21,6 +21,9 @@ package org.drugis.mtc.jags
 
 import org.drugis.mtc._
 import java.text.DecimalFormat
+import org.mvel2.templates.TemplateRuntime
+import org.mvel2.templates.TemplateCompiler
+import org.mvel2.templates.CompiledTemplate
 
 class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		val model: NetworkModel[M, P]
@@ -454,5 +457,20 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		(for {i <- 0 until n; j <- 0 until n}
 			yield "\td[" + (i + 1) + "," + (j + 1) + "] <- " + express(i, j)
 		).mkString("\n")
+	}
+
+	def readTemplate(fileName: String): CompiledTemplate = {
+		TemplateCompiler.compileTemplate(getClass().getResourceAsStream(fileName), null)
+	}
+
+	def bugsSyntaxModel: String = {
+		val template = readTemplate("modelTemplate.txt")
+		val map = new java.util.HashMap[String, Object]()
+		map.put("armLikelihood", "FIXME")
+		map.put("relativeEffectMatrix", relativeEffectMatrix)
+		map.put("priorPrecision", effPrior)
+		map.put("stdDevUpperLimit", varPrior)
+		map.put("effectPriors", metaParameters)
+		TemplateRuntime.execute(template, map).asInstanceOf[String]
 	}
 }
