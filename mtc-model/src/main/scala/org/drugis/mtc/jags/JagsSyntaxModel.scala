@@ -95,7 +95,8 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	private val varPrior = rewrite(format.format(model.variancePrior))
 	private val effPrior = rewrite(format.format(1/model.normalPrior))
 
-	def modelText: String = {
+	def modelText: String = bugsSyntaxModel
+	/*def modelText: String = {
 		List(
 			header,
 			baselineEffects,
@@ -108,7 +109,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			empty,
 			varianceParameters,
 			footer).mkString("\n")
-	}
+	}*/
 
 	def initialValuesText(gen: StartingValueGenerator[M]): String = {
 		List(
@@ -469,10 +470,32 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		val template = readTemplate("modelTemplate.txt")
 		val map = new java.util.HashMap[String, Object]()
 		map.put("dichotomous", dichotomous.asInstanceOf[AnyRef])
+		map.put("inconsistency", inconsistency.asInstanceOf[AnyRef])
 		map.put("relativeEffectMatrix", relativeEffectMatrix)
 		map.put("priorPrecision", effPrior)
 		map.put("stdDevUpperLimit", varPrior)
 		map.put("parameters", asList(model.parameterVector))
 		String.valueOf(TemplateRuntime.execute(template, map))
+	}
+}
+
+object JagsSyntaxModel {
+	/**
+	 * Convert a number to a String so that it can be read by S-Plus/R
+	 */
+	def writeNumber(n: Number): String = {
+		if (n.isInstanceOf[Int] || n.isInstanceOf[Long]) {
+			String.valueOf(n) + "L"
+		} else {
+			String.valueOf(n)
+		}
+	}
+
+	/**
+	 * Convert a matrix m -- where m(i)(j) is the number in the i-th row and j-th column -- to S-Plus/R format.
+	 * @param columnMajor true for column-major format (R/S-Plus/JAGS), false for row-major (BUGS).
+	 */
+	def writeMatrix(m: List[List[Number]]): String = {
+		""
 	}
 }

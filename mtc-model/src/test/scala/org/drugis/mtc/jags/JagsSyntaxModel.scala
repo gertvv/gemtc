@@ -34,55 +34,52 @@ n <- c(140, 140, 138, 702, 694, 671, 535)
 b <- c(2, 1, 1)"""
 
 	val modelText = """model {
-	# Study baseline effects
-	for (i in 1:length(b)) {
+	for (i in 1:ns) {
+		# Likelihood for each arm
+		for (k in 1:na[i]) {
+			r[i, k] ~ dbin(p[i, k], n[i, k])
+			logit(p[i, k]) <- mu[i] + delta[i, k]
+		}
+
+		# Study-level relative effects
+		w[i, 1] <- 0
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) { # parameterize multi-arm trials using a trick to avoid dmnorm
+			delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+			md[i, k] <- d[t[i, 1], t[i, k]] + sw[i, k]
+			taud[i, k] <- tau.d * 2 * (k - 1) / k
+			w[i, k] <- delta[i, k] - d[t[i, 1], t[i, k]]
+			sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
+		}
+	}
+
+	# Relative effect matrix
+	d[1,1] <- 0
+	d[1,2] <- d.A.B
+	d[1,3] <- d.A.B + d.B.C + -w.A.B.C
+	d[2,1] <- -d.A.B
+	d[2,2] <- 0
+	d[2,3] <- d.B.C
+	d[3,1] <- -d.A.B + -d.B.C + w.A.B.C
+	d[3,2] <- -d.B.C
+	d[3,3] <- 0
+
+	# Study baseline priors
+	for (i in 1:ns) {
 		mu[i] ~ dnorm(0, 4.423*10^-3)
 	}
 
-	# Random effects in study 01
-	d[1, 1] <- -d.A.B
-	d[1, 2] <- d.B.C
-	re[1, 1:2] ~ dmnorm(d[1, 1:2], tau.2)
-	delta[1, 2, 2] <- 0
-	delta[1, 2, 1] <- re[1, 1]
-	delta[1, 2, 3] <- re[1, 2]
-	# Random effects in study 02
-	re[2, 1] ~ dnorm(d.A.B, tau.d)
-	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] <- re[2, 1]
-	# Random effects in study 03
-	re[3, 1] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
-	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] <- re[3, 1]
+	# Variance prior
+	sd.d ~ dunif(0, 1.002*10^0)
+	tau.d <- pow(sd.d, -2)
+	sd.w ~ dunif(0, 1.002*10^0)
+	tau.w <- pow(sd.w, -2)
 
-	# For each (study, treatment), model effect
-	for (i in 1:length(s)) {
-		logit(p[s[i], t[i]]) <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-		r[i] ~ dbin(p[s[i], t[i]], n[i])
-	}
-
-	# Meta-parameters
+	# Effect parameter priors
 	d.A.B ~ dnorm(0, 4.423*10^-3)
 	d.B.C ~ dnorm(0, 4.423*10^-3)
 	w.A.B.C ~ dnorm(0, tau.w)
-
-	# Inconsistency variance
-	sd.w ~ dunif(0, 1.002*10^0)
-	var.w <- sd.w * sd.w
-	tau.w <- 1 / var.w
-
-	# Random effect variance
-	sd.d ~ dunif(0, 1.002*10^0)
-	var.d <- sd.d * sd.d
-	tau.d <- 1 / var.d
-
-	# 2x2 inv. covariance matrix for 3-arm trials
-	var.2[1, 1] <- var.d
-	var.2[1, 2] <- var.d / 2
-	var.2[2, 1] <- var.d / 2
-	var.2[2, 2] <- var.d
-	tau.2 <- inverse(var.2)
-}"""
+}""" + "\n"
 
 
 	val scriptText =
@@ -172,49 +169,49 @@ n <- c(140, 140, 138, 702, 694, 671, 535)
 b <- c(2, 1, 1)"""
 
 	val modelText = """model {
-	# Study baseline effects
-	for (i in 1:length(b)) {
+	for (i in 1:ns) {
+		# Likelihood for each arm
+		for (k in 1:na[i]) {
+			r[i, k] ~ dbin(p[i, k], n[i, k])
+			logit(p[i, k]) <- mu[i] + delta[i, k]
+		}
+
+		# Study-level relative effects
+		w[i, 1] <- 0
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) { # parameterize multi-arm trials using a trick to avoid dmnorm
+			delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+			md[i, k] <- d[t[i, 1], t[i, k]] + sw[i, k]
+			taud[i, k] <- tau.d * 2 * (k - 1) / k
+			w[i, k] <- delta[i, k] - d[t[i, 1], t[i, k]]
+			sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
+		}
+	}
+
+	# Relative effect matrix
+	d[1,1] <- 0
+	d[1,2] <- d.A.B
+	d[1,3] <- d.A.B + d.B.C
+	d[2,1] <- -d.A.B
+	d[2,2] <- 0
+	d[2,3] <- d.B.C
+	d[3,1] <- -d.A.B + -d.B.C
+	d[3,2] <- -d.B.C
+	d[3,3] <- 0
+
+	# Study baseline priors
+	for (i in 1:ns) {
 		mu[i] ~ dnorm(0, 4.423*10^-3)
 	}
 
-	# Random effects in study 01
-	d[1, 1] <- -d.A.B
-	d[1, 2] <- d.B.C
-	re[1, 1:2] ~ dmnorm(d[1, 1:2], tau.2)
-	delta[1, 2, 2] <- 0
-	delta[1, 2, 1] <- re[1, 1]
-	delta[1, 2, 3] <- re[1, 2]
-	# Random effects in study 02
-	re[2, 1] ~ dnorm(d.A.B, tau.d)
-	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] <- re[2, 1]
-	# Random effects in study 03
-	re[3, 1] ~ dnorm(d.A.B + d.B.C, tau.d)
-	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] <- re[3, 1]
+	# Variance prior
+	sd.d ~ dunif(0, 1.002*10^0)
+	tau.d <- pow(sd.d, -2)
 
-	# For each (study, treatment), model effect
-	for (i in 1:length(s)) {
-		logit(p[s[i], t[i]]) <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-		r[i] ~ dbin(p[s[i], t[i]], n[i])
-	}
-
-	# Meta-parameters
+	# Effect parameter priors
 	d.A.B ~ dnorm(0, 4.423*10^-3)
 	d.B.C ~ dnorm(0, 4.423*10^-3)
-
-	# Random effect variance
-	sd.d ~ dunif(0, 1.002*10^0)
-	var.d <- sd.d * sd.d
-	tau.d <- 1 / var.d
-
-	# 2x2 inv. covariance matrix for 3-arm trials
-	var.2[1, 1] <- var.d
-	var.2[1, 2] <- var.d / 2
-	var.2[2, 1] <- var.d / 2
-	var.2[2, 2] <- var.d
-	tau.2 <- inverse(var.2)
-}"""
+}""" + "\n"
 
 	val initText =
 		""" |`d.A.B` <-
@@ -343,100 +340,99 @@ e <- c(1.0, 2.0, 1.5, 1.0, 1.0, 1.0, 1.0)
 b <- c(2, 1, 1)"""
 
 	val modelText = """model {
-	# Study baseline effects
-	for (i in 1:length(b)) {
+	for (i in 1:ns) {
+		# Likelihood for each arm
+		for (k in 1:na[i]) {
+			m[i, k] ~ dnorm(theta[i, k], prec[i, k])
+			theta[i, k] <- mu[i] + delta[i, k]
+			prec[i, k] <- pow(e[i, k], -2)
+		}
+
+		# Study-level relative effects
+		w[i, 1] <- 0
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) { # parameterize multi-arm trials using a trick to avoid dmnorm
+			delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+			md[i, k] <- d[t[i, 1], t[i, k]] + sw[i, k]
+			taud[i, k] <- tau.d * 2 * (k - 1) / k
+			w[i, k] <- delta[i, k] - d[t[i, 1], t[i, k]]
+			sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
+		}
+	}
+
+	# Relative effect matrix
+	d[1,1] <- 0
+	d[1,2] <- d.A.B
+	d[1,3] <- d.A.B + d.B.C
+	d[2,1] <- -d.A.B
+	d[2,2] <- 0
+	d[2,3] <- d.B.C
+	d[3,1] <- -d.A.B + -d.B.C
+	d[3,2] <- -d.B.C
+	d[3,3] <- 0
+
+	# Study baseline priors
+	for (i in 1:ns) {
 		mu[i] ~ dnorm(0, 4.444*10^-3)
 	}
 
-	# Random effects in study 01
-	d[1, 1] <- -d.A.B
-	d[1, 2] <- d.B.C
-	re[1, 1:2] ~ dmnorm(d[1, 1:2], tau.2)
-	delta[1, 2, 2] <- 0
-	delta[1, 2, 1] <- re[1, 1]
-	delta[1, 2, 3] <- re[1, 2]
-	# Random effects in study 02
-	re[2, 1] ~ dnorm(d.A.B, tau.d)
-	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] <- re[2, 1]
-	# Random effects in study 03
-	re[3, 1] ~ dnorm(d.A.B + d.B.C, tau.d)
-	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] <- re[3, 1]
+	# Variance prior
+	sd.d ~ dunif(0, 1.0*10^0)
+	tau.d <- pow(sd.d, -2)
 
-	# For each (study, treatment), model effect
-	for (i in 1:length(s)) {
-		p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
-	}
-
-	# Meta-parameters
+	# Effect parameter priors
 	d.A.B ~ dnorm(0, 4.444*10^-3)
 	d.B.C ~ dnorm(0, 4.444*10^-3)
-
-	# Random effect variance
-	sd.d ~ dunif(0, 1.0*10^0)
-	var.d <- sd.d * sd.d
-	tau.d <- 1 / var.d
-
-	# 2x2 inv. covariance matrix for 3-arm trials
-	var.2[1, 1] <- var.d
-	var.2[1, 2] <- var.d / 2
-	var.2[2, 1] <- var.d / 2
-	var.2[2, 2] <- var.d
-	tau.2 <- inverse(var.2)
-}"""
+}""" + "\n"
 
 	val inconsModelText = """model {
-	# Study baseline effects
-	for (i in 1:length(b)) {
+	for (i in 1:ns) {
+		# Likelihood for each arm
+		for (k in 1:na[i]) {
+			m[i, k] ~ dnorm(theta[i, k], prec[i, k])
+			theta[i, k] <- mu[i] + delta[i, k]
+			prec[i, k] <- pow(e[i, k], -2)
+		}
+
+		# Study-level relative effects
+		w[i, 1] <- 0
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) { # parameterize multi-arm trials using a trick to avoid dmnorm
+			delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+			md[i, k] <- d[t[i, 1], t[i, k]] + sw[i, k]
+			taud[i, k] <- tau.d * 2 * (k - 1) / k
+			w[i, k] <- delta[i, k] - d[t[i, 1], t[i, k]]
+			sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
+		}
+	}
+
+	# Relative effect matrix
+	d[1,1] <- 0
+	d[1,2] <- d.A.B
+	d[1,3] <- d.A.B + d.B.C + -w.A.B.C
+	d[2,1] <- -d.A.B
+	d[2,2] <- 0
+	d[2,3] <- d.B.C
+	d[3,1] <- -d.A.B + -d.B.C + w.A.B.C
+	d[3,2] <- -d.B.C
+	d[3,3] <- 0
+
+	# Study baseline priors
+	for (i in 1:ns) {
 		mu[i] ~ dnorm(0, 4.444*10^-3)
 	}
 
-	# Random effects in study 01
-	d[1, 1] <- -d.A.B
-	d[1, 2] <- d.B.C
-	re[1, 1:2] ~ dmnorm(d[1, 1:2], tau.2)
-	delta[1, 2, 2] <- 0
-	delta[1, 2, 1] <- re[1, 1]
-	delta[1, 2, 3] <- re[1, 2]
-	# Random effects in study 02
-	re[2, 1] ~ dnorm(d.A.B, tau.d)
-	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] <- re[2, 1]
-	# Random effects in study 03
-	re[3, 1] ~ dnorm(d.A.B + d.B.C + -w.A.B.C, tau.d)
-	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] <- re[3, 1]
+	# Variance prior
+	sd.d ~ dunif(0, 1.0*10^0)
+	tau.d <- pow(sd.d, -2)
+	sd.w ~ dunif(0, 1.0*10^0)
+	tau.w <- pow(sd.w, -2)
 
-	# For each (study, treatment), model effect
-	for (i in 1:length(s)) {
-		p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-		m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))
-	}
-
-	# Meta-parameters
+	# Effect parameter priors
 	d.A.B ~ dnorm(0, 4.444*10^-3)
 	d.B.C ~ dnorm(0, 4.444*10^-3)
 	w.A.B.C ~ dnorm(0, tau.w)
-
-	# Inconsistency variance
-	sd.w ~ dunif(0, 1.0*10^0)
-	var.w <- sd.w * sd.w
-	tau.w <- 1 / var.w
-
-	# Random effect variance
-	sd.d ~ dunif(0, 1.0*10^0)
-	var.d <- sd.d * sd.d
-	tau.d <- 1 / var.d
-
-	# 2x2 inv. covariance matrix for 3-arm trials
-	var.2[1, 1] <- var.d
-	var.2[1, 2] <- var.d / 2
-	var.2[2, 1] <- var.d / 2
-	var.2[2, 2] <- var.d
-	tau.2 <- inverse(var.2)
-}"""
+}""" + "\n"
 
 	val scriptText =
 		"""	|model in 'jags.model'
@@ -536,42 +532,50 @@ n <- c(140, 140, 138, 702, 694, 671, 535)
 b <- c(2, 1, 1)"""
 
 	val modelText = """model {
-	# Study baseline effects
-	for (i in 1:length(b)) {
+	for (i in 1:ns) {
+		# Likelihood for each arm
+		for (k in 1:na[i]) {
+			r[i, k] ~ dbin(p[i, k], n[i, k])
+			logit(p[i, k]) <- mu[i] + delta[i, k]
+		}
+
+		# Study-level relative effects
+		w[i, 1] <- 0
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) { # parameterize multi-arm trials using a trick to avoid dmnorm
+			delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+			md[i, k] <- d[t[i, 1], t[i, k]] + sw[i, k]
+			taud[i, k] <- tau.d * 2 * (k - 1) / k
+			w[i, k] <- delta[i, k] - d[t[i, 1], t[i, k]]
+			sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
+		}
+	}
+
+	# Relative effect matrix
+	d[1,1] <- 0
+	d[1,2] <- d.A.B.dir
+	d[1,3] <- d.A.B.ind + d.B.C
+	d[2,1] <- -d.A.B.dir
+	d[2,2] <- 0
+	d[2,3] <- d.B.C
+	d[3,1] <- -d.A.B.ind + -d.B.C
+	d[3,2] <- -d.B.C
+	d[3,3] <- 0
+
+	# Study baseline priors
+	for (i in 1:ns) {
 		mu[i] ~ dnorm(0, 4.423*10^-3)
 	}
 
-	# Random effects in study 01
-	re[1, 1] ~ dnorm(-d.A.B.dir, tau.d)
-	re[1, 2] ~ dnorm(d.B.C, tau.d)
-	delta[1, 2, 2] <- 0
-	delta[1, 2, 1] <- re[1, 1]
-	delta[1, 2, 3] <- re[1, 2]
-	# Random effects in study 02
-	re[2, 1] ~ dnorm(d.A.B.dir, tau.d)
-	delta[2, 1, 1] <- 0
-	delta[2, 1, 2] <- re[2, 1]
-	# Random effects in study 03
-	re[3, 1] ~ dnorm(d.A.B.ind + d.B.C, tau.d)
-	delta[3, 1, 1] <- 0
-	delta[3, 1, 3] <- re[3, 1]
+	# Variance prior
+	sd.d ~ dunif(0, 1.002*10^0)
+	tau.d <- pow(sd.d, -2)
 
-	# For each (study, treatment), model effect
-	for (i in 1:length(s)) {
-		logit(p[s[i], t[i]]) <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-		r[i] ~ dbin(p[s[i], t[i]], n[i])
-	}
-
-	# Meta-parameters
+	# Effect parameter priors
 	d.A.B.dir ~ dnorm(0, 4.423*10^-3)
 	d.A.B.ind ~ dnorm(0, 4.423*10^-3)
 	d.B.C ~ dnorm(0, 4.423*10^-3)
-
-	# Random effect variance
-	sd.d ~ dunif(0, 1.002*10^0)
-	var.d <- sd.d * sd.d
-	tau.d <- 1 / var.d
-}"""
+}""" + "\n"
 
 	val initText =
 		""" |`d.A.B.dir` <-
@@ -664,3 +668,16 @@ b <- c(2, 1, 1)"""
 		model.scriptText("jags", 3, 30000, 20000) should be (scriptText)
 	}
 }
+
+class DataWritingTest extends ShouldMatchersForJUnit {
+	@Test def testWriteInt() {
+		JagsSyntaxModel.writeNumber(3) should be ("3L")
+		JagsSyntaxModel.writeNumber(15) should be ("15L")
+	}
+
+	@Test def testWriteFloat() {
+		JagsSyntaxModel.writeNumber(3.0) should be ("3.0")
+		JagsSyntaxModel.writeNumber(15.0) should be ("15.0")
+	}
+}
+

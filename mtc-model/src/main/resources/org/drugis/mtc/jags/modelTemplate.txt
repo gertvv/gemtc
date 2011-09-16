@@ -2,9 +2,10 @@ model {
 	for (i in 1:ns) {
 		# Likelihood for each arm
 		for (k in 1:na[i]) {
-			@if{dichotomous}logit(p[s[i], t[i]]) <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-			r[i] ~ dbin(p[s[i], t[i]], n[i])@else{}p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
-			m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))@end{}
+			@if{dichotomous}r[i, k] ~ dbin(p[i, k], n[i, k])
+			logit(p[i, k]) <- mu[i] + delta[i, k]@else{}m[i, k] ~ dnorm(theta[i, k], prec[i, k])
+			theta[i, k] <- mu[i] + delta[i, k]
+			prec[i, k] <- pow(e[i, k], -2)@end{}
 		}
 
 		# Study-level relative effects
@@ -29,8 +30,12 @@ model {
 
 	# Variance prior
 	sd.d ~ dunif(0, @{stdDevUpperLimit})
-	tau.d <- pow(sd.d, -2)
+	tau.d <- pow(sd.d, -2)@if{inconsistency}
+	sd.w ~ dunif(0, @{stdDevUpperLimit})
+	tau.w <- pow(sd.w, -2)@end{}
 
 	# Effect parameter priors
-	@foreach{p : parameters}@{p} ~ dnorm(0, @{priorPrecision})@end{'\n\t'}
+	@foreach{p : parameters}@code{
+		prec = p instanceof org.drugis.mtc.InconsistencyParameter ? "tau.w" : priorPrecision
+	}@{p} ~ dnorm(0, @{prec})@end{'\n\t'}
 }
