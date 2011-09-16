@@ -2,7 +2,9 @@ model {
 	for (i in 1:ns) {
 		# Likelihood for each arm
 		for (k in 1:na[i]) {
-			@{armLikelihood}
+			@if{dichotomous}logit(p[s[i], t[i]]) <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
+			r[i] ~ dbin(p[s[i], t[i]], n[i])@else{}p[s[i], t[i]] <- mu[s[i]] + delta[s[i], b[s[i]], t[i]]
+			m[i] ~ dnorm(p[s[i], t[i]], 1 / (e[i] * e[i]))@end{}
 		}
 
 		# Study-level relative effects
@@ -18,7 +20,7 @@ model {
 	}
 
 	# Relative effect matrix
-	@{relativeEffectMatrix}
+@{relativeEffectMatrix}
 
 	# Study baseline priors
 	for (i in 1:ns) {
@@ -30,5 +32,5 @@ model {
 	tau.d <- pow(sd.d, -2)
 
 	# Effect parameter priors
-	@{effectPriors}
+	@foreach{p : parameters}@{p} ~ dnorm(0, @{priorPrecision})@end{'\n\t'}
 }

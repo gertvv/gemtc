@@ -25,6 +25,8 @@ import org.mvel2.templates.TemplateRuntime
 import org.mvel2.templates.TemplateCompiler
 import org.mvel2.templates.CompiledTemplate
 
+import scala.collection.JavaConversions._
+
 class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		val model: NetworkModel[M, P]
 ) {
@@ -466,11 +468,11 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	def bugsSyntaxModel: String = {
 		val template = readTemplate("modelTemplate.txt")
 		val map = new java.util.HashMap[String, Object]()
-		map.put("armLikelihood", "FIXME")
+		map.put("dichotomous", dichotomous.asInstanceOf[AnyRef])
 		map.put("relativeEffectMatrix", relativeEffectMatrix)
 		map.put("priorPrecision", effPrior)
 		map.put("stdDevUpperLimit", varPrior)
-		map.put("effectPriors", metaParameters)
-		TemplateRuntime.execute(template, map).asInstanceOf[String]
+		map.put("parameters", asList(model.parameterVector))
+		String.valueOf(TemplateRuntime.execute(template, map))
 	}
 }
