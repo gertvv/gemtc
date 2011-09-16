@@ -325,11 +325,6 @@ b <- c(2, 1, 1)"""
 			   |	d[3,3] <- 0""".stripMargin
 		model.relativeEffectMatrix should be (exp)
 	}
-
-	@Test def testBla() {
-		println(model.bugsSyntaxModel)
-	}
-
 }
 
 class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {
@@ -671,13 +666,28 @@ b <- c(2, 1, 1)"""
 
 class DataWritingTest extends ShouldMatchersForJUnit {
 	@Test def testWriteInt() {
-		JagsSyntaxModel.writeNumber(3) should be ("3L")
-		JagsSyntaxModel.writeNumber(15) should be ("15L")
+		JagsSyntaxModel.writeNumber[Integer](3) should be ("3L")
+		JagsSyntaxModel.writeNumber[Integer](15) should be ("15L")
 	}
 
 	@Test def testWriteFloat() {
-		JagsSyntaxModel.writeNumber(3.0) should be ("3.0")
-		JagsSyntaxModel.writeNumber(15.0) should be ("15.0")
+		JagsSyntaxModel.writeNumber[java.lang.Double](3.0) should be ("3.0")
+		JagsSyntaxModel.writeNumber[java.lang.Double](15.0) should be ("15.0")
+	}
+
+	@Test def testIntMatrixColMajor() {
+		val m = List(
+			List[Integer](1, 2, 3, 4),
+			List[Integer](5, 6, 7, 8)
+		)
+		JagsSyntaxModel.writeMatrix(m, true) should be ("structure(c(1L, 5L, 2L, 6L, 3L, 7L, 4L, 8L), .Dim = c(2L, 4L))")
+	}
+
+	@Test def testIntMatrixRowMajor() {
+		val m = List(
+			List[Integer](1, 2, 3, 4),
+			List[Integer](5, 6, 7, 8)
+		)
+		JagsSyntaxModel.writeMatrix(m, false) should be ("structure(c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L), .Dim = c(2L, 4L))")
 	}
 }
-

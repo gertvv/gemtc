@@ -483,7 +483,7 @@ object JagsSyntaxModel {
 	/**
 	 * Convert a number to a String so that it can be read by S-Plus/R
 	 */
-	def writeNumber(n: Number): String = {
+	def writeNumber[N <: Number](n: N): String = {
 		if (n.isInstanceOf[Int] || n.isInstanceOf[Long]) {
 			String.valueOf(n) + "L"
 		} else {
@@ -495,7 +495,13 @@ object JagsSyntaxModel {
 	 * Convert a matrix m -- where m(i)(j) is the number in the i-th row and j-th column -- to S-Plus/R format.
 	 * @param columnMajor true for column-major format (R/S-Plus/JAGS), false for row-major (BUGS).
 	 */
-	def writeMatrix(m: List[List[Number]]): String = {
-		""
+	def writeMatrix[N <: Number](m: List[List[N]], columnMajor: Boolean): String = {
+		val rows = m.size
+		val cols = m(0).size
+		val cells: Seq[String] = {
+			if (columnMajor) (0 until cols).map(j => (0 until rows).map(i => writeNumber(m(i)(j)))).flatten
+			else m.flatten.map(writeNumber _)
+		}
+		"structure(c(" + cells.mkString(", ") + "), .Dim = c(" + writeNumber[Integer](rows) + ", " + writeNumber[Integer](cols) + "))"
 	}
 }
