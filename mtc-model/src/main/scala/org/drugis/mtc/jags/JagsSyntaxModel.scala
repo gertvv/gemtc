@@ -47,24 +47,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		case _ => false
 	}
 
-	def dataText: String =
-		if (dichotomous) {
-			List(
-				vectorStr("s", studyIndexVector),
-				vectorStr("t", treatmentIndexVector),
-				vectorStr("r", responderVector),
-				vectorStr("n", sampleSizeVector),
-				vectorStr("b", baselineVector)
-			).mkString("\n")
-		} else {
-			List(
-				vectorStr("s", studyIndexVector),
-				vectorStr("t", treatmentIndexVector),
-				vectorStr("m", meanVector),
-				vectorStr("e", errorVector),
-				vectorStr("b", baselineVector)
-			).mkString("\n")
-		}
+	def dataText: String = jagsDataText
 
 	private def studyIndexVector: List[Int] =
 		model.data.map(a => model.studyMap(a._1))
@@ -477,6 +460,69 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		map.put("parameters", asList(model.parameterVector))
 		String.valueOf(TemplateRuntime.execute(template, map))
 	}
+
+	def maxArmCount: Int = model.studyList.map(x => x.treatments.size).max
+
+	def studyArms(s: Study[M]): List[Treatment] = {
+		val baseline = model.studyBaseline(s)
+		val arms = baseline :: (s.treatments - baseline).toList.sortWith(_ < _)
+		val nonArms: List[Treatment] =
+			(0 until (maxArmCount - arms.size)).map(_ => null).toList
+		arms ::: nonArms
+	}
+
+	def treatmentMatrix: List[List[java.lang.Integer]] = {
+		model.studyList.map(s => studyArms(s).map(t =>
+			if (t == null) null 
+			else model.treatmentMap(t).asInstanceOf[java.lang.Integer]))
+	}
+
+	def responderMatrix: List[List[java.lang.Integer]] = {
+		model.studyList.map(s => studyArms(s).map(t =>
+			if (t == null) null
+			else s.measurements(t).asInstanceOf[DichotomousMeasurement].responders.asInstanceOf[java.lang.Integer]))
+	}
+
+	def meanMatrix: List[List[java.lang.Double]] = {
+		model.studyList.map(s => studyArms(s).map(t =>
+			if (t == null) null
+			else s.measurements(t).asInstanceOf[ContinuousMeasurement].mean.asInstanceOf[java.lang.Double]))
+	}
+
+	def stdErrMatrix: List[List[java.lang.Double]] = {
+		model.studyList.map(s => studyArms(s).map(t =>
+			if (t == null) null
+			else s.measurements(t).asInstanceOf[ContinuousMeasurement].stdErr.asInstanceOf[java.lang.Double]))
+	}
+
+	def sampleSizeMatrix: List[List[java.lang.Integer]] = {
+		model.studyList.map(s => studyArms(s).map(t =>
+			if (t == null) null
+			else s.measurements(t).sampleSize.asInstanceOf[java.lang.Integer]))
+	}
+
+	def armCounts: List[java.lang.Integer] = {
+		model.studyList.map(x => x.treatments.size.asInstanceOf[java.lang.Integer])
+	}
+
+	def jagsDataText: String = 
+		if (dichotomous) {
+			List(
+				"ns <- " + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer]),
+				"t <- " + JagsSyntaxModel.writeMatrix(treatmentMatrix, true),
+				"r <- " + JagsSyntaxModel.writeMatrix(responderMatrix, true),
+				"n <- " + JagsSyntaxModel.writeMatrix(sampleSizeMatrix, true),
+				"na <- " + JagsSyntaxModel.writeVector(armCounts)
+			).mkString("\n")
+		} else {
+			List(
+				"ns <- " + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer]),
+				"t <- " + JagsSyntaxModel.writeMatrix(treatmentMatrix, true),
+				"m <- " + JagsSyntaxModel.writeMatrix(meanMatrix, true),
+				"e <- " + JagsSyntaxModel.writeMatrix(stdErrMatrix, true),
+				"na <- " + JagsSyntaxModel.writeVector(armCounts)
+			).mkString("\n")
+		}
 }
 
 object JagsSyntaxModel {
@@ -484,7 +530,9 @@ object JagsSyntaxModel {
 	 * Convert a number to a String so that it can be read by S-Plus/R
 	 */
 	def writeNumber[N <: Number](n: N): String = {
-		if (n.isInstanceOf[Int] || n.isInstanceOf[Long]) {
+		if (n == null) {
+			"NA"
+		} else if (n.isInstanceOf[Int] || n.isInstanceOf[Long]) {
 			String.valueOf(n) + "L"
 		} else {
 			String.valueOf(n)
@@ -503,5 +551,9 @@ object JagsSyntaxModel {
 			else m.flatten.map(writeNumber _)
 		}
 		"structure(c(" + cells.mkString(", ") + "), .Dim = c(" + writeNumber[Integer](rows) + ", " + writeNumber[Integer](cols) + "))"
+	}
+
+	def writeVector[N <: Number](v: List[N]): String = {
+		"c(" + v.map(writeNumber _).mkString(", ") + ")"
 	}
 }

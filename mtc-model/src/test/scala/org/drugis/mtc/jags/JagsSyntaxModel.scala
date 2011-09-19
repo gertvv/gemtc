@@ -27,11 +27,11 @@ import org.junit.Test
 import org.junit.Before
 
 class JagsSyntaxInconsistencyModelTest extends ShouldMatchersForJUnit {
-	val dataText = """s <- c(1, 1, 1, 2, 2, 3, 3)
-t <- c(1, 2, 3, 1, 2, 1, 3)
-r <- c(9, 23, 10, 79, 77, 18, 21)
-n <- c(140, 140, 138, 702, 694, 671, 535)
-b <- c(2, 1, 1)"""
+	val jagsDataText = """ns <- 3L
+		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
+		|r <- structure(c(23L, 79L, 18L, 9L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
+		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))
+		|na <- c(3L, 2L, 2L)""".stripMargin
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -145,7 +145,7 @@ b <- c(2, 1, 1)"""
 		InconsistencyNetworkModel(network, spanningTree))
 
 	@Test def testDataText() {
-		model.dataText should be (dataText)
+		model.dataText should be (jagsDataText)
 	}
 
 	@Test def testModelText() {
@@ -162,11 +162,11 @@ b <- c(2, 1, 1)"""
 }
 
 class JagsSyntaxConsistencyModelTest extends ShouldMatchersForJUnit {
-	val dataText = """s <- c(1, 1, 1, 2, 2, 3, 3)
-t <- c(1, 2, 3, 1, 2, 1, 3)
-r <- c(9, 23, 10, 79, 77, 18, 21)
-n <- c(140, 140, 138, 702, 694, 671, 535)
-b <- c(2, 1, 1)"""
+	val jagsDataText = """ns <- 3L
+		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
+		|r <- structure(c(23L, 79L, 18L, 9L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
+		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))
+		|na <- c(3L, 2L, 2L)""".stripMargin
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -293,7 +293,7 @@ b <- c(2, 1, 1)"""
 	def model = new JagsSyntaxModel(proto)
 
 	@Test def testDataText() {
-		model.dataText should be (dataText)
+		model.dataText should be (jagsDataText)
 	}
 
 	@Test def testModelText() {
@@ -328,11 +328,11 @@ b <- c(2, 1, 1)"""
 }
 
 class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {
-	val dataText = """s <- c(1, 1, 1, 2, 2, 3, 3)
-t <- c(1, 2, 3, 1, 2, 1, 3)
-m <- c(10.0, 8.0, 9.0, 13.0, 11.0, 13.0, 11.0)
-e <- c(1.0, 2.0, 1.5, 1.0, 1.0, 1.0, 1.0)
-b <- c(2, 1, 1)"""
+	val jagsDataText = """ns <- 3L
+		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
+		|m <- structure(c(8.0, 13.0, 13.0, 10.0, 11.0, 11.0, 9.0, NA, NA), .Dim = c(3L, 3L))
+		|e <- structure(c(2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.5, NA, NA), .Dim = c(3L, 3L))
+		|na <- c(3L, 2L, 2L)""".stripMargin
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -499,7 +499,7 @@ b <- c(2, 1, 1)"""
 		InconsistencyNetworkModel(network, spanningTree))
 
 	@Test def testDataText() {
-		model.dataText should be (dataText)
+		model.dataText should be (jagsDataText)
 	}
 
 	@Test def testModelText() {
@@ -520,11 +520,11 @@ b <- c(2, 1, 1)"""
 }
 
 class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
-	val dataText = """s <- c(1, 1, 1, 2, 2, 3, 3)
-t <- c(1, 2, 3, 1, 2, 1, 3)
-r <- c(9, 23, 10, 79, 77, 18, 21)
-n <- c(140, 140, 138, 702, 694, 671, 535)
-b <- c(2, 1, 1)"""
+	val jagsDataText = """ns <- 3L
+		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
+		|r <- structure(c(23L, 79L, 18L, 9L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
+		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))
+		|na <- c(3L, 2L, 2L)""".stripMargin
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -648,7 +648,7 @@ b <- c(2, 1, 1)"""
 	def model = new JagsSyntaxModel(proto)
 
 	@Test def testDataText() {
-		model.dataText should be (dataText)
+		model.dataText should be (jagsDataText)
 	}
 
 	@Test def testModelText() {
