@@ -111,7 +111,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			"compile, nchains(" + chains + ")") ++
 		{
 			for {i <- 1 to chains} yield "parameters in '" + prefix +
-				".param" + i + "', chain(" + i + ")"
+				".inits" + i + "', chain(" + i + ")"
 		} ++
 		List(
 			"initialize",
@@ -140,9 +140,9 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	private def paramNames = model.parameterVector.map(p => p.toString)
 	private def varNames =
 		if (inconsistency) {
-			List("var.d", "var.w")
+			List("sd.d", "sd.w")
 		} else {
-			List("var.d")
+			List("sd.d")
 		}
 
 	private val header = "model {"
@@ -317,7 +317,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 
 	private def init(p: NetworkModelParameter, g: StartingValueGenerator[M],
 			bl: List[Double])
-	: String = "`" + p.toString + "` <-\n" + (p match {
+	: String = "`" + p.toString + "` <- " + (p match {
 		case b: BasicParameter => bl(model.basicParameters.findIndexOf(_ == b))
 		case s: SplitParameter => bl(model.basicParameters.findIndexOf(_ == s))
 		case i: InconsistencyParameter =>
@@ -326,22 +326,18 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	})
 
 	private def initBaselineEffects(g: StartingValueGenerator[M]): String = {
-		"`mu` <-\nc(" + {
-			{
-				for {s <- model.studyList} yield g.getBaselineEffect(s)
-			}.mkString(",")
-		} + ")"
+		"`mu` <- " + JagsSyntaxModel.writeVector(model.studyList.map(s => g.getBaselineEffect(s).asInstanceOf[java.lang.Double]))
 	}
 
 	private def initRelativeEffects(g: StartingValueGenerator[M]): String = {
-		val reDim = model.studyList.map(s => s.treatments.size).reduceLeft(Math.max) - 1
-		"`re` <-\nstructure(c(" + {
-			{
-				for {i <- 0 until reDim; s <- model.studyList} yield {
-					init(s, i, g)
-				}
-			}.mkString(",")
-		} + "), .Dim = c(" + model.studyList.size + "L," + reDim + "L))"
+		"`delta` <- " + JagsSyntaxModel.writeMatrix(model.studyList.map(
+				s => studyArms(s).map(init(s, _, g))), true)
+	}
+
+	private def init(s: Study[M], t: Treatment, g: StartingValueGenerator[M])
+	: java.lang.Double = {
+		if (t == null || t == base(s)) null
+		else g.getRandomEffect(s, new BasicParameter(base(s), t))
 	}
 
 	private def init(s: Study[M], idx: Int, g: StartingValueGenerator[M])
@@ -355,9 +351,9 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	private def initVarianceParameters(g: StartingValueGenerator[M]): String = {
 		{
 			if (inconsistency) 
-				"`sd.w` <-\n" + g.getRandomEffectsVariance() + "\n"
+				"`sd.w` <- " + g.getRandomEffectsVariance() + "\n"
 			else ""
-		} + "`sd.d` <-\n" + g.getRandomEffectsVariance()
+		} + "`sd.d` <- " + g.getRandomEffectsVariance()
 	}
 
 	private def format(p: NetworkModelParameter): String = 

@@ -122,7 +122,7 @@ class JAGSGenerator(options: Options) {
 		scriptOut.close()
 
 		for (i <- 1 to nChains) {
-			val paramOut = new PrintStream(options.baseName + spec.nameSuffix + ".param" + i)
+			val paramOut = new PrintStream(options.baseName + spec.nameSuffix + ".inits" + i)
 			paramOut.println(spec.model.initialValuesText(spec.generator))
 			paramOut.close()
 		}
@@ -169,7 +169,7 @@ object Main {
 		|      [--suppress]
 		|      <xmlfile> [<output>]
 		|When unspecified, the default is --type=consistency --scale=2.5
-		|   --tuning=30000 --simulation=20000 <xmlfile> ${<xmlfile>%.xml}.
+		|   --tuning=20000 --simulation=40000 <xmlfile> ${<xmlfile>%.xml}.
 		|
 		|This will generate a JAGS model from the specified XML file, which can
 		|subsequently be run using the output.script file.""".stripMargin
@@ -196,8 +196,8 @@ object Main {
 			val modelType = ModelType.valueOf(
 				parser.getOptionValue(argType, "consistency").asInstanceOf[String])
 			val scale = parser.getOptionValue(argScale, 2.5).asInstanceOf[Double]
-			val tuning = parser.getOptionValue(argTuning, 30000).asInstanceOf[Int]
-			val simulation = parser.getOptionValue(argSimulation, 20000).asInstanceOf[Int]
+			val tuning = parser.getOptionValue(argTuning, 20000).asInstanceOf[Int]
+			val simulation = parser.getOptionValue(argSimulation, 40000).asInstanceOf[Int]
 			val suppress = parser.getOptionValue(argSuppress, false).asInstanceOf[Boolean]
 			val otherArgs = parser.getRemainingArgs()
 

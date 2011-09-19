@@ -86,9 +86,9 @@ class JagsSyntaxInconsistencyModelTest extends ShouldMatchersForJUnit {
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
 			|compile, nchains(3)
-			|parameters in 'jags.param1', chain(1)
-			|parameters in 'jags.param2', chain(2)
-			|parameters in 'jags.param3', chain(3)
+			|parameters in 'jags.inits1', chain(1)
+			|parameters in 'jags.inits2', chain(2)
+			|parameters in 'jags.inits3', chain(3)
 			|initialize
 			|
 			|adapt 30000
@@ -96,8 +96,8 @@ class JagsSyntaxInconsistencyModelTest extends ShouldMatchersForJUnit {
 			|monitor d.A.B
 			|monitor d.B.C
 			|monitor w.A.B.C
-			|monitor var.d
-			|monitor var.w
+			|monitor sd.d
+			|monitor sd.w
 			|
 			|update 20000
 			|
@@ -214,31 +214,26 @@ class JagsSyntaxConsistencyModelTest extends ShouldMatchersForJUnit {
 }""" + "\n"
 
 	val initText =
-		""" |`d.A.B` <-
-			|0.0
-			|`d.B.C` <-
-			|0.0
-			|`mu` <-
-			|c(0.0,0.0,0.0)
-			|`re` <-
-			|structure(c(0.0,0.0,0.0,0.0,NA,NA), .Dim = c(3L,2L))
-			|`sd.d` <-
-			|0.5012338759470988""".stripMargin
+		""" |`d.A.B` <- 0.0
+			|`d.B.C` <- 0.0
+			|`mu` <- c(0.0, 0.0, 0.0)
+			|`delta` <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
+			|`sd.d` <- 0.5012338759470988""".stripMargin
 
 	val scriptText =
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
 			|compile, nchains(3)
-			|parameters in 'jags.param1', chain(1)
-			|parameters in 'jags.param2', chain(2)
-			|parameters in 'jags.param3', chain(3)
+			|parameters in 'jags.inits1', chain(1)
+			|parameters in 'jags.inits2', chain(2)
+			|parameters in 'jags.inits3', chain(3)
 			|initialize
 			|
 			|adapt 30000
 			|
 			|monitor d.A.B
 			|monitor d.B.C
-			|monitor var.d
+			|monitor sd.d
 			|
 			|update 20000
 			|
@@ -433,16 +428,16 @@ class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
 			|compile, nchains(3)
-			|parameters in 'jags.param1', chain(1)
-			|parameters in 'jags.param2', chain(2)
-			|parameters in 'jags.param3', chain(3)
+			|parameters in 'jags.inits1', chain(1)
+			|parameters in 'jags.inits2', chain(2)
+			|parameters in 'jags.inits3', chain(3)
 			|initialize
 			|
 			|adapt 30000
 			|
 			|monitor d.A.B
 			|monitor d.B.C
-			|monitor var.d
+			|monitor sd.d
 			|
 			|update 20000
 			|
@@ -573,26 +568,20 @@ class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
 }""" + "\n"
 
 	val initText =
-		""" |`d.A.B.dir` <-
-			|0.0
-			|`d.A.B.ind` <-
-			|0.0
-			|`d.B.C` <-
-			|0.0
-			|`mu` <-
-			|c(0.0,0.0,0.0)
-			|`re` <-
-			|structure(c(0.0,0.0,0.0,0.0,NA,NA), .Dim = c(3L,2L))
-			|`sd.d` <-
-			|0.5012338759470988""".stripMargin
+		""" |`d.A.B.dir` <- 0.0
+			|`d.A.B.ind` <- 0.0
+			|`d.B.C` <- 0.0
+			|`mu` <- c(0.0, 0.0, 0.0)
+			|`delta` <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
+			|`sd.d` <- 0.5012338759470988""".stripMargin
 
 	val scriptText =
 		"""	|model in 'jags.model'
 			|data in 'jags.data'
 			|compile, nchains(3)
-			|parameters in 'jags.param1', chain(1)
-			|parameters in 'jags.param2', chain(2)
-			|parameters in 'jags.param3', chain(3)
+			|parameters in 'jags.inits1', chain(1)
+			|parameters in 'jags.inits2', chain(2)
+			|parameters in 'jags.inits3', chain(3)
 			|initialize
 			|
 			|adapt 30000
@@ -600,7 +589,7 @@ class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
 			|monitor d.A.B.dir
 			|monitor d.A.B.ind
 			|monitor d.B.C
-			|monitor var.d
+			|monitor sd.d
 			|
 			|update 20000
 			|
