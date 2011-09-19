@@ -101,7 +101,7 @@ class JagsSyntaxInconsistencyModelTest extends ShouldMatchersForJUnit {
 			|
 			|update 20000
 			|
-			|coda *, stem('jags')""".stripMargin
+			|coda *, stem('jags')""".stripMargin + "\n"
 
 	val analysisText =
 		"""	|deriv <- list(
@@ -237,7 +237,7 @@ class JagsSyntaxConsistencyModelTest extends ShouldMatchersForJUnit {
 			|
 			|update 20000
 			|
-			|coda *, stem('jags')""".stripMargin
+			|coda *, stem('jags')""".stripMargin + "\n"
 
 	val analysisText =
 		"""	|deriv <- list(
@@ -441,7 +441,7 @@ class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {
 			|
 			|update 20000
 			|
-			|coda *, stem('jags')""".stripMargin
+			|coda *, stem('jags')""".stripMargin + "\n"
 
 	val analysisText =
 		"""	|deriv <- list(
@@ -593,7 +593,7 @@ class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
 			|
 			|update 20000
 			|
-			|coda *, stem('jags')""".stripMargin
+			|coda *, stem('jags')""".stripMargin + "\n"
 
 	def network = Network.dichFromXML(
 		<network description="Smoking cessation rates">

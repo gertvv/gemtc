@@ -61,30 +61,6 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			initVarianceParameters(gen)).mkString("\n")
 	}
 
-	val empty = ""
-
-	def scriptText(prefix: String, chains: Int, tuning: Int, simulation: Int)
-	: String = 
-		(List(
-			"model in '" + prefix + ".model'",
-			"data in '" + prefix + ".data'",
-			"compile, nchains(" + chains + ")") ++
-		{
-			for {i <- 1 to chains} yield "parameters in '" + prefix +
-				".inits" + i + "', chain(" + i + ")"
-		} ++
-		List(
-			"initialize",
-			empty,
-			"adapt " + tuning,
-			empty,
-			monitors,
-			empty,
-			"update " + simulation,
-			empty,
-			"coda *, stem('" + prefix + "')"
-		)).mkString("\n")
-
 	def analysisText(prefix: String): String =
 		List(
 			"deriv <- list(",
@@ -93,18 +69,6 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			"# source('mtc.R')",
 			"# data <- append.derived(read.mtc('" + prefix + "'), deriv)"
 		).mkString("\n")
-
-	private def monitors =
-		(paramNames ++ varNames).map(p => "monitor " + p).mkString("\n")
-
-	private def paramNames = model.parameterVector.map(p => p.toString)
-
-	private def varNames =
-		if (inconsistency) {
-			List("sd.d", "sd.w")
-		} else {
-			List("sd.d")
-		}
 
 	private def expressParam(p: NetworkModelParameter, v: Int,
 		f: String => String): String = 
@@ -216,6 +180,20 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		map.put("relativeEffectMatrix", relativeEffectMatrix)
 		map.put("priorPrecision", effPrior)
 		map.put("stdDevUpperLimit", varPrior)
+		map.put("parameters", asList(model.parameterVector))
+		String.valueOf(TemplateRuntime.execute(template, map))
+	}
+
+	def scriptText(prefix: String, chains: Int, tuning: Int, simulation: Int)
+	: String = {
+		val template = readTemplate("jagsScriptTemplate.txt")
+		val map = new java.util.HashMap[String, Object]()
+		map.put("prefix", prefix)
+		map.put("nchains", chains.asInstanceOf[AnyRef])
+		map.put("chains", asList((1 to chains).map(_.asInstanceOf[AnyRef])))
+		map.put("tuning", tuning.asInstanceOf[AnyRef])
+		map.put("simulation", simulation.asInstanceOf[AnyRef])
+		map.put("inconsistency", inconsistency.asInstanceOf[AnyRef])
 		map.put("parameters", asList(model.parameterVector))
 		String.valueOf(TemplateRuntime.execute(template, map))
 	}
