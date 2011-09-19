@@ -28,8 +28,11 @@ import org.mvel2.templates.CompiledTemplate
 import scala.collection.JavaConversions._
 
 class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
-		val model: NetworkModel[M, P]
+		val model: NetworkModel[M, P],
+		val isJags: Boolean
 ) {
+	def this(model: NetworkModel[M, P]) = this(model, true)
+
 	val dichotomous: Boolean = {
 		val cls = model.network.measurementType
 		if (cls == classOf[DichotomousMeasurement])
@@ -40,8 +43,6 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			throw new IllegalStateException("Unknown measurement type " + cls)
 	}
 
-	val isJags = true
-
 	val format = new DecimalFormat("0.0##E0")
 
 	val inconsistency: Boolean = model.parametrization match {
@@ -49,16 +50,25 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		case _ => false
 	}
 
-	private def rewrite(s: String): String = s.replaceFirst("E", "*10^")
+	private def rewrite(s: String): String = 
+		if (isJags) s.replaceFirst("E", "*10^")
+		else s
 	private val varPrior = rewrite(format.format(model.variancePrior))
 	private val effPrior = rewrite(format.format(1/model.normalPrior))
 
 	def initialValuesText(gen: StartingValueGenerator[M]): String = {
+		val sep = { if (isJags) "\n" else ",\n" }
+		{
+			if (isJags) "" else "list(\n"
+		} + { 
 		List(
 			initMetaParameters(gen),
 			initBaselineEffects(gen),
 			initRelativeEffects(gen),
-			initVarianceParameters(gen)).mkString("\n")
+			initVarianceParameters(gen)).mkString(sep)
+		} + {
+			if (isJags) "" else ")"
+		}
 	}
 
 	def analysisText(prefix: String): String =
@@ -104,16 +114,16 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			for {basicParam <- model.basicParameters}
 			yield g.getRelativeEffect(asBasic(basicParam))
 		}
-
+		val sep = { if (isJags) "\n" else ",\n" }
 		
 		{
 			for {param <- model.parameterVector} yield init(param, g, basic)
-		}.mkString("\n")
+		}.mkString(sep)
 	}
 
 	private def init(p: NetworkModelParameter, g: StartingValueGenerator[M],
 			bl: List[Double])
-	: String = "`" + p.toString + "` <- " + (p match {
+	: String = p.toString + assign + (p match {
 		case b: BasicParameter => bl(model.basicParameters.findIndexOf(_ == b))
 		case s: SplitParameter => bl(model.basicParameters.findIndexOf(_ == s))
 		case i: InconsistencyParameter =>
@@ -122,11 +132,11 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	})
 
 	private def initBaselineEffects(g: StartingValueGenerator[M]): String = {
-		"`mu` <- " + JagsSyntaxModel.writeVector(model.studyList.map(s => g.getBaselineEffect(s).asInstanceOf[java.lang.Double]))
+		"mu" + assign + JagsSyntaxModel.writeVector(model.studyList.map(s => g.getBaselineEffect(s).asInstanceOf[java.lang.Double]), isJags)
 	}
 
 	private def initRelativeEffects(g: StartingValueGenerator[M]): String = {
-		"`delta` <- " + JagsSyntaxModel.writeMatrix(model.studyList.map(
+		"delta" + assign + JagsSyntaxModel.writeMatrix(model.studyList.map(
 				s => studyArms(s).map(init(s, _, g))), isJags)
 	}
 
@@ -137,11 +147,13 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	}
 
 	private def initVarianceParameters(g: StartingValueGenerator[M]): String = {
+		val sep = { if (isJags) "\n" else ",\n" }
+
 		{
 			if (inconsistency) 
-				"`sd.w` <- " + g.getRandomEffectsVariance() + "\n"
+				"sd.w" + assign + g.getRandomEffectsVariance() + sep
 			else ""
-		} + "`sd.d` <- " + g.getRandomEffectsVariance()
+		} + "sd.d" + assign + g.getRandomEffectsVariance()
 	}
 
 	private def derivations = {
@@ -186,7 +198,10 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 
 	def scriptText(prefix: String, chains: Int, tuning: Int, simulation: Int)
 	: String = {
-		val template = readTemplate("jagsScriptTemplate.txt")
+		val template = {
+			if (isJags) readTemplate("jagsScriptTemplate.txt")
+			else readTemplate("bugsScriptTemplate.txt")
+		}
 		val map = new java.util.HashMap[String, Object]()
 		map.put("prefix", prefix)
 		map.put("nchains", chains.asInstanceOf[AnyRef])
@@ -242,34 +257,44 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		model.studyList.map(x => x.treatments.size.asInstanceOf[java.lang.Integer])
 	}
 
-	def dataText: String = 
+	val assign = { if (isJags) " <- " else " = " }
+
+	def dataText: String = {
+		val sep = { if (isJags) "\n" else ",\n" }
+		{
+			if (isJags) "" else "list(\n"
+		} + { 
 		if (dichotomous) {
 			List(
-				"ns <- " + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer]),
-				"t <- " + JagsSyntaxModel.writeMatrix(treatmentMatrix, isJags),
-				"r <- " + JagsSyntaxModel.writeMatrix(responderMatrix, isJags),
-				"n <- " + JagsSyntaxModel.writeMatrix(sampleSizeMatrix, isJags),
-				"na <- " + JagsSyntaxModel.writeVector(armCounts)
-			).mkString("\n")
+				"ns" + assign + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer], isJags),
+				"t" + assign + JagsSyntaxModel.writeMatrix(treatmentMatrix, isJags),
+				"r" + assign + JagsSyntaxModel.writeMatrix(responderMatrix, isJags),
+				"n" + assign + JagsSyntaxModel.writeMatrix(sampleSizeMatrix, isJags),
+				"na" + assign + JagsSyntaxModel.writeVector(armCounts, isJags)
+			).mkString(sep)
 		} else {
 			List(
-				"ns <- " + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer]),
-				"t <- " + JagsSyntaxModel.writeMatrix(treatmentMatrix, isJags),
-				"m <- " + JagsSyntaxModel.writeMatrix(meanMatrix, isJags),
-				"e <- " + JagsSyntaxModel.writeMatrix(stdErrMatrix, isJags),
-				"na <- " + JagsSyntaxModel.writeVector(armCounts)
-			).mkString("\n")
+				"ns" + assign + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer], isJags),
+				"t" + assign + JagsSyntaxModel.writeMatrix(treatmentMatrix, isJags),
+				"m" + assign + JagsSyntaxModel.writeMatrix(meanMatrix, isJags),
+				"e" + assign + JagsSyntaxModel.writeMatrix(stdErrMatrix, isJags),
+				"na" + assign + JagsSyntaxModel.writeVector(armCounts, isJags)
+			).mkString(sep)
+		} } +
+		{
+			if (isJags) "" else ")"
 		}
+	}
 }
 
 object JagsSyntaxModel {
 	/**
 	 * Convert a number to a String so that it can be read by S-Plus/R
 	 */
-	def writeNumber[N <: Number](n: N): String = {
+	def writeNumber[N <: Number](n: N, jags: Boolean): String = {
 		if (n == null) {
 			"NA"
-		} else if (n.isInstanceOf[Int] || n.isInstanceOf[Long]) {
+		} else if (jags && (n.isInstanceOf[Int] || n.isInstanceOf[Long])) {
 			String.valueOf(n) + "L"
 		} else {
 			String.valueOf(n)
@@ -278,19 +303,21 @@ object JagsSyntaxModel {
 
 	/**
 	 * Convert a matrix m -- where m(i)(j) is the number in the i-th row and j-th column -- to S-Plus/R format.
-	 * @param columnMajor true for column-major format (R/S-Plus/JAGS), false for row-major (BUGS).
+	 * @param jags true for column-major format (R/S-Plus/JAGS), false for row-major (BUGS).
 	 */
-	def writeMatrix[N <: Number](m: List[List[N]], columnMajor: Boolean): String = {
+	def writeMatrix[N <: Number](m: List[List[N]], jags: Boolean): String = {
 		val rows = m.size
 		val cols = m(0).size
 		val cells: Seq[String] = {
-			if (columnMajor) (0 until cols).map(j => (0 until rows).map(i => writeNumber(m(i)(j)))).flatten
-			else m.flatten.map(writeNumber _)
+			if (jags) (0 until cols).map(j => (0 until rows).map(i => writeNumber(m(i)(j), jags))).flatten
+			else m.flatten.map(writeNumber(_, jags))
 		}
-		"structure(c(" + cells.mkString(", ") + "), .Dim = c(" + writeNumber[Integer](rows) + ", " + writeNumber[Integer](cols) + "))"
+		"structure(" + {
+			if (jags) "" else ".Data = "
+		} + "c(" + cells.mkString(", ") + "), .Dim = c(" + writeNumber[Integer](rows, jags) + ", " + writeNumber[Integer](cols, jags) + "))"
 	}
 
-	def writeVector[N <: Number](v: List[N]): String = {
-		"c(" + v.map(writeNumber _).mkString(", ") + ")"
+	def writeVector[N <: Number](v: List[N], jags: Boolean): String = {
+		"c(" + v.map(writeNumber(_, jags)).mkString(", ") + ")"
 	}
 }

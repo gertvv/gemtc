@@ -214,11 +214,11 @@ class JagsSyntaxConsistencyModelTest extends ShouldMatchersForJUnit {
 }""" + "\n"
 
 	val initText =
-		""" |`d.A.B` <- 0.0
-			|`d.B.C` <- 0.0
-			|`mu` <- c(0.0, 0.0, 0.0)
-			|`delta` <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
-			|`sd.d` <- 0.5012338759470988""".stripMargin
+		""" |d.A.B <- 0.0
+			|d.B.C <- 0.0
+			|mu <- c(0.0, 0.0, 0.0)
+			|delta <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
+			|sd.d <- 0.5012338759470988""".stripMargin
 
 	val scriptText =
 		"""	|model in 'jags.model'
@@ -568,12 +568,12 @@ class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
 }""" + "\n"
 
 	val initText =
-		""" |`d.A.B.dir` <- 0.0
-			|`d.A.B.ind` <- 0.0
-			|`d.B.C` <- 0.0
-			|`mu` <- c(0.0, 0.0, 0.0)
-			|`delta` <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
-			|`sd.d` <- 0.5012338759470988""".stripMargin
+		""" |d.A.B.dir <- 0.0
+			|d.A.B.ind <- 0.0
+			|d.B.C <- 0.0
+			|mu <- c(0.0, 0.0, 0.0)
+			|delta <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
+			|sd.d <- 0.5012338759470988""".stripMargin
 
 	val scriptText =
 		"""	|model in 'jags.model'
@@ -655,13 +655,13 @@ class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
 
 class DataWritingTest extends ShouldMatchersForJUnit {
 	@Test def testWriteInt() {
-		JagsSyntaxModel.writeNumber[Integer](3) should be ("3L")
-		JagsSyntaxModel.writeNumber[Integer](15) should be ("15L")
+		JagsSyntaxModel.writeNumber[Integer](3, true) should be ("3L")
+		JagsSyntaxModel.writeNumber[Integer](15, true) should be ("15L")
 	}
 
 	@Test def testWriteFloat() {
-		JagsSyntaxModel.writeNumber[java.lang.Double](3.0) should be ("3.0")
-		JagsSyntaxModel.writeNumber[java.lang.Double](15.0) should be ("15.0")
+		JagsSyntaxModel.writeNumber[java.lang.Double](3.0, true) should be ("3.0")
+		JagsSyntaxModel.writeNumber[java.lang.Double](15.0, true) should be ("15.0")
 	}
 
 	@Test def testIntMatrixColMajor() {
@@ -677,6 +677,6 @@ class DataWritingTest extends ShouldMatchersForJUnit {
 			List[Integer](1, 2, 3, 4),
 			List[Integer](5, 6, 7, 8)
 		)
-		JagsSyntaxModel.writeMatrix(m, false) should be ("structure(c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L), .Dim = c(2L, 4L))")
+		JagsSyntaxModel.writeMatrix(m, false) should be ("structure(.Data = c(1, 2, 3, 4, 5, 6, 7, 8), .Dim = c(2, 4))")
 	}
 }

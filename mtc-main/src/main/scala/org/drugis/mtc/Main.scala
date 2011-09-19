@@ -36,7 +36,7 @@ import ModelType._
 class Options(val xmlFile: String, val baseName: String,
 	val modelType: ModelType, val scale: Double,
 	val tuningIter: Int, val simulationIter: Int,
-	val suppress: Boolean) {
+	val suppress: Boolean, val bugs: Boolean) {
 }
 
 class ModelSpecification[M <: Measurement](
@@ -49,7 +49,7 @@ class JAGSGenerator(options: Options) {
 	def createJagsModel[M <: Measurement, P <: Parametrization[M]](
 		model: NetworkModel[M, P], suffix: String)
 	: ModelSpecification[M] = {
-		new ModelSpecification(new JagsSyntaxModel(model),
+		new ModelSpecification(new JagsSyntaxModel(model, !options.bugs),
 			RandomizedStartingValueGenerator(model,
 				new JDKRandomGenerator(), options.scale), suffix)
 	}
@@ -166,7 +166,7 @@ object Main {
 		|Usage: java -jar ${MTC_JAR} \
 		|      [--type=consistency|inconsistency|nodesplit] \
 		|      [--scale=<f>] [--tuning=<n>] [--simulation=<m>] \
-		|      [--suppress]
+		|      [--bugs] [--suppress]
 		|      <xmlfile> [<output>]
 		|When unspecified, the default is --type=consistency --scale=2.5
 		|   --tuning=20000 --simulation=40000 <xmlfile> ${<xmlfile>%.xml}.
@@ -189,6 +189,7 @@ object Main {
 		val argTuning = parser.addIntegerOption("tuning")
 		val argSimulation = parser.addIntegerOption("simulation")
 		val argSuppress = parser.addBooleanOption("suppress")
+		val argBugs = parser.addBooleanOption("bugs")
 		
 		try {
 			parser.parse(args)
@@ -199,6 +200,7 @@ object Main {
 			val tuning = parser.getOptionValue(argTuning, 20000).asInstanceOf[Int]
 			val simulation = parser.getOptionValue(argSimulation, 40000).asInstanceOf[Int]
 			val suppress = parser.getOptionValue(argSuppress, false).asInstanceOf[Boolean]
+			val bugs = parser.getOptionValue(argBugs, false).asInstanceOf[Boolean]
 			val otherArgs = parser.getRemainingArgs()
 
 			if (otherArgs.length < 1 || otherArgs.length > 2) {
@@ -212,7 +214,7 @@ object Main {
 				}
 				modelType match {
 					case None => None
-					case Some(x) => Some(new Options(xmlFile, baseName, x, scale, tuning, simulation, suppress))
+					case Some(x) => Some(new Options(xmlFile, baseName, x, scale, tuning, simulation, suppress, bugs))
 				}
 			}
 		} catch {
