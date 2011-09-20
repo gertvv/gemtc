@@ -56,20 +56,21 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	private val varPrior = rewrite(format.format(model.variancePrior))
 	private val effPrior = rewrite(format.format(1/model.normalPrior))
 
-	def initialValuesText(gen: StartingValueGenerator[M]): String = {
+	def generateDataFile(lines: List[(String, String)]): String = {
+		val assign = { if (isJags) " <- " else " = " }
 		val sep = { if (isJags) "\n" else ",\n" }
-		{
-			if (isJags) "" else "list(\n"
-		} + { 
-		List(
-			initMetaParameters(gen),
-			initBaselineEffects(gen),
-			initRelativeEffects(gen),
-			initVarianceParameters(gen)).mkString(sep)
-		} + {
-			if (isJags) "" else ")"
-		}
+		val head = { if (isJags) "" else "list(\n" }
+		val foot = { if (isJags) "\n" else "\n)\n" }
+
+		head + lines.map(x => x._1 + assign + x._2).mkString(sep) + foot
 	}
+
+	def initialValuesText(gen: StartingValueGenerator[M]): String = 
+		generateDataFile(
+			initMetaParameters(gen) :::
+			initBaselineEffects(gen) ::
+			initRelativeEffects(gen) ::
+			initVarianceParameters(gen))
 
 	def analysisText(prefix: String): String =
 		List(
@@ -109,36 +110,32 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 			" to a BasicParameter")
 	}
 
-	private def initMetaParameters(g: StartingValueGenerator[M]): String = {
+	private def initMetaParameters(g: StartingValueGenerator[M]): List[(String, String)] = {
 		val basic = {
 			for {basicParam <- model.basicParameters}
 			yield g.getRelativeEffect(asBasic(basicParam))
 		}
-		val sep = { if (isJags) "\n" else ",\n" }
 		
-		{
-			for {param <- model.parameterVector} yield init(param, g, basic)
-		}.mkString(sep)
+		model.parameterVector.map(param => init(param, g, basic))
 	}
 
 	private def init(p: NetworkModelParameter, g: StartingValueGenerator[M],
 			bl: List[Double])
-	: String = p.toString + assign + (p match {
+	: (String, String) = (p.toString, (p match {
 		case b: BasicParameter => bl(model.basicParameters.findIndexOf(_ == b))
 		case s: SplitParameter => bl(model.basicParameters.findIndexOf(_ == s))
 		case i: InconsistencyParameter =>
 			InconsistencyStartingValueGenerator(i, model, g, bl)
 		case _ => throw new IllegalStateException("Unsupported parameter " + p)
-	})
+	}).toString)
 
-	private def initBaselineEffects(g: StartingValueGenerator[M]): String = {
-		"mu" + assign + JagsSyntaxModel.writeVector(model.studyList.map(s => g.getBaselineEffect(s).asInstanceOf[java.lang.Double]), isJags)
-	}
+	private def initBaselineEffects(g: StartingValueGenerator[M]): (String, String) = 
+		("mu", JagsSyntaxModel.writeVector(model.studyList.map(s => g.getBaselineEffect(s).asInstanceOf[java.lang.Double]), isJags))
 
-	private def initRelativeEffects(g: StartingValueGenerator[M]): String = {
-		"delta" + assign + JagsSyntaxModel.writeMatrix(model.studyList.map(
-				s => studyArms(s).map(init(s, _, g))), isJags)
-	}
+	private def initRelativeEffects(g: StartingValueGenerator[M]): (String, String) = 
+		("delta", JagsSyntaxModel.writeMatrix(model.studyList.map(
+				s => studyArms(s).map(init(s, _, g))), isJags))
+	
 
 	private def init(s: Study[M], t: Treatment, g: StartingValueGenerator[M])
 	: java.lang.Double = {
@@ -146,14 +143,11 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		else g.getRandomEffect(s, new BasicParameter(model.studyBaseline(s), t))
 	}
 
-	private def initVarianceParameters(g: StartingValueGenerator[M]): String = {
-		val sep = { if (isJags) "\n" else ",\n" }
-
-		{
-			if (inconsistency) 
-				"sd.w" + assign + g.getRandomEffectsVariance() + sep
-			else ""
-		} + "sd.d" + assign + g.getRandomEffectsVariance()
+	private def initVarianceParameters(g: StartingValueGenerator[M]): List[(String, String)] = {
+		("sd.d", g.getRandomEffectsVariance().toString) :: {
+			if (inconsistency) List(("sd.w", g.getRandomEffectsVariance().toString))
+			else Nil
+		}
 	}
 
 	private def derivations = {
@@ -257,33 +251,22 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		model.studyList.map(x => x.treatments.size.asInstanceOf[java.lang.Integer])
 	}
 
-	val assign = { if (isJags) " <- " else " = " }
-
 	def dataText: String = {
-		val sep = { if (isJags) "\n" else ",\n" }
-		{
-			if (isJags) "" else "list(\n"
-		} + { 
-		if (dichotomous) {
-			List(
-				"ns" + assign + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer], isJags),
-				"t" + assign + JagsSyntaxModel.writeMatrix(treatmentMatrix, isJags),
-				"r" + assign + JagsSyntaxModel.writeMatrix(responderMatrix, isJags),
-				"n" + assign + JagsSyntaxModel.writeMatrix(sampleSizeMatrix, isJags),
-				"na" + assign + JagsSyntaxModel.writeVector(armCounts, isJags)
-			).mkString(sep)
-		} else {
-			List(
-				"ns" + assign + JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer], isJags),
-				"t" + assign + JagsSyntaxModel.writeMatrix(treatmentMatrix, isJags),
-				"m" + assign + JagsSyntaxModel.writeMatrix(meanMatrix, isJags),
-				"e" + assign + JagsSyntaxModel.writeMatrix(stdErrMatrix, isJags),
-				"na" + assign + JagsSyntaxModel.writeVector(armCounts, isJags)
-			).mkString(sep)
-		} } +
-		{
-			if (isJags) "" else ")"
+		val list = List(
+			("ns", JagsSyntaxModel.writeNumber(model.studyList.size.asInstanceOf[java.lang.Integer], isJags)),
+			("na", JagsSyntaxModel.writeVector(armCounts, isJags)),
+			("t", JagsSyntaxModel.writeMatrix(treatmentMatrix, isJags))) ++ {
+			if (dichotomous) {
+				List(
+				("r", JagsSyntaxModel.writeMatrix(responderMatrix, isJags)),
+				("n", JagsSyntaxModel.writeMatrix(sampleSizeMatrix, isJags)))
+			} else {
+				List(
+				("m", JagsSyntaxModel.writeMatrix(meanMatrix, isJags)),
+				("e", JagsSyntaxModel.writeMatrix(stdErrMatrix, isJags)))
+			}
 		}
+		generateDataFile(list)
 	}
 }
 

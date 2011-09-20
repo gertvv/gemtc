@@ -28,10 +28,10 @@ import org.junit.Before
 
 class JagsSyntaxInconsistencyModelTest extends ShouldMatchersForJUnit {
 	val jagsDataText = """ns <- 3L
+		|na <- c(3L, 2L, 2L)
 		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
 		|r <- structure(c(23L, 79L, 18L, 9L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
-		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))
-		|na <- c(3L, 2L, 2L)""".stripMargin
+		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))""".stripMargin + "\n"
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -163,10 +163,10 @@ class JagsSyntaxInconsistencyModelTest extends ShouldMatchersForJUnit {
 
 class JagsSyntaxConsistencyModelTest extends ShouldMatchersForJUnit {
 	val jagsDataText = """ns <- 3L
+		|na <- c(3L, 2L, 2L)
 		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
 		|r <- structure(c(23L, 79L, 18L, 9L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
-		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))
-		|na <- c(3L, 2L, 2L)""".stripMargin
+		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))""".stripMargin + "\n"
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -218,7 +218,7 @@ class JagsSyntaxConsistencyModelTest extends ShouldMatchersForJUnit {
 			|d.B.C <- 0.0
 			|mu <- c(0.0, 0.0, 0.0)
 			|delta <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
-			|sd.d <- 0.5012338759470988""".stripMargin
+			|sd.d <- 0.5012338759470988""".stripMargin + "\n"
 
 	val scriptText =
 		"""	|model in 'jags.model'
@@ -324,10 +324,10 @@ class JagsSyntaxConsistencyModelTest extends ShouldMatchersForJUnit {
 
 class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {
 	val jagsDataText = """ns <- 3L
+		|na <- c(3L, 2L, 2L)
 		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
 		|m <- structure(c(8.0, 13.0, 13.0, 10.0, 11.0, 11.0, 9.0, NA, NA), .Dim = c(3L, 3L))
-		|e <- structure(c(2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.5, NA, NA), .Dim = c(3L, 3L))
-		|na <- c(3L, 2L, 2L)""".stripMargin
+		|e <- structure(c(2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.5, NA, NA), .Dim = c(3L, 3L))""".stripMargin + "\n"
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -516,10 +516,10 @@ class JagsSyntaxContinuousModelTest extends ShouldMatchersForJUnit {
 
 class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
 	val jagsDataText = """ns <- 3L
+		|na <- c(3L, 2L, 2L)
 		|t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
 		|r <- structure(c(23L, 79L, 18L, 9L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
-		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))
-		|na <- c(3L, 2L, 2L)""".stripMargin
+		|n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))""".stripMargin + "\n"
 
 	val modelText = """model {
 	for (i in 1:ns) {
@@ -573,7 +573,7 @@ class JagsSyntaxNodeSplitModelTest extends ShouldMatchersForJUnit {
 			|d.B.C <- 0.0
 			|mu <- c(0.0, 0.0, 0.0)
 			|delta <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
-			|sd.d <- 0.5012338759470988""".stripMargin
+			|sd.d <- 0.5012338759470988""".stripMargin + "\n"
 
 	val scriptText =
 		"""	|model in 'jags.model'
