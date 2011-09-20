@@ -35,28 +35,19 @@ import java.io.OutputStreamWriter;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import org.apache.commons.math.random.JDKRandomGenerator;
 import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileDialog;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
-import org.drugis.mtc.ConsistencyNetworkModel$;
-import org.drugis.mtc.RandomizedStartingValueGenerator$;
 import org.drugis.mtc.Measurement;
 import org.drugis.mtc.Network;
-import org.drugis.mtc.NetworkModel;
-import org.drugis.mtc.StartingValueGenerator;
-import org.drugis.mtc.jags.JagsSyntaxModel;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
@@ -161,7 +152,6 @@ public class MainWindow extends JFrame {
 		JButton openButton = new JButton("Open", ImageLoader.getIcon("openfile.gif"));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.err.println("HELLO");
 				FileDialog dialog = new FileLoadDialog(MainWindow.this, "xml", "XML files") {
 					public void doAction(String path, String extension) {
 						final File file = new File(path);
@@ -225,39 +215,14 @@ public class MainWindow extends JFrame {
 					JOptionPane.showMessageDialog(MainWindow.this, "Error: " + e.getMessage(), "Cannot generate model", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				final NetworkModel nm = ConsistencyNetworkModel$.MODULE$.apply(network);
-				final JagsSyntaxModel jagsSyntaxModel = new JagsSyntaxModel(nm);
 				final String name = model.getFile() == null ? "unnamed" : model.getFile().getName().replaceFirst(".xml$", "");
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						showSyntaxModel(nm, jagsSyntaxModel, name);	
-					}
-				});
-				
+				CodeGenerationDialog codeGenerationDialog = new CodeGenerationDialog(MainWindow.this, name, network);
+				codeGenerationDialog.setVisible(true);
 			}
 			
 		});
 		PropertyConnector.connectAndUpdate(new ListMinimumSizeModel(d_models, 1), button, "enabled");
 		return button;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void showSyntaxModel(NetworkModel nm, JagsSyntaxModel jagsSyntaxModel, String name) {
-		JDialog dialog = new JDialog(this, "Jags consistency model: " + name);
-		JTabbedPane tabbedPane = new JTabbedPane();
-		
-		tabbedPane.addTab("Model", new JScrollPane(new JTextArea(jagsSyntaxModel.modelText())));
-		tabbedPane.addTab("Data", new JScrollPane(new JTextArea(jagsSyntaxModel.dataText())));
-		final int chains = 4;
-		tabbedPane.addTab("Script", new JScrollPane(new JTextArea(jagsSyntaxModel.scriptText(name, chains, 20000, 40000))));
-		StartingValueGenerator gen = RandomizedStartingValueGenerator$.MODULE$.apply(nm, new JDKRandomGenerator(), 2.5);
-		for (int i = 1; i <= 4; ++i) {
-			tabbedPane.addTab("Inits " + i, new JScrollPane(new JTextArea(jagsSyntaxModel.initialValuesText(gen))));
-		}
-		
-		dialog.add(tabbedPane);
-		dialog.pack();
-		dialog.setVisible(true);
 	}
 	
 	private DataSetModel readFromFile(final File file) {
