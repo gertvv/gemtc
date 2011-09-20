@@ -16,20 +16,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
-import org.apache.commons.math.random.JDKRandomGenerator;
-import org.drugis.mtc.ConsistencyNetworkModel$;
-import org.drugis.mtc.InconsistencyNetworkModel$;
 import org.drugis.mtc.Network;
-import org.drugis.mtc.NetworkModel;
-import org.drugis.mtc.RandomizedStartingValueGenerator$;
-import org.drugis.mtc.StartingValueGenerator;
-import org.drugis.mtc.jags.JagsSyntaxModel;
 
 import com.jgoodies.binding.adapter.Bindings;
 import com.jgoodies.binding.adapter.RadioButtonAdapter;
@@ -37,11 +26,11 @@ import com.jgoodies.binding.value.ConverterFactory;
 import com.jgoodies.binding.value.ValueHolder;
 
 public class CodeGenerationDialog extends JDialog {
-	private enum SyntaxType {
+	public enum SyntaxType {
 		BUGS,
 		JAGS
 	}
-	private enum ModelType {
+	public enum ModelType {
 		Consistency,
 		Inconsistency,
 		NodeSplit
@@ -182,42 +171,11 @@ public class CodeGenerationDialog extends JDialog {
 		return button;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void generate() {
-		final NetworkModel nm = buildNetworkModel();
-		final JagsSyntaxModel jagsSyntaxModel = new JagsSyntaxModel(nm, d_syntaxType.getValue() == SyntaxType.JAGS);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				showSyntaxModel(nm, jagsSyntaxModel, d_name);	
-			}
-		});
-	}
-
-	private NetworkModel<?, ?> buildNetworkModel() {
-		if (d_modelType.getValue() == ModelType.Consistency) {
-			return ConsistencyNetworkModel$.MODULE$.apply(d_network);
-		} else {
-			return InconsistencyNetworkModel$.MODULE$.apply(d_network);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void showSyntaxModel(NetworkModel nm, JagsSyntaxModel jagsSyntaxModel, String name) {
-		JDialog dialog = new JDialog(this, d_syntaxType.getValue().toString() + " consistency model: " + name);
-		JTabbedPane tabbedPane = new JTabbedPane();
-		
-		tabbedPane.addTab("Model", new JScrollPane(new JTextArea(jagsSyntaxModel.modelText())));
-		tabbedPane.addTab("Data", new JScrollPane(new JTextArea(jagsSyntaxModel.dataText())));
-		final int chains = getInt(d_chains);
-		StartingValueGenerator gen = RandomizedStartingValueGenerator$.MODULE$.apply(nm, new JDKRandomGenerator(), (Double)d_scale.getValue());
-		for (int i = 1; i <= chains; ++i) {
-			tabbedPane.addTab("Inits " + i, new JScrollPane(new JTextArea(jagsSyntaxModel.initialValuesText(gen))));
-		}
-		tabbedPane.addTab("Script", new JScrollPane(new JTextArea(jagsSyntaxModel.scriptText(name, chains, getInt(d_tuning), getInt(d_simulation)))));
-
-		dialog.add(tabbedPane);
-		dialog.pack();
-		dialog.setVisible(true);
+	private void generate() {
+		JFrame window = new GeneratedCodeWindow(d_name, d_network, 
+				(SyntaxType)d_syntaxType.getValue(), (ModelType)d_modelType.getValue(), 
+				getInt(d_chains), getInt(d_tuning), getInt(d_simulation), (Double)d_scale.getValue());
+		window.setVisible(true);
 	}
 
 	private int getInt(ValueHolder model) {
