@@ -23,9 +23,10 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,10 +37,10 @@ import javax.swing.ListModel;
 import javax.swing.WindowConstants;
 
 import org.drugis.mtc.gui.ListEditor.ListActions;
+import org.drugis.mtc.gui.ValidationPanel.Validation;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
-import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueModel;
@@ -144,16 +145,19 @@ class StudyActions implements ListActions<StudyModel> {
 		ValueModel idNotEmpty = new StringNotEmptyModel(idModel);
 		ValueModel idUnique = new PropertyUniqueModel<StudyModel>(list, model, StudyModel.PROPERTY_ID);
 		ValueModel treatmentsSelected = new ListMinimumSizeModel(model.getTreatments(), 2);
-		ValueModel complete = new BooleanAndModel(treatmentsSelected, new BooleanAndModel(idNotEmpty, idUnique));
+		List<Validation> validations = Arrays.asList(
+				new Validation(idNotEmpty, "The ID may not be empty"),
+				new Validation(idUnique, "The ID must be unique (there is another treatment with this ID)"),
+				new Validation(treatmentsSelected, "You must select at least two treatments")
+				);
 
-		JButton okButton = new JButton("OK");
-		PropertyConnector.connectAndUpdate(complete, okButton, "enabled");
-		okButton.addActionListener(new ActionListener() {
+		ActionListener okListener = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				dialog.dispose();
 			}
-		});
-		dialog.add(okButton, BorderLayout.SOUTH);
+		};
+		JPanel bottomPanel = new ValidationPanel(validations, okListener);
+		dialog.add(bottomPanel, BorderLayout.SOUTH);
 
 		dialog.pack();
 		dialog.setVisible(true);

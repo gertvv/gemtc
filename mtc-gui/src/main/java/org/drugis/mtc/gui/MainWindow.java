@@ -170,7 +170,6 @@ public class MainWindow extends JFrame {
 		return openButton;
 	}
 
-
 	private JButton createSaveButton() {
 		JButton saveButton = new JButton("Save", ImageLoader.getIcon("savefile.gif"));
 		saveButton.addActionListener(new ActionListener() {

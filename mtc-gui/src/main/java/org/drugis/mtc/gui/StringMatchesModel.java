@@ -21,37 +21,33 @@ package org.drugis.mtc.gui;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.util.Arrays;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.binding.value.AbstractValueModel;
 
 /**
- * Listens to two nested ValueModels, and converts to true iff both are true. Converts to null if either one is null, or not a Boolean.
+ * Listens to a nested ValueModel, and converts it to true iff nested matches the given pattern.
  */
-public class BooleanAndModel extends AbstractValueModel {
-	private static final long serialVersionUID = 8591942709442108053L;
-	private List<ValueModel> d_models;
-	private Boolean d_val;
-	
-	public BooleanAndModel(List<ValueModel> models) {
-		d_models = models;
-		PropertyChangeListener listener = new PropertyChangeListener() {
+public class StringMatchesModel extends AbstractValueModel {
+	private static final long serialVersionUID = -7062635813334832465L;
+
+	private ValueModel d_nested;
+	private final Pattern d_pattern;
+	private boolean d_val;
+
+	public StringMatchesModel(ValueModel nested, String regex) {
+		d_nested = nested;
+		d_pattern = Pattern.compile(regex);
+		nested.addValueChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
-				Object oldVal = d_val;
+				boolean oldVal = d_val;
 				d_val = calc();
 				fireValueChange(oldVal, d_val);
 			}
-		};
-		for (ValueModel model : d_models) {
-			model.addValueChangeListener(listener);
-		}
+		});
 		d_val = calc();
-	}
-
-	public BooleanAndModel(ValueModel bool1, ValueModel bool2) {
-		this(Arrays.asList(bool1, bool2));
 	}
 
 	public Boolean getValue() {
@@ -62,19 +58,11 @@ public class BooleanAndModel extends AbstractValueModel {
 		throw new UnsupportedOperationException();
 	}
 
-	private boolean isBoolean(ValueModel model) {
-		return model.getValue() != null && model.getValue() instanceof Boolean;
-	}
-
-	private Boolean calc() {
-		for (ValueModel model : d_models) {
-			if (!isBoolean(model)) {
-				return null;
-			} else if (!(Boolean)model.getValue()) {
-				return false;
-			}
+	private boolean calc() {
+		if (d_nested.getValue() != null && d_nested.getValue() instanceof String) {
+			Matcher matcher = d_pattern.matcher((String)d_nested.getValue());
+			return matcher.matches();
 		}
-		return true;
+		return false;
 	}
 }
-

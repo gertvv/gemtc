@@ -23,9 +23,10 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,10 +37,10 @@ import javax.swing.ListModel;
 import javax.swing.WindowConstants;
 
 import org.drugis.mtc.gui.ListEditor.ListActions;
+import org.drugis.mtc.gui.ValidationPanel.Validation;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
-import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.ValueModel;
 
@@ -102,7 +103,6 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		final JDialog dialog = new JDialog(d_parent, "Treatment");
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		//dialog.setMinimumSize(new Dimension(300, 200));
 
 		dialog.setLayout(new BorderLayout());
 
@@ -117,19 +117,20 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		JTextField field2 = BasicComponentFactory.createTextField(new PropertyAdapter<TreatmentModel>(model, TreatmentModel.PROPERTY_DESCRIPTION), false);
 		field2.setColumns(25);
 		panel.add(field2);
-
 		dialog.add(panel, BorderLayout.CENTER);
 
-		JButton okButton = new JButton("OK");
-		ValueModel notEmpty = new StringNotEmptyModel(idModel);
-		ValueModel unique = new PropertyUniqueModel<TreatmentModel>(list, model, TreatmentModel.PROPERTY_ID);
-		PropertyConnector.connectAndUpdate(new BooleanAndModel(notEmpty, unique), okButton, "enabled");
-		okButton.addActionListener(new ActionListener() {
+		List<Validation> validators = Arrays.asList(
+				new Validation(new StringNotEmptyModel(idModel), "The ID may not be empty"),
+				new Validation(new PropertyUniqueModel<TreatmentModel>(list, model, TreatmentModel.PROPERTY_ID), "The ID must be unique (there is another treatment with this ID)"),
+				new Validation(new StringMatchesModel(idModel, "[A-Za-z0-9_]*"), "The ID may only contain letters, digits and underscores (_)")
+				);
+
+		ActionListener okListener = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				dialog.dispose();
 			}
-		});
-		dialog.add(okButton, BorderLayout.SOUTH);
+		};
+		dialog.add(new ValidationPanel(validators, okListener), BorderLayout.SOUTH);
 
 		dialog.pack();
 		dialog.setVisible(true);
