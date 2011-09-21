@@ -62,7 +62,7 @@
 		<module>mtc-test</module>
 		<module>mtc-model</module>
 		<module>mtc-lib</module>
-		<module>mtc-main</module>
+		<module>mtc-cli</module>
 		<module>mtc-gui</module>
 	</modules>
 </project>

@@ -9,7 +9,7 @@
 	</parent>
 
 	<groupId>org.drugis</groupId>
-	<artifactId>mtc-main</artifactId>
+	<artifactId>mtc-cli</artifactId>
 	<name>GeMTC CLI</name>
 
 	<distributionManagement>
