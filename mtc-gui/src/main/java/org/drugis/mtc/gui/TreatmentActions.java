@@ -36,6 +36,10 @@ import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.WindowConstants;
 
+import org.drugis.common.beans.ContentAwareListModel;
+import org.drugis.common.validation.PropertyUniqueModel;
+import org.drugis.common.validation.StringMatchesModel;
+import org.drugis.common.validation.StringNotEmptyModel;
 import org.drugis.mtc.gui.ListEditor.ListActions;
 import org.drugis.mtc.gui.ValidationPanel.Validation;
 

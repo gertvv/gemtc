@@ -30,6 +30,8 @@ import com.jgoodies.binding.value.ValueModel;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListDataEvent;
 
+import org.drugis.common.beans.ListPropertyChangeProxy;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 

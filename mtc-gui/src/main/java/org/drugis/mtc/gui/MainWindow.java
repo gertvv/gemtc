@@ -48,6 +48,7 @@ import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileDialog;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
+import org.drugis.common.validation.ListMinimumSizeModel;
 import org.drugis.mtc.Measurement;
 import org.drugis.mtc.Network;
 

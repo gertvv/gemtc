@@ -31,6 +31,7 @@ import java.util.Arrays;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import org.drugis.common.event.TableModelEventMatcher;
 import org.junit.Before;
 import org.junit.Test;
 

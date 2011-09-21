@@ -30,6 +30,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.drugis.common.validation.BooleanAndModel;
+
 import com.jgoodies.binding.adapter.Bindings;
 import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.value.ConverterFactory;
