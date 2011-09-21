@@ -10,7 +10,7 @@
 
 	<groupId>org.drugis</groupId>
 	<artifactId>mtc-main</artifactId>
-	<name>mtc-main</name>
+	<name>GeMTC CLI</name>
 
 	<distributionManagement>
 		<repository>

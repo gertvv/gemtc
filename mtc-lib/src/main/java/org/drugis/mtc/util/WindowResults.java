@@ -20,7 +20,6 @@
 package org.drugis.mtc.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.drugis.mtc.MCMCResults;
