@@ -21,6 +21,7 @@ package org.drugis.mtc.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -106,8 +108,9 @@ public class MainWindow extends JFrame {
 	private ObservableList<DataSetModel> d_models = new ArrayListModel<DataSetModel>();
 
 	public MainWindow() {
-		super("drugis.org MTC");
+		super(AppInfo.getAppName() + " " + AppInfo.getAppVersion());
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setAppIcon();
 
 		setMinimumSize(new Dimension(750, 550));
 		setLayout(new BorderLayout());
@@ -115,6 +118,18 @@ public class MainWindow extends JFrame {
 		d_mainPane = new JTabbedPane();
 		add(createToolBar(), BorderLayout.NORTH);
 		add(d_mainPane , BorderLayout.CENTER);
+	}
+
+	private void setAppIcon() {
+		Image image = null;
+		try {
+			image = ((ImageIcon)ImageLoader.getIcon("appicon.png")).getImage();
+		} catch (Exception e) {
+			// suppress
+		}
+		if (image != null) {
+			setIconImage(image);
+		}
 	}
 	
 	private void addModel(DataSetModel model) {
@@ -134,6 +149,7 @@ public class MainWindow extends JFrame {
 		toolbar.add(createOpenButton());
 		toolbar.add(createSaveButton());
 		toolbar.add(createGenerateButton());
+		toolbar.add(createAboutButton());
 
         return toolbar;
 	}
@@ -222,6 +238,16 @@ public class MainWindow extends JFrame {
 		});
 		PropertyConnector.connectAndUpdate(new ListMinimumSizeModel(d_models, 1), button, "enabled");
 		return button;
+	}
+	
+	private JButton createAboutButton() {
+		JButton aboutButton = new JButton("About", ImageLoader.getIcon("about.gif"));
+		aboutButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				(new AboutDialog(MainWindow.this)).setVisible(true);
+			}
+		});
+		return aboutButton;
 	}
 	
 	private DataSetModel readFromFile(final File file) {

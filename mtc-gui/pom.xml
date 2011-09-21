@@ -10,7 +10,7 @@
 
 	<groupId>org.drugis</groupId>
 	<artifactId>mtc-gui</artifactId>
-	<name>mtc-gui</name>
+	<name>GeMTC GUI</name>
 
 	<distributionManagement>
 		<repository>
