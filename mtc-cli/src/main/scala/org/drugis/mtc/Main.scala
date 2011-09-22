@@ -166,13 +166,13 @@ object Main {
 		|Usage: java -jar ${MTC_JAR} \
 		|      [--type=consistency|inconsistency|nodesplit] \
 		|      [--scale=<f>] [--tuning=<n>] [--simulation=<m>] \
-		|      [--bugs] [--suppress]
-		|      <xmlfile> [<output>]
+		|      [--bugs] [--suppress] \
+		|      <datafile> [<output>]
 		|When unspecified, the default is --type=consistency --scale=2.5
-		|   --tuning=20000 --simulation=40000 <xmlfile> ${<xmlfile>%.xml}.
+		|   --tuning=20000 --simulation=40000 <datafile> ${<datafile>%.gemtc}.
 		|
-		|This will generate a JAGS model from the specified XML file, which can
-		|subsequently be run using the output.script file.""".stripMargin
+		|This will generate a JAGS or BUGS model from the specified GeMTC
+		|datafile.""".stripMargin
 
 	def main(args: Array[String]) {
 		val opts = parseArguments(args)
@@ -210,7 +210,7 @@ object Main {
 				val xmlFile = otherArgs(0)
 				val baseName = {
 					if (otherArgs.length == 2) otherArgs(1)
-					else xmlFile.stripSuffix(".xml")
+					else xmlFile.stripSuffix(".gemtc")
 				}
 				modelType match {
 					case None => None

@@ -169,7 +169,7 @@ public class MainWindow extends JFrame {
 		JButton openButton = new JButton("Open", ImageLoader.getIcon("openfile.gif"));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				FileDialog dialog = new FileLoadDialog(MainWindow.this, "xml", "XML files") {
+				FileDialog dialog = new FileLoadDialog(MainWindow.this, "gemtc", "GeMTC files") {
 					public void doAction(String path, String extension) {
 						final File file = new File(path);
 						final DataSetModel model = readFromFile(file);
@@ -194,7 +194,7 @@ public class MainWindow extends JFrame {
 				try {
 					final DataSetModel model = getActiveModel();
 					if (model.getFile() == null) {
-						FileDialog dialog = new FileSaveDialog(MainWindow.this, "xml", "XML files") {
+						FileDialog dialog = new FileSaveDialog(MainWindow.this, "gemtc", "GeMTC files") {
 							public void doAction(String path, String extension) {
 								File file = new File(path);
 								writeToFile(model, file);
@@ -231,7 +231,7 @@ public class MainWindow extends JFrame {
 					JOptionPane.showMessageDialog(MainWindow.this, "Error: " + e.getMessage(), "Cannot generate model", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				final String name = model.getFile() == null ? "unnamed" : model.getFile().getName().replaceFirst(".xml$", "");
+				final String name = model.getFile() == null ? "unnamed" : model.getFile().getName().replaceFirst(".gemtc$", "");
 				CodeGenerationDialog codeGenerationDialog = new CodeGenerationDialog(MainWindow.this, name, network);
 				codeGenerationDialog.setVisible(true);
 			}
