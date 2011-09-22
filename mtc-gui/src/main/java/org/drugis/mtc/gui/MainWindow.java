@@ -224,6 +224,10 @@ public class MainWindow extends JFrame {
 					JOptionPane.showMessageDialog(MainWindow.this, "You need to define at least two studies and treatments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
+				if (model.getMeasurementType().getValue() == MeasurementType.NONE) {
+					JOptionPane.showMessageDialog(MainWindow.this, "Model generation not possible with 'None' measuments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
 				Network network;
 				try {
 					network = model.build();
