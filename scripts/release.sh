@@ -56,6 +56,6 @@ zip -r gemtc-cli-$VERSION.zip $CLIDIR
 
 # Package the R package
 cd r-code
-make mtc_$VERSION.tar.gz
-mv mtc_$VERSION.tar.gz ..
+make gemtc_$VERSION.tar.gz
+mv gemtc_$VERSION.tar.gz ../gemtc_$VERSION-EXPERIMENTAL.tar.gz
 cd ..
