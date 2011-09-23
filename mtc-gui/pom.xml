@@ -39,17 +39,17 @@
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-lib</artifactId>
-			<version>0.4.5-SNAPSHOT</version>
+			<version>0.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-test</artifactId>
-			<version>0.4.5-SNAPSHOT</version>
+			<version>0.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-gui</artifactId>
-			<version>0.4.5-SNAPSHOT</version>
+			<version>0.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
