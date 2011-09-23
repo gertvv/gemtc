@@ -141,6 +141,7 @@ public class GeneratedCodeWindow extends JFrame {
 			String filePath = dir.getPath() + "/" + getBaseName() + "." + file.extension;
 			OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(filePath));
 			osw.write(file.text);
+			osw.close();
 		}
 	}
 	
