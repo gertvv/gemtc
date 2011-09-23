@@ -17,7 +17,7 @@
 }
 \author{Gert van Valkenhoef}
 \examples{
-	fileName <- system.file("extdata/luades-smoking.gemtc", package="mtc")
+	fileName <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 	network <- mtcNetwork(fileName)
 	model <- mtcModel(network)
 	data <- mtcJags(model, 1000, 2000)
