@@ -1,0 +1,40 @@
+<network type="continuous">
+	<treatments>
+		<treatment id="A"/>
+		<treatment id="B"/>
+		<treatment id="C"/>
+		<treatment id="D"/>
+		<treatment id="E"/>
+	</treatments>
+	<studies>
+		<study id="1">
+			<measurement treatment="A" mean="-1.22" standardDeviation="3.7" sample="54" />
+			<measurement treatment="C" mean="-1.53" standardDeviation="4.28" sample="95" />
+		</study>
+		<study id="2">
+			<measurement treatment="A" mean="-0.7" standardDeviation="3.7" sample="172" />
+			<measurement treatment="B" mean="-2.4" standardDeviation="3.4" sample="173" />
+		</study>
+		<study id="3">
+			<measurement treatment="A" mean="-0.3" standardDeviation="4.4" sample="76" />
+			<measurement treatment="B" mean="-2.6" standardDeviation="4.3" sample="71" />
+			<measurement treatment="D" mean="-1.2" standardDeviation="4.3" sample="81" />
+		</study>
+		<study id="4">
+			<measurement treatment="C" mean="-0.24" standardDeviation="3" sample="128" />
+			<measurement treatment="D" mean="-0.59" standardDeviation="3" sample="72" />
+		</study>
+		<study id="5">
+			<measurement treatment="C" mean="-0.73" standardDeviation="3" sample="80" />
+			<measurement treatment="D" mean="-0.18" standardDeviation="3" sample="46" />
+		</study>
+		<study id="6">
+			<measurement treatment="D" mean="-2.2" standardDeviation="2.31" sample="137" />
+			<measurement treatment="E" mean="-2.5" standardDeviation="2.18" sample="131" />
+		</study>
+		<study id="7">
+			<measurement treatment="D" mean="-1.8" standardDeviation="2.48" sample="154" />
+			<measurement treatment="E" mean="-2.1" standardDeviation="2.99" sample="143" />
+		</study>
+	</studies>
+</network>

@@ -1,0 +1,68 @@
+<!-- Continuous analysis from
+	Welton et al., Am J Epidemiol 2009;169:1158-1165
+This is the "single intervention effect" model for total cholesterol with the correlation between pre- and post-measures assumed 0.5.
+-->
+<network type="continuous">
+	<treatments>
+		<treatment id="usual" />
+		<treatment id="psych" />
+	</treatments>
+	<studies>
+		<study id="1">
+			<measurement treatment="psych" mean="-0.82" standardDeviation="0.94" sample="243" />
+			<measurement treatment="usual" mean="-0.09" standardDeviation="1.202" sample="244" />
+		</study>
+		<study id="12">
+			<measurement treatment="psych" mean="-0.279" standardDeviation="0.799" sample="216" />
+			<measurement treatment="usual" mean="-0.206" standardDeviation="0.756" sample="217" />
+		</study>
+		<study id="13">
+			<measurement treatment="psych" mean="-0.2" standardDeviation="0.854400375" sample="44" />
+			<measurement treatment="usual" mean="-0.5" standardDeviation="0.953939201" sample="36" />
+		</study>
+		<study id="20">
+			<measurement treatment="psych" mean="-0.7" standardDeviation="0.888819442" sample="48" />
+			<measurement treatment="usual" mean="0" standardDeviation="1" sample="47" />
+		</study>
+		<study id="21">
+			<measurement treatment="psych" mean="-0.94" standardDeviation="0.746" sample="23" />
+			<measurement treatment="usual" mean="-0.117" standardDeviation="0.249" sample="20" />
+		</study>
+		<study id="22">
+			<measurement treatment="psych" mean="-0.6" standardDeviation="0.99" sample="99" />
+			<measurement treatment="usual" mean="-0.3" standardDeviation="1.546" sample="102" />
+		</study>
+		<study id="24">
+			<measurement treatment="psych" mean="0.3" standardDeviation="1.374772708" sample="43" />
+			<measurement treatment="usual" mean="0.1" standardDeviation="1.113552873" sample="43" />
+		</study>
+		<study id="25">
+			<measurement treatment="psych" mean="-0.96" standardDeviation="1.217374223" sample="20" />
+			<measurement treatment="usual" mean="-0.8" standardDeviation="0.862554346" sample="15" />
+		</study>
+		<study id="33">
+			<measurement treatment="psych" mean="-0.43" standardDeviation="0.948208838" sample="45" />
+			<measurement treatment="usual" mean="-0.05" standardDeviation="1.127430707" sample="46" />
+		</study>
+		<study id="40">
+			<measurement treatment="psych" mean="-0.22" standardDeviation="0.855394646" sample="130" />
+			<measurement treatment="usual" mean="0" standardDeviation="0.921466223" sample="119" />
+		</study>
+		<study id="49">
+			<measurement treatment="psych" mean="-0.454" standardDeviation="0.891" sample="118" />
+			<measurement treatment="usual" mean="-0.25" standardDeviation="0.754" sample="109" />
+		</study>
+		<study id="51">
+			<measurement treatment="psych" mean="-0.43" standardDeviation="1.070140178" sample="84" />
+			<measurement treatment="usual" mean="-0.12" standardDeviation="0.939521155" sample="84" />
+		</study>
+		<study id="55">
+			<measurement treatment="psych" mean="-0.27" standardDeviation="0.998967467" sample="107" />
+			<measurement treatment="usual" mean="0.16" standardDeviation="0.947071275" sample="112" />
+		</study>
+		<study id="56">
+			<measurement treatment="psych" mean="-0.54" standardDeviation="1.067" sample="331" />
+			<measurement treatment="usual" mean="-0.18" standardDeviation="1.047" sample="348" />
+		</study>
+	</studies>
+</network>
