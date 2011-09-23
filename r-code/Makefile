@@ -1,9 +1,9 @@
-mtc_%.tar.gz: ../mtc-cli/target/mtc-cli-%-jar-with-dependencies.jar mtc/R/*.R mtc/man/*.Rd mtc/DESCRIPTION mtc/NAMESPACE ../example/*.gemtc
-	rm -Rf mtc/inst/extdata
-	rm -Rf mtc/inst/java
-	mkdir -p mtc/inst/extdata
-	mkdir mtc/inst/java
-	cp ../example/*.gemtc mtc/inst/extdata
-	cp $< mtc/inst/java
-	R CMD build mtc
-	R CMD check mtc
+gemtc_%.tar.gz: ../mtc-cli/target/mtc-cli-%-jar-with-dependencies.jar gemtc/R/*.R gemtc/man/*.Rd gemtc/DESCRIPTION gemtc/NAMESPACE ../example/*.gemtc
+	rm -Rf gemtc/inst/extdata
+	rm -Rf gemtc/inst/java
+	mkdir -p gemtc/inst/extdata
+	mkdir gemtc/inst/java
+	cp ../example/*.gemtc gemtc/inst/extdata
+	cp $< gemtc/inst/java
+	R CMD build gemtc
+	R CMD check gemtc

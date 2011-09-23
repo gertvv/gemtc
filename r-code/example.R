@@ -1,4 +1,4 @@
-library(mtc)
+library(gemtc)
 
 network <- mtcNetwork("luades-smoking.xml")
 model <- mtcModel(network)
