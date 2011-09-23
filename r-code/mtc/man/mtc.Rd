@@ -5,7 +5,7 @@
 	Mixed Treatment Comparisons R package based on the Java MTC library from http://drugis.org/mtc and JAGS.
 }
 \usage{
-  network <- mtcNetwork("file.xml")
+  network <- mtcNetwork("file.gemtc")
   model <- mtcModel(network)
   data <- mtcJags(model, 3000, 2000)
 }
@@ -17,7 +17,7 @@
 }
 \author{Gert van Valkenhoef}
 \examples{
-	fileName <- system.file("extdata/luades-smoking.xml", package="mtc")
+	fileName <- system.file("extdata/luades-smoking.gemtc", package="mtc")
 	network <- mtcNetwork(fileName)
 	model <- mtcModel(network)
 	data <- mtcJags(model, 1000, 2000)

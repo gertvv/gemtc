@@ -175,11 +175,16 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 	}
 
 	def readTemplate(fileName: String): CompiledTemplate = {
-		TemplateCompiler.compileTemplate(getClass().getResourceAsStream(fileName), null)
+		TemplateCompiler.compileTemplate(getClass().getResourceAsStream(fileName))
+	}
+
+	def readTemplate2(fileName: String): java.io.InputStream = {
+		getClass().getResourceAsStream(fileName)
 	}
 
 	def modelText: String = {
 		val template = readTemplate("modelTemplate.txt")
+		println(template)
 		val map = new java.util.HashMap[String, Object]()
 		map.put("dichotomous", dichotomous.asInstanceOf[AnyRef])
 		map.put("inconsistency", inconsistency.asInstanceOf[AnyRef])
@@ -187,6 +192,7 @@ class JagsSyntaxModel[M <: Measurement, P <: Parametrization[M]](
 		map.put("priorPrecision", effPrior)
 		map.put("stdDevUpperLimit", varPrior)
 		map.put("parameters", asList(model.parameterVector))
+		map.put("inconsClass", classOf[org.drugis.mtc.InconsistencyParameter])
 		String.valueOf(TemplateRuntime.execute(template, map))
 	}
 

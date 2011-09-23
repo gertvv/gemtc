@@ -28,9 +28,6 @@ print.mtcModel <- function(x, ...) {
 	cat("\n")
 }
 
-# Add MTC to classpath (FIXME)
-.jaddClassPath("/home/gert/Documents/repositories/mtc/mtc-0.8/mtc-0.8.jar")
-
 # Load XML & parse it
 mtcNetwork <- function(file) {
 	xml <- .jcall("scala/xml/XML", "Lscala/xml/Node;", "loadFile", file)
@@ -114,9 +111,18 @@ generateJags <- function(jagsModel, generator, nchain) {
 mtcModel <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5, nchain=4) {
 	class <- paste("org/drugis/mtc/", type, "NetworkModel", sep="")
 	model <- .jcall(class, "Lorg/drugis/mtc/NetworkModel;", "apply", network$value)
+	if (is.jnull(model)) {
+		stop("Error: failed to initialize NetworkModel")
+	}
 	rng <- .jnew("org/apache/commons/math/random/JDKRandomGenerator")
 	generator <- .jcall("org/drugis/mtc/RandomizedStartingValueGenerator", "Lorg/drugis/mtc/StartingValueGenerator;", "apply", model, .jcast(rng, "org/apache/commons/math/random/RandomGenerator"), factor)
+	if (is.jnull(generator)) {
+		stop("Error: failed to initialize initial values generator")
+	}
 	jagsModel <- .jnew("org/drugis/mtc/jags/JagsSyntaxModel", model)
+	if (is.jnull(jagsModel)) {
+		stop("Error: failed to initialize JagsSyntaxModel")
+	}
 	rval <- list(model=model, jagsModel=jagsModel, jags=generateJags(jagsModel, generator, nchain), type=type)
 	class(rval) <- "mtcModel"
 	rval

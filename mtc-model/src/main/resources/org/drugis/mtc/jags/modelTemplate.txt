@@ -36,6 +36,6 @@ model {
 
 	# Effect parameter priors
 	@foreach{p : parameters}@code{
-		prec = p instanceof org.drugis.mtc.InconsistencyParameter ? "tau.w" : priorPrecision
+		prec = p.getClass().equals(inconsClass) ? "tau.w" : priorPrecision
 	}@{p} ~ dnorm(0, @{prec})@end{'\n\t'}
 }
