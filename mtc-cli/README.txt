@@ -1,9 +1,8 @@
-GeMTC GUI - Mixed Treatment Comparison model generation
+GeMTC CLI - Mixed Treatment Comparison model generation
 =======================================================
 
-GeMTC GUI provides a graphical interface to manage Mixed Treatment
-Comparison (MTC) data files and generate analysis models. MTC is also
-known as Network Meta-Analysis.
+GeMTC CLI is a program for Mixed Treatment Comparison (MTC) model
+generation. MTC is also known as Network Meta-Analysis.
 
 The software is capable of generating JAGS and BUGS models for both
 dichotomous and continuous data structures. The data is provided in an
@@ -50,12 +49,67 @@ The node-split model generation algorithm is not completely developed
 yet, and in some cases it generates a model that will not converge; this
 should be evident from the time-series plot for the split node.
 
-Running GeMTC GUI
------------------
+Using GeMTC CLI with JAGS
+-------------------------
 
-Double click the mtc-gui-0.10.jar file, and click "Open" to open an
-existing data file (e.g. those provided in the examples directory) or
-"New" to create a new one.
+For example, say we have a data file 'cardiovasc.xml'. To generate and
+run the model, do the following (on a command line; in windows, use
+start -> run -> type 'cmd' -> ok). Place the 'mtc.R' file provided in
+with MTC in the same directory as your data.
+
+ $ cd directory_with_data_file_and_mtc
+
+ $ java -jar mtc-0.10.jar --type=consistency cardiovasc.xml cv.cons
+
+    ... some output follows ...   
+
+ $ jags cv.cons.script
+
+    ... running model ...
+
+ $ R
+
+ > source('mtc.R') 
+ > data <- read.mtc('cv.cons')
+ > summary(data)
+
+    ... summary of simulation results ...
+
+To run an inconsistency model, replace --type=consistency with
+--type=inconsistency. The following are important ways to assess
+convergence:
+
+ > plot(data)
+ > gelman.diag(data)
+ > gelman.plot(data)
+
+For consistency and inconsistency models, a utility method is provided
+to calculate values for derived (functional) parameters. This is used
+like this:
+
+ > source('mtc.R') 
+ > source('cv.cons.analysis.R')
+ > data <- append.derived(read.mtc('cv.cons'), deriv)
+ > summary(data)
+
+    ... summary of simulation results ...
+
+Node split models can be generated with --type=nodesplit, and utility
+methods are also provided in "mtc.R":
+
+ > source('mtc.R') 
+ > data <- read.mtc('cv.splt.A.B')
+ > summary(data)
+
+    ... summary of simulation results ...
+
+ > nodeSplitP(data, 'A', 'B')
+
+    ... P-value for A.B.ind == A.B.dir
+
+To evaluate the P-values for all generated node-split models, use:
+
+ > nodeSplitSummary('cv')
 
 Versions
 --------
