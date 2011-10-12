@@ -45,7 +45,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.drugis.common.ImageLoader;
-import org.drugis.common.gui.FileDialog;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.common.validation.ListMinimumSizeModel;
@@ -169,7 +168,7 @@ public class MainWindow extends JFrame {
 		JButton openButton = new JButton("Open", ImageLoader.getIcon("openfile.gif"));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				FileDialog dialog = new FileLoadDialog(MainWindow.this, "gemtc", "GeMTC files") {
+				FileLoadDialog dialog = new FileLoadDialog(MainWindow.this, "gemtc", "GeMTC files") {
 					public void doAction(String path, String extension) {
 						final File file = new File(path);
 						final DataSetModel model = readFromFile(file);
@@ -181,7 +180,7 @@ public class MainWindow extends JFrame {
 						});
 					}
 				};
-				dialog.setVisible(true);
+				dialog.loadActions();
 			}
 		});
 		return openButton;
@@ -194,14 +193,14 @@ public class MainWindow extends JFrame {
 				try {
 					final DataSetModel model = getActiveModel();
 					if (model.getFile() == null) {
-						FileDialog dialog = new FileSaveDialog(MainWindow.this, "gemtc", "GeMTC files") {
+						FileSaveDialog dialog = new FileSaveDialog(MainWindow.this, "gemtc", "GeMTC files") {
 							public void doAction(String path, String extension) {
 								File file = new File(path);
 								writeToFile(model, file);
 								model.setFile(file);
 							}
 						};
-						dialog.setVisible(true);
+						dialog.saveActions();
 					} else {
 						writeToFile(model, model.getFile());
 					}
