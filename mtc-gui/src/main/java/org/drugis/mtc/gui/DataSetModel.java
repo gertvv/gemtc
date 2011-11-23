@@ -87,7 +87,7 @@ public class DataSetModel extends AbstractObservable {
 		for (StudyModel sm : d_studies) {
 			ss.add(sm.buildDichotomous(ts));
 		}
-		return new Network<DichotomousMeasurement>(ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
+		return new Network<DichotomousMeasurement>(getDescStr(), ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
 	}
 
 	private Network<?> buildContinuous(List<Treatment> ts) {
@@ -95,7 +95,7 @@ public class DataSetModel extends AbstractObservable {
 		for (StudyModel sm : d_studies) {
 			ss.add(sm.buildContinuous(ts));
 		}
-		return new Network<ContinuousMeasurement>(ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
+		return new Network<ContinuousMeasurement>(getDescStr(), ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
 	}
 
 	private Network<?> buildNone(List<Treatment> ts) {
@@ -103,12 +103,17 @@ public class DataSetModel extends AbstractObservable {
 		for (StudyModel sm : d_studies) {
 			ss.add(sm.buildNone(ts));
 		}
-		return new Network<NoneMeasurement>(ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
+		return new Network<NoneMeasurement>(getDescStr(), ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
+	}
+
+	private String getDescStr() {
+		return (String) getDescription().getValue();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static DataSetModel build(Network<?> network) {
 		DataSetModel model = new DataSetModel();
+		model.getDescription().setValue(network.description());
 		
 		// populate treatments
 		Map<Treatment, TreatmentModel> tMap = new HashMap<Treatment, TreatmentModel>();
@@ -122,7 +127,7 @@ public class DataSetModel extends AbstractObservable {
 		Collections.sort(model.getTreatments(), new TreatmentIdComparator());
 		
 		convertStudies(network, model, tMap);
-		if (network.measurementType().equals(NoneMeasurement.class)) {
+		if (network.measurementType() == null || network.measurementType().equals(NoneMeasurement.class)) {
 			model.getMeasurementType().setValue(MeasurementType.NONE);
 		} else if (network.measurementType().equals(ContinuousMeasurement.class)) {
 			model.getMeasurementType().setValue(MeasurementType.CONTINUOUS);

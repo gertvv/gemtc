@@ -44,6 +44,7 @@ public class DataSetModelTest {
 	@Test
 	public void testBuildNone() {
 		DataSetModel model = new DataSetModel();
+		model.getDescription().setValue("test description");
 		TreatmentModel ta = new TreatmentModel();
 		ta.setId("A");
 		TreatmentModel tb = new TreatmentModel();
@@ -62,11 +63,11 @@ public class DataSetModelTest {
 		map.put(new Treatment("B"), new NoneMeasurement(new Treatment("B")));
 		Study<NoneMeasurement> s01 = new Study<NoneMeasurement>("01", ScalaUtil.toScalaMap(map));
 		Set<Study<NoneMeasurement>> ss = new HashSet<Study<NoneMeasurement>>(Arrays.asList(s01));
-		Network<NoneMeasurement> expected = new Network<NoneMeasurement>(ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
-		
+		Network<NoneMeasurement> expected = new Network<NoneMeasurement>("test description", ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
+
 		Elem expectedXML = expected.toXML();
-		assertEquals(expectedXML, model.build().toXML());
-		assertEquals(expectedXML, DataSetModel.build(Network.fromXML(expectedXML)).build().toXML()); // round-trip
+		assertEquals(expectedXML.toString(), model.build().toXML().toString());
+		assertEquals(expectedXML.toString(), DataSetModel.build(Network.fromXML(expectedXML)).build().toXML().toString()); // round-trip
 	}
 	
 	@SuppressWarnings("unchecked")

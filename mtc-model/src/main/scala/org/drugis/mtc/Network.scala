@@ -19,8 +19,13 @@
 
 package org.drugis.mtc
 
-class Network[M <: Measurement](
+class Network[M <: Measurement](val description: String,
 		val treatments: Set[Treatment], val studies: Set[Study[M]]) {
+
+	def this(treatments: Set[Treatment], studies: Set[Study[M]]) {
+		this("", treatments, studies)
+	}
+
 	override def toString = treatments.toString + studies.toString
 
 	val measurementType: Class[M] =
@@ -280,7 +285,7 @@ class Network[M <: Measurement](
 		case None => null
 	}
 
-	def toXML = <network type={measurementTypeString}>
+	def toXML = <network description={description} type={measurementTypeString}>
 		<treatments>{treatments.toList.sort((a, b) => a.id < b.id).map(t => t.toXML)}</treatments>
 		<studies>{studies.toList.sort((a, b) => a.id < b.id).map(s => s.toXML)}</studies>
 	</network>
@@ -290,10 +295,6 @@ class Network[M <: Measurement](
 }
 
 object Network {
-	/*
-	def fromXML(node: scala.xml.Node): Network[DichotomousMeasurement] = {
-		dichFromXML(node)
-	} */
 	def fromXML(node: scala.xml.Node): Network[_ <: Measurement] = {
 		node.attribute("type") match {
 			case Some(x) => x.text match {
@@ -307,23 +308,32 @@ object Network {
 		}
 	}
 
+	def description(node: scala.xml.Node): String = 
+		node.attribute("description") match {
+			case Some(x) => x.text
+			case None => ""
+		}
+
 	def dichFromXML(node: scala.xml.Node): Network[DichotomousMeasurement] = {
 		val treatments = treatmentsFromXML((node \ "treatments")(0))
-		new Network(Set[Treatment]() ++ treatments.values, 
+		new Network(description(node),
+			Set[Treatment]() ++ treatments.values, 
 			studiesFromXML((node \ "studies")(0), treatments,
 				DichotomousMeasurement.fromXML))
 	}
 
 	def contFromXML(node: scala.xml.Node): Network[ContinuousMeasurement] = {
 		val treatments = treatmentsFromXML((node \ "treatments")(0))
-		new Network(Set[Treatment]() ++ treatments.values, 
+		new Network(description(node),
+			Set[Treatment]() ++ treatments.values, 
 			studiesFromXML((node \ "studies")(0), treatments,
 				ContinuousMeasurement.fromXML))
 	}
 
 	def noneFromXML(node: scala.xml.Node): Network[NoneMeasurement] = {
 		val treatments = treatmentsFromXML((node \ "treatments")(0))
-		new Network(Set[Treatment]() ++ treatments.values, 
+		new Network(description(node),
+			Set[Treatment]() ++ treatments.values, 
 			studiesFromXML((node \ "studies")(0), treatments,
 				NoneMeasurement.fromXML))
 	}
