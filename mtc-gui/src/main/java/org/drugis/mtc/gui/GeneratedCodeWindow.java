@@ -108,6 +108,9 @@ public class GeneratedCodeWindow extends JFrame {
 			files.add(new GeneratedFile("inits" + i, d_syntaxModel.initialValuesText(gen)));
 		}
 		files.add(new GeneratedFile("script", d_syntaxModel.scriptText(getBaseName(), d_nchains, d_tuning, d_simulation)));
+		if (d_syntaxType.equals(SyntaxType.JAGS)) {
+			files.add(new GeneratedFile("R", d_syntaxModel.analysisText(getBaseName())));
+		}
 		return files;
 	}
 
