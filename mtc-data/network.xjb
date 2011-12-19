@@ -1,0 +1,27 @@
+<jxb:bindings
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+	version="2.1">
+	
+	
+	
+	<jxb:bindings schemaLocation="network.xsd">
+		<jxb:nameXmlTransform>
+			<jxb:typeName suffix="Data"/>
+		</jxb:nameXmlTransform>
+		
+		<jxb:bindings node="//xs:element[@name='treatments']">
+			<jxb:property name="treatmentList" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:element[@name='studies']">
+			<jxb:property name="studyList" />
+		</jxb:bindings>
+		
+		<jxb:bindings node="//xs:element[@name='treatments']/xs:complexType/xs:sequence/xs:element[@name='treatment']">
+			<jxb:property collectionType="com.jgoodies.binding.list.ArrayListModel" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:element[@name='studies']/xs:complexType/xs:sequence/xs:element[@name='study']">
+			<jxb:property collectionType="com.jgoodies.binding.list.ArrayListModel" />
+		</jxb:bindings>
+	</jxb:bindings>
+</jxb:bindings>
