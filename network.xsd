@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="network" type="Network">	
+		<xsd:key name="treatmentKey">
+			<xsd:selector xpath="treatments/treatment"/>
+			<xsd:field xpath="@id"/>
+		</xsd:key>
+		<xsd:keyref name="treatmentRef" refer="treatmentKey">
+			<xsd:selector xpath="studies/study/measurement"/>
+			<xsd:field xpath="@treatment"/>
+		</xsd:keyref>
+	</xsd:element>
+	
+	<xsd:complexType name="Network">
+		<xsd:sequence>
+			<xsd:element name="treatments">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="treatment" type="Treatment" minOccurs="0" maxOccurs="unbounded" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="studies">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="study" type="Study" minOccurs="0" maxOccurs="unbounded"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="type" type="DataType" default="rate"/>
+		<xsd:attribute name="description" type="xsd:string"/>
+	</xsd:complexType>
+	
+	<!-- Type of data presented in the network -->
+	<xsd:simpleType name="DataType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="none"/>
+			<xsd:enumeration value="rate"/>
+			<xsd:enumeration value="continuous"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:complexType name="Treatment">
+		<xsd:simpleContent id="description">
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="id" type="TreatmentId" use="required" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<!-- TreatmentId is restricted so it is a valid identifier in MCMC packages -->
+	<xsd:simpleType name="TreatmentId">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([a-zA-Z0-9_]*)"></xsd:pattern>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="TreatmentRef">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([a-zA-Z0-9_]*)"></xsd:pattern>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:complexType name="Study">
+			<xsd:sequence>
+				<xsd:element name="measurement" type="Measurement" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:string" use="required" />
+	</xsd:complexType>
+	
+	<xsd:complexType name="Measurement">
+		<xsd:attribute name="treatment" type="TreatmentRef" />
+		<xsd:attribute name="responders" type="nonNegativeInt" />
+		<xsd:attribute name="sample" type="nonNegativeInt" />
+		<xsd:attribute name="mean" type="xsd:double" />
+		<xsd:attribute name="standardDeviation" type="xsd:double" />
+	</xsd:complexType>
+	
+	<!-- non-negative integer that maps to a Java int -->
+	<xsd:simpleType name="nonNegativeInt">
+		<xsd:restriction base="xsd:int">
+			<xsd:minInclusive value="0"></xsd:minInclusive>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>
