@@ -1,15 +1,16 @@
 <jxb:bindings
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
-	version="2.1">
-	
-	
+	version="2.1"
+	xmlns:injector="http://jaxb.dev.java.net/plugin/listener-injector">
 	
 	<jxb:bindings schemaLocation="network.xsd">
-		<jxb:nameXmlTransform>
-			<jxb:typeName suffix="Data"/>
-		</jxb:nameXmlTransform>
-		
+		<jxb:schemaBindings>
+			<jxb:nameXmlTransform>
+				<jxb:typeName suffix="Data"/>
+				<jxb:elementName suffix="Data"/>
+			</jxb:nameXmlTransform>
+		</jxb:schemaBindings>
 		<jxb:bindings node="//xs:element[@name='treatments']">
 			<jxb:property name="treatmentList" />
 		</jxb:bindings>
@@ -22,6 +23,9 @@
 		</jxb:bindings>
 		<jxb:bindings node="//xs:element[@name='studies']/xs:complexType/xs:sequence/xs:element[@name='study']">
 			<jxb:property collectionType="com.jgoodies.binding.list.ArrayListModel" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:complexType[@name='Treatment']">
+			<jxb:class implClass="org.drugis.mtc.model.Treatment" />
 		</jxb:bindings>
 	</jxb:bindings>
 </jxb:bindings>
