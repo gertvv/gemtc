@@ -10,8 +10,9 @@ import org.drugis.mtc.data.TreatmentData;
 import com.jgoodies.binding.beans.Observable;
 
 public class Treatment extends TreatmentData implements Observable {
-	private static final String PROPERTY_DESCRIPTION = "description";
-	private static final String PROPERTY_ID = "id";
+	public static final String PROPERTY_DESCRIPTION = "description";
+	public static final String PROPERTY_ID = "id";
+	
 	@XmlTransient
 	ObserverManager d_obsManager = new ObserverManager(this);
 	
@@ -30,6 +31,9 @@ public class Treatment extends TreatmentData implements Observable {
 		return getValue();
 	}
 	
+	/**
+	 * An alias for setDescription(). For JAXB compatibility. Do not use.
+	 */
 	@Override
 	public void setValue(String newValue) {
 		String oldValue = super.getValue();
@@ -42,7 +46,7 @@ public class Treatment extends TreatmentData implements Observable {
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		d_obsManager.addPropertyChangeListener(listener);
+		d_obsManager.removePropertyChangeListener(listener);
 	}
 	
 	@Override
