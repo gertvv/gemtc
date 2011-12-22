@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.drugis.common.beans.ObserverManager;
+import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.data.MeasurementData;
 
 import com.jgoodies.binding.beans.Observable;
@@ -71,5 +72,27 @@ public class Measurement extends MeasurementData implements Observable {
 	@Override
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.removePropertyChangeListener(listener);
+	}
+	
+	/**
+	 * Create a clone of this Measurement with only the properties allowed by the DataType set.
+	 */
+	public Measurement restrict(DataType type) {
+		Measurement m = new Measurement();
+		m.setTreatment(getTreatment());
+		switch (type) {
+		case NONE:
+			break;
+		case RATE:
+			m.setSampleSize(getSampleSize());
+			m.setResponders(getResponders());
+			break;
+		case CONTINUOUS:
+			m.setMean(getMean());
+			m.setStdDev(getStdDev());
+			m.setSampleSize(getSampleSize());
+			break;
+		}
+		return m;
 	}
 }

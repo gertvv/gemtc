@@ -61,4 +61,19 @@ public class Network extends NetworkData implements Observable {
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.removePropertyChangeListener(listener);
 	}
+
+	/**
+	 * Create a clone of this Network, with the Measurement values restricted to those allowed by the DataType.
+	 */
+	public Network restrictMeasurements() {
+		Network n = new Network();
+		n.setDescription(getDescription());
+		n.setType(getType());
+		n.setTreatmentList(getTreatmentList());
+		n.setStudyList(new Studies());
+		for (Study s : getStudies()) {
+			n.getStudies().add(s.restrictMeasurements(type));
+		}
+		return n;
+	}
 }

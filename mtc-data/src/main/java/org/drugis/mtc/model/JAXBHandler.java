@@ -21,7 +21,9 @@ public class JAXBHandler {
 	}
 
 	public static void writeNetwork(Network data, OutputStream out) throws JAXBException {
-		createMarshaller().marshal(data, out);
+		// Since there is no way to restrict the allowed attributes based on values elsewhere in the XML,
+		// enforce the restrictions before marshalling.
+		createMarshaller().marshal(data.restrictMeasurements(), out);
 	}
 	
 	private static Marshaller createMarshaller() throws JAXBException {

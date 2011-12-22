@@ -36,7 +36,7 @@
 			<jxb:property name="stdDev" />
 		</jxb:bindings>
 		<jxb:bindings node="//xs:element[@name='measurement']">
-			<jxb:property name="measurements" />
+			<jxb:property name="measurementList" />
 		</jxb:bindings>
 		<jxb:bindings node="//xs:element[@name='treatments']">
 			<jxb:property name="treatmentList" />
