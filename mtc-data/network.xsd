@@ -51,13 +51,13 @@
 	
 	<!-- TreatmentId is restricted so it is a valid identifier in MCMC packages -->
 	<xsd:simpleType name="TreatmentId">
-		<xsd:restriction base="xsd:string">
+		<xsd:restriction base="xsd:ID">
 			<xsd:pattern value="([a-zA-Z0-9_]*)"></xsd:pattern>
 		</xsd:restriction>
 	</xsd:simpleType>
 	
 	<xsd:simpleType name="TreatmentRef">
-		<xsd:restriction base="xsd:string">
+		<xsd:restriction base="xsd:IDREF">
 			<xsd:pattern value="([a-zA-Z0-9_]*)"></xsd:pattern>
 		</xsd:restriction>
 	</xsd:simpleType>

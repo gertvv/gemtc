@@ -29,4 +29,11 @@ public class MarshallUnmarshallTest {
 		System.out.println(data);
 		System.out.println(data.getTreatmentList().getTreatment().get(0));
 	}
+	
+	@Test
+	public void testTreatmentRef() throws JAXBException {
+		Network data = JAXBHandler.readNetwork(
+				new StringReader("<?xml version=\"1.0\"?><network><treatments><treatment id=\"A\">Argh!</treatment></treatments><studies><study id=\"Study 1\"><measurement treatment=\"A\"/></study></studies></network>"));
+		assertEquals(data.getTreatments().get(0), data.getStudies().get(0).getMeasurements().get(0).getTreatment());
+	}
 }
