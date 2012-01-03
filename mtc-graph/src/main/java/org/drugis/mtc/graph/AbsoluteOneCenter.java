@@ -29,37 +29,62 @@ import edu.uci.ics.jung.graph.UndirectedGraph;
  * This class only implements the vertex-unweighted algorithm. Edge-weighted graphs are supported, however.)
  */
 public class AbsoluteOneCenter<V, E> {
+	public static class UnitLength<E> implements Transformer<E, Number> {
+		@Override
+		public Number transform(E input) {
+			return 1.0;
+		}
+
+	}
+
 	private final UndirectedGraph<V, E> d_graph;
 	private final ShortestPath<V, E> d_shortestPath;
 	private final Distance<V> d_distance;
+	private final Transformer<E, Number> d_edgeLength;
 
 	/**
 	 * Absolute 1-center of an unweighted graph.
 	 */
 	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph) {
-		this(graph, new DijkstraShortestPath<V, E>(graph));
+		this(graph, new UnitLength<E>(), new DijkstraShortestPath<V, E>(graph));
+	}
+	
+	/**
+	 * Absolute 1-center of a weighted graph.
+	 */
+	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength) {
+		this(graph, edgeLength, new DijkstraShortestPath<V, E>(graph));
 	}
 
 	/**
-	 * Absolute 1-center of an unweighted graph.
+	 * Absolute 1-center of an weighted graph.
 	 */
-	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final DijkstraShortestPath<V, E> dijkstra) {
-		d_graph = graph;
-		d_shortestPath = dijkstra;
-		d_distance = dijkstra;
+	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final DijkstraShortestPath<V, E> dijkstra) {
+		this(graph, edgeLength, dijkstra, dijkstra);
 	}
 
 	/**
-	 * Absolute 1-center of an unweighted graph.
+	 * Absolute 1-center of an weighted graph.
 	 */
-	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final ShortestPath<V, E> shortestPath, final Distance<V> distance) {
+	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final ShortestPath<V, E> shortestPath, final Distance<V> distance) {
 		d_graph = graph;
+		d_edgeLength = edgeLength;
 		d_shortestPath = shortestPath;
 		d_distance = distance;
 	}
 
 	public PointOnEdge<V, E> getCenter() {
-		return null;
+		LocalCenter<V, E> localCenter = new LocalCenter<V, E>(d_graph, d_edgeLength, d_distance);
+		
+		Center<V, E> c = null;
+		for (E e : d_graph.getEdges()) {
+			Center<V, E> lc = localCenter.transform(e);
+			if (c == null || lc.getRadius() < c.getRadius()) {
+				c = lc;
+			}
+		}
+		
+		return c;
 	}
 
 	/**
@@ -237,7 +262,7 @@ public class AbsoluteOneCenter<V, E> {
 			} else {
 				c = new Center<V, E>(xs, ds);
 			}
-			
+
 			if (d_orderedVertices.get(vr).get(0) == d_orderedVertices.get(vs).get(0)) {
 				return c;
 			} else {
@@ -284,14 +309,13 @@ public class AbsoluteOneCenter<V, E> {
 		private Center<V, E> step5(Center<V, E> c, V vm, V vbar, int i) {
 //			System.out.println("step5: " + (i + 1));
 			V v = d_orderedVertices.get(c.getVertex0()).get(i + 1); // guaranteed to succeed
-            if (de(xs(c), v) != de(xs(c), vm)) {
+            if (de(xr(c), v) != de(xr(c), vm)) {
             	return step6(c, vm, vbar, i + 1);
-            } else if (de(xr(c), v) > de(xr(c), vm)) {
+            } else if (de(xs(c), v) > de(xs(c), vm)) {
             	return step5(c, v, vbar, i + 1); // v_m <- v*
             } else {
             	return step5(c, vm, vbar, i + 1);
             }
-
 		}
 
 		/**
@@ -344,7 +368,5 @@ public class AbsoluteOneCenter<V, E> {
 				}
 			}
 		}
-		
-
 	}
 }

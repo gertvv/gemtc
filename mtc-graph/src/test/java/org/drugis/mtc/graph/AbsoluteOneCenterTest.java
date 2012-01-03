@@ -99,10 +99,75 @@ public class AbsoluteOneCenterTest {
 		final EdgeLength edgeLength = new EdgeLength(new double[] {1.0, 1.0, 1.0, 0.5});
 		final DijkstraDistance<Integer, Integer> distance2 = new DijkstraDistance<Integer, Integer>(g, edgeLength);
 		final LocalCenter<Integer,Integer> center2 = new AbsoluteOneCenter.LocalCenter<Integer, Integer>(g, edgeLength, distance2);
-		
+
 		assertEquals(0.75, center2.transform(1).getDistance(), EPSILON);
 		assertEquals(1.75, center2.transform(1).getRadius(), EPSILON);
 		assertEquals(0.0, center2.transform(2).getDistance(), EPSILON);
 		assertEquals(2.0, center2.transform(2).getRadius(), EPSILON);
 	}
+
+	@Test
+	public void testSimpleVertexCenter() {
+		final UndirectedGraph<String, Integer> g = new UndirectedSparseGraph<String, Integer>();
+		g.addVertex("A");
+		g.addVertex("B");
+		g.addVertex("C");
+		g.addVertex("D");
+		g.addEdge(1, "A", "B");
+		g.addEdge(2, "B", "C");
+		g.addEdge(3, "B", "D");
+
+		final AbsoluteOneCenter<String, Integer> absoluteOneCenter = new AbsoluteOneCenter<String, Integer>(g);
+		final PointOnEdge<String, Integer> center = absoluteOneCenter.getCenter();
+		assertEquals(1, center.getEdge().intValue());
+		assertEquals("A", center.getVertex0());
+		assertEquals("B", center.getVertex1());
+		assertEquals(1.0, center.getDistance(), EPSILON);
+	}
+
+	@Test
+	public void testSimplePointCenter() {
+		final UndirectedGraph<String, Integer> g = new UndirectedSparseGraph<String, Integer>();
+		g.addVertex("A");
+		g.addVertex("B");
+		g.addVertex("C");
+		g.addVertex("D");
+		g.addEdge(1, "A", "B");
+		g.addEdge(2, "B", "C");
+		g.addEdge(3, "C", "D");
+
+		final AbsoluteOneCenter<String, Integer> absoluteOneCenter = new AbsoluteOneCenter<String, Integer>(g);
+		final PointOnEdge<String, Integer> center = absoluteOneCenter.getCenter();
+		assertEquals(2, center.getEdge().intValue());
+		assertEquals("B", center.getVertex0());
+		assertEquals("C", center.getVertex1());
+		assertEquals(0.5, center.getDistance(), EPSILON);
+	}
+
+
+	@Test
+	public void testCenterWithCycles() {
+		final UndirectedGraph<String, Integer> g = new UndirectedSparseGraph<String, Integer>();
+		g.addVertex("A");
+		g.addVertex("B");
+		g.addVertex("C");
+		g.addVertex("D");
+		g.addVertex("E");
+		g.addEdge(1, "A", "B");
+		g.addEdge(2, "A", "C");
+		g.addEdge(3, "A", "D");
+		g.addEdge(4, "A", "E");
+		g.addEdge(5, "B", "C");
+		g.addEdge(6, "C", "D");
+		g.addEdge(7, "D", "E");
+
+		final AbsoluteOneCenter<String, Integer> absoluteOneCenter = new AbsoluteOneCenter<String, Integer>(g);
+		final PointOnEdge<String, Integer> center = absoluteOneCenter.getCenter();
+		assertEquals(1, center.getEdge().intValue());
+		assertEquals("A", center.getVertex0());
+		assertEquals("B", center.getVertex1());
+		assertEquals(0.0, center.getDistance(), EPSILON);
+	}
+
+	// FIXME: add more tests for non-unit edge weights (lengths)
 }
