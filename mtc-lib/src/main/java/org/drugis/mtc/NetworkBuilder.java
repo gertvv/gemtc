@@ -6,10 +6,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections15.BidiMap;
+import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+import org.apache.commons.collections15.bidimap.UnmodifiableBidiMap;
 import org.drugis.common.EqualsUtil;
 import org.drugis.mtc.util.ScalaUtil;
 
-public class NetworkBuilder<M extends Measurement> {
+public class NetworkBuilder<M extends Measurement, TreatmentType> {
 	private static class MKey {
 		public final String studyId;
 		public final Treatment treatment;
@@ -34,11 +37,15 @@ public class NetworkBuilder<M extends Measurement> {
 		}
 	}
 
-	private Map<String, Treatment> d_treatmentMap = new HashMap<String, Treatment>();
+	private BidiMap<TreatmentType, Treatment> d_treatmentMap = new DualHashBidiMap<TreatmentType, Treatment>();
 	private Map<MKey, M> d_measurementMap = new HashMap<MKey, M>();
 
 	public Network<M> buildNetwork() {
 		return new Network<M>(ScalaUtil.toScalaSet(getTreatments()), ScalaUtil.toScalaSet(getStudies()));
+	}
+	
+	public BidiMap<TreatmentType, Treatment> getTreatmentMap() {
+		return UnmodifiableBidiMap.decorate(d_treatmentMap);
 	}
 	
 	protected void add(String studyId, Treatment t, M measurement) {
@@ -49,9 +56,9 @@ public class NetworkBuilder<M extends Measurement> {
 		d_measurementMap.put(key, measurement);
 	}
 
-	protected Treatment makeTreatment(String id) {
+	protected Treatment makeTreatment(TreatmentType id) {
 		if (!d_treatmentMap.containsKey(id)) {
-			d_treatmentMap.put(id, new Treatment(id));
+			d_treatmentMap.put(id, new Treatment(id.toString()));
 		}
 		return d_treatmentMap.get(id);
 	}
@@ -80,9 +87,5 @@ public class NetworkBuilder<M extends Measurement> {
 
 	private Collection<Treatment> getTreatments() {
 		return d_treatmentMap.values();
-	}
-
-	public Treatment getTreatment(String tId) {
-		return d_treatmentMap.get(tId);
 	}
 }
