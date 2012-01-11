@@ -33,6 +33,7 @@ import org.drugis.mtc.Network;
 import org.drugis.mtc.NoneMeasurement;
 import org.drugis.mtc.Study;
 import org.drugis.mtc.Treatment;
+import org.drugis.mtc.util.ScalaUtil;
 
 import com.jgoodies.binding.list.ArrayListModel;
 import com.jgoodies.binding.list.ObservableList;

@@ -32,6 +32,7 @@ import org.drugis.common.JUnitUtil;
 import org.drugis.mtc.NoneMeasurement;
 import org.drugis.mtc.Study;
 import org.drugis.mtc.Treatment;
+import org.drugis.mtc.util.ScalaUtil;
 import org.junit.Test;
 
 public class StudyModelTest {
