@@ -5,14 +5,25 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections15.BidiMap;
+import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.commons.collections15.bidimap.UnmodifiableBidiMap;
 import org.drugis.common.EqualsUtil;
 import org.drugis.mtc.util.ScalaUtil;
 
 public class NetworkBuilder<M extends Measurement, TreatmentType> {
+	private static final Pattern s_treatmentIdPattern = Pattern.compile("^[A-Za-z0-9_]+$");
+	
+	public static class ToStringTransformer<T> implements Transformer<T, String> {
+		public String transform(T input) {
+			return input.toString();
+		}
+	}
+
 	private static class MKey {
 		public final String studyId;
 		public final Treatment treatment;
@@ -39,7 +50,16 @@ public class NetworkBuilder<M extends Measurement, TreatmentType> {
 
 	private BidiMap<TreatmentType, Treatment> d_treatmentMap = new DualHashBidiMap<TreatmentType, Treatment>();
 	private Map<MKey, M> d_measurementMap = new HashMap<MKey, M>();
+	private Transformer<TreatmentType, String> d_idToString;
 
+	public NetworkBuilder() {
+		this(new ToStringTransformer<TreatmentType>());
+	}
+	
+	public NetworkBuilder(Transformer<TreatmentType, String> idToString) {
+		d_idToString = idToString;
+	}
+	
 	public Network<M> buildNetwork() {
 		return new Network<M>(ScalaUtil.toScalaSet(getTreatments()), ScalaUtil.toScalaSet(getStudies()));
 	}
@@ -58,9 +78,19 @@ public class NetworkBuilder<M extends Measurement, TreatmentType> {
 
 	protected Treatment makeTreatment(TreatmentType id) {
 		if (!d_treatmentMap.containsKey(id)) {
-			d_treatmentMap.put(id, new Treatment(id.toString()));
+			d_treatmentMap.put(id, new Treatment(createId(id)));
 		}
 		return d_treatmentMap.get(id);
+	}
+
+	private String createId(TreatmentType id) {
+		String transformed = d_idToString.transform(id);
+		Matcher matcher = s_treatmentIdPattern.matcher(transformed);
+		if (matcher.matches()) {
+			return transformed;
+		} else {
+			throw new IllegalArgumentException("Illegal Treatment id: " + transformed);
+		}
 	}
 
 	private Set<Study<M>> getStudies() {

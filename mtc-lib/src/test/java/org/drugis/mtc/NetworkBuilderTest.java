@@ -7,12 +7,22 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections15.Transformer;
+import org.apache.commons.lang.StringUtils;
 import org.drugis.mtc.util.ScalaUtil;
 import org.junit.Before;
 import org.junit.Test;
 
 public class NetworkBuilderTest {
 	public static class NoneBuilder<TreatmentType> extends NetworkBuilder<NoneMeasurement, TreatmentType> {
+		public NoneBuilder() {
+			super();
+		}
+		
+		public NoneBuilder(Transformer<TreatmentType, String> idToString) {
+			super(idToString);
+		}
+		
 		public void add(String studyId, TreatmentType treatmentId) {
 			Treatment t = makeTreatment(treatmentId);
 			add(studyId, t, new NoneMeasurement(t));
@@ -76,6 +86,20 @@ public class NetworkBuilderTest {
 		assertEquals(expected, d_builder.getTreatmentMap());
 	}
 	
+	@Test
+	public void testIdTransform() {
+		NoneBuilder<Integer> builder = new NoneBuilder<Integer>(new Transformer<Integer, String>() {
+			public String transform(Integer input) {
+				return StringUtils.repeat("A", input.intValue());
+			}
+		});
+		
+		builder.add("1", 5);
+		HashMap<Integer, Treatment> expected = new HashMap<Integer, Treatment>();
+		expected.put(5, new Treatment("AAAAA"));
+		assertEquals(expected, builder.getTreatmentMap());
+	}
+	
 	@Test(expected=UnsupportedOperationException.class)
 	public void testTreatmentMapUnmodifiable() {
 		d_builder.getTreatmentMap().put("A", d_ta);
@@ -85,5 +109,10 @@ public class NetworkBuilderTest {
 	public void testDuplicateEntry() {
 		d_builder.add("1", "A");
 		d_builder.add("1", "A");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testIllegalTreatmentId() {
+		d_builder.add("1", "-A"); // allowed chars: A-Za-z0-9_
 	}
 }
