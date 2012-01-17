@@ -1,7 +1,7 @@
 package org.drugis.mtc.graph;
 
 /**
- * Represents a point x along an edge e = (v0, v1), with t \in [0, 1] the distance of x from v0.  
+ * Represents a point x along an edge e = (v0, v1), with t \in [0, l(e)] the distance of x from v0.  
  */
 public class PointOnEdge<V, E> {
 	private final E d_e;
@@ -10,9 +10,6 @@ public class PointOnEdge<V, E> {
 	private final double d_t;
 
 	public PointOnEdge(E e, V v0, V v1, double t) {
-		if (t < 0.0 || t > 1.0) {
-			throw new IllegalArgumentException("The distance t must be in [0, 1]; was " + t);
-		}
 		d_e = e;
 		d_v0 = v0;
 		d_v1 = v1;
@@ -41,8 +38,8 @@ public class PointOnEdge<V, E> {
 	}
 	
 	/**
-	 * Get the distance t \in [0, 1] from the start vertex v0.
-	 * Thus, if t = 0.0, x = v0 and if t = 1.0, x = v1. Otherwise x lies in between the two.
+	 * Get the distance t \in [0, l(e)] from the start vertex v0.
+	 * Thus, if t = 0.0, x = v0 and if t = l(e), x = v1. Otherwise x lies in between the two.
 	 * @return t.
 	 */
 	public double getDistance() {

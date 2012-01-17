@@ -11,7 +11,6 @@ import org.apache.commons.collections15.Transformer;
 
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.algorithms.shortestpath.Distance;
-import edu.uci.ics.jung.algorithms.shortestpath.ShortestPath;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 
 /**
@@ -38,7 +37,6 @@ public class AbsoluteOneCenter<V, E> {
 	}
 
 	private final UndirectedGraph<V, E> d_graph;
-	private final ShortestPath<V, E> d_shortestPath;
 	private final Distance<V> d_distance;
 	private final Transformer<E, Number> d_edgeLength;
 
@@ -59,17 +57,9 @@ public class AbsoluteOneCenter<V, E> {
 	/**
 	 * Absolute 1-center of an weighted graph.
 	 */
-	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final DijkstraShortestPath<V, E> dijkstra) {
-		this(graph, edgeLength, dijkstra, dijkstra);
-	}
-
-	/**
-	 * Absolute 1-center of an weighted graph.
-	 */
-	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final ShortestPath<V, E> shortestPath, final Distance<V> distance) {
+	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final Distance<V> distance) {
 		d_graph = graph;
 		d_edgeLength = edgeLength;
-		d_shortestPath = shortestPath;
 		d_distance = distance;
 	}
 
