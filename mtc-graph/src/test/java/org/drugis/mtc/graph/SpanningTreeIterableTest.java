@@ -7,11 +7,15 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.apache.commons.collections15.Factory;
 import org.junit.Test;
 
+import edu.uci.ics.jung.algorithms.transformation.DirectionTransformer;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Tree;
+import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 public class SpanningTreeIterableTest {
 	@Test
@@ -61,16 +65,30 @@ public class SpanningTreeIterableTest {
 
 		assertFalse(iterator.hasNext());
 	}
-//
-//		@Test def testEnumerateUndirected() {
-//			val g = new UndirectedGraph[String](Set[(String, String)](
-//					("A", "B"), ("A", "C"), ("A", "D"),
-//					("B", "C"), ("B", "D"),
-//					("C", "D")
-//				))
-//
-//			val found = SpanningTreeEnumerator.treeEnumerator(g, "A").toList
-//			(Set[Tree[String]]() ++ found).size should be (found.size)
-//			found.size should be (16)
-//		}
+
+	@Test
+	public void testEnumerateUndirected() {
+		UndirectedGraph<String, Integer> ug = new UndirectedSparseGraph<String, Integer>();
+		GraphUtil.addVertices(ug, Arrays.asList("A", "B", "C", "D"));
+		ug.addEdge(1, "A", "B");
+		ug.addEdge(2, "A", "C");
+		ug.addEdge(3, "A", "D");
+		ug.addEdge(4, "B", "C");
+		ug.addEdge(5, "B", "D");
+		ug.addEdge(6, "C", "D");
+		
+		DirectedGraph<String, Integer> dg = (DirectedGraph<String, Integer>) DirectionTransformer.toDirected(ug, DirectedSparseGraph.<String, Integer>getFactory(), new Factory<Integer>() {
+			int cnt = 0;
+			public Integer create() {
+				return ++cnt;
+			}
+		}, true);
+
+		Iterator<Tree<String, Integer>> iterator = new SpanningTreeIterable<String, Integer>(dg, "A").iterator();
+		int i;
+		for (i = 0; iterator.hasNext(); ++i) {
+			iterator.next();
+		}
+		assertEquals(16, i);
+	}
 }
