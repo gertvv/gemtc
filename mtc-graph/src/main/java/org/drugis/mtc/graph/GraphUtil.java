@@ -1,6 +1,7 @@
 package org.drugis.mtc.graph;
 
 import java.util.Collection;
+import java.util.LinkedList;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Tree;
@@ -21,8 +22,11 @@ public class GraphUtil {
 	
 	public static <V, E> void copyTree(Tree<V, E> source, Tree<V, E> target) {
 		target.addVertex(source.getRoot());
-		for (E e : source.getEdges()) {
+		LinkedList<E> toAdd = new LinkedList<E>(source.getChildEdges(source.getRoot()));
+		while (!toAdd.isEmpty()) {
+			E e = toAdd.pop();
 			target.addEdge(e, source.getSource(e), source.getDest(e));
+			toAdd.addAll(source.getChildEdges(source.getDest(e)));
 		}
 	}
 	
