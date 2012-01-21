@@ -3,6 +3,7 @@ package org.drugis.mtc.graph;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Hypergraph;
@@ -73,5 +74,47 @@ public class GraphUtil {
 			}
 			return false;
 		}
+	}
+	
+	/**
+	 * Find the closest common ancestor of u and v in the given tree. May be u or v itself.
+	 */
+	public static <V, E> V findCommonAncestor(Tree<V, E> tree, V u, V v) {
+		while (tree.getDepth(u) > tree.getDepth(v)) {
+			u = tree.getParent(u);
+		}
+		while (tree.getDepth(v) > tree.getDepth(u)) {
+			v = tree.getParent(v);
+		}
+		while (!u.equals(v)) {
+			v = tree.getParent(v);
+			u = tree.getParent(u);
+		}
+		return v;
+	}
+	
+	/**
+	 * Find the (unique, simple) path from u to v in the given tree.
+	 */
+	public static <V, E> List<V> findPath(Tree<V, E> tree, V u, V v) {
+		LinkedList<V> path = new LinkedList<V>();
+		while (tree.getDepth(u) > tree.getDepth(v)) {
+			path.add(u);
+			u = tree.getParent(u);
+		}
+		int idx = path.size();
+		while (tree.getDepth(v) > tree.getDepth(u)) {
+			path.add(idx, v);
+			v = tree.getParent(v);
+		}
+		while (!u.equals(v)) {
+			path.add(idx, v);
+			path.add(idx, u);
+			++idx;
+			v = tree.getParent(v);
+			u = tree.getParent(u);
+		}
+		path.add(idx, u);
+		return path;
 	}
 }

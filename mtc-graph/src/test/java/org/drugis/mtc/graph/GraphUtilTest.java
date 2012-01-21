@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import edu.uci.ics.jung.graph.DelegateTree;
@@ -78,4 +80,52 @@ public class GraphUtilTest {
 		graph.addEdge(3, "D", "E");
 		assertFalse(GraphUtil.isWeaklyConnected(graph));
 	}
+	
+	@Test
+	public void testFindCommonAncestor() {
+		Tree<String, Integer> tree = new DelegateTree<String, Integer>();
+		tree.addVertex("A");
+		tree.addEdge(1, "A", "B");
+		tree.addEdge(2, "B", "C");
+		tree.addEdge(3, "B", "D");
+		tree.addEdge(4, "A", "E");
+		
+		assertEquals("D", GraphUtil.findCommonAncestor(tree, "D", "D"));
+		assertEquals("B", GraphUtil.findCommonAncestor(tree, "C", "D"));
+		assertEquals("B", GraphUtil.findCommonAncestor(tree, "B", "D"));
+		assertEquals("A", GraphUtil.findCommonAncestor(tree, "E", "D"));
+	}
+	
+	@Test
+	public void findPath() {
+		Tree<String, Integer> tree = new DelegateTree<String, Integer>();
+		tree.addVertex("A");
+		tree.addEdge(1, "A", "B");
+		tree.addEdge(2, "B", "C");
+		tree.addEdge(3, "B", "D");
+		tree.addEdge(4, "A", "E");
+		
+		assertEquals(Arrays.asList("D"), GraphUtil.findPath(tree, "D", "D"));
+		assertEquals(Arrays.asList("C", "B", "D"), GraphUtil.findPath(tree, "C", "D"));
+		assertEquals(Arrays.asList("B", "D"), GraphUtil.findPath(tree, "B", "D"));
+		assertEquals(Arrays.asList("E", "A", "B", "D"), GraphUtil.findPath(tree, "E", "D"));		
+	}
+	/*
+    @Test def testPath() {
+        val t = new Tree[String](Set[(String, String)](
+                ("A", "B"), ("B", "C"), ("A", "D")), "A")
+
+        t.path("A", "C") should be (List[String]("A", "B", "C"))
+        t.path("B", "D") should be (Nil)
+}
+
+@Test def testCommonAncestor() {
+        val t = new Tree[String](Set[(String, String)](
+                ("A", "B"), ("B", "C"), ("B", "D"), ("A", "E")), "A")
+
+        t.commonAncestor("C", "D") should be ("B")
+        t.commonAncestor("B", "D") should be ("B")
+        t.commonAncestor("E", "D") should be ("A")
+}*/
+
 }
