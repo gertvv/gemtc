@@ -4,11 +4,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.collections15.Factory;
+
 import edu.uci.ics.jung.algorithms.transformation.FoldingTransformer;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.SetHypergraph;
-import edu.uci.ics.jung.graph.SparseGraph;
+import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 public class NetworkModel {
 	public static Hypergraph<Treatment, Study> createStudyGraph(Network network) {
@@ -22,8 +25,17 @@ public class NetworkModel {
 		return graph ;
 	}
 	
-	public static Graph<Treatment, Collection<Study>> createComparisonGraph(Network network) {
-		return FoldingTransformer.foldHypergraphEdges(createStudyGraph(network), SparseGraph.<Treatment, Collection<Study>>getFactory());
+	public static UndirectedGraph<Treatment, Collection<Study>> createComparisonGraph(Network network) {
+		return createComparisonGraph(createStudyGraph(network));
+	}
+
+	public static UndirectedGraph<Treatment, Collection<Study>> createComparisonGraph(Hypergraph<Treatment, Study> studyGraph) {
+		return (UndirectedGraph<Treatment, Collection<Study>>)FoldingTransformer.foldHypergraphEdges(studyGraph, 
+				new Factory<Graph<Treatment, Collection<Study>>>() {
+					public Graph<Treatment, Collection<Study>> create() {
+						return new UndirectedSparseGraph<Treatment, Collection<Study>>();
+					}
+				});
 	}
 
 	private static Collection<Treatment> getTreatments(Study s) {
