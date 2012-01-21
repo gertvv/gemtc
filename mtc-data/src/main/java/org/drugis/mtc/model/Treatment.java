@@ -16,6 +16,15 @@ public class Treatment extends TreatmentData implements Observable {
 	@XmlTransient
 	ObserverManager d_obsManager = new ObserverManager(this);
 	
+	public Treatment() {
+		super();
+	}
+	
+	public Treatment(String id, String desc) {
+		setId(id);
+		setDescription(desc);
+	}
+	
 	@Override
 	public void setId(String newValue) {
 		String oldValue = getId();
@@ -37,7 +46,7 @@ public class Treatment extends TreatmentData implements Observable {
 	@Override
 	public void setValue(String newValue) {
 		String oldValue = super.getValue();
-		super.setValue(value);
+		super.setValue(newValue);
 		d_obsManager.firePropertyChange(PROPERTY_DESCRIPTION, oldValue, newValue);
 	}
 

@@ -19,6 +19,8 @@ public class Network extends NetworkData implements Observable {
 	ObserverManager d_obsManager = new ObserverManager(this);
 	
 	public Network() {
+		this.studyList = new NetworkData.Studies();
+		this.treatmentList = new NetworkData.Treatments();
 	}
 	
 	public Network(NetworkData data) {

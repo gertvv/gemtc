@@ -1,5 +1,7 @@
 package org.drugis.mtc.model;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 
@@ -18,6 +20,11 @@ public class JAXBHandler {
 		// Since JAXB does not access the root element through the ObjectFactory, 
 		// we have to work around it like this.
 		return new Network((NetworkData)createUnmarshaller().unmarshal(reader));
+	}
+	
+
+	public static Network readNetwork(InputStream inputStream) throws JAXBException {
+		return readNetwork(new InputStreamReader(inputStream));
 	}
 
 	public static void writeNetwork(Network data, OutputStream out) throws JAXBException {

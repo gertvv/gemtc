@@ -17,6 +17,15 @@ public class Study extends StudyData implements Observable {
 	@XmlTransient
 	ObserverManager d_obsManager = new ObserverManager(this);
 	
+	public Study() {
+		super();
+	}
+	
+	public Study(String id) {
+		super();
+		setId(id);
+	}
+
 	@Override
 	public void setId(String newValue) {
 		String oldValue = getId();

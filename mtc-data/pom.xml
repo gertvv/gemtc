@@ -40,6 +40,16 @@
 			<version>0.4.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>org.drugis.mtc</groupId>
+			<artifactId>mtc-graph</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jvnet.jaxb2_commons</groupId>
+			<artifactId>jaxb2-basics-runtime</artifactId>
+			<version>0.6.0</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.6</version>
@@ -76,6 +86,11 @@
 								<include>network.xjb</include>
 							</bindingIncludes>
 							<generatePackage>org.drugis.mtc.data</generatePackage>
+							<args>
+								<arg>-XtoString</arg>
+								<arg>-Xequals</arg>
+								<arg>-XhashCode</arg>
+							</args>
 						</configuration>
 					</execution>
 				</executions>
@@ -84,6 +99,11 @@
 						<groupId>com.sun.xml.bind</groupId>
 						<artifactId>jaxb-xjc</artifactId>
 						<version>2.2.4-1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jvnet.jaxb2_commons</groupId>
+						<artifactId>jaxb2-basics</artifactId>
+						<version>0.6.0</version>
 					</dependency>
 				</dependencies>
 			</plugin>
