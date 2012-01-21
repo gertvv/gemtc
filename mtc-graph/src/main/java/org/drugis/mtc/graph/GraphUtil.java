@@ -1,9 +1,11 @@
 package org.drugis.mtc.graph;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.Tree;
 
 public class GraphUtil {
@@ -44,5 +46,32 @@ public class GraphUtil {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Test whether the given graph is connected.
+	 * For directed graphs, tests weak connectivity, i.e. it tests whether the
+	 * graph is connected when all directed edges are replaced by undirected
+	 * ones.
+	 */
+	public static <V, E> boolean isWeaklyConnected(Hypergraph<V, E> graph) {
+		if (graph.getVertexCount() == 0) {
+			return true;
+		} else {
+			HashSet<V> visited = new HashSet<V>(); // already visited vertices
+			LinkedList<V> fringe = new LinkedList<V>(); // directly reachable vertices
+			fringe.add(graph.getVertices().iterator().next()); // start at an arbitrary vertex
+			while (!fringe.isEmpty()) {
+				V v = fringe.pop();
+				if (!visited.contains(v)) {
+					visited.add(v);
+					fringe.addAll(graph.getNeighbors(v));
+				}
+				if (visited.size() == graph.getVertexCount()) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }

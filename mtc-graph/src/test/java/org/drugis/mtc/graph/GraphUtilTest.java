@@ -1,6 +1,7 @@
 package org.drugis.mtc.graph;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -61,5 +62,20 @@ public class GraphUtilTest {
 		GraphUtil.copyTree(tree, copy);
 		assertEquals(tree.getVertexCount(), copy.getVertexCount());
 		assertEquals(tree.getEdgeCount(), copy.getEdgeCount());
+	}
+	
+	@Test
+	public void testIsWeaklyConnected() {
+		Graph<String, Integer> graph = new SparseMultigraph<String, Integer>();
+		graph.addEdge(1, "A", "B", EdgeType.DIRECTED);
+		graph.addVertex("C");
+		
+		assertFalse(GraphUtil.isWeaklyConnected(graph));
+		
+		graph.addEdge(2, "A", "C");
+		assertTrue(GraphUtil.isWeaklyConnected(graph));
+		
+		graph.addEdge(3, "D", "E");
+		assertFalse(GraphUtil.isWeaklyConnected(graph));
 	}
 }
