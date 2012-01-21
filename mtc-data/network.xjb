@@ -1,0 +1,48 @@
+<jxb:bindings
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+	version="2.1">
+	
+	<jxb:bindings schemaLocation="network.xsd">
+		<jxb:globalBindings collectionType="com.jgoodies.binding.list.ArrayListModel" />
+		<!-- enable own extensions of JAXB classes -->
+		<jxb:bindings node="//xs:element[@name='network']">
+			<!-- While this modifies the ObjectFactory, JAXB will still return a NetworkData instead of a Network -->
+			<jxb:class
+				name="NetworkData"
+				implClass="org.drugis.mtc.model.Network" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:complexType[@name='Treatment']">
+			<jxb:class
+				name="TreatmentData"
+				implClass="org.drugis.mtc.model.Treatment" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:complexType[@name='Study']">
+			<jxb:class
+				name="StudyData"
+				implClass="org.drugis.mtc.model.Study" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:complexType[@name='Measurement']">
+			<jxb:class
+				name="MeasurementData"
+				implClass="org.drugis.mtc.model.Measurement" />
+		</jxb:bindings>
+
+		<!-- customize property names -->
+		<jxb:bindings node="//xs:complexType[@name='Measurement']/xs:attribute[@name='sample']">
+			<jxb:property name="sampleSize" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:complexType[@name='Measurement']/xs:attribute[@name='standardDeviation']">
+			<jxb:property name="stdDev" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:element[@name='measurement']">
+			<jxb:property name="measurementList" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:element[@name='treatments']">
+			<jxb:property name="treatmentList" />
+		</jxb:bindings>
+		<jxb:bindings node="//xs:element[@name='studies']">
+			<jxb:property name="studyList" />
+		</jxb:bindings>
+	</jxb:bindings>
+</jxb:bindings>

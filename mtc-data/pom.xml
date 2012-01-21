@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.drugis</groupId>
+		<artifactId>mtc</artifactId>
+		<version>0.11-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.drugis.mtc</groupId>
+	<artifactId>mtc-data</artifactId>
+	<name>MTC data objects</name>
+
+	<packaging>jar</packaging>
+
+	<repositories>
+		<repository>
+  			<id>maven2-repository.dev.java.net</id>
+	  		<name>Java.net Repository for Maven</name>
+  			<url>http://download.java.net/maven/2/</url>
+  			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>drugis.org</id>
+			<name>drugis.org Maven2 Repository</name>
+			<url>http://drugis.org/mvn</url>
+		</repository>
+	</repositories>
+    
+	<dependencies>
+		<dependency>
+			<groupId>com.jgoodies</groupId>
+			<artifactId>binding</artifactId>
+			<version>2.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.drugis</groupId>
+			<artifactId>common-lib</artifactId>
+			<version>0.4.8-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.6</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>MTC schema</id>
+						<goals>
+								<goal>generate</goal>
+						</goals>
+						<configuration>
+							<extension>true</extension>
+							<schemaDirectory>${basedir}</schemaDirectory>
+							<bindingDirectory>${basedir}</bindingDirectory>
+							<schemaIncludes>
+								<include>network.xsd</include>
+							</schemaIncludes>
+							<bindingIncludes>
+								<include>network.xjb</include>
+							</bindingIncludes>
+							<generatePackage>org.drugis.mtc.data</generatePackage>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-xjc</artifactId>
+						<version>2.2.4-1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+</project>
