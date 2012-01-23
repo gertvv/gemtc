@@ -110,22 +110,4 @@ public class GraphUtilTest {
 		assertEquals(Arrays.asList("B", "D"), GraphUtil.findPath(tree, "B", "D"));
 		assertEquals(Arrays.asList("E", "A", "B", "D"), GraphUtil.findPath(tree, "E", "D"));		
 	}
-	/*
-    @Test def testPath() {
-        val t = new Tree[String](Set[(String, String)](
-                ("A", "B"), ("B", "C"), ("A", "D")), "A")
-
-        t.path("A", "C") should be (List[String]("A", "B", "C"))
-        t.path("B", "D") should be (Nil)
-}
-
-@Test def testCommonAncestor() {
-        val t = new Tree[String](Set[(String, String)](
-                ("A", "B"), ("B", "C"), ("B", "D"), ("A", "E")), "A")
-
-        t.commonAncestor("C", "D") should be ("B")
-        t.commonAncestor("B", "D") should be ("B")
-        t.commonAncestor("E", "D") should be ("A")
-}*/
-
 }

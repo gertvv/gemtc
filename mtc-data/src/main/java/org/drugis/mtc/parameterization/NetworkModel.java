@@ -1,10 +1,14 @@
-package org.drugis.mtc.model;
+package org.drugis.mtc.parameterization;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.collections15.Factory;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 
 import edu.uci.ics.jung.algorithms.transformation.FoldingTransformer;
 import edu.uci.ics.jung.graph.Graph;

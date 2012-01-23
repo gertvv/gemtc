@@ -21,10 +21,15 @@ public class Treatment extends TreatmentData implements Observable {
 	}
 	
 	public Treatment(String id, String desc) {
+		super();
 		setId(id);
 		setDescription(desc);
 	}
 	
+	public Treatment(String id) {
+		this(id, null);
+	}
+
 	@Override
 	public void setId(String newValue) {
 		String oldValue = getId();

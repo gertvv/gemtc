@@ -1,4 +1,4 @@
-package org.drugis.mtc.model;
+package org.drugis.mtc.parameterization;
 
 /**
  * Parameterization of a Network. The parameterization completely fixes the 

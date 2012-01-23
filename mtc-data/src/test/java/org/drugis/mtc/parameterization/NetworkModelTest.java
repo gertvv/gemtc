@@ -1,18 +1,24 @@
-package org.drugis.mtc.model;
+package org.drugis.mtc.parameterization;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 import org.drugis.mtc.graph.GraphUtil;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 import org.junit.Test;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Hypergraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class NetworkModelTest {
 	@Test
@@ -90,6 +96,8 @@ public class NetworkModelTest {
 		assertEquals(new HashSet<Study>(Arrays.asList(s1, s2, s3)), new HashSet<Study>(graph.findEdge(ta, tb)));
 		assertEquals(new HashSet<Study>(Arrays.asList(s3)), new HashSet<Study>(graph.findEdge(ta, tc)));
 		assertEquals(new HashSet<Study>(Arrays.asList(s3, s4)), new HashSet<Study>(graph.findEdge(tb, tc)));
+		
+		assertEquals(new Pair<Treatment>(ta, tb), graph.getEndpoints(new ArrayList<Study>(Arrays.asList(s1, s2, s3))));
 		
 		assertFalse(GraphUtil.isWeaklyConnected(graph));
 	}

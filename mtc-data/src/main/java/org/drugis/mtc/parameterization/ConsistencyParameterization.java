@@ -1,8 +1,10 @@
-package org.drugis.mtc.model;
+package org.drugis.mtc.parameterization;
 
 import java.util.Collection;
 
 import org.drugis.mtc.graph.MinimumDiameterSpanningTree;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 
 import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
