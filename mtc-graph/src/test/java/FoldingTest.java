@@ -5,8 +5,8 @@ import java.util.HashSet;
 
 import org.junit.Test;
 
-import edu.uci.ics.jung.algorithms.transformation.FoldingTransformer;
-import edu.uci.ics.jung.algorithms.transformation.FoldingTransformer.FoldedEdge;
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed;
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.SetHypergraph;
@@ -29,7 +29,7 @@ public class FoldingTest {
 		
 		// This is kind of awkward... if the method accepted a Factory<UndirectedGraph> one could
 		// just use UndirectedSparseGraph.getFactory()
-		Graph<String, FoldedEdge<String, Integer>> graph = FoldingTransformer.foldHypergraphEdges(hGraph,
+		Graph<String, FoldedEdge<String, Integer>> graph = FoldingTransformerFixed.foldHypergraphEdges(hGraph,
 				UndirectedSparseGraph.<String, FoldedEdge<String, Integer>>getFactory());
 		
 		// The vertices are copied fine
