@@ -27,6 +27,13 @@ public class MinimumDiameterSpanningTree<V, E> {
 	public MinimumDiameterSpanningTree(final UndirectedGraph<V, E> graph) {
 		this(graph, new AbsoluteOneCenter.UnitLength<E>(), new DijkstraShortestPath<V, E>(graph));
 	}
+
+	/**
+	 * Minimum diameter spanning tree of a unweighted graph.
+	 */
+	public MinimumDiameterSpanningTree(final UndirectedGraph<V, E> graph, Comparator<V> vertexComparator) {
+		this(graph, new AbsoluteOneCenter.UnitLength<E>(), new DijkstraShortestPath<V, E>(graph), vertexComparator);
+	}
 	
 	/**
 	 * Minimum diameter spanning tree of a weighted graph.
@@ -40,7 +47,23 @@ public class MinimumDiameterSpanningTree<V, E> {
 	 */
 	public MinimumDiameterSpanningTree(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, 
 			final DijkstraShortestPath<V, E> shortestPath) {
-		this(graph, edgeLength, shortestPath, shortestPath, null);
+		this(graph, edgeLength, shortestPath, shortestPath);
+	}
+	
+	/**
+	 * Minimum diameter spanning tree of a weighted graph.
+	 */
+	public MinimumDiameterSpanningTree(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength,
+			final DijkstraShortestPath<V, E> shortestPath, final Comparator<V> vertexComparator) {
+		this(graph, edgeLength, shortestPath, shortestPath, vertexComparator);
+	}
+	
+	/**
+	 * Minimum diameter spanning tree of a weighted graph.
+	 */
+	public MinimumDiameterSpanningTree(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, 
+			final Distance<V> distance, final ShortestPath<V, E> shortestPath) {
+		this(graph, edgeLength, distance, shortestPath, null);
 	}
 	
 	/**
@@ -54,13 +77,17 @@ public class MinimumDiameterSpanningTree<V, E> {
 		d_shortestPath = shortestPath;
 		d_vertexComparator = vertexComparator;
 	}
-	
+
 	public Tree<V, E> getMinimumDiameterSpanningTree() {
 		PointOnEdge<V, E> center = new AbsoluteOneCenter<V, E>(d_graph, d_edgeLength, d_distance).getCenter();
 		DelegateTree<V,E> tree = new DelegateTree<V, E>();
 		
 		// add the center edge
-		if (center.getDistance() <= 0.5 * l(center.getEdge())) {
+		// choose the one closest to the absolute one center, or the "first"
+		// vertex according to the comparator if they are equally close.
+		double dc = center.getDistance() - 0.5 * l(center.getEdge());
+		int vc = d_vertexComparator == null ? 0 : d_vertexComparator.compare(center.getVertex0(), center.getVertex1());
+		if (dc < 0.0 || (dc == 0.0 && vc <= 0)) {
 			tree.setRoot(center.getVertex0());
 			tree.addChild(center.getEdge(), center.getVertex0(), center.getVertex1());
 		} else {

@@ -24,6 +24,14 @@ public class BasicParameter implements NetworkParameter {
 		return "d." + d_base.getId() + "." + d_subj.getId();
 	}
 	
+	public Treatment getBaseline() {
+		return d_base;
+	}
+	
+	public Treatment getSubject() {
+		return d_subj;
+	}
+	
 	@Override
 	public String toString() {
 		return getName();

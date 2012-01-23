@@ -4,14 +4,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.collections15.Factory;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 
-import edu.uci.ics.jung.algorithms.transformation.FoldingTransformer;
-import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed;
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.SetHypergraph;
 import edu.uci.ics.jung.graph.UndirectedGraph;
@@ -29,17 +28,12 @@ public class NetworkModel {
 		return graph ;
 	}
 	
-	public static UndirectedGraph<Treatment, Collection<Study>> createComparisonGraph(Network network) {
+	public static UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> createComparisonGraph(Network network) {
 		return createComparisonGraph(createStudyGraph(network));
 	}
 
-	public static UndirectedGraph<Treatment, Collection<Study>> createComparisonGraph(Hypergraph<Treatment, Study> studyGraph) {
-		return (UndirectedGraph<Treatment, Collection<Study>>)FoldingTransformer.foldHypergraphEdges(studyGraph, 
-				new Factory<Graph<Treatment, Collection<Study>>>() {
-					public Graph<Treatment, Collection<Study>> create() {
-						return new UndirectedSparseGraph<Treatment, Collection<Study>>();
-					}
-				});
+	public static UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> createComparisonGraph(Hypergraph<Treatment, Study> studyGraph) {
+		return FoldingTransformerFixed.foldHypergraphEdges(studyGraph, UndirectedSparseGraph.<Treatment, FoldedEdge<Treatment, Study>>getFactory());
 	}
 
 	private static Collection<Treatment> getTreatments(Study s) {

@@ -3,9 +3,7 @@ package org.drugis.mtc.parameterization;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -16,8 +14,9 @@ import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 import org.junit.Test;
 
-import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
 import edu.uci.ics.jung.graph.Hypergraph;
+import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
 public class NetworkModelTest {
@@ -90,14 +89,14 @@ public class NetworkModelTest {
 		List<Study> studies = Arrays.asList(s1, s2, s3, s4);
 		network.getStudies().addAll(studies);
 		
-		Graph<Treatment, Collection<Study>> graph = NetworkModel.createComparisonGraph(network);
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> graph = NetworkModel.createComparisonGraph(network);
 		assertEquals(new HashSet<Treatment>(treatments), new HashSet<Treatment>(graph.getVertices()));
 		assertEquals(3, graph.getEdgeCount());
-		assertEquals(new HashSet<Study>(Arrays.asList(s1, s2, s3)), new HashSet<Study>(graph.findEdge(ta, tb)));
-		assertEquals(new HashSet<Study>(Arrays.asList(s3)), new HashSet<Study>(graph.findEdge(ta, tc)));
-		assertEquals(new HashSet<Study>(Arrays.asList(s3, s4)), new HashSet<Study>(graph.findEdge(tb, tc)));
+		assertEquals(new HashSet<Study>(Arrays.asList(s1, s2, s3)), new HashSet<Study>(graph.findEdge(ta, tb).getFolded()));
+		assertEquals(new HashSet<Study>(Arrays.asList(s3)), new HashSet<Study>(graph.findEdge(ta, tc).getFolded()));
+		assertEquals(new HashSet<Study>(Arrays.asList(s3, s4)), new HashSet<Study>(graph.findEdge(tb, tc).getFolded()));
 		
-		assertEquals(new Pair<Treatment>(ta, tb), graph.getEndpoints(new ArrayList<Study>(Arrays.asList(s1, s2, s3))));
+		assertEquals(new Pair<Treatment>(ta, tb), graph.getEndpoints(graph.findEdge(ta, tb)));
 		
 		assertFalse(GraphUtil.isWeaklyConnected(graph));
 	}

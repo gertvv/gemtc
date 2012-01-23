@@ -1,10 +1,13 @@
 package org.drugis.mtc.parameterization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
@@ -13,6 +16,8 @@ import org.drugis.mtc.model.Treatment;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
+import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 
@@ -22,194 +27,130 @@ public class ConsistencyParameterizationTest {
 	private Study d_s2;
 	private Study d_s3;
 	private Study d_s4;
+	private Treatment d_ta;
+	private Treatment d_tb;
+	private Treatment d_tc;
+	private Treatment d_td;
+	private Treatment d_te;
+	private Treatment d_tf;
 	
 	@Before
 	public void setUp() {
 		d_network = new Network();
-		Treatment ta = new Treatment("A");
-		Treatment tb = new Treatment("B");
-		Treatment tc = new Treatment("C");
-		Treatment td = new Treatment("D");
-		d_network.getTreatments().addAll(Arrays.asList(ta, tb, tc, td));
+		d_ta = new Treatment("A");
+		d_tb = new Treatment("B");
+		d_tc = new Treatment("C");
+		d_td = new Treatment("D");
+		d_te = new Treatment("E");
+		d_tf = new Treatment("F");
+		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td));
 		d_s1 = new Study("1");
-		d_s1.getMeasurements().addAll(Arrays.asList(new Measurement(td), new Measurement(tb), new Measurement(tc)));
+		d_s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_td), new Measurement(d_tb), new Measurement(d_tc)));
 		d_s2 = new Study("2");
-		d_s2.getMeasurements().addAll(Arrays.asList(new Measurement(ta), new Measurement(tb)));
+		d_s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb)));
 		d_s3 = new Study("3");
-		d_s3.getMeasurements().addAll(Arrays.asList(new Measurement(ta), new Measurement(tc)));
+		d_s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tc)));
 		d_s4 = new Study("4");
-		d_s4.getMeasurements().addAll(Arrays.asList(new Measurement(ta), new Measurement(td)));
+		d_s4.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_td)));
 		d_network.getStudies().addAll(Arrays.asList(d_s1, d_s2, d_s3, d_s4));
 	}
 	
 	@Test
 	public void testMinimumDiamaterTree() {
-		UndirectedGraph<Treatment, Collection<Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
-		for (Collection<Study> e : cGraph.getEdges()) {
-			System.out.println(e + " " + e.hashCode() + " " + cGraph.getEndpoints(e));
-			
-		}
-		System.out.println(cGraph.getEndpoints(new ArrayList<Study>(Arrays.asList(d_s2))));
-		Tree<Treatment, Collection<Study>> tree = ConsistencyParameterization.findSpanningTree(cGraph);
-		assertEquals(new Treatment("A"), tree.getRoot());
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
+		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = ConsistencyParameterization.findSpanningTree(cGraph);
+		assertEquals(d_ta, tree.getRoot());
+		assertNotNull(tree.findEdge(d_ta, d_tb));
+		assertNotNull(tree.findEdge(d_ta, d_tc));
+		assertNotNull(tree.findEdge(d_ta, d_td));
 	}
 	
-/*
-class ConsistencyParametrizationTest extends ShouldMatchersForJUnit {
-	val network = Network.noneFromXML(<network type="none">
-		<treatments>
-			<treatment id="A"/>
-			<treatment id="B"/>
-			<treatment id="C"/>
-			<treatment id="D"/>
-		</treatments>
-		<studies>
-			<study id="1">
-				<measurement treatment="D" />
-				<measurement treatment="B" />
-				<measurement treatment="C" />
-			</study>
-			<study id="2">
-				<measurement treatment="A" />
-				<measurement treatment="B" />
-			</study>
-			<study id="3">
-				<measurement treatment="A" />
-				<measurement treatment="C" />
-			</study>
-			<study id="4">
-				<measurement treatment="A" />
-				<measurement treatment="D" />
-			</study>
-		</studies>
-	</network>)
-
-	@Test def testBasicParameters() {
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-		val d = new Treatment("D")
-
-		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(a, b), (b, d), (b, c)), a))
-		new ConsistencyParametrization(network, basis2).basicParameters should be (
-			List[NetworkModelParameter](
-				new BasicParameter(a, b),
-				new BasicParameter(b, c),
-				new BasicParameter(b, d))
-		)
-
-		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(a, c), (a, d), (d, b)), a))
-		new ConsistencyParametrization(network, basis3).basicParameters should be (
-			List[NetworkModelParameter](
-				new BasicParameter(a, c),
-				new BasicParameter(a, d),
-				new BasicParameter(d, b))
-		)
+	@Test
+	public void testBasicParameters() {
+		ConsistencyParameterization pmtz = create();
+		
+		List<NetworkParameter> expected = new ArrayList<NetworkParameter>();
+		expected.add(new BasicParameter(d_ta, d_tb));
+		expected.add(new BasicParameter(d_ta, d_tc));
+		expected.add(new BasicParameter(d_ta, d_td));
+		assertEquals(expected, pmtz.getParameters());
 	}
 
-	@Test def testParameterizationBasic() {
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-		val d = new Treatment("D")
-
-		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(a, b), (b, d), (b, c)), a))
-		val param = new ConsistencyParametrization(network, basis2)
-
-		param(a, b) should be (
-			Map((new BasicParameter(a, b), 1)))
-		param(b, a) should be (
-			Map((new BasicParameter(a, b), -1)))
+	private ConsistencyParameterization create() {
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
+		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = ConsistencyParameterization.findSpanningTree(cGraph);
+		ConsistencyParameterization pmtz = new ConsistencyParameterization(d_network, tree);
+		return pmtz;
 	}
-
-	@Test def testParameterizationFunctional() {
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-		val d = new Treatment("D")
-
-		val basis2 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(a, b), (b, d), (b, c)), a))
-		val param2 = new ConsistencyParametrization(network, basis2)
-
-		param2(c, d) should be (
-			Map((new BasicParameter(b, d), 1),
-				(new BasicParameter(b, c), -1)))
-
-		param2(a, d) should be (
-			Map((new BasicParameter(b, d), 1),
-				(new BasicParameter(a, b), 1)))
-
-		param2(a, c) should be (
-			Map((new BasicParameter(a, b), 1),
-				(new BasicParameter(b, c), 1)))
-
-		// ACBDA reduces to ACDA
-		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(a, c), (a, d), (d, b)), a))
-		val param3 = new ConsistencyParametrization(network, basis3)
-
-		param3(a, b) should be (
-			Map((new BasicParameter(a, d), 1),
-				(new BasicParameter(d, b), 1)))
-
-		param3(c, d) should be (
-			Map((new BasicParameter(a, c), -1),
-				(new BasicParameter(a, d), 1)))
-
-		param3(b, c) should be (
-			Map((new BasicParameter(a, d), -1),
-				(new BasicParameter(d, b), -1), 
-				(new BasicParameter(a, c), 1)))
+	
+	@Test
+	public void testParameterizationBasic() {
+		ConsistencyParameterization pmtz = create();
+		
+		Map<NetworkParameter, Integer> expected1 = new HashMap<NetworkParameter, Integer>();
+		expected1.put(new BasicParameter(d_ta, d_tb), 1);
+		assertEquals(expected1, pmtz.parameterize(d_ta, d_tb));
+		
+		Map<NetworkParameter, Integer> expected2 = new HashMap<NetworkParameter, Integer>();
+		expected2.put(new BasicParameter(d_ta, d_tb), -1);
+		assertEquals(expected2, pmtz.parameterize(d_tb, d_ta));		
 	}
+	
+	@Test
+	public void testParameterizationFunctional() {
+		ConsistencyParameterization pmtz = create();
 
-	@Test def testParamForNonExistantCycle() {
-		val network = Network.noneFromXML(<network type="none">
-			<treatments>
-				<treatment id="A"/>
-				<treatment id="B"/>
-				<treatment id="C"/>
-				<treatment id="D"/>
-			</treatments>
-			<studies>
-				<study id="1">
-					<measurement treatment="D" />
-					<measurement treatment="B" />
-					<measurement treatment="C" />
-				</study>
-				<study id="3">
-					<measurement treatment="A" />
-					<measurement treatment="C" />
-				</study>
-				<study id="4">
-					<measurement treatment="A" />
-					<measurement treatment="D" />
-				</study>
-			</studies>
-		</network>)
-
-		val a = new Treatment("A")
-		val b = new Treatment("B")
-		val c = new Treatment("C")
-		val d = new Treatment("D")
-
-		val basis3 = new FundamentalGraphBasis(network.treatmentGraph,
-			new Tree[Treatment](Set[(Treatment, Treatment)](
-				(a, c), (a, d), (d, b)), a))
-		val param3 = new ConsistencyParametrization(network, basis3)
-
-		param3(a, b) should be (
-			Map((new BasicParameter(a, d), 1),
-				(new BasicParameter(d, b), 1)))
+		Map<NetworkParameter, Integer> expected1 = new HashMap<NetworkParameter, Integer>();
+		expected1.put(new BasicParameter(d_ta, d_tb), -1);
+		expected1.put(new BasicParameter(d_ta, d_tc), 1);
+		assertEquals(expected1, pmtz.parameterize(d_tb, d_tc));
+		
+		Map<NetworkParameter, Integer> expected2 = new HashMap<NetworkParameter, Integer>();
+		expected2.put(new BasicParameter(d_ta, d_tb), 1);
+		expected2.put(new BasicParameter(d_ta, d_tc), -1);
+		assertEquals(expected2, pmtz.parameterize(d_tc, d_tb));
 	}
-}
- */
+	
+	@Test
+	public void testStudyBaselines() {
+		Network network = new Network();
+		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td, d_te, d_tf));
+		Study s1 = new Study("1");
+		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_tf)));
+		Study s2 = new Study("2");
+		s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_tb), new Measurement(d_tc), new Measurement(d_td)));
+		Study s3 = new Study("3");
+		s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_te), new Measurement(d_tf)));
+		network.getStudies().addAll(Arrays.asList(s1, s2, s3));
+		
+		// First test the tree is as expected since the study baselines depend on the chosen tree
+		Hypergraph<Treatment, Study> studyGraph = NetworkModel.createStudyGraph(network);
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(studyGraph);
+		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = ConsistencyParameterization.findSpanningTree(cGraph);
+		assertEquals(d_tc, tree.getRoot());
+		assertNotNull(tree.findEdge(d_tc, d_tf));
+		assertNotNull(tree.findEdge(d_tc, d_tb));
+		assertNotNull(tree.findEdge(d_tc, d_td));
+		assertNotNull(tree.findEdge(d_tf, d_te));
+		assertNotNull(tree.findEdge(d_tf, d_ta));
+		
+		// Now test the study baselines
+		Map<Study, Treatment> baselines = ConsistencyParameterization.findStudyBaselines(studyGraph, tree);
+		assertEquals(d_tc, baselines.get(s1));
+		assertEquals(d_tc, baselines.get(s2));
+		assertEquals(d_tf, baselines.get(s3));
+	}
+	/*
+
+		@Test def testModelCreation() {
+			val model = ConsistencyNetworkModel(network)
+			val expectedTree = new Tree[Treatment](
+				Set((tc, tf), (tc, tb), (tc, td), (tf, te), (tf, ta)), tc)
+			model.basis.tree should be (expectedTree)
+			model.studyBaseline(studies(0)) should be (tc)
+			model.studyBaseline(studies(1)) should be (tc)
+			model.studyBaseline(studies(2)) should be (tf)
+		}
+	}*/
+
 }

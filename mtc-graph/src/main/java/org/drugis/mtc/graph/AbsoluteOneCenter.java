@@ -39,6 +39,7 @@ public class AbsoluteOneCenter<V, E> {
 	private final UndirectedGraph<V, E> d_graph;
 	private final Distance<V> d_distance;
 	private final Transformer<E, Number> d_edgeLength;
+	private Comparator<V> d_comparator;
 
 	/**
 	 * Absolute 1-center of an unweighted graph.
@@ -48,23 +49,45 @@ public class AbsoluteOneCenter<V, E> {
 	}
 	
 	/**
+	 * Absolute 1-center of an unweighted graph.
+	 */
+	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Comparator<V> comparator) {
+		this(graph, new UnitLength<E>(), new DijkstraShortestPath<V, E>(graph), comparator);
+	}
+	
+	/**
 	 * Absolute 1-center of a weighted graph.
 	 */
 	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength) {
 		this(graph, edgeLength, new DijkstraShortestPath<V, E>(graph));
 	}
-
+	
+	/**
+	 * Absolute 1-center of a weighted graph.
+	 */
+	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final Comparator<V> comparator) {
+		this(graph, edgeLength, new DijkstraShortestPath<V, E>(graph), comparator);
+	}
+	
 	/**
 	 * Absolute 1-center of an weighted graph.
 	 */
 	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final Distance<V> distance) {
+		this(graph, edgeLength, distance, null);
+	}
+	
+	/**
+	 * Absolute 1-center of an weighted graph.
+	 */
+	public AbsoluteOneCenter(final UndirectedGraph<V, E> graph, final Transformer<E, Number> edgeLength, final Distance<V> distance, final Comparator<V> comparator) {
 		d_graph = graph;
 		d_edgeLength = edgeLength;
 		d_distance = distance;
+		d_comparator = comparator;
 	}
 
 	public PointOnEdge<V, E> getCenter() {
-		LocalCenter<V, E> localCenter = new LocalCenter<V, E>(d_graph, d_edgeLength, d_distance);
+		LocalCenter<V, E> localCenter = new LocalCenter<V, E>(d_graph, d_edgeLength, d_distance, d_comparator);
 		
 		Center<V, E> c = null;
 		for (E e : d_graph.getEdges()) {
@@ -118,7 +141,7 @@ public class AbsoluteOneCenter<V, E> {
 		Collections.sort(list, new Comparator<V>() {
 			@Override
 			public int compare(V a, V b) {
-				if (map.get(a) == map.get(b)) {
+				if (map.get(a).equals(map.get(b))) {
 					return comparator == null ? 0 : comparator.compare(a, b);
 				} else {
 					return ((Double)map.get(b).doubleValue()).compareTo(map.get(a).doubleValue());
