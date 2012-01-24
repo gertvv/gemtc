@@ -20,8 +20,6 @@ import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class ConsistencyParameterization implements Parameterization {
-	private static TreatmentComparator s_tc = new TreatmentComparator();
-	
 	private final Tree<Treatment, FoldedEdge<Treatment, Study>> d_tree;
 	private final Map<Study, Treatment> d_baselines;
 	
@@ -43,7 +41,7 @@ public class ConsistencyParameterization implements Parameterization {
 	 * @return The minimum diameter spanning tree.
 	 */
 	public static Tree<Treatment, FoldedEdge<Treatment, Study>> findSpanningTree(UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph) {
-		MinimumDiameterSpanningTree<Treatment, FoldedEdge<Treatment, Study>> mdst = new MinimumDiameterSpanningTree<Treatment, FoldedEdge<Treatment, Study>>(cGraph, new TreatmentComparator());
+		MinimumDiameterSpanningTree<Treatment, FoldedEdge<Treatment, Study>> mdst = new MinimumDiameterSpanningTree<Treatment, FoldedEdge<Treatment, Study>>(cGraph, TreatmentComparator.INSTANCE);
 		return mdst.getMinimumDiameterSpanningTree();
 	}
 	
@@ -66,7 +64,7 @@ public class ConsistencyParameterization implements Parameterization {
 		while (iterator.hasNext()) {
 			Treatment t = iterator.next();
 			int degreeDiff = tree.getNeighborCount(t) - tree.getNeighborCount(maxDegree);
-			if (degreeDiff > 0 || (degreeDiff == 0 && s_tc.compare(t, maxDegree) < 0)) {
+			if (degreeDiff > 0 || (degreeDiff == 0 && TreatmentComparator.INSTANCE.compare(t, maxDegree) < 0)) {
 				maxDegree = t;
 			}
 		}
@@ -90,7 +88,7 @@ public class ConsistencyParameterization implements Parameterization {
 		for (FoldedEdge<Treatment, Study> e : d_tree.getEdges()) {
 			list.add(createBasic(e));
 		}
-		Collections.sort(list, new NetworkParameterComparator());
+		Collections.sort(list, NetworkParameterComparator.INSTANCE);
 		return list;
 	}
 

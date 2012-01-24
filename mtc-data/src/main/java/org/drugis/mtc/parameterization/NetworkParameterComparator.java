@@ -6,12 +6,23 @@ import java.util.Comparator;
  * Defines an order on NetworkParameter, where BasicParameter < ...
  */
 public class NetworkParameterComparator implements Comparator<NetworkParameter> {
-	TreatmentComparator s_tc = new TreatmentComparator();
+	public static final NetworkParameterComparator INSTANCE = new NetworkParameterComparator();
 	
 	public int compare(NetworkParameter p1, NetworkParameter p2) {
-		BasicParameter b1 = (BasicParameter) p1;
-		BasicParameter b2 = (BasicParameter) p2;
-		int c1 = s_tc.compare(b1.getBaseline(), b2.getBaseline());
-		return c1 == 0 ? s_tc.compare(b1.getSubject(), b2.getSubject()) : c1;
+		if (compareType(p1, p2) != 0) {
+			return compareType(p1, p2);
+		}
+		
+		if (p1 instanceof BasicParameter) {
+			return ((BasicParameter) p1).compareTo((BasicParameter) p2);
+		} else {
+			return ((InconsistencyParameter) p1).compareTo((InconsistencyParameter) p2);
+		}
+	}
+	
+	private int compareType(NetworkParameter p1, NetworkParameter p2) {
+		int type1 = p1 instanceof BasicParameter ? 0 : 1;
+		int type2 = p2 instanceof BasicParameter ? 0 : 1;
+		return type1 - type2;
 	}
 }

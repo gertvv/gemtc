@@ -5,7 +5,7 @@ import org.drugis.mtc.model.Treatment;
 /**
  * Represents a relative effect parameter that is 'basic' to the parameterization. 
  */
-public class BasicParameter implements NetworkParameter {
+public class BasicParameter implements NetworkParameter, Comparable<BasicParameter> {
 	private final Treatment d_base;
 	private final Treatment d_subj;
 
@@ -49,5 +49,11 @@ public class BasicParameter implements NetworkParameter {
 	@Override
 	public int hashCode() {
 		return 31 * d_base.hashCode() + d_subj.hashCode();
+	}
+
+	@Override
+	public int compareTo(BasicParameter other) {
+		int c1 = TreatmentComparator.INSTANCE.compare(d_base, other.d_base);
+		return c1 == 0 ? TreatmentComparator.INSTANCE.compare(d_subj, other.d_subj) : c1;
 	}
 }

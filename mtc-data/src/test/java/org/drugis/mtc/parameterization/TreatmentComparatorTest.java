@@ -8,7 +8,7 @@ import org.junit.Test;
 public class TreatmentComparatorTest {
 	@Test
 	public void testCompare() {
-		TreatmentComparator tc = new TreatmentComparator();
+		TreatmentComparator tc = TreatmentComparator.INSTANCE;
 		assertTrue(tc.compare(new Treatment("A"), new Treatment("B")) < 0);
 		assertTrue(tc.compare(new Treatment("B"), new Treatment("A")) > 0);
 		assertTrue(tc.compare(new Treatment("A"), new Treatment("A")) == 0);
