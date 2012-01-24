@@ -3,6 +3,7 @@ package org.drugis.mtc.parameterization;
 import java.util.List;
 import java.util.Map;
 
+import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 
 /**
@@ -26,5 +27,11 @@ public interface Parameterization {
 	 * @see Parameterization.getParameters
 	 */
 	public Map<NetworkParameter, Integer> parameterize(Treatment base, Treatment subj);
-
+	
+	/**
+	 * Return the treatment relative to which all effects in the given study should be expressed.
+	 * @param s The study.
+	 * @return The baseline treatment for the study.
+	 */
+	public Treatment getStudyBaseline(Study s);
 }

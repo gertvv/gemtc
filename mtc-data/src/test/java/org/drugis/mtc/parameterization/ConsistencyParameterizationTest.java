@@ -56,7 +56,7 @@ public class ConsistencyParameterizationTest {
 	}
 	
 	@Test
-	public void testMinimumDiamaterTree() {
+	public void testFindSpanningTree() {
 		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
 		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = ConsistencyParameterization.findSpanningTree(cGraph);
 		assertEquals(d_ta, tree.getRoot());
@@ -66,53 +66,7 @@ public class ConsistencyParameterizationTest {
 	}
 	
 	@Test
-	public void testBasicParameters() {
-		ConsistencyParameterization pmtz = create();
-		
-		List<NetworkParameter> expected = new ArrayList<NetworkParameter>();
-		expected.add(new BasicParameter(d_ta, d_tb));
-		expected.add(new BasicParameter(d_ta, d_tc));
-		expected.add(new BasicParameter(d_ta, d_td));
-		assertEquals(expected, pmtz.getParameters());
-	}
-
-	private ConsistencyParameterization create() {
-		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
-		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = ConsistencyParameterization.findSpanningTree(cGraph);
-		ConsistencyParameterization pmtz = new ConsistencyParameterization(d_network, tree);
-		return pmtz;
-	}
-	
-	@Test
-	public void testParameterizationBasic() {
-		ConsistencyParameterization pmtz = create();
-		
-		Map<NetworkParameter, Integer> expected1 = new HashMap<NetworkParameter, Integer>();
-		expected1.put(new BasicParameter(d_ta, d_tb), 1);
-		assertEquals(expected1, pmtz.parameterize(d_ta, d_tb));
-		
-		Map<NetworkParameter, Integer> expected2 = new HashMap<NetworkParameter, Integer>();
-		expected2.put(new BasicParameter(d_ta, d_tb), -1);
-		assertEquals(expected2, pmtz.parameterize(d_tb, d_ta));		
-	}
-	
-	@Test
-	public void testParameterizationFunctional() {
-		ConsistencyParameterization pmtz = create();
-
-		Map<NetworkParameter, Integer> expected1 = new HashMap<NetworkParameter, Integer>();
-		expected1.put(new BasicParameter(d_ta, d_tb), -1);
-		expected1.put(new BasicParameter(d_ta, d_tc), 1);
-		assertEquals(expected1, pmtz.parameterize(d_tb, d_tc));
-		
-		Map<NetworkParameter, Integer> expected2 = new HashMap<NetworkParameter, Integer>();
-		expected2.put(new BasicParameter(d_ta, d_tb), 1);
-		expected2.put(new BasicParameter(d_ta, d_tc), -1);
-		assertEquals(expected2, pmtz.parameterize(d_tc, d_tb));
-	}
-	
-	@Test
-	public void testStudyBaselines() {
+	public void testFindStudyBaselines() {
 		Network network = new Network();
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td, d_te, d_tf));
 		Study s1 = new Study("1");
@@ -140,17 +94,53 @@ public class ConsistencyParameterizationTest {
 		assertEquals(d_tc, baselines.get(s2));
 		assertEquals(d_tf, baselines.get(s3));
 	}
-	/*
 
-		@Test def testModelCreation() {
-			val model = ConsistencyNetworkModel(network)
-			val expectedTree = new Tree[Treatment](
-				Set((tc, tf), (tc, tb), (tc, td), (tf, te), (tf, ta)), tc)
-			model.basis.tree should be (expectedTree)
-			model.studyBaseline(studies(0)) should be (tc)
-			model.studyBaseline(studies(1)) should be (tc)
-			model.studyBaseline(studies(2)) should be (tf)
-		}
-	}*/
+	@Test
+	public void testBasicParameters() {
+		ConsistencyParameterization pmtz = ConsistencyParameterization.create(d_network);
+		
+		List<NetworkParameter> expected = new ArrayList<NetworkParameter>();
+		expected.add(new BasicParameter(d_ta, d_tb));
+		expected.add(new BasicParameter(d_ta, d_tc));
+		expected.add(new BasicParameter(d_ta, d_td));
+		assertEquals(expected, pmtz.getParameters());
+	}
+	
+	@Test
+	public void testStudyBaselines() {
+		ConsistencyParameterization pmtz = ConsistencyParameterization.create(d_network);
 
+		assertEquals(d_tb, pmtz.getStudyBaseline(d_s1));
+		assertEquals(d_ta, pmtz.getStudyBaseline(d_s2));
+		assertEquals(d_ta, pmtz.getStudyBaseline(d_s3));
+		assertEquals(d_ta, pmtz.getStudyBaseline(d_s4));
+	}
+	
+	@Test
+	public void testParameterizationBasic() {
+		ConsistencyParameterization pmtz = ConsistencyParameterization.create(d_network);
+		
+		Map<NetworkParameter, Integer> expected1 = new HashMap<NetworkParameter, Integer>();
+		expected1.put(new BasicParameter(d_ta, d_tb), 1);
+		assertEquals(expected1, pmtz.parameterize(d_ta, d_tb));
+		
+		Map<NetworkParameter, Integer> expected2 = new HashMap<NetworkParameter, Integer>();
+		expected2.put(new BasicParameter(d_ta, d_tb), -1);
+		assertEquals(expected2, pmtz.parameterize(d_tb, d_ta));		
+	}
+	
+	@Test
+	public void testParameterizationFunctional() {
+		ConsistencyParameterization pmtz = ConsistencyParameterization.create(d_network);
+
+		Map<NetworkParameter, Integer> expected1 = new HashMap<NetworkParameter, Integer>();
+		expected1.put(new BasicParameter(d_ta, d_tb), -1);
+		expected1.put(new BasicParameter(d_ta, d_tc), 1);
+		assertEquals(expected1, pmtz.parameterize(d_tb, d_tc));
+		
+		Map<NetworkParameter, Integer> expected2 = new HashMap<NetworkParameter, Integer>();
+		expected2.put(new BasicParameter(d_ta, d_tb), 1);
+		expected2.put(new BasicParameter(d_ta, d_tc), -1);
+		assertEquals(expected2, pmtz.parameterize(d_tc, d_tb));
+	}
 }

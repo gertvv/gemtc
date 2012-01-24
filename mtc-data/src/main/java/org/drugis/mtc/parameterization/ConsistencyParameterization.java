@@ -20,8 +20,23 @@ import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class ConsistencyParameterization implements Parameterization {
+	private static TreatmentComparator s_tc = new TreatmentComparator();
+	
 	private final Tree<Treatment, FoldedEdge<Treatment, Study>> d_tree;
-
+	private final Map<Study, Treatment> d_baselines;
+	
+	/**
+	 * Factory method to create a consistency parameterization for the given network.
+	 */
+	public static ConsistencyParameterization create(Network network) {
+		Hypergraph<Treatment, Study> sGraph = NetworkModel.createStudyGraph(network);
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(sGraph);
+		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = findSpanningTree(cGraph);
+		Map<Study, Treatment> baselines = findStudyBaselines(sGraph, tree);
+		ConsistencyParameterization pmtz = new ConsistencyParameterization(network, tree, baselines);
+		return pmtz;
+	}
+	
 	/**
 	 * Find the minimum diameter spanning tree for the comparison graph.
 	 * @param cGraph
@@ -44,8 +59,6 @@ public class ConsistencyParameterization implements Parameterization {
 		}
 		return map;
 	}
-	
-	private static TreatmentComparator s_tc = new TreatmentComparator();
 
 	private static Treatment findMaxDegreeVertex(Tree<Treatment, FoldedEdge<Treatment, Study>> tree, Collection<Treatment> incidentVertices) {
 		Iterator<Treatment> iterator = incidentVertices.iterator();
@@ -60,10 +73,18 @@ public class ConsistencyParameterization implements Parameterization {
 		return maxDegree;
 	}
 
-	public ConsistencyParameterization(Network network, Tree<Treatment, FoldedEdge<Treatment, Study>> tree) {
+	/**
+	 * Construct a consistency parameterization with the given spanning tree and study baselines.
+	 * @param network Network to parameterize.
+	 * @param tree Spanning tree that defines the basic parameters.
+	 * @param baselines Map of studies to baseline treatments.
+	 */
+	public ConsistencyParameterization(Network network, Tree<Treatment, FoldedEdge<Treatment, Study>> tree, Map<Study, Treatment> baselines) {
 		d_tree = tree;
+		d_baselines = baselines;
 	}
 
+	// Documented in Parameterization
 	public List<NetworkParameter> getParameters() {
 		ArrayList<NetworkParameter> list = new ArrayList<NetworkParameter>();
 		for (FoldedEdge<Treatment, Study> e : d_tree.getEdges()) {
@@ -73,16 +94,7 @@ public class ConsistencyParameterization implements Parameterization {
 		return list;
 	}
 
-	private BasicParameter createBasic(FoldedEdge<Treatment, Study> e) {
-		Treatment first = e.getVertices().getFirst();
-		Treatment second = e.getVertices().getSecond();
-		return createBasic(first, second);
-	}
-
-	private BasicParameter createBasic(Treatment first, Treatment second) {
-		return new BasicParameter(first, second);
-	}
-
+	// Documented in Parameterization
 	public Map<NetworkParameter, Integer> parameterize(Treatment ta, Treatment tb) {
 		// First try to find a basic parameter that corresponds to (ta, tb).
 		if (d_tree.findEdge(ta, tb) != null) {
@@ -95,6 +107,11 @@ public class ConsistencyParameterization implements Parameterization {
 		return pathToParameterization(GraphUtil.findPath(d_tree, ta, tb));
 	}
 
+	// Documented in Parameterization
+	public Treatment getStudyBaseline(Study s) {
+		return d_baselines.get(s);
+	}
+	
 	private Map<NetworkParameter, Integer> pathToParameterization(List<Treatment> path) {
 		Map<NetworkParameter, Integer> map = new HashMap<NetworkParameter, Integer>();
 		for (int i = 1; i < path.size(); ++i) {
@@ -108,9 +125,14 @@ public class ConsistencyParameterization implements Parameterization {
 		}
 		return map;
 	}
+	
+	private BasicParameter createBasic(FoldedEdge<Treatment, Study> e) {
+		Treatment first = e.getVertices().getFirst();
+		Treatment second = e.getVertices().getSecond();
+		return createBasic(first, second);
+	}
 
-	public Treatment getStudyBaseline(Study s) {
-		// TODO Auto-generated method stub
-		return null;
+	private BasicParameter createBasic(Treatment first, Treatment second) {
+		return new BasicParameter(first, second);
 	}
 }
