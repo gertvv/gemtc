@@ -12,6 +12,8 @@ import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.Tree;
+import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.graph.util.Pair;
 
@@ -79,6 +81,36 @@ public class GraphUtilTest {
 		
 		graph.addEdge(3, "D", "E");
 		assertFalse(GraphUtil.isWeaklyConnected(graph));
+	}
+	
+	@Test
+	public void testIsSimpleCycle() {
+		UndirectedGraph<String, Integer> graph = new UndirectedSparseGraph<String, Integer>();
+		
+		graph.addVertex("C");
+		assertFalse(GraphUtil.isSimpleCycle(graph));
+		
+		graph.removeVertex("C");
+		graph.addEdge(1, "A", "B");
+		assertFalse(GraphUtil.isSimpleCycle(graph));
+		
+		graph.addEdge(2, "A", "C");
+		assertFalse(GraphUtil.isSimpleCycle(graph));
+		
+		graph.addEdge(3, "C", "B");
+		assertTrue(GraphUtil.isSimpleCycle(graph));
+		
+		graph.addVertex("D");
+		assertFalse(GraphUtil.isSimpleCycle(graph));
+		
+		graph.addEdge(4, "B", "D");
+		assertFalse(GraphUtil.isSimpleCycle(graph));
+		
+		graph.addEdge(5, "D", "C");
+		assertFalse(GraphUtil.isSimpleCycle(graph));
+		
+		graph.removeEdge(3);
+		assertTrue(GraphUtil.isSimpleCycle(graph));
 	}
 	
 	@Test

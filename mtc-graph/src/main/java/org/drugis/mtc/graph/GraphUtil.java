@@ -2,12 +2,15 @@ package org.drugis.mtc.graph;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.Tree;
+import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class GraphUtil {
 	public static <V, E> void addVertices(Graph<V, E> graph, Collection<V> vertices) {
@@ -74,6 +77,33 @@ public class GraphUtil {
 			}
 			return false;
 		}
+	}
+	
+	/**
+	 * Determine whether the graph is a simple cycle: it is connected, and its
+	 * edges form a closed simple path (no repeated edges or vertices, except
+	 * the first and last).
+	 */
+	public static <V, E> boolean isSimpleCycle(UndirectedGraph<V, E> graph) {
+		if (graph.getVertexCount() < 3 || graph.getEdgeCount() < graph.getVertexCount()) {
+			return false;
+		}
+		V v = graph.getVertices().iterator().next();
+		Set<V> visited = new HashSet<V>();
+		visited.add(v);
+		while (graph.getNeighborCount(v) == 2 && !visited.containsAll(graph.getNeighbors(v))) {
+			Iterator<V> iterator = graph.getNeighbors(v).iterator();
+			V v1 = iterator.next();
+			V v2 = iterator.next();
+			if (!visited.contains(v1)) {
+				v = v1;
+				visited.add(v1);
+			} else {
+				v = v2;
+				visited.add(v2);
+			}
+		}
+		return visited.containsAll(graph.getVertices());
 	}
 	
 	/**

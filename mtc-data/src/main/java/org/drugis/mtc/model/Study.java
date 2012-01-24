@@ -4,6 +4,8 @@ import java.beans.PropertyChangeListener;
 
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.apache.commons.collections15.CollectionUtils;
+import org.apache.commons.collections15.Predicate;
 import org.drugis.common.beans.ObserverManager;
 import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.data.StudyData;
@@ -58,5 +60,13 @@ public class Study extends StudyData implements Observable {
 			s.getMeasurements().add(m.restrict(type));
 		}
 		return s;
+	}
+
+	public boolean containsTreatment(final Treatment t) {
+		return CollectionUtils.exists(getMeasurements(), new Predicate<Measurement>() {
+			public boolean evaluate(Measurement m) {
+				return m.getTreatment().equals(t);
+			}
+		});
 	}
 }
