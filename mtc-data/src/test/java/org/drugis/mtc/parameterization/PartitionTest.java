@@ -1,9 +1,12 @@
 package org.drugis.mtc.parameterization;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.drugis.common.JUnitUtil;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
@@ -65,5 +68,26 @@ public class PartitionTest {
 		new Partition(Collections.singleton(d_p1));
 		new Partition(new HashSet<Part>(Arrays.asList(d_p2, d_p3)));
 		new Partition(new HashSet<Part>(Arrays.asList(d_p3, d_p4, d_p5)));
+	}
+	
+	@Test
+	public void testEquals() {
+		assertEquals(new Partition(Collections.singleton(d_p1)), new Partition(Collections.singleton(d_p1)));
+		assertEquals(new Partition(Collections.singleton(d_p1)).hashCode(), new Partition(Collections.singleton(d_p1)).hashCode());
+		JUnitUtil.assertNotEquals(new Partition(Collections.singleton(d_p1)), new Partition(Arrays.asList(d_p2, d_p3)));
+		JUnitUtil.assertNotEquals(new Partition(Collections.singleton(d_p1)), new Partition(Collections.singleton(d_p6)));
+	}
+	
+	@Test
+	public void testReduce() {
+		// Check that a partition that reduces to a point works correctly
+		assertEquals(new Partition(Collections.singleton(d_p6)), new Partition(Arrays.asList(d_p3, d_p4, d_p5)).reduce());
+
+		// Partitions that reduce to two sets of studies on the same edge
+		assertEquals(new Partition(Arrays.asList(d_p7, d_p3)), new Partition(Arrays.asList(d_p7, d_p4, d_p5)).reduce());
+		assertEquals(new Partition(Arrays.asList(d_p8, d_p5)), new Partition(Arrays.asList(d_p3, d_p8, d_p4)).reduce());
+
+		// Partition that does not reduce
+		assertEquals(new Partition(Arrays.asList(d_p7, d_p8, d_p4)), new Partition(Arrays.asList(d_p7, d_p8, d_p4)).reduce());
 	}
 }

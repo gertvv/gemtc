@@ -41,6 +41,10 @@ public class Part {
 		return Collections.unmodifiableSet(d_treatments);
 	}
 	
+	public Set<Study> getStudies() {
+		return Collections.unmodifiableSet(d_studies);
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Part) {
