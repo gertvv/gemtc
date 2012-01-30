@@ -184,4 +184,12 @@ public class InconsistencyParameterizationTest {
 		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
 		assertNull(InconsistencyParameterization.findStudyBaselines(d_network.getStudies(), cGraph));
 	}
+	
+	@Test
+	public void testFindSpanningTree() {
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
+		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = InconsistencyParameterization.findSpanningTree(d_network.getStudies(), cGraph);
+		Map<Partition, Set<List<Treatment>>> cycleClasses = InconsistencyParameterization.getCycleClasses(cGraph, tree);
+		assertEquals(2, InconsistencyParameterization.getInconsistencyDegree(cycleClasses));
+	}
 }
