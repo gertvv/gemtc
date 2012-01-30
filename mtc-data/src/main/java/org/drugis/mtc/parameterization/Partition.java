@@ -36,40 +36,22 @@ public class Partition {
 	public int hashCode() {
 		return d_parts.hashCode();
 	}
-
-	private static boolean validPartition(Set<Part> parts) {
-		if (parts.isEmpty()) {
-			return false;
-		}
-		if (parts.size() == 1) {
-			return parts.iterator().next().getTreatments().size() == 1;
-		}
-		if (parts.size() == 2) {
-			Iterator<Part> iterator = parts.iterator();
-			Part p1 = iterator.next();
-			Part p2 = iterator.next();
-			return p1.getTreatments().equals(p2.getTreatments());
-		}
-		
-		// now try to assemble the parts into a cycle
-		UndirectedGraph<Treatment, Part> graph = buildGraph(parts);
-		return graph == null ? false : GraphUtil.isSimpleCycle(graph);
+	
+	@Override
+	public String toString() {
+		return "Partition{" + d_parts.toString() + "}";
+	}
+	
+	/**
+	 * Get an unmodifiable view of the parts in this Partition.
+	 */
+	public Set<Part> getParts() {
+		return Collections.unmodifiableSet(d_parts);
 	}
 
-	private static UndirectedGraph<Treatment, Part> buildGraph(Set<Part> parts) {
-		UndirectedGraph<Treatment, Part> graph = new UndirectedSparseGraph<Treatment, Part>();
-		for (Part p : parts) {
-			if (p.getTreatments().size() != 2) { // FIXME: add test for this.
-				return null;
-			}
-			Iterator<Treatment> iterator = p.getTreatments().iterator();
-			Treatment t1 = iterator.next();
-			Treatment t2 = iterator.next();
-			graph.addEdge(p, t1, t2);
-		}
-		return graph;
-	}
-
+	/**
+	 * Reduce this partition so that all the parts in the resulting partition are independent.
+	 */
 	public Partition reduce() {
 		if (d_parts.size() < 3) {
 			return this;
@@ -77,9 +59,11 @@ public class Partition {
 		
 		UndirectedGraph<Treatment, Part> graph = buildGraph(d_parts);
 		
-		// Start at an arbitrary part
-		Part p = d_parts.iterator().next(); // Starting part
-		Pair<Treatment> treatments = new Pair<Treatment>(p.getTreatments());
+		// Start at an arbitrary part connected to the least vertex.
+		// If we don't start at the least vertex, the result might vary for cycles that reduce to a point.
+		Treatment v0 = TreatmentComparator.findLeast(graph.getVertices());
+		Part p = graph.getIncidentEdges(v0).iterator().next(); // Starting part
+		Pair<Treatment> treatments = new Pair<Treatment>(v0, otherTreatment(p, v0));
 		Set<Part> visited = new HashSet<Part>(Collections.singleton(p)); // Visited parts
 		
 		// Go as far to the right as possible
@@ -122,6 +106,45 @@ public class Partition {
 			pNext = nextPart(graph, tPrev, tCurr); // So move on to the next part
 		}
 		return tCurr;
+	}
+
+	/**
+	 * Determine whether the given set of parts forms a valid partition.
+	 */
+	private static boolean validPartition(Set<Part> parts) {
+		if (parts.isEmpty()) {
+			return false;
+		}
+		if (parts.size() == 1) {
+			return parts.iterator().next().getTreatments().size() == 1;
+		}
+		if (parts.size() == 2) {
+			Iterator<Part> iterator = parts.iterator();
+			Part p1 = iterator.next();
+			Part p2 = iterator.next();
+			return p1.getTreatments().equals(p2.getTreatments()) && p1.getTreatments().size() == 2;
+		}
+		
+		// now try to assemble the parts into a cycle
+		UndirectedGraph<Treatment, Part> graph = buildGraph(parts);
+		return graph == null ? false : GraphUtil.isSimpleCycle(graph);
+	}
+
+	/**
+	 * Build a graph in which the given parts are the edges.
+	 */
+	private static UndirectedGraph<Treatment, Part> buildGraph(Set<Part> parts) {
+		UndirectedGraph<Treatment, Part> graph = new UndirectedSparseGraph<Treatment, Part>();
+		for (Part p : parts) {
+			if (p.getTreatments().size() != 2) { // FIXME: add test for this.
+				return null;
+			}
+			Iterator<Treatment> iterator = p.getTreatments().iterator();
+			Treatment t1 = iterator.next();
+			Treatment t2 = iterator.next();
+			graph.addEdge(p, t1, t2);
+		}
+		return graph;
 	}
 	
 	/**

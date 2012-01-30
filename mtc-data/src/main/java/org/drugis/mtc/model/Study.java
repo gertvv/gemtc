@@ -1,6 +1,8 @@
 package org.drugis.mtc.model;
 
 import java.beans.PropertyChangeListener;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -50,6 +52,11 @@ public class Study extends StudyData implements Observable {
 		d_obsManager.addPropertyChangeListener(listener);
 	}
 	
+	@Override
+	public String toString() {
+		return "Study[" + getId() + "]";
+	}
+	
 	/**
 	 * Create a clone of this Study, with the Measurement values restricted to those allowed by the DataType.
 	 */
@@ -68,5 +75,13 @@ public class Study extends StudyData implements Observable {
 				return m.getTreatment().equals(t);
 			}
 		});
+	}
+	
+	public Set<Treatment> getTreatments() {
+		Set<Treatment> treatments = new HashSet<Treatment>();
+		for (Measurement m : getMeasurements()) {
+			treatments.add(m.getTreatment());
+		}
+		return treatments;
 	}
 }

@@ -1,5 +1,6 @@
 package org.drugis.mtc.parameterization;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,9 +18,6 @@ public class Part {
 	/**
 	 * A part represents an undirected comparison measured by a set of studies.
 	 * Hence, (new Part(ta, tb, s)).equals(new Part(tb, ta, s)).
-	 * @param t1 
-	 * @param t2
-	 * @param studies
 	 */
 	public Part(final Treatment t1, final Treatment t2, final Set<Study> studies) {
 		if (studies.isEmpty()) {
@@ -37,6 +35,10 @@ public class Part {
 		d_studies = studies;
 	}
 	
+	public Part(Treatment ta, Treatment tb, Collection<Study> studies) {
+		this(ta, tb, new HashSet<Study>(studies));
+	}
+
 	public Set<Treatment> getTreatments() {
 		return Collections.unmodifiableSet(d_treatments);
 	}
@@ -57,5 +59,10 @@ public class Part {
 	@Override
 	public int hashCode() {
 		return d_treatments.hashCode() * 31 + d_studies.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "Part(" + d_treatments.toString() + ", " + d_studies.toString() + ")";
 	}
 }

@@ -1,10 +1,5 @@
 package org.drugis.mtc.parameterization;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
@@ -23,7 +18,7 @@ public class NetworkModel {
 			graph.addVertex(t);
 		}
 		for (Study s : network.getStudies()) {
-			graph.addEdge(s, getTreatments(s));
+			graph.addEdge(s, s.getTreatments());
 		}
 		return graph ;
 	}
@@ -34,13 +29,5 @@ public class NetworkModel {
 
 	public static UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> createComparisonGraph(Hypergraph<Treatment, Study> studyGraph) {
 		return FoldingTransformerFixed.foldHypergraphEdges(studyGraph, UndirectedSparseGraph.<Treatment, FoldedEdge<Treatment, Study>>getFactory());
-	}
-
-	private static Collection<Treatment> getTreatments(Study s) {
-		Set<Treatment> treatments = new HashSet<Treatment>();
-		for (Measurement m : s.getMeasurements()) {
-			treatments.add(m.getTreatment());
-		}
-		return treatments;
 	}
 }

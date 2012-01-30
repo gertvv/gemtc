@@ -65,6 +65,6 @@ public class Treatment extends TreatmentData implements Observable {
 	
 	@Override
 	public String toString() {
-		return "Treatment[" + getId() + "]{description=" + getDescription() + "}";
+		return "Treatment[" + getId() + "]";
 	}
 }
