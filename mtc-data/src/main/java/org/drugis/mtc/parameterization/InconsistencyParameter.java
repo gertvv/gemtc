@@ -2,6 +2,7 @@ package org.drugis.mtc.parameterization;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,10 @@ public class InconsistencyParameter implements NetworkParameter, Comparable<Inco
 	@Override
 	public String getName() {
 		return "w." + StringUtils.join(transform(d_cycle, s_idTransformer), ".");
+	}
+	
+	public List<Treatment> getCycle() {
+		return Collections.unmodifiableList(d_cycle);
 	}
 	
 	// FIXME: make a method in common?

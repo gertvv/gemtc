@@ -48,7 +48,7 @@ public class InconsistencyBaselineSearchProblem implements SearchProblem<Map<Stu
 		for (Study s : d_studies) {
 			Set<Treatment> treatments = s.getTreatments();
 			if (treatments.size() == 2) {
-				state.put(s, TreatmentComparator.findLeast(treatments));
+				state.put(s, CompareUtil.findLeast(treatments, TreatmentComparator.INSTANCE));
 			}
 		}
 		return state;
@@ -107,7 +107,7 @@ public class InconsistencyBaselineSearchProblem implements SearchProblem<Map<Stu
 			Set<List<Treatment>> cycles = c.getValue();
 			if (existsTooManyMissing(cycles, covered)) {
 				return false;
-			} else if (c.getKey().getParts().size() >= 3 && !existsNoneMissing(cycles, covered)) {
+			} else if (InconsistencyParameterization.isInconsistencyCycle(c.getKey()) && !existsNoneMissing(cycles, covered)) {
 				return false;
 			}
 		}

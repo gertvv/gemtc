@@ -1,9 +1,11 @@
 package org.drugis.mtc.parameterization;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.drugis.mtc.graph.GraphUtil;
@@ -15,12 +17,14 @@ import edu.uci.ics.jung.graph.util.Pair;
 
 public class Partition {
 	private final Set<Part> d_parts;
+	private boolean d_reduced;
 
 	public Partition(Collection<Part> parts) {
 		d_parts = new HashSet<Part>(parts);
 		if (!validPartition(d_parts)) {
 			throw new IllegalArgumentException("Given parts do not form a valid partition");
 		}
+		d_reduced = false;
 	}
 	
 	@Override
@@ -53,15 +57,18 @@ public class Partition {
 	 * Reduce this partition so that all the parts in the resulting partition are independent.
 	 */
 	public Partition reduce() {
-		if (d_parts.size() < 3) {
+		if (d_reduced) {
 			return this;
 		}
 		
 		UndirectedGraph<Treatment, Part> graph = buildGraph(d_parts);
+		if (graph == null) {
+			return this;
+		}
 		
 		// Start at an arbitrary part connected to the least vertex.
 		// If we don't start at the least vertex, the result might vary for cycles that reduce to a point.
-		Treatment v0 = TreatmentComparator.findLeast(graph.getVertices());
+		Treatment v0 = CompareUtil.findLeast(graph.getVertices(), TreatmentComparator.INSTANCE);
 		Part p = graph.getIncidentEdges(v0).iterator().next(); // Starting part
 		Pair<Treatment> treatments = new Pair<Treatment>(v0, otherTreatment(p, v0));
 		Set<Part> visited = new HashSet<Part>(Collections.singleton(p)); // Visited parts
@@ -84,7 +91,24 @@ public class Partition {
 			tRight = tNext;
 		} while (!tRight.equals(tLeft));
 		
-		return new Partition(reduced);
+		Partition partition = new Partition(reduced);
+		partition.d_reduced = true;
+		return partition;
+	}
+	
+	public List<Treatment> asCycle() {
+		UndirectedGraph<Treatment, Part> graph = buildGraph(d_parts);
+		
+		List<Treatment> cycle = new ArrayList<Treatment>(d_parts.size() + 1);
+		Part p0 = graph.getEdges().iterator().next();
+		Pair<Treatment> treatments = new Pair<Treatment>(p0.getTreatments());
+		cycle.addAll(treatments);
+		for (int i = 1; i < d_parts.size(); ++i) {
+			Part pNext = nextPart(graph, cycle.get(i - 1), cycle.get(i));
+			cycle.add(otherTreatment(pNext, cycle.get(i)));
+		}
+		
+		return cycle;
 	}
 
 	/**

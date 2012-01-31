@@ -20,7 +20,7 @@ import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class ConsistencyParameterization implements Parameterization {
-	private final Tree<Treatment, FoldedEdge<Treatment, Study>> d_tree;
+	protected final Tree<Treatment, FoldedEdge<Treatment, Study>> d_tree;
 	private final Map<Study, Treatment> d_baselines;
 	
 	/**
@@ -84,11 +84,19 @@ public class ConsistencyParameterization implements Parameterization {
 
 	// Documented in Parameterization
 	public List<NetworkParameter> getParameters() {
-		ArrayList<NetworkParameter> list = new ArrayList<NetworkParameter>();
-		for (FoldedEdge<Treatment, Study> e : d_tree.getEdges()) {
+		List<NetworkParameter> list = getBasicParameters(d_tree);
+		Collections.sort(list, NetworkParameterComparator.INSTANCE);
+		return list;
+	}
+
+	/**
+	 * Build an unordered list of basic parameters derived from the given tree.
+	 */
+	public static List<NetworkParameter> getBasicParameters(Tree<Treatment, FoldedEdge<Treatment, Study>> tree) {
+		List<NetworkParameter> list = new ArrayList<NetworkParameter>();
+		for (FoldedEdge<Treatment, Study> e : tree.getEdges()) {
 			list.add(createBasic(e));
 		}
-		Collections.sort(list, NetworkParameterComparator.INSTANCE);
 		return list;
 	}
 
@@ -102,6 +110,10 @@ public class ConsistencyParameterization implements Parameterization {
 			return Collections.<NetworkParameter, Integer>singletonMap(createBasic(tb, ta), -1);
 		}
 		// Now handle functional parameters.
+		return parameterizeFunctional(ta, tb);
+	}
+
+	protected Map<NetworkParameter, Integer> parameterizeFunctional(Treatment ta, Treatment tb) {
 		return pathToParameterization(GraphUtil.findPath(d_tree, ta, tb));
 	}
 
@@ -124,13 +136,13 @@ public class ConsistencyParameterization implements Parameterization {
 		return map;
 	}
 	
-	private BasicParameter createBasic(FoldedEdge<Treatment, Study> e) {
+	private static BasicParameter createBasic(FoldedEdge<Treatment, Study> e) {
 		Treatment first = e.getVertices().getFirst();
 		Treatment second = e.getVertices().getSecond();
 		return createBasic(first, second);
 	}
 
-	private BasicParameter createBasic(Treatment first, Treatment second) {
+	private static BasicParameter createBasic(Treatment first, Treatment second) {
 		return new BasicParameter(first, second);
 	}
 }
