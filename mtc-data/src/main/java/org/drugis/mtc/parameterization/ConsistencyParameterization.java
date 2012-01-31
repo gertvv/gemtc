@@ -19,6 +19,9 @@ import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 
+/**
+ * Implements parameterization of consistency models for network meta-analysis.
+ */
 public class ConsistencyParameterization implements Parameterization {
 	protected final Tree<Treatment, FoldedEdge<Treatment, Study>> d_tree;
 	private final Map<Study, Treatment> d_baselines;

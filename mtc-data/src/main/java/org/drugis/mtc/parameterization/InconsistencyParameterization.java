@@ -25,6 +25,10 @@ import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
+/**
+ * Implements parameterization of inconsistency models for network meta-analysis.
+ * Method described in <a href="http://dx.doi.org/10.1007/s11222-011-9281-9">van Valkenhoef et al., Statistics and Computing (2011)</a>.
+ */
 public class InconsistencyParameterization extends ConsistencyParameterization {
 	
 	public static InconsistencyParameterization create(Network network) {
