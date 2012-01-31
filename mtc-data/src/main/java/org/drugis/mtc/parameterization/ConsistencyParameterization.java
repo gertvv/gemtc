@@ -61,7 +61,7 @@ public class ConsistencyParameterization implements Parameterization {
 		return map;
 	}
 
-	private static Treatment findMaxDegreeVertex(Tree<Treatment, FoldedEdge<Treatment, Study>> tree, Collection<Treatment> incidentVertices) {
+	protected static Treatment findMaxDegreeVertex(Tree<Treatment, FoldedEdge<Treatment, Study>> tree, Collection<Treatment> incidentVertices) {
 		Iterator<Treatment> iterator = incidentVertices.iterator();
 		Treatment maxDegree = iterator.next();
 		while (iterator.hasNext()) {

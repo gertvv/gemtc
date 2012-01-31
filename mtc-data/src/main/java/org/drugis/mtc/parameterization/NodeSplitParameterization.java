@@ -3,6 +3,7 @@ package org.drugis.mtc.parameterization;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,7 @@ import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.SetHypergraph;
 import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
 /**
@@ -29,11 +31,20 @@ import edu.uci.ics.jung.graph.util.Pair;
  */
 public class NodeSplitParameterization extends ConsistencyParameterization {
 	/**
+	 * Factory method to create a node-split parameterization for the given network and split node.
+	 */
+	public static NodeSplitParameterization create(Network network, BasicParameter split) {
+		Hypergraph<Treatment, Study> sGraph = NetworkModel.createStudyGraph(network);
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(sGraph);
+		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = findSpanningTree(cGraph, split);
+		Map<Study, Treatment> baselines = findStudyBaselines(sGraph, tree, split);
+		NodeSplitParameterization pmtz = new NodeSplitParameterization(network, split, tree, baselines);
+		return pmtz;
+	}
+	
+	/**
 	 * Determine which nodes should be split.
-	 * Applies the rule 
-	 * "for a given set of studies S, split {x,y} if and only if there is a path between x and y
-	 * in the reduced network determined by removing the x and y arms from all studies
-	 * that include both x and y."
+	 * @see isSplittable
 	 */
 	public static List<BasicParameter> getSplittableNodes(Hypergraph<Treatment, Study> studyGraph, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph) {
 		// Get any spanning tree
@@ -67,6 +78,12 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 		return paramList;
 	}
 	
+	/**
+	 * Applies the rule 
+	 * "for a given set of studies S, split {x,y} if and only if there is a path between x and y
+	 * in the reduced network determined by removing the x and y arms from all studies
+	 * that include both x and y."
+	 */
 	public static boolean isSplittable(Hypergraph<Treatment, Study> studyGraph, Pair<Treatment> split) {
 		SetHypergraph<Treatment, Study> reduced = new SetHypergraph<Treatment, Study>();
 		for (Treatment t : studyGraph.getVertices()) {
@@ -106,11 +123,35 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 	}
 
 	public static Tree<Treatment, FoldedEdge<Treatment, Study>> findSpanningTree(UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph, BasicParameter split) {
-		return null;
-	}	
+		UndirectedSparseGraph<Treatment, FoldedEdge<Treatment, Study>> graph = new UndirectedSparseGraph<Treatment, FoldedEdge<Treatment, Study>>();
+		GraphUtil.copyGraph(cGraph, graph);
+		graph.removeEdge(cGraph.findEdge(split.getBaseline(), split.getSubject()));
+		return ConsistencyParameterization.findSpanningTree(graph);
+	}
+	
+	/**
+	 * Find the study baseline assignment that maximizes the degree of each baseline in the given spanning tree,
+	 * but exclude the split node if it occurs in that study.
+	 * @param studyGraph The study graph.
+	 * @param tree The spanning tree
+	 */
+	public static Map<Study, Treatment> findStudyBaselines(Hypergraph<Treatment, Study> studyGraph, Tree<Treatment, FoldedEdge<Treatment, Study>> tree, BasicParameter split) {
+		Pair<Treatment> splitVertices = new Pair<Treatment>(split.getBaseline(), split.getSubject());
+		Map<Study, Treatment> map = new HashMap<Study, Treatment>();
+		for (Study s : studyGraph.getEdges()) {
+			Collection<Treatment> incidentVertices = studyGraph.getIncidentVertices(s);
+			if (incidentVertices.size() > 2 && incidentVertices.containsAll(splitVertices)) { // taboo the split vertices in studies that contain both
+				incidentVertices = new HashSet<Treatment>(incidentVertices);
+				incidentVertices.removeAll(splitVertices);
+			}
+			map.put(s, findMaxDegreeVertex(tree, incidentVertices));
+		}
+		return map;
+	}
 
 	public NodeSplitParameterization(Network network, BasicParameter splitNode, Tree<Treatment, FoldedEdge<Treatment, Study>> tree, Map<Study, Treatment> baselines) {
 		super(network, tree, baselines);
 	}
 
+	// FIXME: need a new concept of how to parameterize the individual studies -- this cannot be the same as for consistency models!
 }
