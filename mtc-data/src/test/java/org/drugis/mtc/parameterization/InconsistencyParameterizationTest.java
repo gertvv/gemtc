@@ -223,7 +223,7 @@ public class InconsistencyParameterizationTest {
 		// create a spanning tree in which ACBDA and ACDA are equivalent
 		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
 		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = new DelegateTree<Treatment, FoldedEdge<Treatment, Study>>();
-		DirectedGraph<Treatment, FoldedEdge<Treatment, Study>> dg = InconsistencyParameterization.toDirected(cGraph);
+		DirectedGraph<Treatment, FoldedEdge<Treatment, Study>> dg = NetworkModel.toDirected(cGraph);
 		tree.addVertex(d_ta);
 		tree.addEdge(dg.findEdge(d_ta, d_tc), d_ta, d_tc);
 		tree.addEdge(dg.findEdge(d_ta, d_td), d_ta, d_td);
@@ -247,7 +247,7 @@ public class InconsistencyParameterizationTest {
 		// create a spanning tree in which ACBDA and ACDA are equivalent
 		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(d_network);
 		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = new DelegateTree<Treatment, FoldedEdge<Treatment, Study>>();
-		DirectedGraph<Treatment, FoldedEdge<Treatment, Study>> dg = InconsistencyParameterization.toDirected(cGraph);
+		DirectedGraph<Treatment, FoldedEdge<Treatment, Study>> dg = NetworkModel.toDirected(cGraph);
 		tree.addVertex(d_ta);
 		tree.addEdge(dg.findEdge(d_ta, d_tc), d_ta, d_tc);
 		tree.addEdge(dg.findEdge(d_ta, d_td), d_ta, d_td);
@@ -328,7 +328,7 @@ public class InconsistencyParameterizationTest {
 		
 		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(network);
 		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = new DelegateTree<Treatment, FoldedEdge<Treatment, Study>>();
-		DirectedGraph<Treatment, FoldedEdge<Treatment, Study>> dg = InconsistencyParameterization.toDirected(cGraph);
+		DirectedGraph<Treatment, FoldedEdge<Treatment, Study>> dg = NetworkModel.toDirected(cGraph);
 		tree.addVertex(d_ta);
 		tree.addEdge(dg.findEdge(d_ta, d_tc), d_ta, d_tc);
 		tree.addEdge(dg.findEdge(d_ta, d_td), d_ta, d_td);
