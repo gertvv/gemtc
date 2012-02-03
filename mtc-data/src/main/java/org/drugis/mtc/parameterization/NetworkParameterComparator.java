@@ -15,6 +15,8 @@ public class NetworkParameterComparator implements Comparator<NetworkParameter> 
 		
 		if (p1 instanceof BasicParameter) {
 			return ((BasicParameter) p1).compareTo((BasicParameter) p2);
+		} else if (p2 instanceof SplitParameter) {
+			return ((SplitParameter) p1).compareTo((SplitParameter) p2);
 		} else {
 			return ((InconsistencyParameter) p1).compareTo((InconsistencyParameter) p2);
 		}

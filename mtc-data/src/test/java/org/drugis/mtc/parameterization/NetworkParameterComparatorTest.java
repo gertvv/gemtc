@@ -45,6 +45,17 @@ public class NetworkParameterComparatorTest {
 	}
 	
 	@Test
+	public void testCompareSplitParameters() {
+		NetworkParameterComparator pc = NetworkParameterComparator.INSTANCE;
+		
+		Treatment ta = new Treatment("A");
+		Treatment tb = new Treatment("B");
+		
+		assertTrue(pc.compare(new SplitParameter(ta, tb, true), new SplitParameter(ta, tb, false)) < 0);
+		assertTrue(pc.compare(new SplitParameter(ta, tb, true), new SplitParameter(ta, tb, true)) == 0);
+	}
+	
+	@Test
 	public void testCompareMixed() {
 		NetworkParameterComparator pc = NetworkParameterComparator.INSTANCE;
 		
@@ -57,5 +68,11 @@ public class NetworkParameterComparatorTest {
 		assertTrue(pc.compare(new BasicParameter(ta, tb), new InconsistencyParameter(c1)) < 0);
 		assertTrue(pc.compare(new InconsistencyParameter(c1), new BasicParameter(ta, tb)) > 0);
 		assertTrue(pc.compare(new BasicParameter(tb, tc), new InconsistencyParameter(c1)) < 0);
+		
+		assertTrue(pc.compare(new BasicParameter(ta, tb), new SplitParameter(ta, tb, true)) < 0);
+		assertTrue(pc.compare(new SplitParameter(ta, tb, true), new BasicParameter(ta, tb)) > 0);
+		assertTrue(pc.compare(new BasicParameter(tb, tc), new SplitParameter(ta, tb, true)) < 0);
+		
+		// Not testing SplitParameter / InconsistencyParameter comparisons because they should not occur together.
 	}
 }

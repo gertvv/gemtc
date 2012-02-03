@@ -30,6 +30,8 @@ import edu.uci.ics.jung.graph.util.Pair;
  * WARNING: this method is a work-in-progress, correctness is TBD.
  */
 public class NodeSplitParameterization extends ConsistencyParameterization {
+	private final BasicParameter d_splitNode;
+
 	/**
 	 * Factory method to create a node-split parameterization for the given network and split node.
 	 */
@@ -151,7 +153,14 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 
 	public NodeSplitParameterization(Network network, BasicParameter splitNode, Tree<Treatment, FoldedEdge<Treatment, Study>> tree, Map<Study, Treatment> baselines) {
 		super(network, tree, baselines);
+		d_splitNode = splitNode;
 	}
 
+	@Override
+	public List<NetworkParameter> getParameters() {
+		List<NetworkParameter> parameters = super.getParameters();
+		parameters.add(new SplitParameter(d_splitNode.getBaseline(), d_splitNode.getSubject(), true));
+		return parameters;
+	}
 	// FIXME: need a new concept of how to parameterize the individual studies -- this cannot be the same as for consistency models!
 }

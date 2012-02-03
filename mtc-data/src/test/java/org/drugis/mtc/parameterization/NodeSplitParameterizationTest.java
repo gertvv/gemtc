@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -132,9 +131,11 @@ public class NodeSplitParameterizationTest {
 		NodeSplitParameterization pmtz = NodeSplitParameterization.create(d_network, new BasicParameter(d_ta, d_tb));
 		
 		List<NetworkParameter> expected = Arrays.<NetworkParameter>asList(
-				new BasicParameter(d_ta, d_tc), new BasicParameter(d_tb, d_tc), 
-				new BasicParameter(d_tc, d_td), new BasicParameter(d_tc, d_te)); // FIXME: add the split param
+				new BasicParameter(d_tc, d_ta), new BasicParameter(d_tc, d_tb), 
+				new BasicParameter(d_tc, d_td), new BasicParameter(d_tc, d_te),
+				new SplitParameter(d_ta, d_tb, true));
 		
 		assertEquals(expected, pmtz.getParameters());
 	}
+
 }

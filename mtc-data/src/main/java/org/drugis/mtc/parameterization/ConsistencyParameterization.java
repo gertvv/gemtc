@@ -98,7 +98,13 @@ public class ConsistencyParameterization implements Parameterization {
 	public static List<NetworkParameter> getBasicParameters(Tree<Treatment, FoldedEdge<Treatment, Study>> tree) {
 		List<NetworkParameter> list = new ArrayList<NetworkParameter>();
 		for (FoldedEdge<Treatment, Study> e : tree.getEdges()) {
-			list.add(createBasic(e));
+			Treatment u = e.getVertices().getFirst();
+			Treatment v = e.getVertices().getSecond();
+			if (tree.findEdge(u, v) != null) {
+				list.add(createBasic(u, v));
+			} else {
+				list.add(createBasic(v, u));
+			}
 		}
 		return list;
 	}
@@ -137,12 +143,6 @@ public class ConsistencyParameterization implements Parameterization {
 			}
 		}
 		return map;
-	}
-	
-	private static BasicParameter createBasic(FoldedEdge<Treatment, Study> e) {
-		Treatment first = e.getVertices().getFirst();
-		Treatment second = e.getVertices().getSecond();
-		return createBasic(first, second);
 	}
 
 	private static BasicParameter createBasic(Treatment first, Treatment second) {
