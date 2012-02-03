@@ -1,12 +1,10 @@
 package org.drugis.mtc.parameterization;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +54,6 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 		Tree<Treatment, FoldedEdge<Treatment,Study>> tree = (Tree<Treatment, FoldedEdge<Treatment, Study>>) treeBuilder.transform(cGraph);
 
 		// The spanning tree gives us a cycle basis, to determine which comparisons occur in a cycle
-		// FIXME: move to GraphUtil
 		Set<FoldedEdge<Treatment,Study>> nonTreeEdges = new HashSet<FoldedEdge<Treatment,Study>>(cGraph.getEdges());
 		nonTreeEdges.removeAll(tree.getEdges());
 		Set<BasicParameter> inCycle = new HashSet<BasicParameter>();
@@ -104,27 +101,9 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 				reduced.addEdge(s, incidentVertices);
 			}
 		}
-		return areVerticesConnected(reduced, split.getFirst(), split.getSecond());
+		return GraphUtil.areVerticesWeaklyConnected(reduced, split.getFirst(), split.getSecond());
 	}
 	
-	// FIXME: move to GraphUtil
-	private static <V,E> boolean areVerticesConnected(Hypergraph<V, E> studyGraph, V first, V second) {
-		Set<V> visited = new HashSet<V>();
-		LinkedList<V> fringe = new LinkedList<V>();
-		fringe.add(first);
-		while (!fringe.isEmpty()) {
-			V v = fringe.pop();
-			if (v.equals(second)) {
-				return true;
-			}
-			visited.add(v);
-			HashSet<V> neighbors = new HashSet<V>(studyGraph.getNeighbors(v));
-			neighbors.removeAll(visited);
-			fringe.addAll(neighbors);
-		}
-		return false;
-	}
-
 	public static Tree<Treatment, FoldedEdge<Treatment, Study>> findSpanningTree(UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph, BasicParameter split) {
 		UndirectedSparseGraph<Treatment, FoldedEdge<Treatment, Study>> graph = new UndirectedSparseGraph<Treatment, FoldedEdge<Treatment, Study>>();
 		GraphUtil.copyGraph(cGraph, graph);

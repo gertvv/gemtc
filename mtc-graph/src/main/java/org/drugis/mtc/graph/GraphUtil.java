@@ -80,6 +80,30 @@ public class GraphUtil {
 	}
 	
 	/**
+	 * Test whether the given vertices are connected in the hypergraph.
+	 * For directed graphs, tests weak connectivity, i.e. it tests whether the
+	 * vertices are connected when all directed edges are replaced by
+	 * undirected ones.
+	 */
+	public static <V,E> boolean areVerticesWeaklyConnected(Hypergraph<V, E> studyGraph, V first, V second) {
+		Set<V> visited = new HashSet<V>();
+		LinkedList<V> fringe = new LinkedList<V>();
+		fringe.add(first);
+		while (!fringe.isEmpty()) {
+			V v = fringe.pop();
+			if (v.equals(second)) {
+				return true;
+			}
+			visited.add(v);
+			HashSet<V> neighbors = new HashSet<V>(studyGraph.getNeighbors(v));
+			neighbors.removeAll(visited);
+			neighbors.removeAll(fringe);
+			fringe.addAll(neighbors);
+		}
+		return false;
+	}
+	
+	/**
 	 * Determine whether the graph is a simple cycle: it is connected, and its
 	 * edges form a closed simple path (no repeated edges or vertices, except
 	 * the first and last).

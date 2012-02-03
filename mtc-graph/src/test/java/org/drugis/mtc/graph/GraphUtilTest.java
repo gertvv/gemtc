@@ -84,6 +84,28 @@ public class GraphUtilTest {
 	}
 	
 	@Test
+	public void testAreVerticesWeaklyConnected() {
+		Graph<String, Integer> graph = new SparseMultigraph<String, Integer>();
+		graph.addEdge(1, "A", "B", EdgeType.DIRECTED);
+		graph.addVertex("C");
+		
+		assertFalse(GraphUtil.areVerticesWeaklyConnected(graph, "A", "C"));
+		assertTrue(GraphUtil.areVerticesWeaklyConnected(graph, "A", "B"));
+		assertTrue(GraphUtil.areVerticesWeaklyConnected(graph, "B", "A"));
+		
+		graph.addEdge(2, "B", "C");
+		assertTrue(GraphUtil.areVerticesWeaklyConnected(graph, "A", "C"));
+		
+		graph.addEdge(3, "D", "E");
+		assertTrue(GraphUtil.areVerticesWeaklyConnected(graph, "A", "C"));
+		
+		// Test that we don't keep going around in cycles
+		graph.addEdge(4, "C", "A");
+		assertTrue(GraphUtil.areVerticesWeaklyConnected(graph, "A", "C"));
+		assertFalse(GraphUtil.areVerticesWeaklyConnected(graph, "A", "D"));
+	}
+	
+	@Test
 	public void testIsSimpleCycle() {
 		UndirectedGraph<String, Integer> graph = new UndirectedSparseGraph<String, Integer>();
 		
