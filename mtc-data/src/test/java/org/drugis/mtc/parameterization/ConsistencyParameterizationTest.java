@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.Folded
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class ConsistencyParameterizationTest {
 	private Network d_network;
@@ -68,7 +70,7 @@ public class ConsistencyParameterizationTest {
 	@Test
 	public void testFindStudyBaselines() {
 		Network network = new Network();
-		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td, d_te, d_tf));
+		network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td, d_te, d_tf));
 		Study s1 = new Study("1");
 		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_tf)));
 		Study s2 = new Study("2");
@@ -107,6 +109,27 @@ public class ConsistencyParameterizationTest {
 	}
 	
 	@Test
+	public void testBasicParametersCorrespondToSpanningTree() {
+		Network network = new Network();
+		network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td, d_te, d_tf));
+		Study s1 = new Study("1");
+		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_tf)));
+		Study s2 = new Study("2");
+		s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_tb), new Measurement(d_tc), new Measurement(d_td)));
+		Study s3 = new Study("3");
+		s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_te), new Measurement(d_tf)));
+		network.getStudies().addAll(Arrays.asList(s1, s2, s3));
+		
+		ConsistencyParameterization pmtz = ConsistencyParameterization.create(network);
+		
+		List<BasicParameter> expected = Arrays.asList(
+				new BasicParameter(d_tc, d_tb), new BasicParameter(d_tc, d_td), new BasicParameter(d_tc, d_tf),
+				new BasicParameter(d_tf, d_ta), new BasicParameter(d_tf, d_te));
+		assertEquals(expected, pmtz.getParameters());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
 	public void testStudyBaselines() {
 		ConsistencyParameterization pmtz = ConsistencyParameterization.create(d_network);
 
@@ -114,6 +137,11 @@ public class ConsistencyParameterizationTest {
 		assertEquals(d_ta, pmtz.getStudyBaseline(d_s2));
 		assertEquals(d_ta, pmtz.getStudyBaseline(d_s3));
 		assertEquals(d_ta, pmtz.getStudyBaseline(d_s4));
+		
+		assertEquals(Collections.singletonList(Collections.singletonList(new Pair<Treatment>(d_ta, d_tb))), 
+				pmtz.parameterizeStudy(d_s2));
+		List<Pair<Treatment>> expected = Arrays.asList(new Pair<Treatment>(d_tb, d_tc), new Pair<Treatment>(d_tb, d_td));
+		assertEquals(Collections.singletonList(expected), pmtz.parameterizeStudy(d_s1));
 	}
 	
 	@Test

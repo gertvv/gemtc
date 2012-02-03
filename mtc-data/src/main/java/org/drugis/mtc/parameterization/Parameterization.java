@@ -6,6 +6,8 @@ import java.util.Map;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 
+import edu.uci.ics.jung.graph.util.Pair;
+
 /**
  * Parameterization of a Network. The parameterization completely fixes the 
  * structure of the MCMC model, but is not concerned with values (e.g. data, 
@@ -29,9 +31,10 @@ public interface Parameterization {
 	public Map<NetworkParameter, Integer> parameterize(Treatment base, Treatment subj);
 	
 	/**
-	 * Return the treatment relative to which all effects in the given study should be expressed.
-	 * @param s The study.
-	 * @return The baseline treatment for the study.
+	 * How to parameterize a study. Generates a list, each element of which
+	 * represents an independent normal likelihood to be defined. Each of these
+	 * elements is itself a list, the elements of which give the comparisons
+	 * that are to be parameters of that likelihood.
 	 */
-	public Treatment getStudyBaseline(Study s);
+	public List<List<Pair<Treatment>>> parameterizeStudy(Study s);
 }

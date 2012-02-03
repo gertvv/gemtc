@@ -18,6 +18,7 @@ import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.Folded
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 /**
  * Implements parameterization of consistency models for network meta-analysis.
@@ -147,5 +148,20 @@ public class ConsistencyParameterization implements Parameterization {
 
 	private static BasicParameter createBasic(Treatment first, Treatment second) {
 		return new BasicParameter(first, second);
+	}
+
+	@Override
+	public List<List<Pair<Treatment>>> parameterizeStudy(Study s) {
+		Treatment b = getStudyBaseline(s);
+		List<Treatment> treatments = new ArrayList<Treatment>(s.getTreatments());
+		treatments.remove(b);
+		Collections.sort(treatments, TreatmentComparator.INSTANCE);
+		
+		List<Pair<Treatment>> list = new ArrayList<Pair<Treatment>>(s.getTreatments().size() - 1);
+		for (Treatment t : treatments) {
+			list.add(new Pair<Treatment>(b, t));
+		}
+		
+		return Collections.singletonList(list);
 	}
 }

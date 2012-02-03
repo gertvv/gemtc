@@ -1,6 +1,7 @@
 package org.drugis.mtc.parameterization;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -159,8 +160,50 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 	@Override
 	public List<NetworkParameter> getParameters() {
 		List<NetworkParameter> parameters = super.getParameters();
-		parameters.add(new SplitParameter(d_splitNode.getBaseline(), d_splitNode.getSubject(), true));
+		parameters.add(getDirectParameter());
 		return parameters;
 	}
-	// FIXME: need a new concept of how to parameterize the individual studies -- this cannot be the same as for consistency models!
+	
+	@Override
+	public Map<NetworkParameter, Integer> parameterize(Treatment ta, Treatment tb) {
+		if (d_splitNode.getBaseline().equals(ta) && d_splitNode.getSubject().equals(tb)) {
+			Map<NetworkParameter, Integer> map = new HashMap<NetworkParameter, Integer>();
+			map.put(getDirectParameter(), 1);
+			return map;
+		}
+		if (d_splitNode.getBaseline().equals(tb) && d_splitNode.getSubject().equals(ta)) {
+			Map<NetworkParameter, Integer> map = new HashMap<NetworkParameter, Integer>();
+			map.put(getDirectParameter(), -1);
+			return map;			
+		}
+		return super.parameterize(ta, tb);
+	}
+	
+	public SplitParameter getDirectParameter() {
+		return new SplitParameter(d_splitNode.getBaseline(), d_splitNode.getSubject(), true);
+	}
+	
+	public SplitParameter getIndirectParameter() {
+		return new SplitParameter(d_splitNode.getBaseline(), d_splitNode.getSubject(), true);
+	}
+	
+	public Map<NetworkParameter, Integer> parameterizeIndirect() {
+		return super.parameterize(d_splitNode.getBaseline(), d_splitNode.getSubject());
+	}
+	
+	@Override
+	public List<List<Pair<Treatment>>> parameterizeStudy(Study s) {
+		Pair<Treatment> split = new Pair<Treatment>(d_splitNode.getBaseline(), d_splitNode.getSubject());
+		if (s.getTreatments().size() == 2 || !s.getTreatments().containsAll(split)) {
+			return super.parameterizeStudy(s);
+		}
+		List<Pair<Treatment>> params1 = super.parameterizeStudy(s).get(0);
+		params1.remove(new Pair<Treatment>(getStudyBaseline(s), d_splitNode.getSubject()));
+		List<Pair<Treatment>> params2 = new ArrayList<Pair<Treatment>>();
+		params2.add(split);
+		List<List<Pair<Treatment>>> params = new ArrayList<List<Pair<Treatment>>>();
+		params.add(params1);
+		params.add(params2);
+		return params;
+	}
 }

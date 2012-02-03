@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import org.junit.Test;
 
 import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
 import edu.uci.ics.jung.graph.Tree;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class NodeSplitParameterizationTest {
 	private Network d_network;
@@ -138,4 +140,57 @@ public class NodeSplitParameterizationTest {
 		assertEquals(expected, pmtz.getParameters());
 	}
 
+	@Test
+	public void testParameterize() {
+		NodeSplitParameterization pmtz = NodeSplitParameterization.create(d_network, new BasicParameter(d_ta, d_tb));
+
+		// The split comparison should be parameterized using the direct node.
+		assertEquals(Collections.singletonMap(new SplitParameter(d_ta, d_tb, true), 1), pmtz.parameterize(d_ta, d_tb));
+		assertEquals(Collections.singletonMap(new SplitParameter(d_ta, d_tb, true), -1), pmtz.parameterize(d_tb, d_ta));
+		
+		// All other parameters should be parameterized as usual.
+		assertEquals(Collections.singletonMap(new BasicParameter(d_tc, d_ta), -1), pmtz.parameterize(d_ta, d_tc));
+		Map<NetworkParameter, Integer> expected = new HashMap<NetworkParameter, Integer>();
+		expected.put(new BasicParameter(d_tc, d_tb), -1);
+		expected.put(new BasicParameter(d_tc, d_td), 1);
+		assertEquals(expected, pmtz.parameterize(d_tb, d_td));
+		
+		// parameterizeIndirect should give the "as usual" parameterization of the split comparison.
+		Map<NetworkParameter, Integer> expected2 = new HashMap<NetworkParameter, Integer>();
+		expected2.put(new BasicParameter(d_tc, d_ta), -1);
+		expected2.put(new BasicParameter(d_tc, d_tb), 1);
+		assertEquals(expected2, pmtz.parameterizeIndirect());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testParameterizeStudy() {
+		Study s1 = new Study();
+		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb)));
+		Study s2 = new Study();
+		s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_td)));
+		Study s3 = new Study();
+		s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb), new Measurement(d_tc), new Measurement(d_td)));
+		Network network = new Network();
+		network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td));
+		network.getStudies().addAll(Arrays.asList(s1, s2, s3));
+		
+		BasicParameter split = new BasicParameter(d_ta, d_tc);
+		NodeSplitParameterization pmtz = NodeSplitParameterization.create(network, split);
+		
+		assertEquals(new BasicParameter(d_td, d_ta), pmtz.getParameters().get(0)); // Check assumption
+		
+		assertEquals(Collections.singletonList(Collections.singletonList(new Pair<Treatment>(d_ta, d_tb))),
+				pmtz.parameterizeStudy(s1));
+		
+		List<Pair<Treatment>> l1 = Arrays.asList(new Pair<Treatment>(d_td, d_ta), new Pair<Treatment>(d_td, d_tb));
+		List<Pair<Treatment>> l2 = Arrays.asList(new Pair<Treatment>(d_ta, d_tc));
+		List<List<Pair<Treatment>>> expected = Arrays.asList(l1, l2);
+		assertEquals(expected, pmtz.parameterizeStudy(s3));
+		
+		// Check case where only the split node is present
+		NodeSplitParameterization pmtz2 = NodeSplitParameterization.create(d_network, new BasicParameter(d_ta, d_tb));
+		assertEquals(Collections.singletonList(Collections.singletonList(new Pair<Treatment>(d_ta, d_tb))),
+				pmtz2.parameterizeStudy(d_s1));
+	}
 }
