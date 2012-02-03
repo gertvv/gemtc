@@ -20,6 +20,19 @@ public class Measurement extends MeasurementData implements Observable {
 	@XmlTransient
 	ObserverManager d_obsManager = new ObserverManager(this);
 	
+	public Measurement(Treatment t, int responders, int sampleSize) {
+		this(t);
+		setResponders(responders);
+		setSampleSize(sampleSize);
+	}
+	
+	public Measurement(Treatment t, double mean, double stdDev, int sampleSize) {
+		this(t);
+		setMean(mean);
+		setStdDev(stdDev);
+		setSampleSize(sampleSize);
+	}
+	
 	public Measurement(Treatment t) {
 		super();
 		setTreatment(t);
@@ -28,7 +41,7 @@ public class Measurement extends MeasurementData implements Observable {
 	public Measurement() {
 		super();
 	}
-	
+
 	@Override
 	public Treatment getTreatment() {
 		return (Treatment) super.getTreatment();

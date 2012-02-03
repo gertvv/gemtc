@@ -1,6 +1,9 @@
 package org.drugis.mtc.parameterization;
 
+import org.apache.commons.collections15.CollectionUtils;
+import org.apache.commons.collections15.Predicate;
 import org.drugis.mtc.graph.GraphUtil;
+import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
@@ -49,5 +52,13 @@ public class NetworkModel {
 			dg.addEdge(edge1, t1, t0);
 		}
 		return dg;
+	}
+
+	public static Measurement findMeasurement(final Study study, final Treatment treatment) {
+		return CollectionUtils.find(study.getMeasurements(), new Predicate<Measurement>() {
+			public boolean evaluate(Measurement m) {
+				return m.getTreatment().equals(treatment);
+			}
+		});
 	}
 }
