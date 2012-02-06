@@ -19,17 +19,14 @@
 
 package org.drugis.mtc.util;
 
-import org.drugis.common.stat.*;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.drugis.common.stat.EstimateWithPrecision;
+import org.drugis.common.stat.Statistics;
+import org.junit.Test;
 
 public class DerSimonianLairdPoolingTest {
 	public static final double EPSILON = 0.0000001;
