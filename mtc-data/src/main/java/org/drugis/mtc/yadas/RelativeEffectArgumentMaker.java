@@ -49,7 +49,10 @@ public class RelativeEffectArgumentMaker implements ArgumentMaker {
 	 * @param pmtz Parameterization of the network.
 	 * @param study The study to calculate relative effects of.
 	 * @param bIdx The index of the basic parameter values in the input data.
-	 * @param wIdx The index of the inconsistency parameter values in the input data.
+	 * @param wIdx The index of the inconsistency parameter values in the input
+	 * data (may be -1, in which case either there are no inconsistency
+	 * parameters, or the inconsistency parameter values are assumed to be
+	 * appended to the array of basic parameter values).
 	 */
 	public RelativeEffectArgumentMaker(Parameterization pmtz, Study study, int bIdx, int wIdx) {
 		d_pmtz = pmtz;
