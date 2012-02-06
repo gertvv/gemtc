@@ -37,4 +37,9 @@ public interface Parameterization {
 	 * that are to be parameters of that likelihood.
 	 */
 	public List<List<Pair<Treatment>>> parameterizeStudy(Study s);
+	
+	/**
+	 * What is the definite baseline in the given study.
+	 */
+	public Treatment getStudyBaseline(Study s);
 }
