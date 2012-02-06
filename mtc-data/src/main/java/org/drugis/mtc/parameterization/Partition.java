@@ -71,7 +71,7 @@ public class Partition {
 		Treatment v0 = CompareUtil.findLeast(graph.getVertices(), TreatmentComparator.INSTANCE);
 		Part p = graph.getIncidentEdges(v0).iterator().next(); // Starting part
 		Pair<Treatment> treatments = new Pair<Treatment>(v0, otherTreatment(p, v0));
-		Set<Part> visited = new HashSet<Part>(Collections.singleton(p)); // Visited parts
+		Set<Part> visited = new HashSet<Part>(); // Visited parts
 		
 		// Go as far to the right as possible
 		Treatment tRight = walk(graph, p, treatments.getFirst(), visited);
@@ -120,6 +120,7 @@ public class Partition {
 	 * @param visited (OUTPUT) set of visited edges. This is an output parameter (the set is written to).
 	 */
 	private Treatment walk(final UndirectedGraph<Treatment, Part> graph, final Part p0, final Treatment t0, Set<Part> visited) {
+		visited.add(p0);
 		Treatment tPrev = t0; // Previously visited vertex
 		Treatment tCurr = otherTreatment(p0, t0); // Current vertex
 		Part pNext = nextPart(graph, tPrev, tCurr); // Next edge to consider

@@ -90,4 +90,30 @@ public class PartitionTest {
 		// Partition that does not reduce
 		assertEquals(new Partition(Arrays.asList(d_p7, d_p8, d_p4)), new Partition(Arrays.asList(d_p7, d_p8, d_p4)).reduce());
 	}
+	
+	@Test
+	public void testLongerCycle() {
+		// This test was added because longer cycles were causing reduce() to go into an infite loop
+		Treatment ta = new Treatment("A");
+		Treatment tb = new Treatment("B");
+		Treatment tc = new Treatment("C");
+		Treatment td = new Treatment("D");
+		
+		Study s1 = new Study("1");
+		s1.getMeasurements().addAll(Arrays.asList(new Measurement(ta), new Measurement(tb)));
+		Study s2 = new Study("2");
+		s2.getMeasurements().addAll(Arrays.asList(new Measurement(tb), new Measurement(tc), new Measurement(td)));
+		Study s3 = new Study("3");
+		s3.getMeasurements().addAll(Arrays.asList(new Measurement(ta), new Measurement(td)));
+		Study s4 = new Study("4");
+		s4.getMeasurements().addAll(Arrays.asList(new Measurement(tc), new Measurement(td)));
+		
+		Part p1 = new Part(ta, tb, Arrays.asList(s1));
+		Part p2 = new Part(tb, tc, Arrays.asList(s2));
+		Part p3 = new Part(tc, td, Arrays.asList(s2, s4));
+		Part p4 = new Part(td, ta, Arrays.asList(s3));
+		
+		Partition partition = new Partition(Arrays.asList(p1, p2, p3, p4));
+		assertEquals(partition, partition.reduce());
+	}
 }
