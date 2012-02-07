@@ -1,5 +1,9 @@
 package org.drugis.mtc.parameterization;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.collections15.Predicate;
 import org.drugis.mtc.graph.GraphUtil;
@@ -60,5 +64,14 @@ public class NetworkModel {
 				return m.getTreatment().equals(treatment);
 			}
 		});
+	}
+	
+	/**
+	 * Get a sorted list of treatments in the study. 
+	 */
+	public static List<Treatment> getTreatments(final Study study) {
+		List<Treatment> treatments = new ArrayList<Treatment>(study.getTreatments());
+		Collections.sort(treatments, TreatmentComparator.INSTANCE);
+		return treatments;
 	}
 }
