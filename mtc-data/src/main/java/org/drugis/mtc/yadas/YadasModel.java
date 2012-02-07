@@ -22,6 +22,7 @@ package org.drugis.mtc.yadas;
 import edu.uci.ics.jung.graph.util.Pair;
 import gov.lanl.yadas.ArgumentMaker;
 import gov.lanl.yadas.BasicMCMCBond;
+import gov.lanl.yadas.Binomial;
 import gov.lanl.yadas.ConstantArgument;
 import gov.lanl.yadas.Gaussian;
 import gov.lanl.yadas.GroupArgument;
@@ -55,6 +56,7 @@ import org.drugis.common.threading.event.TaskEvent.EventType;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
+import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
@@ -63,33 +65,34 @@ import org.drugis.mtc.parameterization.ContinuousDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.DichotomousDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
 import org.drugis.mtc.parameterization.InconsistencyVariance;
+import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
 import org.drugis.mtc.parameterization.Parameterization;
+import org.drugis.mtc.parameterization.PriorGenerator;
 import org.drugis.mtc.parameterization.RandomEffectsVariance;
+import org.drugis.mtc.parameterization.SplitParameter;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
 
 abstract class YadasModel implements MixedTreatmentComparison {
+	protected final Network d_network;
+	protected Parameterization d_pmtz = null;
 	
-	private final Network d_network;
+	private PriorGenerator d_priorGen;
+	protected List<StartingValueGenerator> d_startGen = new ArrayList<StartingValueGenerator>();
+	protected final int d_nChains = 4;
+	
+	private List<List<ParameterWriter>> d_writeList = new ArrayList<List<ParameterWriter>>();
+	private List<List<MCMCUpdate>> d_updateList = new ArrayList<List<MCMCUpdate>>();
 
-	protected Parameterization proto = null;
-	protected List<StartingValueGenerator> startingValues = null;
-	protected final int nChains = 4;
+	protected Parameter d_randomEffectVar = new RandomEffectsVariance();
+	protected Parameter d_inconsistencyVar = new InconsistencyVariance();
 
-	private List<List<ParameterWriter>> parameterList = new ArrayList<List<ParameterWriter>>();
-	private List<List<MCMCUpdate>> updateList = new ArrayList<List<MCMCUpdate>>();
+	private int d_burnInIter = 20000;
+	protected int d_simulationIter = 100000;
+	private int d_reportingInterval = 100;
 
-	protected Parameter randomEffectVar = new RandomEffectsVariance();
-	protected Parameter inconsistencyVar = new InconsistencyVariance();
-
-	private int burnInIter = 20000;
-	protected int simulationIter = 100000;
-	private int reportingInterval = 100;
-
-	private YadasResults results = new YadasResults();
+	private YadasResults d_results = new YadasResults();
 	private ActivityTask d_activityTask;
-
-	private boolean isInconsistency;
 
 	private SimpleSuspendableTask d_finalPhase;
 
@@ -97,7 +100,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		private final int d_chain;
 		
 		public BurnInChain(int chain) {
-			super(burnInIter);
+			super(d_burnInIter);
 			d_chain = chain;
 		}
 		
@@ -110,7 +113,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		private final int d_chain;
 		
 		public SimulationChain(int chain) {
-			super(burnInIter);
+			super(d_burnInIter);
 			d_chain = chain;
 		}
 		
@@ -123,45 +126,48 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	private class BurnInTask extends IterativeTask {
 		public BurnInTask(int chain) {
 			super(new BurnInChain(chain), "burn-in:" + chain);
-			setReportingInterval(reportingInterval);
+			setReportingInterval(d_reportingInterval);
 		}
 	}
 	
 	private class SimulationTask extends IterativeTask {
 		public SimulationTask(int chain) {
 			super(new SimulationChain(chain), "simulation:" + chain);
-			setReportingInterval(reportingInterval);
+			setReportingInterval(d_reportingInterval);
 		}
 	}
 
 	public YadasModel(Network network) {
 		d_network = network;
 
-
+		// Create tasks for each phase of the MCMC simulation
 		Task buildModelPhase = new SimpleSuspendableTask(new Runnable() {
 			public void run() {
 				buildModel();
 			}
 		}, "building model");
-		List<Task> burnInPhase = new ArrayList<Task>(nChains);
-		List<Task> simulationPhase = new ArrayList<Task>(nChains);
-		for (int i = 0; i < nChains; ++i) {
+		List<Task> burnInPhase = new ArrayList<Task>(d_nChains);
+		List<Task> simulationPhase = new ArrayList<Task>(d_nChains);
+		for (int i = 0; i < d_nChains; ++i) {
 			burnInPhase.add(new BurnInTask(i));
 			simulationPhase.add(new SimulationTask(i));
 		}
 		d_finalPhase = new NullTask();
 
+		// Build transition graph between phases of the MCMC simulation
 		List<Transition> transitions = new ArrayList<Transition>();
 		transitions.add(new ForkTransition(buildModelPhase, burnInPhase));
 		transitions.add(new JoinTransition(simulationPhase, d_finalPhase));
-		for (int i = 0; i < nChains; ++i) {
+		for (int i = 0; i < d_nChains; ++i) {
 			transitions.add(new DirectTransition(burnInPhase.get(i), simulationPhase.get(i)));
 		}
 		
+		// Together they form the full "activity"
 		ActivityModel activityModel = new ActivityModel(buildModelPhase, d_finalPhase, transitions);
 		d_activityTask = new ActivityTask(activityModel, "MCMC model");
 	}
 
+	abstract protected boolean isInconsistency();
 	
 	public boolean isReady() {
 		return d_finalPhase.isFinished();
@@ -177,30 +183,30 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	}
 
 	public int getBurnInIterations() {
-		return burnInIter;
+		return d_burnInIter;
 	}
 
 	public void setBurnInIterations(int it) {
 		validIt(it);
-		burnInIter = it;
+		d_burnInIter = it;
 	}
 
 	public int getSimulationIterations() {
-		return simulationIter;
+		return d_simulationIter;
 	}
 
 	public void setSimulationIterations(int it) {
 		validIt(it);
-		simulationIter = it;
+		d_simulationIter = it;
 	}
 
 	@Override
 	public Parameter getRandomEffectsVariance() {
-		return randomEffectVar;
+		return d_randomEffectVar;
 	}
 	
 	public MCMCResults getResults() {
-		return results;
+		return d_results;
 	}
 
 	private void validIt(int it) {
@@ -208,49 +214,66 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			throw new IllegalArgumentException("Specified # iterations should be a positive multiple of 100");
 		}
 	}
-
-	private double sigmaPrior() {
-		return 0.0; // FIXME
+	
+	////
+	//// Below: code to get starting values
+	////
+	
+	private double getStartingSigma(StartingValueGenerator startVal) {
+		return Math.random() * d_priorGen.getRandomEffectsSigma();
 	}
 
-	private double inconsSigmaPrior() {
-		return 0.0; // FIXME
-	}
 
-	protected abstract void buildNetworkModel();
+	private double getStartingValue(StartingValueGenerator startVal, NetworkParameter p) {
+		if (p instanceof BasicParameter) {
+			return startVal.getRelativeEffect((BasicParameter) p);
+		} else if (p instanceof SplitParameter) {
+			SplitParameter sp = (SplitParameter) p;
+			BasicParameter bp = new BasicParameter(sp.getBaseline(), sp.getSubject());
+			return startVal.getRelativeEffect(bp);
+		}
+		return 0; // FIXME
+	}
+	
+	////
+	//// Below: code to initialize the MCMC model
+	////
+
+	protected abstract Parameterization buildNetworkModel();
 
 	private void buildModel() {
-		buildNetworkModel();
+		d_pmtz = buildNetworkModel();
 		JDKRandomGenerator rng = new JDKRandomGenerator();
 		double scale = 2.5;
-		for (int i = 0; i < nChains; ++i) {
+		for (int i = 0; i < d_nChains; ++i) {
 			switch (d_network.getType()) {
 			case CONTINUOUS:
-				startingValues.add(new ContinuousDataStartingValueGenerator(d_network, rng, scale));
+				d_startGen.add(new ContinuousDataStartingValueGenerator(d_network, rng, scale));
 				break;
 			case RATE:
-				startingValues.add(new DichotomousDataStartingValueGenerator(d_network, rng, scale));
+				d_startGen.add(new DichotomousDataStartingValueGenerator(d_network, rng, scale));
 				break;
 			default:
 				throw new IllegalArgumentException("Don't know how to generate starting values for " + d_network.getType() + " data");					
 			}
 		}
+		
+		d_priorGen = new PriorGenerator(d_network);
 
-		List<Parameter> parameters = new ArrayList<Parameter>(proto.getParameters());
-		parameters.add(randomEffectVar);
-		if (isInconsistency) {
-			parameters.add(inconsistencyVar);
+		List<Parameter> parameters = new ArrayList<Parameter>(d_pmtz.getParameters());
+		parameters.add(d_randomEffectVar);
+		if (isInconsistency()) {
+			parameters.add(d_inconsistencyVar);
 		}
 
-		results.setDirectParameters(parameters);
-		results.setNumberOfChains(nChains);
-		results.setNumberOfIterations(simulationIter);
+		d_results.setDirectParameters(parameters);
+		d_results.setNumberOfChains(d_nChains);
+		d_results.setNumberOfIterations(d_simulationIter);
 
-//		FIXME
 //		results.setDerivedParameters(
 //			indirectParameters.map(p => (p, derivation(p))).toList)
 		
-		for (int i = 0 ; i < nChains; ++i) {
+		for (int i = 0 ; i < d_nChains; ++i) {
 			createChain(i);
 		}
 
@@ -258,21 +281,24 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			@Override
 			public void taskEvent(TaskEvent event) {
 				if (event.getType() == EventType.TASK_FINISHED) {
-					results.simulationFinished();
+					d_results.simulationFinished();
 				}
 			}
 		});
 	}
 	
+	////
+	//// Below: code to create the structure of the MCMC model.
+	////
 
 	private void createChain(int chain) {
-		StartingValueGenerator startVal = startingValues.get(chain);
+		StartingValueGenerator startVal = d_startGen.get(chain);
 
 		// study baselines
 		Map<Study, MCMCParameter> mu = new HashMap<Study, MCMCParameter>();
 		for (Study s : d_network.getStudies()) {
 			mu.put(s, new MCMCParameter(
-					new double[] {startVal.getTreatmentEffect(s, proto.getStudyBaseline(s))},
+					new double[] {startVal.getTreatmentEffect(s, d_pmtz.getStudyBaseline(s))},
 					new double[] {0.1}, null));
 		}
 		// random effects
@@ -282,7 +308,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			double[] step = new double[reDim(s)];
 			Arrays.fill(step, 0.1);
 			int i = 0;
-			for (List<Pair<Treatment>> list : proto.parameterizeStudy(s)) {
+			for (List<Pair<Treatment>> list : d_pmtz.parameterizeStudy(s)) {
 				for (Pair<Treatment> pair: list) {
 					start[i] = startVal.getRelativeEffect(s, getRelativeEffect(pair.getFirst(), pair.getSecond()));
 					++i;
@@ -291,7 +317,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			delta.put(s, new MCMCParameter(start, step, null));
 		}
 		// basic parameters & inconsistency parameters
-		List<NetworkParameter> parameters = proto.getParameters();
+		List<NetworkParameter> parameters = d_pmtz.getParameters();
 		double[] basicStart = new double[parameters.size()];
 		double[] basicStep = new double[parameters.size()];
 		Arrays.fill(basicStep, 0.1);
@@ -301,17 +327,17 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		MCMCParameter basic = new MCMCParameter(basicStart, basicStep, null);
 		// variance
 		MCMCParameter sigma = new MCMCParameter(
-			new double[] {getStartingVariance(startVal)}, new double[] {0.1}, null);
+			new double[] {getStartingSigma(startVal)}, new double[] {0.1}, null);
 		// inconsistency variance
-		MCMCParameter sigmaw = isInconsistency ? 
-				new MCMCParameter(new double[] {getStartingVariance(startVal)}, new double[] {0.1}, null) : null;
+		MCMCParameter sigmaw = isInconsistency() ? 
+				new MCMCParameter(new double[] {getStartingSigma(startVal)}, new double[] {0.1}, null) : null;
 
 		List<MCMCParameter> params = new ArrayList<MCMCParameter>();
 		params.addAll(mu.values());
 		params.addAll(delta.values());
 		params.add(basic);
 		params.add(sigma);
-		if (isInconsistency) {
+		if (isInconsistency()) {
 			params.add(sigmaw);
 		}
 
@@ -339,7 +365,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 					new ArgumentMaker[] {
 						new IdentityArgument(0),
 						new ConstantArgument(0, 1),
-						new ConstantArgument(Math.sqrt(getVariancePrior()), 1)
+						new ConstantArgument(Math.sqrt(d_priorGen.getVagueNormalVariance()), 1)
 					},
 					new Gaussian()
 				);
@@ -357,7 +383,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				new ArgumentMaker[] {
 					new GroupArgument(0, basicRange), // FIXME: is this even allowed?
 					new ConstantArgument(0, nBasic),
-					new ConstantArgument(Math.sqrt(getVariancePrior()), nBasic)
+					new ConstantArgument(Math.sqrt(d_priorGen.getVagueNormalVariance()), nBasic)
 				},
 				new Gaussian()
 			);
@@ -368,12 +394,12 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				new ArgumentMaker[] {
 					new IdentityArgument(0),
 					new ConstantArgument(0.00001),
-					new ConstantArgument(sigmaPrior())
+					new ConstantArgument(d_priorGen.getRandomEffectsSigma())
 				},
 				new Uniform()
 			);
 
-		if (isInconsistency) {
+		if (isInconsistency()) {
 			int nIncons = parameters.size() - nBasic;
 			int[] inconsRange = new int[nIncons];
 			for (int i = 0; i < nIncons; ++i) {
@@ -396,7 +422,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 					new ArgumentMaker[] {
 						new IdentityArgument(0),
 						new ConstantArgument(0.00001),
-						new ConstantArgument(inconsSigmaPrior())
+						new ConstantArgument(d_priorGen.getInconsistencySigma())
 					},
 					new Uniform()
 				);
@@ -404,75 +430,109 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		
 		List<MCMCUpdate> tuners = new ArrayList<MCMCUpdate>(params.size());
 		for (MCMCParameter param : params) {
-			tuners.add(new UpdateTuner(param, burnInIter / 50, 50, 1, Math.exp(-1)));
+			tuners.add(new UpdateTuner(param, d_burnInIter / 50, 50, 1, Math.exp(-1)));
 		}
 
-		updateList.set(chain, tuners);
+		d_updateList.add(tuners);
 
 		List<ParameterWriter> writers = new ArrayList<ParameterWriter>(params.size());
 		for (int i = 0; i < parameters.size(); ++i) {
-			writers.add(results.getParameterWriter(parameters.get(i), chain, basic, i));
+			writers.add(d_results.getParameterWriter(parameters.get(i), chain, basic, i));
 		}
-		writers.add(results.getParameterWriter(randomEffectVar, chain, sigma, 0));
-		if (isInconsistency) {
-			writers.add(results.getParameterWriter(inconsistencyVar, chain, sigmaw, 0));
+		writers.add(d_results.getParameterWriter(d_randomEffectVar, chain, sigma, 0));
+		if (isInconsistency()) {
+			writers.add(d_results.getParameterWriter(d_inconsistencyVar, chain, sigmaw, 0));
 		}
 
-		parameterList.set(chain, writers);
+		d_writeList.add(writers);
 	}
-
-
-	private double getVariancePrior() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-
-	private void dichotomousDataBond(Map<Study, MCMCParameter> mu,
-			Map<Study, MCMCParameter> delta) {
-		// TODO Auto-generated method stub
+	
+	private void dichotomousDataBond(Map<Study, MCMCParameter> mu, Map<Study, MCMCParameter> delta) {
+		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
+		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
 		
+		for (Study study : d_network.getStudies()) {
+			new BasicMCMCBond(
+					new MCMCParameter[] {mu.get(study), delta.get(study)},
+					new ArgumentMaker[] {
+							new ConstantArgument(successArray(study)),
+							new ConstantArgument(sampleSizeArray(study)),
+							new SuccessProbabilityArgumentMaker(NetworkModel.getTreatments(study), d_pmtz.parameterizeStudy(study), 0, 1)
+					},
+					new Binomial()
+				);
+		}
 	}
 
-
-	private void continuousDataBond(Map<Study, MCMCParameter> mu,
-			Map<Study, MCMCParameter> delta) {
-		// TODO Auto-generated method stub
+	private void continuousDataBond(Map<Study, MCMCParameter> mu, Map<Study, MCMCParameter> delta) {
+		// m_i ~ N(theta_i, s_i) ;
+		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
 		
+		for (Study study : d_network.getStudies()) {
+			new BasicMCMCBond(
+					new MCMCParameter[] {mu.get(study), delta.get(study)},
+					new ArgumentMaker[] {
+							new ConstantArgument(obsMeanArray(study)),
+							new ThetaArgumentMaker(NetworkModel.getTreatments(study), d_pmtz.parameterizeStudy(study), 0, 1),
+							new ConstantArgument(obsErrorArray(study))
+					},
+					new Gaussian()
+				);
+		}
 	}
 
-
-	private double getStartingVariance(StartingValueGenerator startVal) {
-		// TODO Auto-generated method stub
-		return 0;
+	private double[] successArray(Study study) {
+		List<Treatment> treatments = NetworkModel.getTreatments(study);
+		double[] arr = new double[treatments.size()];
+		for (int i = 0; i < arr.length; ++i) {
+			arr[i] = NetworkModel.findMeasurement(study, treatments.get(i)).getResponders();
+		}
+		return arr;
 	}
 
-
-	private double getStartingValue(StartingValueGenerator startVal, NetworkParameter networkParameter) {
-		// TODO Auto-generated method stub
-		return 0;
+	private double[] sampleSizeArray(Study study) {
+		List<Treatment> treatments = NetworkModel.getTreatments(study);
+		double[] arr = new double[treatments.size()];
+		for (int i = 0; i < arr.length; ++i) {
+			arr[i] = NetworkModel.findMeasurement(study, treatments.get(i)).getSampleSize();
+		}
+		return arr;
+	}
+	
+	private double[] obsMeanArray(Study study) {
+		List<Treatment> treatments = NetworkModel.getTreatments(study);
+		double[] arr = new double[treatments.size()];
+		for (int i = 0; i < arr.length; ++i) {
+			arr[i] = NetworkModel.findMeasurement(study, treatments.get(i)).getMean();
+		}
+		return arr;
 	}
 
-
-	private int reDim(Study s) {
-		return s.getTreatments().size() - 1;
+	private double[] obsErrorArray(Study study) {
+		List<Treatment> treatments = NetworkModel.getTreatments(study);
+		double[] arr = new double[treatments.size()];
+		for (int i = 0; i < arr.length; ++i) {
+			final Measurement m = NetworkModel.findMeasurement(study, treatments.get(i));
+			arr[i] = m.getStdDev() / Math.sqrt(m.getSampleSize());
+		}
+		return arr;
 	}
 
 	private void relativeEffectBond(Study study, MCMCParameter delta,
 			MCMCParameter basic, MCMCParameter sigma) {
 		ArgumentMaker[] arguments = new ArgumentMaker[2 + reDim(study)];
 		arguments[0] = new IdentityArgument(0);
-		arguments[1] = new RelativeEffectArgumentMaker(proto, study, 1, -1);
+		arguments[1] = new RelativeEffectArgumentMaker(d_pmtz, study, 1, -1);
 
 		if (reDim(study) == 1) {
-			arguments[2] = new IdentityArgument(3);
+			arguments[2] = new IdentityArgument(2);
 			new BasicMCMCBond(
 				new MCMCParameter[] {delta, basic, sigma},
 				arguments,
 				new Gaussian()
 			);
 		} else {
-			List<ArgumentMaker> rows = SigmaRowArgumentMaker.createMatrixArgumentMaker(proto.parameterizeStudy(study), 2);
+			List<ArgumentMaker> rows = SigmaRowArgumentMaker.createMatrixArgumentMaker(d_pmtz.parameterizeStudy(study), 2);
 			for (int i = 0; i < rows.size(); ++i) {
 				arguments[2 + i] = rows.get(i);
 			}
@@ -483,107 +543,13 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			);
 		}
 	}
-/*
-	private def basicParameter(p: NetworkModelParameter) = p match {
-		case b: BasicParameter => b
-		case s: SplitParameter => new BasicParameter(s.base, s.subject)
-		case _ => throw new IllegalStateException()
+
+	private int reDim(Study s) {
+		return s.getTreatments().size() - 1;
 	}
-
-	// FIXME: implement
-	private def inconsistencyStartingValue(p: InconsistencyParameter,
-		startVal: StartingValueGenerator[M], basicStart: List[Double])
-	: Double = {
-		InconsistencyStartingValueGenerator(p, proto, startVal, basicStart)
-	}
-
-	private def createChain(chain: Int) {
-
-	}
-
-	private def indirectParameters: Seq[BasicParameter] = {
-		val ts = proto.treatmentList
-		ts.map(t => (ts - t).map(u => new BasicParameter(t, u))).reduceLeft((a, b) => a ++ b) -- proto.basicParameters.asInstanceOf[List[BasicParameter]]
-	}
-
-	private def derivation(p: BasicParameter)
-	: Derivation = {
-		val param = Map[Parameter, Int]() ++
-			proto.parametrization(p.base, p.subject).filter((x) => x._2 != 0)
-		new Derivation(param)
-	}
-
-	private def successArray(model: NetworkModel[DichotomousMeasurement, _],
-		study: Study[DichotomousMeasurement])
-	: Array[Double] =
-		NetworkModel.treatmentList(study.treatments).map(t =>
-			study.measurements(t).responders.toDouble).toArray
-
-	private def sampleSizeArray(model: NetworkModel[DichotomousMeasurement, _],
-		study: Study[DichotomousMeasurement])
-	: Array[Double] =
-		NetworkModel.treatmentList(study.treatments).map(t =>
-			study.measurements(t).sampleSize.toDouble).toArray
-
-	private def dichotomousDataBond(model: NetworkModel[DichotomousMeasurement, _],
-			mu: Map[Study[DichotomousMeasurement], MCMCParameter],
-			delta: Map[Study[DichotomousMeasurement], MCMCParameter]) {
-		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
-		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
-		for (study <- model.studyList) {
-			// success-rate r from data
-			val r = new ConstantArgument(successArray(model, study))
-			// sample-size n from data
-			val n = new ConstantArgument(sampleSizeArray(model, study))
-			new BasicMCMCBond(
-					Array[MCMCParameter](mu(study), delta(study)),
-					Array[ArgumentMaker](
-						r,
-						n,
-						new SuccessProbabilityArgumentMaker(model, 0, 1, study)
-					),
-					new Binomial()
-				)
-		}
-	}
-
-	private def obsMeanArray(model: NetworkModel[ContinuousMeasurement, _],
-		study: Study[ContinuousMeasurement])
-	: Array[Double] =
-		NetworkModel.treatmentList(study.treatments).map(t =>
-			study.measurements(t).mean).toArray
-
-	private def obsErrorArray(model: NetworkModel[ContinuousMeasurement, _],
-		study: Study[ContinuousMeasurement])
-	: Array[Double] =
-		NetworkModel.treatmentList(study.treatments).map(t =>
-			study.measurements(t).stdErr).toArray
-
-	private def continuousDataBond(model: NetworkModel[ContinuousMeasurement, _],
-			mu: Map[Study[ContinuousMeasurement], MCMCParameter],
-			delta: Map[Study[ContinuousMeasurement], MCMCParameter]) {
-		for (study <- model.studyList) {
-			// success-rate r from data
-			val m = new ConstantArgument(obsMeanArray(model, study))
-			// sample-size n from data
-			val s = new ConstantArgument(obsErrorArray(model, study))
-
-			// m_i ~ N(theta_i, s_i)
-			// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
-			new BasicMCMCBond(
-					Array[MCMCParameter](mu(study), delta(study)),
-					Array[ArgumentMaker](
-						m,
-						new ThetaArgumentMaker(model, 0, 1, study),
-						s
-					),
-					new Gaussian()
-				)
-		}
-	}*/
 
 	private void update(int chain) {
-		for (MCMCUpdate u : updateList.get(chain)) {
+		for (MCMCUpdate u : d_updateList.get(chain)) {
 			try {
 				u.update();
 			} catch(Exception e) {
@@ -593,7 +559,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	}
 
 	protected void output(int chain) {
-		for (ParameterWriter p : parameterList.get(chain)) {
+		for (ParameterWriter p : d_writeList.get(chain)) {
 			p.output();
 		}
 	}

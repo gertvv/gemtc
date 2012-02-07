@@ -54,4 +54,11 @@ public class SplitParameter implements NetworkParameter, Comparable<SplitParamet
 		}
 	}
 
+	public Treatment getBaseline() {
+		return d_base;
+	}
+	
+	public Treatment getSubject() {
+		return d_subj;
+	}
 }
