@@ -38,7 +38,7 @@ cp LICENSE.txt $GUIDIR
 cp mtc-gui/README.txt $GUIDIR
 mkdir $GUIDIR/example
 cp example/*.gemtc $GUIDIR/example/
-cp r-code/mtc/R/mtc.R $GUIDIR/
+cp r-code/gemtc/R/mtc.R $GUIDIR/
 zip -r gemtc-gui-$VERSION.zip $GUIDIR
 
 # Package the CLI
@@ -51,7 +51,7 @@ cp LICENSE.txt $CLIDIR
 cp mtc-cli/README.txt $CLIDIR
 mkdir $CLIDIR/example
 cp example/*.gemtc $CLIDIR/example/
-cp r-code/mtc/R/mtc.R $CLIDIR/
+cp r-code/gemtc/R/mtc.R $CLIDIR/
 zip -r gemtc-cli-$VERSION.zip $CLIDIR
 
 # Package the R package
