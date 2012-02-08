@@ -52,6 +52,8 @@ should be evident from the time-series plot for the split node.
 Versions
 --------
 
+0.10.1: Bugfixes, generate R code for JAGS models.
+
 0.10: Addition of GUI module, improved consistency model generation,
 support for BUGS. Renamed to GeMTC CLI and GeMTC GUI.
 
