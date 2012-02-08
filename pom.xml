@@ -8,6 +8,10 @@
 	<packaging>pom</packaging>
 	<name>drugis-mtc</name>
 
+	<properties>
+        	<drugis-common.version>0.4.8</drugis-common.version>
+	</properties> 
+
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>true</uniqueVersion>

@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-lib</artifactId>
-			<version>0.4.5</version>
+			<version>${drugis-common.version}</version>
 		</dependency>
 		<dependency>	
 			<groupId>jargs</groupId>

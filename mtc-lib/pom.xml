@@ -53,12 +53,12 @@
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-lib</artifactId>
-			<version>0.4.6-SNAPSHOT</version>
+			<version>${drugis-common.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-test</artifactId>
-			<version>0.4.6-SNAPSHOT</version>
+			<version>${drugis-common.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
