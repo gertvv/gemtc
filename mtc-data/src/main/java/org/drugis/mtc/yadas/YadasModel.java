@@ -365,7 +365,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 					new ArgumentMaker[] {
 						new IdentityArgument(0),
 						new ConstantArgument(0, 1),
-						new ConstantArgument(Math.sqrt(d_priorGen.getVagueNormalVariance()), 1)
+						new ConstantArgument(d_priorGen.getVagueNormalSigma(), 1)
 					},
 					new Gaussian()
 				);
@@ -383,7 +383,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				new ArgumentMaker[] {
 					new GroupArgument(0, basicRange), // FIXME: is this even allowed?
 					new ConstantArgument(0, nBasic),
-					new ConstantArgument(Math.sqrt(d_priorGen.getVagueNormalVariance()), nBasic)
+					new ConstantArgument(d_priorGen.getVagueNormalSigma(), nBasic)
 				},
 				new Gaussian()
 			);

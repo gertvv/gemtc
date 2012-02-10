@@ -27,7 +27,7 @@ public class Treatment extends TreatmentData implements Observable {
 	}
 	
 	public Treatment(String id) {
-		this(id, null);
+		this(id, "");
 	}
 
 	@Override

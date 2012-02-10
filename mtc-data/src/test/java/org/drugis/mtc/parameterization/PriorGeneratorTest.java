@@ -67,7 +67,7 @@ public class PriorGeneratorTest {
 		assertEquals(7.0, new PriorGenerator(d_networkCont).getRandomEffectsSigma(), EPSILON);
 		assertEquals(7.0, new PriorGenerator(d_networkCont).getInconsistencySigma(), EPSILON);
 		
-		assertEquals(42.4093656180699, new PriorGenerator(d_networkDich).getVagueNormalVariance(), EPSILON);
-		assertEquals(11025.00, new PriorGenerator(d_networkCont).getVagueNormalVariance(), EPSILON);
+		assertEquals(Math.sqrt(42.4093656180699), new PriorGenerator(d_networkDich).getVagueNormalSigma(), EPSILON);
+		assertEquals(Math.sqrt(11025.00), new PriorGenerator(d_networkCont).getVagueNormalSigma(), EPSILON);
 	}
 }

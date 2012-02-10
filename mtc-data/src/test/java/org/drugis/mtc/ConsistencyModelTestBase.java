@@ -78,19 +78,19 @@ abstract public class ConsistencyModelTestBase {
 		
 		System.out.println(Arrays.toString(d_model.getResults().getParameters()));
 		
-		double[] dBA = ResultsUtil.getSamples(d_model.getResults(), d_model.getRelativeEffect(d_tb, d_ta), 0);
-		double[] dBC = ResultsUtil.getSamples(d_model.getResults(), d_model.getRelativeEffect(d_tb, d_tc), 0);
+		double[] dBA = ResultsUtil.getSamples(d_model.getResults(), d_model.getRelativeEffect(d_tb, d_ta), 3);
+		double[] dBC = ResultsUtil.getSamples(d_model.getResults(), d_model.getRelativeEffect(d_tb, d_tc), 3);
 		
 		// Values below obtained via a run through regular JAGS with 30k/20k
 		// iterations. Taking .05 sd as acceptable margin.
-		double mAB = 0.4965705;
-		double sAB = 0.4798996;
-		assertEquals(-mAB, d_mean.evaluate(dBA), FACTOR * sAB);
-		assertEquals(sAB, d_stdDev.evaluate(dBA), FACTOR * sAB);
 		double mBC = -0.4095144;
 		double sBC = 0.593866;
 		assertEquals(mBC, d_mean.evaluate(dBC), FACTOR * sBC);
 		assertEquals(sBC, d_stdDev.evaluate(dBC), FACTOR * sBC);
+		double mAB = 0.4965705;
+		double sAB = 0.4798996;
+		assertEquals(-mAB, d_mean.evaluate(dBA), FACTOR * sAB);
+		assertEquals(sAB, d_stdDev.evaluate(dBA), FACTOR * sAB);
 	}
 	
 	/*

@@ -34,11 +34,10 @@ public class PriorGenerator {
 	}
 	
 	/**
-	 * Give a large variance V to formulate vague normal priors N(0, V).
+	 * Give a large standard deviation S to formulate vague normal priors N(0, S^2).
 	 */
-	public double getVagueNormalVariance() {
-		final double sd = 15 * d_range;
-		return sd * sd;
+	public double getVagueNormalSigma() {
+		return 15 * d_range;
 	}
 	
 	

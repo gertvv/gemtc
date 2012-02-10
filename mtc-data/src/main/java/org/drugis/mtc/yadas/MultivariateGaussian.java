@@ -34,9 +34,14 @@ public class MultivariateGaussian implements Likelihood {
 		// -log(sqrt(2pi^d * det(sigma))) + -.5 (x - mu)' inv(sigma) (x - mu) 
 		Array2DRowRealMatrix dM = xM.subtract(muM);
 		LUDecomposition sigmaD = new LUDecompositionImpl(sigmaM);
-		RealMatrix sigmaInv = sigmaD.getSolver().getInverse();
-		return -0.5 * (
-			Math.log(2 * Math.PI) * d + Math.log(sigmaD.getDeterminant()) +
-			dM.transpose().multiply(sigmaInv).multiply(dM).getEntry(0, 0));
+		try {
+			RealMatrix sigmaInv = sigmaD.getSolver().getInverse();
+			return -0.5 * (
+				Math.log(2 * Math.PI) * d + Math.log(sigmaD.getDeterminant()) +
+				dM.transpose().multiply(sigmaInv).multiply(dM).getEntry(0, 0));
+		} catch (RuntimeException e) {
+			System.out.println(sigmaM);
+			throw e;
+		}
 	}
 }
