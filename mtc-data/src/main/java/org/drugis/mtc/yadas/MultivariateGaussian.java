@@ -7,6 +7,7 @@ import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.LUDecomposition;
 import org.apache.commons.math.linear.LUDecompositionImpl;
 import org.apache.commons.math.linear.RealMatrix;
+import org.apache.commons.math.util.MathUtils;
 
 /**
  * Computes the log of the probability density for a multivariate Gaussian.
@@ -33,7 +34,7 @@ public class MultivariateGaussian implements Likelihood {
 		// Which is:
 		// -log(sqrt(2pi^d * det(sigma))) + -.5 (x - mu)' inv(sigma) (x - mu) 
 		Array2DRowRealMatrix dM = xM.subtract(muM);
-		/*LUDecomposition sigmaD = new LUDecompositionImpl(sigmaM);
+		LUDecomposition sigmaD = new LUDecompositionImpl(sigmaM, MathUtils.SAFE_MIN);
 		try {
 			RealMatrix sigmaInv = sigmaD.getSolver().getInverse();
 			return -0.5 * (
@@ -42,11 +43,11 @@ public class MultivariateGaussian implements Likelihood {
 		} catch (RuntimeException e) {
 			System.out.println(sigmaM);
 			throw e;
-		}*/
-		RealMatrix sigmaInv = sigmaM.inverse();
+		}
+/*		RealMatrix sigmaInv = sigmaM.inverse();
 		return -0.5 * (
 			Math.log(2 * Math.PI) * d + Math.log(sigmaM.getDeterminant()) +
-			dM.transpose().multiply(sigmaInv).multiply(dM).getEntry(0, 0));
+			dM.transpose().multiply(sigmaInv).multiply(dM).getEntry(0, 0)); */
 	}
 
 }

@@ -1,0 +1,78 @@
+<!-- Dataset from Vlaar (2010) et al., submitted manuscript -->
+<network type="dichotomous">
+    <treatments>
+        <treatment id="iPCI"></treatment>
+        <treatment id="mPCI"></treatment>
+        <treatment id="sPCI"></treatment>
+    </treatments>
+    <studies>
+        <study id="Corpus 2004">
+            <measurement sample="354" treatment="iPCI" responders="42"></measurement>
+            <measurement sample="26" treatment="mPCI" responders="5"></measurement>
+            <measurement sample="126" treatment="sPCI" responders="12"></measurement>
+        </study>
+        <study id="Di Mario 2004_n">
+            <measurement sample="17" treatment="iPCI" responders="0"></measurement>
+            <measurement sample="52" treatment="mPCI" responders="1"></measurement>
+        </study>
+        <study id="Dziewierz 2010_n">
+            <measurement sample="707" treatment="iPCI" responders="57"></measurement>
+            <measurement sample="70" treatment="mPCI" responders="11"></measurement>
+        </study>
+        <study id="Han 2008">
+            <measurement sample="149" treatment="iPCI" responders="5"></measurement>
+            <measurement sample="93" treatment="sPCI" responders="3"></measurement>
+        </study>
+        <study id="Hannan 2010 iPCI vs mPCI">
+            <measurement sample="503" treatment="iPCI" responders="28"></measurement>
+            <measurement sample="503" treatment="mPCI" responders="36"></measurement>
+        </study>
+        <study id="Hannan 2010 iPCI vs sPCI">
+            <measurement sample="259" treatment="iPCI" responders="14"></measurement>
+            <measurement sample="259" treatment="sPCI" responders="10"></measurement>
+        </study>
+        <study id="Khattab 2008">
+            <measurement sample="45" treatment="iPCI" responders="3"></measurement>
+            <measurement sample="25" treatment="mPCI" responders="2"></measurement>
+        </study>
+        <study id="Mohammed 2010">
+            <measurement sample="30" treatment="iPCI" responders="3"></measurement>
+            <measurement sample="7" treatment="mPCI" responders="2"></measurement>
+            <measurement sample="12" treatment="sPCI" responders="2"></measurement>
+        </study>
+        <study id="Ochala 2004_n">
+            <measurement sample="48" treatment="mPCI" responders="0"></measurement>
+            <measurement sample="44" treatment="sPCI" responders="0"></measurement>
+        </study>
+        <study id="Politi 2010_n">
+            <measurement sample="84" treatment="iPCI" responders="13"></measurement>
+            <measurement sample="65" treatment="mPCI" responders="6"></measurement>
+            <measurement sample="65" treatment="sPCI" responders="4"></measurement>
+        </study>
+        <study id="Qarawani 2008">
+            <measurement sample="25" treatment="iPCI" responders="2"></measurement>
+            <measurement sample="95" treatment="mPCI" responders="9"></measurement>
+        </study>
+        <study id="Rigattie 2007_n">
+            <measurement sample="46" treatment="iPCI" responders="7"></measurement>
+            <measurement sample="64" treatment="sPCI" responders="1"></measurement>
+        </study>
+        <study id="Roe 2001">
+            <measurement sample="79" treatment="iPCI" responders="13"></measurement>
+            <measurement sample="79" treatment="mPCI" responders="19"></measurement>
+        </study>
+        <study id="Schaaf 2010.">
+            <measurement sample="124" treatment="iPCI" responders="66"></measurement>
+            <measurement sample="37" treatment="mPCI" responders="22"></measurement>
+        </study>
+        <study id="Toma 2010_n">
+            <measurement sample="1979" treatment="iPCI" responders="111"></measurement>
+            <measurement sample="216" treatment="mPCI" responders="27"></measurement>
+        </study>
+        <study id="Variani 2008">
+            <measurement sample="152" treatment="iPCI" responders="18"></measurement>
+            <measurement sample="142" treatment="mPCI" responders="24"></measurement>
+            <measurement sample="85" treatment="sPCI" responders="3"></measurement>
+        </study>
+    </studies>
+</network>
