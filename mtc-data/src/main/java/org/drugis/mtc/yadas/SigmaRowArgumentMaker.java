@@ -79,21 +79,3 @@ public class SigmaRowArgumentMaker implements ArgumentMaker {
 		return arr;
 	}
 }
-
-/*
-object SigmaMatrixArgumentMaker {
-	def apply[M <: Measurement](study: Study[M], sigmaIdx: Int)
-	: List[ArgumentMaker] = {
-		(0 until (study.treatments.size - 1)).map(
-			rowIdx => new SigmaRowArgumentMaker(study, sigmaIdx, rowIdx)
-		).toList
-	}
-
-	def apply[M <: Measurement](study: Study[M],
-		splitIdx: Int, sigmaIdx: Int)
-	: List[ArgumentMaker] = {
-		(0 until (study.treatments.size - 1)).map(
-			rowIdx => new SigmaRowArgumentMaker(study, sigmaIdx, rowIdx, splitIdx)
-		).toList
-	}
-}	*/

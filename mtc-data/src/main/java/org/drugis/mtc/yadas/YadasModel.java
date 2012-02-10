@@ -240,6 +240,19 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	////
 
 	protected abstract Parameterization buildNetworkModel();
+	
+	protected Map<NetworkParameter, Derivation> getDerivedParameters() {
+		Map<NetworkParameter, Derivation> map = new HashMap<NetworkParameter, Derivation>();
+		for (Treatment t1 : d_network.getTreatments()) {
+			for (Treatment t2 : d_network.getTreatments()) {
+				final BasicParameter p = new BasicParameter(t1, t2);
+				if (!t1.equals(t2) && !d_pmtz.getParameters().contains(p)) {
+					map.put(p, new Derivation(d_pmtz.parameterize(t1, t2)));
+				}
+			}
+		}
+		return map;
+	}
 
 	private void buildModel() {
 		d_pmtz = buildNetworkModel();
@@ -270,6 +283,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		d_results.setNumberOfChains(d_nChains);
 		d_results.setNumberOfIterations(d_simulationIter);
 
+		d_results.setDerivedParameters(getDerivedParameters());
 //		results.setDerivedParameters(
 //			indirectParameters.map(p => (p, derivation(p))).toList)
 		
@@ -372,8 +386,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		}
 
 		// basic parameter prior
-		int nBasic;
-		for (nBasic = 0; nBasic < parameters.size() && !(parameters.get(nBasic) instanceof InconsistencyParameter); ++nBasic) {}
+		int nBasic = getNumberOfBasicParameters();
 		int[] basicRange = new int[nBasic];
 		for (int i = 0; i < nBasic; ++i) {
 			basicRange[i] = i;
@@ -445,6 +458,13 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		}
 
 		d_writeList.add(writers);
+	}
+
+	protected int getNumberOfBasicParameters() {
+		List<NetworkParameter> parameters = d_pmtz.getParameters();
+		int nBasic;
+		for (nBasic = 0; nBasic < parameters.size() && !(parameters.get(nBasic) instanceof InconsistencyParameter); ++nBasic) {}
+		return nBasic;
 	}
 	
 	private void dichotomousDataBond(Map<Study, MCMCParameter> mu, Map<Study, MCMCParameter> delta) {

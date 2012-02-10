@@ -76,11 +76,11 @@ public class YadasResults implements MCMCResults {
 	/**
 	 * Set the derived parameters, which are to be calculated from the direct ones using the given Derivation.
 	 */
-	public void setDerivedParameters(Map<Parameter, Derivation> derivations) {
+	public void setDerivedParameters(Map<? extends Parameter, Derivation> derivations) {
 		d_derivedParameters = new Parameter[derivations.size()];
 		d_derivations = new Derivation[derivations.size()];
 		int i = 0;
-		for (Entry<Parameter, Derivation> e : derivations.entrySet()) {
+		for (Entry<? extends Parameter, Derivation> e : derivations.entrySet()) {
 			d_derivedParameters[i] = e.getKey();
 			d_derivations[i] = e.getValue();
 			++i;

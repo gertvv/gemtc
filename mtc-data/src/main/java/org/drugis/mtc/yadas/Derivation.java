@@ -7,9 +7,9 @@ import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.Parameter;
 
 public class Derivation {
-	private final Map<Parameter, Integer> d_pmtz;
+	private final Map<? extends Parameter, Integer> d_pmtz;
 	
-	public Derivation(Map<Parameter, Integer> pmtz) {
+	public Derivation(Map<? extends Parameter, Integer> pmtz) {
 		assert(!pmtz.isEmpty());
 		d_pmtz = pmtz;	
 	}
@@ -25,7 +25,7 @@ public class Derivation {
 	
 	public double calculate(MCMCResults results, int c, int i) {
 		double val = 0.0;
-		for (Entry<Parameter, Integer> e : d_pmtz.entrySet()) {
+		for (Entry<? extends Parameter, Integer> e : d_pmtz.entrySet()) {
 			val += e.getValue() * results.getSample(results.findParameter(e.getKey()), c, i);
 		}
 		return val;
