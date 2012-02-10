@@ -1,0 +1,5 @@
+deriv <- list(
+	`d.A.C` = function(x) { x[, "d.A.B"] + x[, "d.B.C"] + -x[, "w.A.B.C"] }
+	)
+# source('mtc.R')
+# data <- append.derived(read.mtc('jags'), deriv)

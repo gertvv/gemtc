@@ -1,0 +1,22 @@
+<network type="continuous">
+	<treatments>
+		<treatment id="A"/>
+		<treatment id="B"/>
+		<treatment id="C"/>
+	</treatments>
+	<studies>
+		<study id="01">
+			<measurement treatment="A" mean="10" standardDeviation="4" sample="16" />
+			<measurement treatment="B" mean="8" standardDeviation="8" sample="16" />
+			<measurement treatment="C" mean="9" standardDeviation="6" sample="16" />
+		</study>
+		<study id="02">
+			<measurement treatment="A" mean="13" standardDeviation="8" sample="64" />
+			<measurement treatment="B" mean="11" standardDeviation="8" sample="64" />
+		</study>
+		<study id="03">
+			<measurement treatment="A" mean="13" standardDeviation="8" sample="64" />
+			<measurement treatment="C" mean="11" standardDeviation="8" sample="64" />
+		</study>
+	</studies>
+</network>

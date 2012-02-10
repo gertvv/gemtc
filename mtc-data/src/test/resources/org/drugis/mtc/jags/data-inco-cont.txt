@@ -1,0 +1,5 @@
+ns <- 3L
+na <- c(3L, 2L, 2L)
+t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
+m <- structure(c(8.0, 13.0, 13.0, 10.0, 11.0, 11.0, 9.0, NA, NA), .Dim = c(3L, 3L))
+e <- structure(c(2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.5, NA, NA), .Dim = c(3L, 3L))

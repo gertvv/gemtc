@@ -1,0 +1,19 @@
+model in 'jags.model'
+data in 'jags.data'
+compile, nchains(3)
+parameters in 'jags.inits1', chain(1)
+parameters in 'jags.inits2', chain(2)
+parameters in 'jags.inits3', chain(3)
+initialize
+
+adapt 30000
+
+monitor d.A.B
+monitor d.B.C
+monitor w.A.B.C
+monitor sd.d
+monitor sd.w
+
+update 20000
+
+coda *, stem('jags')

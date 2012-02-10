@@ -1,14 +1,12 @@
 package org.drugis.mtc.parameterization;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.lang.StringUtils;
+import org.drugis.common.CollectionHelper;
 import org.drugis.mtc.model.Treatment;
 
 /**
@@ -32,21 +30,12 @@ public class InconsistencyParameter implements NetworkParameter, Comparable<Inco
 
 	@Override
 	public String getName() {
-		return "w." + StringUtils.join(transform(d_cycle, s_idTransformer), ".");
+		return "w." + StringUtils.join(CollectionHelper.transform(d_cycle, s_idTransformer), ".");
 	}
 	
 	public List<Treatment> getCycle() {
 		return Collections.unmodifiableList(d_cycle);
 	}
-	
-	// FIXME: make a method in common?
-    private static <I, O> Collection<O> transform(Collection<? extends I> coll, Transformer<? super I, ? extends O> transform) {
-        List<O> list = new ArrayList<O>(coll.size());
-        for (Iterator<? extends I> it = coll.iterator(); it.hasNext();) {
-            list.add(transform.transform(it.next()));
-        }
-        return list;
-    }
 	
 	@Override
 	public String toString() {

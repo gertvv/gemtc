@@ -1,0 +1,15 @@
+modelCheck('@{prefix}.model')
+modelData('@{prefix}.data')
+modelCompile(@{nchains})
+@foreach{i: chains}modelInits('@{prefix}.inits@{i}', @{i})
+@end{}
+modelSetAP('slice', @{tuning})
+modelUpdate(@{tuning})
+
+@foreach{p : parameters}samplesSet('@{p}')
+@end{}samplesSet('sd.d')@if{inconsistency}
+samplesSet('sd.w')@end{}
+
+modelUpdate(@{simulation})
+
+samplesCoda('*', '@{prefix}')
