@@ -113,7 +113,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		private final int d_chain;
 		
 		public SimulationChain(int chain) {
-			super(d_burnInIter);
+			super(d_simulationIter);
 			d_chain = chain;
 		}
 		
@@ -220,7 +220,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	////
 	
 	private double getStartingSigma(StartingValueGenerator startVal) {
-		return Math.random() * d_priorGen.getRandomEffectsSigma();
+		return 0.00001 + Math.random() * (d_priorGen.getRandomEffectsSigma() - 0.00001); // FIXME: handle lower bound better
 	}
 
 

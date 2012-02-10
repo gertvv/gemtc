@@ -48,8 +48,6 @@ public class ContinuousDataIT {
 		YadasConsistencyModel model = new YadasConsistencyModel(d_network);
 		TaskUtil.run(model.getActivityTask());
 		
-		assertEquals(model.getResults().getParameters()[0], model.getRelativeEffect(d_psych, d_usual));
-		
 		assertTrue(model.isReady());
 		int d = model.getResults().findParameter(model.getRelativeEffect(d_psych, d_usual));
 		assertEquals(-d_m, d_mean.evaluate(ResultsUtil.getSamples(model.getResults(), d, 0)), FACTOR * d_s);
