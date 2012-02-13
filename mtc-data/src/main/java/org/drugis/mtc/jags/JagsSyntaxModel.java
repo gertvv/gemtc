@@ -7,10 +7,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.collections15.Transformer;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.drugis.common.CollectionHelper;
 import org.drugis.mtc.data.DataType;
@@ -18,10 +18,12 @@ import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
+import org.drugis.mtc.parameterization.NetworkParameterComparator;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.PriorGenerator;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
@@ -35,12 +37,23 @@ import edu.uci.ics.jung.graph.util.Pair;
 
 public class JagsSyntaxModel {
 	private static final Format s_format = new DecimalFormat("0.0##E0");
+	private static final Transformer<NetworkParameter, String> s_idTrans = new Transformer<NetworkParameter, String>() {
+		public String transform(NetworkParameter input) {
+			return input.getName();
+		}
+	};
+	private static final Transformer<NetworkParameter, String> s_rTransform = new Transformer<NetworkParameter, String>() {
+		public String transform(NetworkParameter input) {
+			return "x[, \"" + input.getName() + "\"]";
+		}
+	};
+	
 	private final Parameterization d_pmtz;
 	private final boolean d_isJags;
 	private final boolean d_inconsistency;
 	private final Network d_network;
 	private final PriorGenerator d_priorGen;
-	
+
 	public JagsSyntaxModel(Network network, Parameterization pmtz, boolean isJags) {
 		d_network = network;
 		d_pmtz = pmtz;
@@ -48,19 +61,6 @@ public class JagsSyntaxModel {
 		d_inconsistency = pmtz instanceof InconsistencyParameterization;
 		d_priorGen = new PriorGenerator(network);
 	}
-	
-	/*
-	 * 			switch (d_network.getType()) {
-			case CONTINUOUS:
-				d_startGen.add(new ContinuousDataStartingValueGenerator(d_network, rng, scale));
-				break;
-			case RATE:
-				d_startGen.add(new DichotomousDataStartingValueGenerator(d_network, rng, scale));
-				break;
-			default:
-				throw new IllegalArgumentException("Don't know how to generate starting values for " + d_network.getType() + " data");					
-			}
-	 */
 
 	/**
 	 * Rewrite a number in scientific E-notation to the format appropriate for BUGS or JAGS.
@@ -97,44 +97,15 @@ public class JagsSyntaxModel {
 	public String analysisText(String prefix) {
 		List<String> list = new ArrayList<String>();
 		list.add("deriv <- list(");
-		list.addAll(getDerivations());
+		list.add(getDerivations());
 		list.add("\t)");
 		list.add("# source('mtc.R')");
-		list.add("# data <- append.derived(read.mtc('" + prefix + "'), deriv)");
+		list.add("# data <- append.derived(read.mtc('" + prefix + "'), deriv)\n");
 		
 		return StringUtils.join(list, "\n");
 	}
 
 	/*
-	private def expressParam(p: NetworkModelParameter, v: Int,
-		f: String => String): String = 
-		v match {
-			case  1 => f(p.toString)
-			case -1 => "-" + f(p.toString)
-			case  _ => throw new Exception("Unexpected value!")
-		}
-
-	private def expressParams(params: Map[NetworkModelParameter, Int],
-		f: String => String)
-	: String =
-		(for {(p, v) <- params} yield expressParam(p, v, f)).mkString(" + ")
-
-	private def expressParams(params: Map[NetworkModelParameter, Int])
-	: String = expressParams(params, (x) => x)
-
-	def express(study: Study[M], effect: Treatment) = {
-		val base = model.studyBaseline(study)
-		require(effect != base)
-		expressParams(model.parametrization(base, effect))
-	}
-
-	private def asBasic(p: NetworkModelParameter): BasicParameter = p match {
-		case b: BasicParameter => b
-		case s: SplitParameter => new BasicParameter(s.base, s.subject)
-		case _ => throw new IllegalArgumentException("Cannot convert " + p +
-			" to a BasicParameter")
-	}
-
 	private def initMetaParameters(g: StartingValueGenerator[M]): List[(String, String)] = {
 		val basic = {
 			for {basicParam <- model.basicParameters}
@@ -197,23 +168,24 @@ public class JagsSyntaxModel {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	/*
-	private def derivations = {
-		val n = model.treatmentList.size
-		val t = model.treatmentList
-		(for {i <- 0 until (n - 1); j <- (i + 1) until n
-			val p = new BasicParameter(t(i), t(j))
-			val p2 = new BasicParameter(t(j), t(i))
-			val e = expressParams(model.parametrization(t(i), t(j)),
-				(x) => "x[, \"" + x + "\"]")
-			if (!model.basicParameters.contains(p) && !model.basicParameters.contains(p2))
-		 } yield "\t`" + p + "` = function(x) { " + e + " }").mkString(",\n")
-	}
-	*/
 	
-	private Collection<? extends String> getDerivations() {
-		// TODO Auto-generated method stub
-		return null;
+	private String getDerivations() {
+		int n = d_network.getTreatments().size();
+		List<String> lines = new ArrayList<String>();
+		for (int i = 0; i < n - 1; ++i) {
+			for (int j = i + 1; j < n; ++j) {
+				final Treatment ti = d_network.getTreatments().get(i);
+				final Treatment tj = d_network.getTreatments().get(j);
+				BasicParameter p = new BasicParameter(ti, tj);
+				BasicParameter q = new BasicParameter(tj, ti);
+				if (!d_pmtz.getParameters().contains(p) && !d_pmtz.getParameters().contains(q)) {
+					String e = expressRelativeEffect(ti, tj, s_rTransform);
+					lines.add("\t`" + p + "` = function(x) { " + e + " }");
+				}
+			}
+		}
+		
+		return StringUtils.join(lines, ",\n");
 	}
 	
 	public CompiledTemplate readTemplate(String path) {
@@ -234,11 +206,11 @@ public class JagsSyntaxModel {
 		return String.valueOf(TemplateRuntime.execute(template, map));
 	}
 
-	private String expressRelativeEffect(Treatment t1, Treatment t2) {
+	private String expressRelativeEffect(Treatment t1, Treatment t2, Transformer<NetworkParameter, String> transform) {
 		if (t1.equals(t2)) {
 			return "0";
 		}
-		return writeExpression(d_pmtz.parameterize(t1, t2));
+		return writeExpression(d_pmtz.parameterize(t1, t2), transform);
 	}
 
 	private String getRelativeEffectMatrix() {
@@ -246,30 +218,29 @@ public class JagsSyntaxModel {
 		final ObservableList<Treatment> treatments = d_network.getTreatments();
 		for (int i = 0; i < treatments.size(); ++i) {
 			for (int j = 0; j < treatments.size(); ++j) {
-				lines.add("\td[" + (i + 1) + "," + (j + 1) + "] <- " + expressRelativeEffect(treatments.get(i), treatments.get(j)));
+				lines.add("\td[" + (i + 1) + "," + (j + 1) + "] <- " + expressRelativeEffect(treatments.get(i), treatments.get(j), s_idTrans));
 			}
 		}
 		return StringUtils.join(lines, "\n");
 	}
-/*
-	def scriptText(prefix: String, chains: Int, tuning: Int, simulation: Int)
-	: String = {
-		val template = {
-			if (isJags) readTemplate("jagsScriptTemplate.txt")
-			else readTemplate("bugsScriptTemplate.txt")
-		}
-		val map = new java.util.HashMap[String, Object]()
-		map.put("prefix", prefix)
-		map.put("nchains", chains.asInstanceOf[AnyRef])
-		map.put("chains", asList((1 to chains).map(_.asInstanceOf[AnyRef])))
-		map.put("tuning", tuning.asInstanceOf[AnyRef])
-		map.put("simulation", simulation.asInstanceOf[AnyRef])
-		map.put("inconsistency", inconsistency.asInstanceOf[AnyRef])
-		map.put("parameters", asList(model.parameterVector))
-		String.valueOf(TemplateRuntime.execute(template, map))
-	}
-*/
+	
 
+	public String scriptText(String prefix, int nchains, int tuning, int simulation) {
+		CompiledTemplate template = d_isJags ? readTemplate("jagsScriptTemplate.txt") : readTemplate("bugsScriptTemplate.txt");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("prefix", prefix);
+		map.put("nchains", nchains);
+		List<Integer> chains = new ArrayList<Integer>();
+		for (int i = 0; i < nchains; ++i) {
+			chains.add(i + 1);
+		}
+		map.put("chains", chains);
+		map.put("tuning", tuning);
+		map.put("simulation", simulation);
+		map.put("inconsistency", d_inconsistency);
+		map.put("parameters", d_pmtz.getParameters());
+		return String.valueOf(TemplateRuntime.execute(template, map));
+	}
 	
 	public String dataText() {
 		List<Pair<String>> list = new ArrayList<Pair<String>>();
@@ -349,18 +320,37 @@ public class JagsSyntaxModel {
 		public O transform(Study s, Treatment t);
 	};
 	
+	/**
+	 * Fill a matrix with Doubles that correspond to each (study, arm) combination.
+	 * @see getTreatments() for the order in which arms are listed. 
+	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponsing number.
+	 * @return The generated matrix, containing "null" for missing combinations.
+	 */
 	public Double[][] getMatrix(StudyTreatmentTransformer<Double> transformer) {
 		Double[][] m = new Double[d_network.getStudies().size()][getMaxArmCount()];
 		getMatrix(m, transformer);
 		return m;
 	}
 	
+	/**
+	 * Fill a matrix with Integers that correspond to each (study, arm) combination.
+	 * @see getTreatments() for the order in which arms are listed.
+	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponsing number.
+	 * @return The generated matrix, containing "null" for missing combinations.
+	 */
 	public Integer[][] getMatrix(StudyTreatmentTransformer<Integer> transformer) {
 		Integer[][] m = new Integer[d_network.getStudies().size()][getMaxArmCount()];
 		getMatrix(m, transformer);
 		return m;
 	}
 	
+	/**
+	 * Fill a matrix with numbers that correspond to each (study, arm) combination.
+	 * @see getTreatments() for the order in which arms are listed.
+	 * @param <N> The type of number.
+	 * @param m The array to write results in.
+	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponding number.
+	 */
 	public <N extends Number> void getMatrix(N[][] m, StudyTreatmentTransformer<N> transformer) {
 		final ObservableList<Study> studies = d_network.getStudies();
 		for (int i = 0; i < studies.size(); ++i) {
@@ -415,6 +405,10 @@ public class JagsSyntaxModel {
 			writeNumber(rows, jags) + ", " + writeNumber(cols, jags) + "))";
 	}
 	
+	/**
+	 * Convert a vector v to S-Plus/R format.
+	 * @param jags true for R/S-Plus/JAGS format, false for BUGS.
+	 */
 	public static String writeVector(Number[] v, boolean jags) {
 		String[] cells = new String[v.length];
 		for (int i = 0; i < cells.length; ++i) {
@@ -424,10 +418,15 @@ public class JagsSyntaxModel {
 		return "c(" + StringUtils.join(cells, ", ") + ")";
 	}
 	
-	public static String writeExpression(Map<NetworkParameter, Integer> pmtz) {
+	/**
+	 * Transform the given map from parameters to -1 or +1 to a sum expression.
+	 */
+	public static String writeExpression(Map<NetworkParameter, Integer> pmtz, Transformer<NetworkParameter, String> transform) {
 		List<String> terms = new ArrayList<String>();
-		for (Entry<NetworkParameter, Integer> entry : pmtz.entrySet()) {
-			terms.add((entry.getValue() == -1 ? "-" : "") + entry.getKey().getName());
+		final Set<NetworkParameter> keys = new TreeSet<NetworkParameter>(NetworkParameterComparator.INSTANCE);
+		keys.addAll(pmtz.keySet());
+		for (NetworkParameter key : keys) {
+			terms.add((pmtz.get(key) == -1 ? "-" : "") + transform.transform(key));
 		}
 		return StringUtils.join(terms, " + ");
 	}

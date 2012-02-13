@@ -15,7 +15,7 @@ public class InconsistencyParameterTest {
 		List<Treatment> cycle = Arrays.asList(new Treatment("A"), new Treatment("B"), new Treatment("C"), new Treatment("A"));
 		InconsistencyParameter parameter = new InconsistencyParameter(cycle);
 		
-		assertEquals("w.A.B.C.A", parameter.getName());
+		assertEquals("w.A.B.C", parameter.getName());
 		assertEquals(parameter.getName(), parameter.toString());
 	}
 	

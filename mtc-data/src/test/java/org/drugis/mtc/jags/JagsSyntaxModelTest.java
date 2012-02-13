@@ -6,18 +6,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.lang.StringUtils;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
-import org.drugis.mtc.yadas.ContinuousDataIT;
+import org.drugis.mtc.parameterization.NetworkModel;
+import org.drugis.mtc.parameterization.Partition;
 import org.junit.Test;
 
-import sun.misc.IOUtils;
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
+import edu.uci.ics.jung.graph.DelegateTree;
+import edu.uci.ics.jung.graph.Tree;
+import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class JagsSyntaxModelTest {
 	@Test
@@ -62,9 +70,28 @@ public class JagsSyntaxModelTest {
 		InputStream is = JagsSyntaxModelTest.class.getResourceAsStream("network1.xml");
 		Network network = JAXBHandler.readNetwork(is);
 		
-		JagsSyntaxModel model = new JagsSyntaxModel(network, InconsistencyParameterization.create(network), true);
+		Treatment ta = network.getTreatments().get(0);
+		Treatment tb = network.getTreatments().get(1);
+		Treatment tc = network.getTreatments().get(2);
+		
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(network);
+		// Fix the tree to AB, BC.
+		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = new DelegateTree<Treatment, FoldedEdge<Treatment,Study>>();
+		tree.addVertex(ta);
+		tree.addEdge(cGraph.findEdge(ta, tb), ta, tb);
+		tree.addEdge(cGraph.findEdge(tb, tc), tb, tc);
+		final Map<Partition, Set<List<Treatment>>> cycleClasses = InconsistencyParameterization.getCycleClasses(cGraph, tree);
+		Map<Study, Treatment> baselines = new HashMap<Study, Treatment>();
+		baselines.put(network.getStudies().get(0), tb);
+		baselines.put(network.getStudies().get(1), ta);
+		baselines.put(network.getStudies().get(2), ta);
+		final InconsistencyParameterization pmtz = new InconsistencyParameterization(network, tree, cycleClasses, baselines);
+		JagsSyntaxModel model = new JagsSyntaxModel(network, pmtz, true);
 		
 		assertEquals(read("data-inco-dich.txt"), model.dataText());
 		assertEquals(read("model-inco-dich.txt"), model.modelText());
+		// FIXME: add initial values test?
+		assertEquals(read("script-inco-dich.txt"), model.scriptText("jags", 3, 30000, 20000));
+		assertEquals(read("analysis-inco-dich.txt"), model.analysisText("jags"));
 	}
 }

@@ -30,7 +30,7 @@ public class InconsistencyParameter implements NetworkParameter, Comparable<Inco
 
 	@Override
 	public String getName() {
-		return "w." + StringUtils.join(CollectionHelper.transform(d_cycle, s_idTransformer), ".");
+		return "w." + StringUtils.join(CollectionHelper.transform(d_cycle.subList(0, d_cycle.size() - 1), s_idTransformer), ".");
 	}
 	
 	public List<Treatment> getCycle() {
