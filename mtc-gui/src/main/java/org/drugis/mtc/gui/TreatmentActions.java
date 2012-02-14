@@ -42,17 +42,20 @@ import org.drugis.common.validation.StringMatchesModel;
 import org.drugis.common.validation.StringNotEmptyModel;
 import org.drugis.mtc.gui.ListEditor.ListActions;
 import org.drugis.mtc.gui.ValidationPanel.Validation;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.NetworkModel;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.ValueModel;
 
-class TreatmentActions implements ListActions<TreatmentModel> {
+class TreatmentActions implements ListActions<Treatment> {
 	private JFrame d_parent;
-	private ObservableList<StudyModel> d_studies;
+	private ObservableList<Study> d_studies;
 
-	public TreatmentActions(JFrame parent, ObservableList<StudyModel> studies) {
+	public TreatmentActions(JFrame parent, ObservableList<Study> studies) {
 		d_parent = parent;
 		d_studies = studies;
 	}
@@ -61,17 +64,17 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		return "treatment";
 	}
 
-	public void addAction(ObservableList<TreatmentModel> list) {
-		TreatmentModel model = new TreatmentModel();
+	public void addAction(ObservableList<Treatment> list) {
+		Treatment model = new Treatment();
 		showEditDialog(list, model);
 		list.add(model);
 	}
-	public void editAction(ObservableList<TreatmentModel> list, TreatmentModel item) {
+	public void editAction(ObservableList<Treatment> list, Treatment item) {
 		if (item != null) {
 			showEditDialog(list, item);
 		}
 	}
-	public void deleteAction(ObservableList<TreatmentModel> list, TreatmentModel item) {
+	public void deleteAction(ObservableList<Treatment> list, Treatment item) {
 		if (used(item)) {
 			JOptionPane.showMessageDialog(d_parent,
 				"This treatment is being used by one or more studies. You can't delete it.",
@@ -83,27 +86,27 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		}
 	}
 
-	private boolean used(TreatmentModel item) {
-		for (StudyModel s : d_studies) {
-			if (s.getTreatments().contains(item)) {
+	private boolean used(Treatment item) {
+		for (Study s : d_studies) {
+			if (NetworkModel.findMeasurement(s, item) != null) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public String getLabel(TreatmentModel item) {
+	public String getLabel(Treatment item) {
 		return item.getId();
 	}
-	public String getTooltip(TreatmentModel item) {
+	public String getTooltip(Treatment item) {
 		return item.getDescription();
 	}
 
-	public ListModel listPresentation(ObservableList<TreatmentModel> list) {
-		return new ContentAwareListModel<TreatmentModel>(list, new String[] { TreatmentModel.PROPERTY_ID, TreatmentModel.PROPERTY_DESCRIPTION });
+	public ListModel listPresentation(ObservableList<Treatment> list) {
+		return new ContentAwareListModel<Treatment>(list, new String[] { Treatment.PROPERTY_ID, Treatment.PROPERTY_DESCRIPTION });
 	}
 
-	private void showEditDialog(ObservableList<TreatmentModel> list, TreatmentModel model) {
+	private void showEditDialog(ObservableList<Treatment> list, Treatment model) {
 		final JDialog dialog = new JDialog(d_parent, "Treatment");
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -113,19 +116,19 @@ class TreatmentActions implements ListActions<TreatmentModel> {
 		JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		panel.add(new JLabel("ID: "));
-		ValueModel idModel = new PropertyAdapter<TreatmentModel>(model, TreatmentModel.PROPERTY_ID, true);
+		ValueModel idModel = new PropertyAdapter<Treatment>(model, Treatment.PROPERTY_ID, true);
 		JTextField field1 = BasicComponentFactory.createTextField(idModel, false);
 		field1.setColumns(25);
 		panel.add(field1);
 		panel.add(new JLabel("Description: "));
-		JTextField field2 = BasicComponentFactory.createTextField(new PropertyAdapter<TreatmentModel>(model, TreatmentModel.PROPERTY_DESCRIPTION), false);
+		JTextField field2 = BasicComponentFactory.createTextField(new PropertyAdapter<Treatment>(model, Treatment.PROPERTY_DESCRIPTION), false);
 		field2.setColumns(25);
 		panel.add(field2);
 		dialog.add(panel, BorderLayout.CENTER);
 
 		List<Validation> validators = Arrays.asList(
 				new Validation(new StringNotEmptyModel(idModel), "The ID may not be empty"),
-				new Validation(new PropertyUniqueModel<TreatmentModel>(list, model, TreatmentModel.PROPERTY_ID), "The ID must be unique (there is another treatment with this ID)"),
+				new Validation(new PropertyUniqueModel<Treatment>(list, model, Treatment.PROPERTY_ID), "The ID must be unique (there is another treatment with this ID)"),
 				new Validation(new StringMatchesModel(idModel, "[A-Za-z0-9_]*"), "The ID may only contain letters, digits and underscores (_)")
 				);
 

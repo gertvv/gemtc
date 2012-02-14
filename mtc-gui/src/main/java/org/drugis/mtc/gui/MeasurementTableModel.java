@@ -31,6 +31,10 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListDataEvent;
 
 import org.drugis.common.beans.ListPropertyChangeProxy;
+import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.NetworkModel;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -45,12 +49,12 @@ public class MeasurementTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = -1186064425875064988L;
 
 	private ValueModel d_measurementType;
-	private ObservableList<StudyModel> d_studies;
+	private ObservableList<Study> d_studies;
 	private List<Integer> d_studyIndex = new ArrayList<Integer>();
-	@SuppressWarnings("unused") private ListPropertyChangeProxy<StudyModel> d_studyIdProxy;
-	@SuppressWarnings("unused") private ListPropertyChangeProxy<TreatmentModel> d_treatmentIdProxy;
+	@SuppressWarnings("unused") private ListPropertyChangeProxy<Study> d_studyIdProxy;
+	@SuppressWarnings("unused") private ListPropertyChangeProxy<Treatment> d_treatmentIdProxy;
 
-	private ListDataListener d_treatmentListener = new ListDataListener() {
+	private ListDataListener d_measurementListener = new ListDataListener() {
 		public void contentsChanged(ListDataEvent e) {
 			throw new UnsupportedOperationException();
 		}
@@ -63,8 +67,8 @@ public class MeasurementTableModel extends AbstractTableModel {
 	};
 
 	public MeasurementTableModel(
-			ObservableList<StudyModel> studies,
-			ObservableList<TreatmentModel> treatments,
+			ObservableList<Study> studies,
+			ObservableList<Treatment> treatments,
 			ValueModel measurementType) {
 		d_studies = studies;
 		d_measurementType = measurementType;
@@ -88,18 +92,18 @@ public class MeasurementTableModel extends AbstractTableModel {
 			}
 		});
 
-		d_studyIdProxy = new ListPropertyChangeProxy<StudyModel>(d_studies, new PropertyChangeListener() {
+		d_studyIdProxy = new ListPropertyChangeProxy<Study>(d_studies, new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
-				if (evt.getPropertyName().equals(StudyModel.PROPERTY_ID)) {
-					studyIdChanged((StudyModel)evt.getSource());
+				if (evt.getPropertyName().equals(Study.PROPERTY_ID)) {
+					studyIdChanged((Study)evt.getSource());
 				}
 			}
 		});
 
-		d_treatmentIdProxy = new ListPropertyChangeProxy<TreatmentModel>(treatments, new PropertyChangeListener() {
+		d_treatmentIdProxy = new ListPropertyChangeProxy<Treatment>(treatments, new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
-				if (evt.getPropertyName().equals(StudyModel.PROPERTY_ID)) {
-					treatmentIdChanged((TreatmentModel)evt.getSource());
+				if (evt.getPropertyName().equals(Study.PROPERTY_ID)) {
+					treatmentIdChanged((Treatment)evt.getSource());
 				}
 			}
 		});
@@ -109,7 +113,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 		this(model.getStudies(), model.getTreatments(), model.getMeasurementType());
 	}
 
-	private void studyIdChanged(StudyModel study) {
+	private void studyIdChanged(Study study) {
 		for (int i = 0; i < d_studies.size(); ++i) {
 			if (d_studies.get(i) == study) {
 				fireTableCellUpdated(d_studyIndex.get(i), 0);
@@ -117,9 +121,9 @@ public class MeasurementTableModel extends AbstractTableModel {
 		}
 	}
 
-	private void treatmentIdChanged(TreatmentModel t) {
+	private void treatmentIdChanged(Treatment t) {
 		for (int i = 0; i < d_studies.size(); ++i) {
-			int j = d_studies.get(i).getTreatments().indexOf(t);
+			int j = d_studies.get(i).getMeasurements().indexOf(NetworkModel.findMeasurement(d_studies.get(i), t));
 			if (j > 0) {
 				fireTableCellUpdated(d_studyIndex.get(i) + j + 1, 0);
 			}
@@ -137,8 +141,8 @@ public class MeasurementTableModel extends AbstractTableModel {
 		int len = 0;
 		for (int i = start; i <= end; ++i) {
 			d_studyIndex.add(i, startIdx + len);
-			len += d_studies.get(i).getTreatments().size() + 1;
-			d_studies.get(i).getTreatments().addListDataListener(d_treatmentListener);
+			len += d_studies.get(i).getMeasurements().size() + 1;
+			d_studies.get(i).getMeasurements().addListDataListener(d_measurementListener);
 		}
 		updateStudiesFrom(end + 1, len);
 		fireTableRowsInserted(startIdx, startIdx + len - 1);
@@ -176,7 +180,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 
 	private int findStudy(Object source) {
 		for (int i = 0; i < d_studies.size(); ++i) {
-			if (d_studies.get(i).getTreatments() == source) {
+			if (d_studies.get(i).getMeasurements() == source) {
 				return i;
 			}
 		}
@@ -187,13 +191,13 @@ public class MeasurementTableModel extends AbstractTableModel {
 		return d_studyIndex.get(d_studies.size());
 	}
 
-	private MeasurementType getMeasurementType() {
-		return (MeasurementType)d_measurementType.getValue();
+	private DataType getMeasurementType() {
+		return (DataType)d_measurementType.getValue();
 	}
 
 	public int getColumnCount() {
 		switch (getMeasurementType()) {
-			case DICHOTOMOUS:
+			case RATE:
 				return 3;
 			case CONTINUOUS:
 				return 4;
@@ -208,7 +212,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 		if (col == 0) {
 			return Object.class;
 		} else {
-			if (getMeasurementType().equals(MeasurementType.DICHOTOMOUS) || col == 3) {
+			if (getMeasurementType().equals(DataType.RATE) || col == 3) {
 				return Integer.class;
 			} else {
 				return Double.class;
@@ -223,7 +227,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 	@Override
 	public String getColumnName(int col) {
 		switch (getMeasurementType()) {
-			case DICHOTOMOUS:
+			case RATE:
 				return d_dichNames[col];
 			case CONTINUOUS:
 				return d_contNames[col];
@@ -247,7 +251,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 		if (i < 0) {
 			return null;
 		}
-		StudyModel s = d_studies.get(i);
+		Study s = d_studies.get(i);
 		if (row == d_studyIndex.get(i)) { // study description row
 			if (col == 0) {
 				return s;
@@ -255,7 +259,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 				return null;
 			}
 		} else {
-			TreatmentModel t = s.getTreatments().get(row - d_studyIndex.get(i) - 1);
+			Treatment t = s.getMeasurements().get(row - d_studyIndex.get(i) - 1).getTreatment();
 			if (col == 0) {
 				return t;
 			} else {
@@ -264,22 +268,22 @@ public class MeasurementTableModel extends AbstractTableModel {
 		}
 	}
 
-	private Object getValue(StudyModel s, TreatmentModel t, int col) {
+	private Object getValue(Study s, Treatment t, int col) {
 		switch (getMeasurementType()) {
-			case DICHOTOMOUS:
+			case RATE:
 				if (col == 1) {
-					return s.getResponders(t);
+					return NetworkModel.findMeasurement(s, t).getResponders();
 				} else if (col == 2) {
-					return s.getSampleSize(t);
+					return NetworkModel.findMeasurement(s, t).getSampleSize();
 				}
 				break;
 			case CONTINUOUS:
 				if (col == 1) {
-					return s.getMean(t);
+					return NetworkModel.findMeasurement(s, t).getMean();
 				} else if (col == 2) {
-					return s.getStdDev(t);
+					return NetworkModel.findMeasurement(s, t).getStdDev();
 				} else if (col == 3) {
-					return s.getSampleSize(t);
+					return NetworkModel.findMeasurement(s, t).getSampleSize();
 				}
 				break;
 		}
@@ -308,27 +312,27 @@ public class MeasurementTableModel extends AbstractTableModel {
 		}
 		int j = row - d_studyIndex.get(i) - 1;
 
-		StudyModel s = d_studies.get(i);
-		TreatmentModel t = s.getTreatments().get(j);
+		Study s = d_studies.get(i);
+		Treatment t = s.getMeasurements().get(j).getTreatment();
 		setValueAt(s, t, col, val);
 	}
 
-	private void setValueAt(StudyModel s, TreatmentModel t, int col, Object val) {
+	private void setValueAt(Study s, Treatment t, int col, Object val) {
 		switch (getMeasurementType()) {
-			case DICHOTOMOUS:
+			case RATE:
 				if (col == 1) {
-					s.setResponders(t, (Integer)val);
+					NetworkModel.findMeasurement(s, t).setResponders(((Integer)val));
 				} else if (col == 2) {
-					s.setSampleSize(t, (Integer)val);
+					NetworkModel.findMeasurement(s, t).setSampleSize(((Integer)val));
 				}
 				break;
 			case CONTINUOUS:
 				if (col == 1) {
-					s.setMean(t, (Double)val);
+					NetworkModel.findMeasurement(s, t).setMean(((Double)val));
 				} else if (col == 2) {
-					s.setStdDev(t, (Double)val);
+					NetworkModel.findMeasurement(s, t).setStdDev(((Double)val));
 				} else if (col == 3) {
-					s.setSampleSize(t, (Integer)val);
+					NetworkModel.findMeasurement(s, t).setSampleSize(((Integer)val));
 				}
 				break;
 		}

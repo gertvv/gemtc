@@ -30,9 +30,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -43,13 +42,17 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.xml.bind.JAXBException;
 
 import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.common.validation.ListMinimumSizeModel;
-import org.drugis.mtc.Measurement;
-import org.drugis.mtc.Network;
+import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.graph.GraphUtil;
+import org.drugis.mtc.model.JAXBHandler;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.parameterization.NetworkModel;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
@@ -212,7 +215,6 @@ public class MainWindow extends JFrame {
 		return saveButton;
 	}
 
-	@SuppressWarnings("unchecked")
 	private JButton createGenerateButton() {
 		JButton button = new JButton("Generate", ImageLoader.getIcon("generate.gif"));
 		button.addActionListener(new ActionListener() {
@@ -223,17 +225,16 @@ public class MainWindow extends JFrame {
 					JOptionPane.showMessageDialog(MainWindow.this, "You need to define at least two studies and treatments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				if (model.getMeasurementType().getValue() == MeasurementType.NONE) {
+				if (model.getMeasurementType().getValue() == DataType.NONE) {
 					JOptionPane.showMessageDialog(MainWindow.this, "Model generation not possible with 'None' measuments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				Network network;
-				try {
-					network = model.build();
-				} catch (IllegalArgumentException e) {
-					JOptionPane.showMessageDialog(MainWindow.this, "Error: " + e.getMessage(), "Cannot generate model", JOptionPane.WARNING_MESSAGE);
+				Network network = model.getNetwork();
+				if (!GraphUtil.isWeaklyConnected(NetworkModel.createStudyGraph(network))) {
+					JOptionPane.showMessageDialog(MainWindow.this, "The network needs to be connected in order to generate an MTC model.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
+				// FIXME: further validation / checking of data.
 				final String name = model.getFile() == null ? "unnamed" : model.getFile().getName().replaceFirst(".gemtc$", "");
 				CodeGenerationDialog codeGenerationDialog = new CodeGenerationDialog(MainWindow.this, name, network);
 				codeGenerationDialog.setVisible(true);
@@ -255,26 +256,24 @@ public class MainWindow extends JFrame {
 	}
 	
 	private DataSetModel readFromFile(final File file) {
-		InputStream is;
 		try {
-			is = new FileInputStream(file);
+			InputStream is = new FileInputStream(file);
+			Network network = JAXBHandler.readNetwork(is);
+			return new DataSetModel(network);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
+		} catch (JAXBException e) {
+			throw new RuntimeException(e);
 		}
-		Network<? extends Measurement> network = Network.fromXML(scala.xml.XML.load(is));
-		return DataSetModel.build(network);
 	}
 	
 	private void writeToFile(final DataSetModel model, final File file) {
-		OutputStreamWriter os;
 		try {
-			os = new OutputStreamWriter(new FileOutputStream(file));
-			os.write(model.build().toPrettyXML());
-			os.write("\n");
-			os.close();
+			OutputStream os = new FileOutputStream(file);
+			JAXBHandler.writeNetwork(model.getNetwork(), os);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
-		} catch (IOException e) {
+		} catch (JAXBException e) {
 			throw new RuntimeException(e);
 		}
 	}

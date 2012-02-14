@@ -37,7 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import org.drugis.mtc.Network;
+import org.drugis.mtc.model.Network;
 
 import com.jgoodies.binding.adapter.Bindings;
 import com.jgoodies.binding.adapter.RadioButtonAdapter;
@@ -57,7 +57,7 @@ public class CodeGenerationDialog extends JDialog {
 	private static final long serialVersionUID = 7179311466635454391L;
 	
 	private final String d_name;
-	private final Network<?> d_network;
+	private final Network d_network;
 	private ValueHolder d_syntaxType = new ValueHolder(SyntaxType.BUGS);
 	private ValueHolder d_modelType = new ValueHolder(ModelType.Consistency);
 
@@ -66,7 +66,7 @@ public class CodeGenerationDialog extends JDialog {
 	private ValueHolder d_tuning = new ValueHolder(20000L);
 	private ValueHolder d_simulation = new ValueHolder(40000L);
 
-	public CodeGenerationDialog(JFrame parent, String name, Network<?> network) {
+	public CodeGenerationDialog(JFrame parent, String name, Network network) {
 		super(parent, "Generate BUGS/JAGS code for " + name, true);
 		d_name = name;
 		d_network = network;

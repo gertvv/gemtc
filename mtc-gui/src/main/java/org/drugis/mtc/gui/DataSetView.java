@@ -36,6 +36,10 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
+
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.SelectionInList;
 
@@ -70,10 +74,10 @@ public class DataSetView extends JPanel {
 		tabbedPane.setTabPlacement(JTabbedPane.TOP);
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
-		JComponent treatmentPane = new ListEditor<TreatmentModel>(d_model.getTreatments(), new TreatmentActions(d_parent, d_model.getStudies()));
+		JComponent treatmentPane = new ListEditor<Treatment>(d_model.getTreatments(), new TreatmentActions(d_parent, d_model.getStudies()));
 		tabbedPane.addTab("Treatments", null, treatmentPane, "Manage treatments");
 
-		JComponent studyPane = new ListEditor<StudyModel>(d_model.getStudies(), new StudyActions(d_parent, d_model.getTreatments()));
+		JComponent studyPane = new ListEditor<Study>(d_model.getStudies(), new StudyActions(d_parent, d_model.getTreatments()));
 		tabbedPane.addTab("Studies", null, studyPane, "Manage studies");
 
 		return tabbedPane;
@@ -102,11 +106,11 @@ public class DataSetView extends JPanel {
 
 			@Override
 			public void setValue(Object value) {
-				if (value instanceof StudyModel) {
-					setText(((StudyModel)value).getId());
+				if (value instanceof Study) {
+					setText(((Study)value).getId());
 					setBackground(Color.LIGHT_GRAY);
-				} else if (value instanceof TreatmentModel) {
-					setText(((TreatmentModel)value).getId());
+				} else if (value instanceof Treatment) {
+					setText(((Treatment)value).getId());
 					setBackground(Color.WHITE);
 				}
 			}
@@ -117,7 +121,7 @@ public class DataSetView extends JPanel {
 	public JComponent buildInfoPane() {
 		JPanel panel = new JPanel(new FlowLayout());
 		panel.add(new JLabel("A "));
-		SelectionInList<MeasurementType> typeSelect = new SelectionInList<MeasurementType>(MeasurementType.values(), d_model.getMeasurementType());
+		SelectionInList<DataType> typeSelect = new SelectionInList<DataType>(DataType.values(), d_model.getMeasurementType());
 		panel.add(BasicComponentFactory.createComboBox(typeSelect));
 		panel.add(new JLabel(" dataset about "));
 		JTextField descriptionField = BasicComponentFactory.createTextField(d_model.getDescription(), false);

@@ -35,6 +35,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.WindowConstants;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import org.drugis.common.beans.ContentAwareListModel;
 import org.drugis.common.validation.ListMinimumSizeModel;
@@ -42,6 +44,10 @@ import org.drugis.common.validation.PropertyUniqueModel;
 import org.drugis.common.validation.StringNotEmptyModel;
 import org.drugis.mtc.gui.ListEditor.ListActions;
 import org.drugis.mtc.gui.ValidationPanel.Validation;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.NetworkModel;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
@@ -49,38 +55,38 @@ import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueModel;
 
-class StudyActions implements ListActions<StudyModel> {
+class StudyActions implements ListActions<Study> {
 	private JFrame d_parent;
-	private ObservableList<TreatmentModel> d_treatments;
+	private ObservableList<Treatment> d_treatments;
 
 	private static class TreatmentSelectedModel extends AbstractValueModel {
 		private static final long serialVersionUID = -8538914749123577488L;
 
-		private StudyModel d_study;
-		private TreatmentModel d_treatment;
+		private Study d_study;
+		private Treatment d_treatment;
 
-		public TreatmentSelectedModel(StudyModel study, TreatmentModel treatment) {
+		public TreatmentSelectedModel(Study study, Treatment treatment) {
 			d_study = study;
 			d_treatment = treatment;
 		}
 
 		public Boolean getValue() {
-			return d_study.getTreatments().contains(d_treatment);
+			return NetworkModel.findMeasurement(d_study, d_treatment) != null;
 		}
 
 		public void setValue(Object obj) {
 			boolean oldVal = getValue();
 			boolean val = (Boolean)obj;
 			if (val && !oldVal) {
-				d_study.getTreatments().add(d_treatment);
+				d_study.getMeasurements().add(new Measurement(d_treatment));
 			} else if (!val && oldVal) {
-				d_study.getTreatments().remove(d_treatment);
+				d_study.getMeasurements().remove(NetworkModel.findMeasurement(d_study, d_treatment));
 			}
 			fireValueChange(oldVal, val);
 		}
 	}
 
-	public StudyActions(JFrame parent, ObservableList<TreatmentModel> treatments) {
+	public StudyActions(JFrame parent, ObservableList<Treatment> treatments) {
 		d_parent = parent;
 		d_treatments = treatments;
 	}
@@ -89,40 +95,62 @@ class StudyActions implements ListActions<StudyModel> {
 		return "study";
 	}
 
-	public void addAction(ObservableList<StudyModel> list) {
+	public void addAction(ObservableList<Study> list) {
 		if (d_treatments.size() < 2) {
 			JOptionPane.showMessageDialog(d_parent,
 				"Before you can create any studies, you have to create at least two treatments.",
 				"Unable to create study", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
-		StudyModel model = new StudyModel();
+		final Study model = new Study();
+		addDefaultValueInserter(model);
 		showEditDialog(list, model);
 		list.add(model);
 	}
-	public void editAction(ObservableList<StudyModel> list, StudyModel item) {
+
+	public void editAction(ObservableList<Study> list, Study item) {
 		if (item != null) {
 			showEditDialog(list, item);
 		}
 	}
-	public void deleteAction(ObservableList<StudyModel> list, StudyModel item) {
+
+	public void deleteAction(ObservableList<Study> list, Study item) {
 		if (item != null) {
 			list.remove(item);
 		}
 	}
 
-	public String getLabel(StudyModel item) {
+	public String getLabel(Study item) {
 		return item.getId();
 	}
-	public String getTooltip(StudyModel item) {
+	public String getTooltip(Study item) {
 		return item.getId();
 	}
 
-	public ListModel listPresentation(ObservableList<StudyModel> list) {
-		return new ContentAwareListModel<StudyModel>(list, new String[] { StudyModel.PROPERTY_ID });
+	public ListModel listPresentation(ObservableList<Study> list) {
+		return new ContentAwareListModel<Study>(list, new String[] { Study.PROPERTY_ID });
 	}
 
-	private void showEditDialog(ObservableList<StudyModel> list, StudyModel model) {
+	public static void addDefaultValueInserter(final Study model) {
+		model.getMeasurements().addListDataListener(new ListDataListener() { // FIXME: HACK
+			public void intervalRemoved(ListDataEvent e) {
+			}
+			
+			public void intervalAdded(ListDataEvent e) {
+				for (int i = e.getIndex0(); i <= e.getIndex1(); ++i) {
+					model.getMeasurements().get(i).setSampleSize(0);
+					model.getMeasurements().get(i).setResponders(0);
+					model.getMeasurements().get(i).setMean(0.0);
+					model.getMeasurements().get(i).setStdDev(0.0);
+				}
+			}
+			
+			public void contentsChanged(ListDataEvent e) {
+			}
+		});
+	}
+	
+	private void showEditDialog(ObservableList<Study> list, Study model) {
 		final JDialog dialog = new JDialog(d_parent, "Study");
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -134,21 +162,21 @@ class StudyActions implements ListActions<StudyModel> {
 		JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		panel.add(new JLabel("ID: "));
-		ValueModel idModel = new PropertyAdapter<StudyModel>(model, StudyModel.PROPERTY_ID, true);
+		ValueModel idModel = new PropertyAdapter<Study>(model, Study.PROPERTY_ID, true);
 		JTextField field1 = BasicComponentFactory.createTextField(idModel, false);
 		field1.setColumns(25);
 		panel.add(field1);
 		dialog.add(panel, BorderLayout.NORTH);
 
 		JPanel treatmentPanel = new JPanel(new GridLayout(0, 3, 5, 5));
-		for (TreatmentModel t : d_treatments) {
+		for (Treatment t : d_treatments) {
 			treatmentPanel.add(BasicComponentFactory.createCheckBox(new TreatmentSelectedModel(model, t), t.getId()));
 		}
 		dialog.add(treatmentPanel, BorderLayout.CENTER);
 
 		ValueModel idNotEmpty = new StringNotEmptyModel(idModel);
-		ValueModel idUnique = new PropertyUniqueModel<StudyModel>(list, model, StudyModel.PROPERTY_ID);
-		ValueModel treatmentsSelected = new ListMinimumSizeModel(model.getTreatments(), 2);
+		ValueModel idUnique = new PropertyUniqueModel<Study>(list, model, Study.PROPERTY_ID);
+		ValueModel treatmentsSelected = new ListMinimumSizeModel(model.getMeasurements(), 2);
 		List<Validation> validations = Arrays.asList(
 				new Validation(idNotEmpty, "The ID may not be empty"),
 				new Validation(idUnique, "The ID must be unique (there is another treatment with this ID)"),

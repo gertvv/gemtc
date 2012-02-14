@@ -21,8 +21,10 @@ package org.drugis.mtc.gui;
 
 import java.util.Comparator;
 
-public class TreatmentIdComparator implements Comparator<TreatmentModel> {
-	public int compare(TreatmentModel arg0, TreatmentModel arg1) {
+import org.drugis.mtc.model.Treatment;
+
+public class TreatmentIdComparator implements Comparator<Treatment> {
+	public int compare(Treatment arg0, Treatment arg1) {
 		return arg0.getId().compareTo(arg1.getId());
 	}
 }

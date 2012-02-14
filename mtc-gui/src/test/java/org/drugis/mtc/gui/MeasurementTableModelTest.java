@@ -32,6 +32,11 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.drugis.common.event.TableModelEventMatcher;
+import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.NetworkModel;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,31 +47,33 @@ import com.jgoodies.binding.value.ValueHolder;
 import static org.drugis.mtc.gui.MeasurementTableModel.*;
 
 public class MeasurementTableModelTest {
-	ObservableList<TreatmentModel> d_treatments;
-	ObservableList<StudyModel> d_studies;
+	ObservableList<Treatment> d_treatments;
+	ObservableList<Study> d_studies;
 	ValueHolder d_measurementType;
 	MeasurementTableModel d_model;
 	private static double EPSILON = 0.00000001;
 
 	@Before
 	public void setUp() {
-		TreatmentModel fluox = new TreatmentModel();
+		Treatment fluox = new Treatment();
 		fluox.setId("Fluox");
-		TreatmentModel parox = new TreatmentModel();
+		Treatment parox = new Treatment();
 		parox.setId("Parox");
-		TreatmentModel venla = new TreatmentModel();
+		Treatment venla = new Treatment();
 		venla.setId("Venla");
-		d_treatments = new ArrayListModel<TreatmentModel>(Arrays.asList(fluox, parox, venla));
+		d_treatments = new ArrayListModel<Treatment>(Arrays.asList(fluox, parox, venla));
 
-		StudyModel study1 = new StudyModel();
+		Study study1 = new Study();
 		study1.setId("study1");
-		study1.getTreatments().add(fluox);
-		study1.getTreatments().add(venla);
-		StudyModel study2 = new StudyModel();
+		StudyActions.addDefaultValueInserter(study1);
+		study1.getMeasurements().add(new Measurement(fluox));
+		study1.getMeasurements().add(new Measurement(venla));
+		Study study2 = new Study();
 		study1.setId("study2");
-		d_studies = new ArrayListModel<StudyModel>(Arrays.asList(study1, study2));
+		StudyActions.addDefaultValueInserter(study2);
+		d_studies = new ArrayListModel<Study>(Arrays.asList(study1, study2));
 
-		d_measurementType = new ValueHolder(MeasurementType.DICHOTOMOUS);
+		d_measurementType = new ValueHolder(DataType.RATE);
 
 		d_model = new MeasurementTableModel(d_studies, d_treatments, d_measurementType);
 	}
@@ -86,7 +93,7 @@ public class MeasurementTableModelTest {
 
 	@Test
 	public void testNoneColumns() {
-		d_measurementType.setValue(MeasurementType.NONE);
+		d_measurementType.setValue(DataType.NONE);
 
 		assertEquals(1, d_model.getColumnCount());
 		assertEquals(COLNAME_ID, d_model.getColumnName(0));
@@ -95,7 +102,7 @@ public class MeasurementTableModelTest {
 
 	@Test
 	public void testContinuousColumns() {
-		d_measurementType.setValue(MeasurementType.CONTINUOUS);
+		d_measurementType.setValue(DataType.CONTINUOUS);
 
 		assertEquals(4, d_model.getColumnCount());
 
@@ -119,8 +126,8 @@ public class MeasurementTableModelTest {
 		replay(mock);
 
 		d_model.addTableModelListener(mock);
-		d_measurementType.setValue(MeasurementType.CONTINUOUS);
-		d_measurementType.setValue(MeasurementType.NONE);
+		d_measurementType.setValue(DataType.CONTINUOUS);
+		d_measurementType.setValue(DataType.NONE);
 		verify(mock);
 	}
 
@@ -153,7 +160,7 @@ public class MeasurementTableModelTest {
 		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
 		replay(mock);
 
-		d_studies.add(new StudyModel());
+		d_studies.add(new Study());
 		verify(mock);
 	}
 
@@ -165,9 +172,9 @@ public class MeasurementTableModelTest {
 		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
 		replay(mock);
 
-		StudyModel study = new StudyModel();
-		study.getTreatments().add(d_treatments.get(1));
-		study.getTreatments().add(d_treatments.get(2));
+		Study study = new Study();
+		study.getMeasurements().add(new Measurement(d_treatments.get(1)));
+		study.getMeasurements().add(new Measurement(d_treatments.get(2)));
 		d_studies.add(1, study);
 		verify(mock);
 	}
@@ -180,7 +187,7 @@ public class MeasurementTableModelTest {
 		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
 		replay(mock);
 
-		d_studies.get(0).getTreatments().add(1, d_treatments.get(1));
+		d_studies.get(0).getMeasurements().add(1, new Measurement(d_treatments.get(1)));
 		verify(mock);
 
 		assertEquals(d_treatments.get(0), d_model.getValueAt(1, 0));
@@ -197,7 +204,7 @@ public class MeasurementTableModelTest {
 		mock.tableChanged(TableModelEventMatcher.eqTableModelEvent(event));
 		replay(mock);
 
-		d_studies.get(0).getTreatments().remove(1);
+		d_studies.get(0).getMeasurements().remove(1);
 		verify(mock);
 
 		assertEquals(d_studies.get(0), d_model.getValueAt(0, 0));
@@ -207,9 +214,9 @@ public class MeasurementTableModelTest {
 
 	@Test
 	public void testRemoveStudyMiddleEventChaining() {
-		StudyModel study = new StudyModel();
-		study.getTreatments().add(d_treatments.get(1));
-		study.getTreatments().add(d_treatments.get(2));
+		Study study = new Study();
+		study.getMeasurements().add(new Measurement(d_treatments.get(1)));
+		study.getMeasurements().add(new Measurement(d_treatments.get(2)));
 		d_studies.add(1, study);
 
 		TableModelEvent event = new TableModelEvent(d_model, 3, 5, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE);
@@ -241,30 +248,30 @@ public class MeasurementTableModelTest {
 	@Test
 	public void testEditing() {
 		d_model.setValueAt(37, 1, 1);
-		assertEquals(37, d_studies.get(0).getResponders(d_treatments.get(0)));
+		assertEquals(37, (int)NetworkModel.findMeasurement(d_studies.get(0), d_treatments.get(0)).getResponders());
 		assertEquals(37, d_model.getValueAt(1, 1));
 		d_model.setValueAt(50, 1, 2);
-		assertEquals(50, d_studies.get(0).getSampleSize(d_treatments.get(0)));
+		assertEquals(50, (int)NetworkModel.findMeasurement(d_studies.get(0), d_treatments.get(0)).getSampleSize());
 		assertEquals(50, d_model.getValueAt(1, 2));
 
-		d_measurementType.setValue(MeasurementType.CONTINUOUS);
+		d_measurementType.setValue(DataType.CONTINUOUS);
 		assertEquals(50, d_model.getValueAt(1, 3));
 
 		d_model.setValueAt(1.0, 1, 1);
-		assertEquals(1.0, (Double)d_studies.get(0).getMean(d_treatments.get(0)), EPSILON);
+		assertEquals(1.0, (Double)NetworkModel.findMeasurement(d_studies.get(0), d_treatments.get(0)).getMean(), EPSILON);
 		assertEquals(1.0, (Double)d_model.getValueAt(1, 1), EPSILON);
 		d_model.setValueAt(0.5, 1, 2);
-		assertEquals(0.5, (Double)d_studies.get(0).getStdDev(d_treatments.get(0)), EPSILON);
+		assertEquals(0.5, (Double)NetworkModel.findMeasurement(d_studies.get(0), d_treatments.get(0)).getStdDev(), EPSILON);
 		assertEquals(0.5, (Double)d_model.getValueAt(1, 2), EPSILON);
 		d_model.setValueAt(40, 1, 3);
-		assertEquals(40, d_studies.get(0).getSampleSize(d_treatments.get(0)));
+		assertEquals(40, (int)NetworkModel.findMeasurement(d_studies.get(0), d_treatments.get(0)).getSampleSize());
 		assertEquals(40, d_model.getValueAt(1, 3));
 		
-		d_measurementType.setValue(MeasurementType.NONE);
-		d_measurementType.setValue(MeasurementType.DICHOTOMOUS);
+		d_measurementType.setValue(DataType.NONE);
+		d_measurementType.setValue(DataType.RATE);
 		assertEquals(37, d_model.getValueAt(1, 1));
 		assertEquals(40, d_model.getValueAt(1, 2));
-		d_measurementType.setValue(MeasurementType.CONTINUOUS);
+		d_measurementType.setValue(DataType.CONTINUOUS);
 		assertEquals(1.0, (Double)d_model.getValueAt(1, 1), EPSILON);
 		assertEquals(0.5, (Double)d_model.getValueAt(1, 2), EPSILON);
 		assertEquals(40, d_model.getValueAt(1, 3));

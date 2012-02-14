@@ -20,24 +20,15 @@
 package org.drugis.mtc.gui;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.drugis.common.beans.AbstractObservable;
-import org.drugis.mtc.ContinuousMeasurement;
-import org.drugis.mtc.DichotomousMeasurement;
-import org.drugis.mtc.Network;
-import org.drugis.mtc.NoneMeasurement;
-import org.drugis.mtc.Study;
-import org.drugis.mtc.Treatment;
-import org.drugis.mtc.util.ScalaUtil;
+import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 
-import com.jgoodies.binding.list.ArrayListModel;
+import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.list.ObservableList;
-import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 
 /**
@@ -45,143 +36,41 @@ import com.jgoodies.binding.value.ValueModel;
  */
 public class DataSetModel extends AbstractObservable {
 	public static final String PROPERTY_FILE = "file";
-	private ValueModel d_description = new ValueHolder("???");
-	private ValueModel d_type = new ValueHolder(MeasurementType.DICHOTOMOUS);
-	private ObservableList<TreatmentModel> d_treatments = new ArrayListModel<TreatmentModel>();
-	private ObservableList<StudyModel> d_studies = new ArrayListModel<StudyModel>();
+	private final Network d_network;
 	private File d_file = null;
 	
+	/**
+	 * Create an empty data set.
+	 */
+	public DataSetModel() {
+		d_network = new Network();
+		d_network.setDescription("???");
+		d_network.setType(DataType.RATE);
+	}
+	
+	/**
+	 * Create a data set based on the given network.
+	 */
+	public DataSetModel(Network network) {
+		d_network = network;
+	}
+	
 	public ValueModel getDescription() {
-		return d_description;
+		return new PropertyAdapter<Network>(d_network, Network.PROPERTY_DESCRIPTION);
 	}
 
 	public ValueModel getMeasurementType() {
-		return d_type;
+		return new PropertyAdapter<Network>(d_network, Network.PROPERTY_TYPE);
 	}
 	
-	public ObservableList<TreatmentModel> getTreatments() {
-		return d_treatments;
+	public ObservableList<Treatment> getTreatments() {
+		return d_network.getTreatments();
 	}
 	
-	public ObservableList<StudyModel> getStudies() {
-		return d_studies;
+	public ObservableList<Study> getStudies() {
+		return d_network.getStudies();
 	}
 	
-	public Network<?> build() {
-		List<Treatment> ts = new ArrayList<Treatment>();
-		for (TreatmentModel tm : d_treatments) {
-			ts.add(tm.build());
-		}
-		switch ((MeasurementType)d_type.getValue()) {
-		case NONE:
-			return buildNone(ts);
-		case CONTINUOUS:
-			return buildContinuous(ts);
-		case DICHOTOMOUS:
-			return buildDichotomous(ts);
-		}
-		throw new IllegalStateException();
-	}
-
-	private Network<?> buildDichotomous(List<Treatment> ts) {
-		List<Study<DichotomousMeasurement>> ss = new ArrayList<Study<DichotomousMeasurement>>();
-		for (StudyModel sm : d_studies) {
-			ss.add(sm.buildDichotomous(ts));
-		}
-		return new Network<DichotomousMeasurement>(getDescStr(), ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
-	}
-
-	private Network<?> buildContinuous(List<Treatment> ts) {
-		List<Study<ContinuousMeasurement>> ss = new ArrayList<Study<ContinuousMeasurement>>();
-		for (StudyModel sm : d_studies) {
-			ss.add(sm.buildContinuous(ts));
-		}
-		return new Network<ContinuousMeasurement>(getDescStr(), ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
-	}
-
-	private Network<?> buildNone(List<Treatment> ts) {
-		List<Study<NoneMeasurement>> ss = new ArrayList<Study<NoneMeasurement>>();
-		for (StudyModel sm : d_studies) {
-			ss.add(sm.buildNone(ts));
-		}
-		return new Network<NoneMeasurement>(getDescStr(), ScalaUtil.toScalaSet(ts), ScalaUtil.toScalaSet(ss));
-	}
-
-	private String getDescStr() {
-		return (String) getDescription().getValue();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static DataSetModel build(Network<?> network) {
-		DataSetModel model = new DataSetModel();
-		model.getDescription().setValue(network.description());
-		
-		// populate treatments
-		Map<Treatment, TreatmentModel> tMap = new HashMap<Treatment, TreatmentModel>();
-		for (Treatment t : ScalaUtil.toJavaSet(network.treatments())) {
-			TreatmentModel tm = new TreatmentModel();
-			tm.setId(t.id());
-			tm.setDescription(t.description());
-			tMap.put(t, tm);
-		}
-		model.getTreatments().addAll(tMap.values());
-		Collections.sort(model.getTreatments(), new TreatmentIdComparator());
-		
-		convertStudies(network, model, tMap);
-		if (network.measurementType() == null || network.measurementType().equals(NoneMeasurement.class)) {
-			model.getMeasurementType().setValue(MeasurementType.NONE);
-		} else if (network.measurementType().equals(ContinuousMeasurement.class)) {
-			model.getMeasurementType().setValue(MeasurementType.CONTINUOUS);
-			convertContinuousMeasurements((Network<ContinuousMeasurement>)network, model);
-		} else if (network.measurementType().equals(DichotomousMeasurement.class)) {
-			model.getMeasurementType().setValue(MeasurementType.DICHOTOMOUS);
-			convertDichotomousMeasurements((Network<DichotomousMeasurement>)network, model);
-		}
-		
-		return model;
-	}
-
-	private static void convertDichotomousMeasurements(
-			Network<DichotomousMeasurement> network, DataSetModel model) {
-		for (StudyModel sm : model.getStudies()) {
-			Study<DichotomousMeasurement> study = network.study(sm.getId());
-			for (TreatmentModel tm : sm.getTreatments()) {
-				DichotomousMeasurement m = study.measurements().apply(network.treatment(tm.getId()));
-				sm.setResponders(tm, m.responders());
-				sm.setSampleSize(tm, m.sampleSize());
-			}
-		}
-	}
-
-	private static void convertContinuousMeasurements(
-			Network<ContinuousMeasurement> network, DataSetModel model) {
-		for (StudyModel sm : model.getStudies()) {
-			Study<ContinuousMeasurement> study = network.study(sm.getId());
-			for (TreatmentModel tm : sm.getTreatments()) {
-				ContinuousMeasurement m = study.measurements().apply(network.treatment(tm.getId()));
-				sm.setMean(tm, m.mean());
-				sm.setStdDev(tm, m.stdDev());
-				sm.setSampleSize(tm, m.sampleSize());
-			}
-		}
-	}
-
-	private static void convertStudies(Network<?> network,
-			DataSetModel model, Map<Treatment, TreatmentModel> tMap) {
-		for (Study<?> s : ScalaUtil.toJavaSet(network.studies())) {
-			StudyModel sm = new StudyModel();
-			sm.setId(s.id());
-			List<TreatmentModel> ts = new ArrayList<TreatmentModel>();
-			for (Treatment t : ScalaUtil.toJavaSet(s.treatments())) {
-				ts.add(tMap.get(t));
-			}
-			Collections.sort(ts, new TreatmentIdComparator());
-			sm.getTreatments().addAll(ts);
-			model.getStudies().add(sm);
-		}
-		Collections.sort(model.getStudies(), new StudyIdComparator());
-	}
-
 	public void setFile(File file) {
 		File oldValue = d_file;
 		d_file = file;
@@ -190,5 +79,9 @@ public class DataSetModel extends AbstractObservable {
 
 	public File getFile() {
 		return d_file;
+	}
+
+	public Network getNetwork() {
+		return d_network;
 	}
 }
