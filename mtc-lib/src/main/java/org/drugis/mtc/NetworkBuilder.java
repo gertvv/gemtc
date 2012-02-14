@@ -32,9 +32,12 @@ import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.commons.collections15.bidimap.UnmodifiableBidiMap;
 import org.drugis.common.EqualsUtil;
-import org.drugis.mtc.util.ScalaUtil;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 
-public class NetworkBuilder<M extends Measurement, TreatmentType> {
+public class NetworkBuilder<TreatmentType> {
 	private static final Pattern s_treatmentIdPattern = Pattern.compile("^[A-Za-z0-9_]+$");
 	
 	public static class ToStringTransformer<T> implements Transformer<T, String> {
@@ -68,7 +71,7 @@ public class NetworkBuilder<M extends Measurement, TreatmentType> {
 	}
 
 	private BidiMap<TreatmentType, Treatment> d_treatmentMap = new DualHashBidiMap<TreatmentType, Treatment>();
-	private Map<MKey, M> d_measurementMap = new HashMap<MKey, M>();
+	private Map<MKey, Measurement> d_measurementMap = new HashMap<MKey, Measurement>();
 	private Transformer<TreatmentType, String> d_idToString;
 
 	public NetworkBuilder() {
@@ -79,15 +82,18 @@ public class NetworkBuilder<M extends Measurement, TreatmentType> {
 		d_idToString = idToString;
 	}
 	
-	public Network<M> buildNetwork() {
-		return new Network<M>(ScalaUtil.toScalaSet(getTreatments()), ScalaUtil.toScalaSet(getStudies()));
+	public Network buildNetwork() {
+		final Network network = new Network();
+		network.getTreatments().addAll(getTreatments());
+		network.getStudies().addAll(getStudies());
+		return network;
 	}
 	
 	public BidiMap<TreatmentType, Treatment> getTreatmentMap() {
 		return UnmodifiableBidiMap.decorate(d_treatmentMap);
 	}
 	
-	protected void add(String studyId, Treatment t, M measurement) {
+	protected void add(String studyId, Treatment t, Measurement measurement) {
 		MKey key = new MKey(studyId, t);
 		if (d_measurementMap.containsKey(key)) {
 			throw new IllegalArgumentException("Study/Treatment combination already mapped.");
@@ -112,26 +118,28 @@ public class NetworkBuilder<M extends Measurement, TreatmentType> {
 		}
 	}
 
-	private Set<Study<M>> getStudies() {
+	private Set<Study> getStudies() {
 		Set<String> ids = new HashSet<String>();
 		for (MKey key : d_measurementMap.keySet()) {
 			ids.add(key.studyId);
 		}
-		Set<Study<M>> studies = new HashSet<Study<M>>();
+		Set<Study> studies = new HashSet<Study>();
 		for (String id : ids) {
 			studies.add(getStudy(id));
 		}
 		return studies;
 	}
 
-	private Study<M> getStudy(String id) {
-		Map<Treatment, M> measurements = new HashMap<Treatment, M>();
+	private Study getStudy(String id) {
+		Map<Treatment, Measurement> measurements = new HashMap<Treatment, Measurement>();
 		for (MKey key : d_measurementMap.keySet()) {
 			if (key.studyId.equals(id)) {
 				measurements.put(key.treatment, d_measurementMap.get(key));
 			}
 		}
-		return new Study<M>(id, ScalaUtil.toScalaMap(measurements));
+		final Study study = new Study(id);
+		study.getMeasurements().addAll(measurements.values());
+		return study;
 	}
 
 	private Collection<Treatment> getTreatments() {

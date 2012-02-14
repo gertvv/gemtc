@@ -20,8 +20,10 @@
 package org.drugis.mtc;
 
 import org.apache.commons.collections15.Transformer;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Treatment;
 
-public class DichotomousNetworkBuilder<TreatmentType> extends NetworkBuilder<DichotomousMeasurement, TreatmentType> {
+public class DichotomousNetworkBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
 	public DichotomousNetworkBuilder() {
 		super();
 	}
@@ -32,6 +34,6 @@ public class DichotomousNetworkBuilder<TreatmentType> extends NetworkBuilder<Dic
 	
 	public void add(String studyId, TreatmentType treatmentId, int responders, int sampleSize) {
 		Treatment t = makeTreatment(treatmentId);
-		add(studyId, t, new DichotomousMeasurement(t, responders, sampleSize));
+		add(studyId, t, new Measurement(t, responders, sampleSize));
 	}
 }

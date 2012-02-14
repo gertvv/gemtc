@@ -86,7 +86,6 @@
 		<module>mtc-data</module> <!-- TODO: replace mtc-model -->
 		<module>mtc-mcmc</module> <!-- TODO: merge with mtc-lib? -->
 		<module>mtc-test</module>
-		<module>mtc-model</module> <!-- TODO: remove -->
 		<module>mtc-lib</module>
 		<module>mtc-cli</module>
 		<module>mtc-gui</module>

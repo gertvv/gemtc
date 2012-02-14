@@ -8,7 +8,7 @@
 		<version>0.11-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.drugis</groupId>
+	<groupId>org.drugis.mtc</groupId>
 	<artifactId>mtc-gui</artifactId>
 	<name>GeMTC GUI</name>
 
@@ -58,7 +58,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mtc-model</artifactId>
+			<artifactId>mtc-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

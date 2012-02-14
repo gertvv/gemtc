@@ -22,25 +22,33 @@ package org.drugis.mtc;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("unused")
 public class ContinuousNetworkBuilderTest {
-	private Study<ContinuousMeasurement> study(String id, ContinuousMeasurement[] m) {
-		return Study$.MODULE$.buildContinuous(id, m);
+	private Study study(String id, Measurement[] m) {
+		Study study = new Study(id);
+		study.getMeasurements().addAll(Arrays.asList(m));
+		return study;
 	}
 
 	private ContinuousNetworkBuilder<String> d_builder;
 	private Treatment d_ta = new Treatment("A");
 	private Treatment d_tb = new Treatment("B");
 	private Treatment d_tc = new Treatment("C");
-	private ContinuousMeasurement d_s1a = new ContinuousMeasurement(d_ta, 4.0, 2.0, 100);
-	private ContinuousMeasurement d_s1b = new ContinuousMeasurement(d_tb, 1.0, 1.5, 100);
-	private Study<ContinuousMeasurement> d_s1 = study("1", new ContinuousMeasurement[]{d_s1a, d_s1b});
-	private ContinuousMeasurement d_s2b = new ContinuousMeasurement(d_tb, 2.4, 0.1, 43);
-	private ContinuousMeasurement d_s2c = new ContinuousMeasurement(d_tc, 12.0, 8.0, 40);
-	private Study<ContinuousMeasurement> d_s2 = study("2", new ContinuousMeasurement[]{d_s2b, d_s2c});
+	private Measurement d_s1a = new Measurement(d_ta, 4.0, 2.0, 100);
+	private Measurement d_s1b = new Measurement(d_tb, 1.0, 1.5, 100);
+	private Study d_s1 = study("1", new Measurement[]{d_s1a, d_s1b});
+	private Measurement d_s2b = new Measurement(d_tb, 2.4, 0.1, 43);
+	private Measurement d_s2c = new Measurement(d_tc, 12.0, 8.0, 40);
+	private Study d_s2 = study("2", new Measurement[]{d_s2b, d_s2c});
 
 	@Before 
 	public void setUp() {
@@ -49,11 +57,11 @@ public class ContinuousNetworkBuilderTest {
 
 	@Test 
 	public void testBuild() {
-		d_builder.add("1", "A", d_s1a.mean(), d_s1a.stdDev(), d_s1a.sampleSize());
-		d_builder.add("1", "B", d_s1b.mean(), d_s1b.stdDev(), d_s1b.sampleSize());
-		d_builder.add("2", "B", d_s2b.mean(), d_s2b.stdDev(), d_s2b.sampleSize());
-		d_builder.add("2", "C", d_s2c.mean(), d_s2c.stdDev(), d_s2c.sampleSize());
-		Network<ContinuousMeasurement> n = d_builder.buildNetwork();
+		d_builder.add("1", "A", d_s1a.getMean(), d_s1a.getStdDev(), d_s1a.getSampleSize());
+		d_builder.add("1", "B", d_s1b.getMean(), d_s1b.getStdDev(), d_s1b.getSampleSize());
+		d_builder.add("2", "B", d_s2b.getMean(), d_s2b.getStdDev(), d_s2b.getSampleSize());
+		d_builder.add("2", "C", d_s2c.getMean(), d_s2c.getStdDev(), d_s2c.getSampleSize());
+		Network n = d_builder.buildNetwork();
 
 		// TODO: test measurement contents
 	}

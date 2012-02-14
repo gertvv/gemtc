@@ -23,17 +23,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.lang.StringUtils;
-import org.drugis.mtc.util.ScalaUtil;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Study;
+import org.drugis.mtc.model.Treatment;
 import org.junit.Before;
 import org.junit.Test;
 
 public class NetworkBuilderTest {
-	public static class NoneBuilder<TreatmentType> extends NetworkBuilder<NoneMeasurement, TreatmentType> {
+	public static class NoneBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
 		public NoneBuilder() {
 			super();
 		}
@@ -44,28 +47,22 @@ public class NetworkBuilderTest {
 		
 		public void add(String studyId, TreatmentType treatmentId) {
 			Treatment t = makeTreatment(treatmentId);
-			add(studyId, t, new NoneMeasurement(t));
+			add(studyId, t, new Measurement(t));
 		}
 	}
 	
-	private Study<NoneMeasurement> study(String id, NoneMeasurement[] m) {
-		return new Study<NoneMeasurement>(id, ScalaUtil.toScalaMap(measurementMap(m)));
-	}
-
-	private Map<Treatment, NoneMeasurement> measurementMap(NoneMeasurement[] ms) {
-		Map<Treatment, NoneMeasurement> map = new HashMap<Treatment, NoneMeasurement>();
-		for (NoneMeasurement m : ms) {
-			map.put(m.treatment(), m);
-		}
-		return map;
+	private Study study(String id, Measurement[] m) {
+		final Study study = new Study(id);
+		study.getMeasurements().addAll(Arrays.asList(m));
+		return study;
 	}
 
 	private NoneBuilder<String> d_builder;
 	private Treatment d_ta = new Treatment("A");
 	private Treatment d_tb = new Treatment("B");
 	private Treatment d_tc = new Treatment("C");
-	private Study<NoneMeasurement> d_s1 = study("1", new NoneMeasurement[]{new NoneMeasurement(d_ta), new NoneMeasurement(d_tb)});
-	private Study<NoneMeasurement> d_s2 = study("2", new NoneMeasurement[]{new NoneMeasurement(d_tb), new NoneMeasurement(d_tc)});
+	private Study d_s1 = study("1", new Measurement[]{new Measurement(d_ta), new Measurement(d_tb)});
+	private Study d_s2 = study("2", new Measurement[]{new Measurement(d_tb), new Measurement(d_tc)});
 
 	@Before 
 	public void setUp() {
@@ -74,11 +71,11 @@ public class NetworkBuilderTest {
 
 	@Test 
 	public void testEmptyBuild() {
-		Network<NoneMeasurement> n = d_builder.buildNetwork();
+		Network n = d_builder.buildNetwork();
 
 		assertNotNull(n);
-		assertTrue(n.treatments().isEmpty());
-		assertTrue(n.studies().isEmpty());
+		assertTrue(n.getTreatments().isEmpty());
+		assertTrue(n.getStudies().isEmpty());
 	}
 
 	@Test 
@@ -87,16 +84,16 @@ public class NetworkBuilderTest {
 		d_builder.add("1", "B");
 		d_builder.add("2", "B");
 		d_builder.add("2", "C");
-		Network<NoneMeasurement> n = d_builder.buildNetwork();
+		Network n = d_builder.buildNetwork();
 
 		assertNotNull(n);
-		assertEquals(3, n.treatments().size());
-		assertTrue(n.treatments().contains(d_ta));
-		assertTrue(n.treatments().contains(d_tb));
-		assertTrue(n.treatments().contains(d_tc));
-		assertEquals(2, n.studies().size());
-		assertTrue(n.studies().contains(d_s1));
-		assertTrue(n.studies().contains(d_s2));
+		assertEquals(3, n.getTreatments().size());
+		assertTrue(n.getTreatments().contains(d_ta));
+		assertTrue(n.getTreatments().contains(d_tb));
+		assertTrue(n.getTreatments().contains(d_tc));
+		assertEquals(2, n.getStudies().size());
+		assertTrue(n.getStudies().contains(d_s1));
+		assertTrue(n.getStudies().contains(d_s2));
 		
 		HashMap<String, Treatment> expected = new HashMap<String, Treatment>();
 		expected.put("A", d_ta);

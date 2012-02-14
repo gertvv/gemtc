@@ -26,14 +26,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.test.ExampleResults;
 import org.junit.Before;
 import org.junit.Test;
-
-import scala.actors.threadpool.Arrays;
 
 public class NodeSplitPValueSummaryTest {
 	private Parameter[] d_parameters;

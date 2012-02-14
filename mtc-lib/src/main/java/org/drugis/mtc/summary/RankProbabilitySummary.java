@@ -20,12 +20,11 @@
 package org.drugis.mtc.summary;
 
 import org.drugis.common.beans.AbstractObservable;
-import org.drugis.mtc.Treatment;
-import org.drugis.mtc.BasicParameter;
+import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MCMCResultsEvent;
 import org.drugis.mtc.MCMCResultsListener;
-import org.drugis.mtc.RankCounter;
 
 import java.util.Collections;
 import java.util.List;

@@ -40,15 +40,15 @@ import javax.swing.JToolBar;
 
 import org.apache.commons.math.random.JDKRandomGenerator;
 import org.drugis.common.ImageLoader;
-import org.drugis.mtc.ConsistencyNetworkModel$;
-import org.drugis.mtc.InconsistencyNetworkModel$;
-import org.drugis.mtc.Network;
-import org.drugis.mtc.NetworkModel;
-import org.drugis.mtc.RandomizedStartingValueGenerator$;
-import org.drugis.mtc.StartingValueGenerator;
 import org.drugis.mtc.gui.CodeGenerationDialog.ModelType;
 import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.parameterization.ConsistencyParameterization;
+import org.drugis.mtc.parameterization.DichotomousDataStartingValueGenerator;
+import org.drugis.mtc.parameterization.InconsistencyParameterization;
+import org.drugis.mtc.parameterization.Parameterization;
+import org.drugis.mtc.parameterization.StartingValueGenerator;
 
 
 public class GeneratedCodeWindow extends JFrame {
@@ -64,9 +64,9 @@ public class GeneratedCodeWindow extends JFrame {
 		}
 	}
 	
-	private final Network<?> d_network;
-	private final NetworkModel<?, ?> d_networkModel;
-	private final JagsSyntaxModel<?, ?> d_syntaxModel;
+	private final Network d_network;
+	private final Parameterization d_pmtz;
+	private final JagsSyntaxModel d_syntaxModel;
 	private final SyntaxType d_syntaxType;
 	private final ModelType d_modelType;
 	private final int d_nchains;
@@ -78,7 +78,7 @@ public class GeneratedCodeWindow extends JFrame {
 	private final List<GeneratedFile> d_files;
 
 
-	public GeneratedCodeWindow(String name, Network<?> network, SyntaxType syntaxType, ModelType modelType,
+	public GeneratedCodeWindow(String name, Network network, SyntaxType syntaxType, ModelType modelType,
 			int nchains, int tuning, int simulation, double scale) {
 		super(syntaxType.toString() + " " + modelType.toString() + " model: " + name);
 		d_name = name;
@@ -90,7 +90,7 @@ public class GeneratedCodeWindow extends JFrame {
 		d_simulation = simulation;
 		d_scale = scale;
 		d_suffix = buildSuffix();
-		d_networkModel = buildNetworkModel();
+		d_pmtz = buildParameterization();
 		d_syntaxModel = buildSyntaxModel();
 		d_files = buildFiles();
 		
@@ -98,12 +98,11 @@ public class GeneratedCodeWindow extends JFrame {
 		pack();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<GeneratedFile> buildFiles() {
 		List<GeneratedFile> files = new ArrayList<GeneratedFile>();
 		files.add(new GeneratedFile("model", d_syntaxModel.modelText()));
 		files.add(new GeneratedFile("data", d_syntaxModel.dataText()));
-		StartingValueGenerator gen = RandomizedStartingValueGenerator$.MODULE$.apply(d_networkModel, new JDKRandomGenerator(), d_scale);
+		StartingValueGenerator gen = buildStartingValueGenerator();
 		for (int i = 1; i <= d_nchains; ++i) {
 			files.add(new GeneratedFile("inits" + i, d_syntaxModel.initialValuesText(gen)));
 		}
@@ -112,6 +111,17 @@ public class GeneratedCodeWindow extends JFrame {
 			files.add(new GeneratedFile("R", d_syntaxModel.analysisText(getBaseName())));
 		}
 		return files;
+	}
+
+	private StartingValueGenerator buildStartingValueGenerator() {
+		switch (d_network.getType()) {
+		case RATE:
+			return new DichotomousDataStartingValueGenerator(d_network, new JDKRandomGenerator(), d_scale);
+		case CONTINUOUS:
+			return new DichotomousDataStartingValueGenerator(d_network, new JDKRandomGenerator(), d_scale);
+		default:
+			throw new IllegalStateException("Unknown measurement type " + d_network.getType());	
+		}
 	}
 
 	private String buildSuffix() {
@@ -182,16 +192,15 @@ public class GeneratedCodeWindow extends JFrame {
 		return saveButton;
 	}
 
-	private NetworkModel<?, ?> buildNetworkModel() {
+	private Parameterization buildParameterization() {
 		if (d_modelType == ModelType.Consistency) {
-			return ConsistencyNetworkModel$.MODULE$.apply(d_network);
+			return ConsistencyParameterization.create(d_network);
 		} else {
-			return InconsistencyNetworkModel$.MODULE$.apply(d_network);
+			return InconsistencyParameterization.create(d_network);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	private JagsSyntaxModel<?, ?> buildSyntaxModel() {
-		return new JagsSyntaxModel(d_networkModel, d_syntaxType == SyntaxType.JAGS);
+	private JagsSyntaxModel buildSyntaxModel() {
+		return new JagsSyntaxModel(d_network, d_pmtz, d_syntaxType == SyntaxType.JAGS);
 	}
 }

@@ -27,19 +27,18 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.drugis.mtc.BasicParameter;
 import org.drugis.mtc.Parameter;
-import org.drugis.mtc.Treatment;
 import org.drugis.mtc.convergence.GelmanRubinAcceptanceTest;
 import org.drugis.mtc.convergence.GelmanRubinConvergence;
+import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.BasicParameter;
+import org.drugis.mtc.parameterization.RandomEffectsVariance;
 import org.drugis.mtc.test.FileResults;
-import org.drugis.mtc.yadas.RandomEffectsVariance;
 import org.junit.Before;
 import org.junit.Test;
-
-import scala.actors.threadpool.Arrays;
 
 public class ConvergenceSummaryTest {
 	private Parameter[] d_parameters;

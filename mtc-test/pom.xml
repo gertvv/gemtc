@@ -8,7 +8,7 @@
 		<version>0.11-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.drugis</groupId>
+	<groupId>org.drugis.mtc</groupId>
 	<artifactId>mtc-test</artifactId>
 	<name>mtc-test</name>
 

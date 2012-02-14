@@ -28,16 +28,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.drugis.mtc.BasicParameter;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.Parameter;
-import org.drugis.mtc.Treatment;
+import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.test.FileResults;
 import org.junit.Before;
 import org.junit.Test;
-
-import scala.actors.threadpool.Arrays;
 
 public class RankProbabilitySummaryTest {
 	private Treatment d_ta;
@@ -46,7 +45,6 @@ public class RankProbabilitySummaryTest {
 	private RankProbabilitySummary d_summary;
 	private FileResults d_results;
 	
-	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws IOException {
 		d_ta = new Treatment("A");

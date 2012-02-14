@@ -20,8 +20,10 @@
 package org.drugis.mtc;
 
 import org.apache.commons.collections15.Transformer;
+import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Treatment;
 
-public class ContinuousNetworkBuilder<TreatmentType> extends NetworkBuilder<ContinuousMeasurement, TreatmentType> {
+public class ContinuousNetworkBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
 	public ContinuousNetworkBuilder() {
 		super();
 	}
@@ -32,6 +34,6 @@ public class ContinuousNetworkBuilder<TreatmentType> extends NetworkBuilder<Cont
 	
 	public void add(String studyId, TreatmentType treatmentId, double mean, double stdDev, int sampleSize) {
 		Treatment t = makeTreatment(treatmentId);
-		add(studyId, t, new ContinuousMeasurement(t, mean, stdDev, sampleSize));
+		add(studyId, t, new Measurement(t, mean, stdDev, sampleSize));
 	}
 }
