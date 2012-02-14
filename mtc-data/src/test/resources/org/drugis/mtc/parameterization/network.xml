@@ -1,0 +1,21 @@
+<network type="continuous">
+	<treatments>
+		<treatment id="A"></treatment>
+		<treatment id="B"></treatment>
+		<treatment id="C"></treatment>
+	</treatments>
+	<studies>
+		<study id="1">
+			<measurement standardDeviation="1.6" mean="-2.5" sample="177" treatment="B" />
+			<measurement standardDeviation="1.5" mean="-2.6" sample="176" treatment="C" />
+		</study>
+		<study id="2">
+			<measurement standardDeviation="1.22" mean="-1.93" sample="30" treatment="A" />
+			<measurement standardDeviation="1.18" mean="-1.52" sample="30" treatment="B" />
+		</study>
+		<study id="3">
+			<measurement standardDeviation="1.23" mean="-1.35" sample="49" treatment="A" />
+			<measurement standardDeviation="0.96" mean="-1.52" sample="46" treatment="C" />
+		</study>
+	</studies>
+</network>

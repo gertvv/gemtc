@@ -24,6 +24,7 @@ import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
+import org.drugis.mtc.parameterization.InconsistencyStartingValueGenerator;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
 import org.drugis.mtc.parameterization.NetworkParameterComparator;
@@ -109,38 +110,21 @@ public class JagsSyntaxModel {
 		return StringUtils.join(list, "\n");
 	}
 
-	/*
-	private def initMetaParameters(g: StartingValueGenerator[M]): List[(String, String)] = {
-		val basic = {
-			for {basicParam <- model.basicParameters}
-			yield g.getRelativeEffect(asBasic(basicParam))
-		}
-		
-		model.parameterVector.map(param => init(param, g, basic))
-	}
-
-	private def init(p: NetworkModelParameter, g: StartingValueGenerator[M],
-			bl: List[Double])
-	: (String, String) = (p.toString, (p match {
-		case b: BasicParameter => bl(model.basicParameters.findIndexOf(_ == b))
-		case s: SplitParameter => bl(model.basicParameters.findIndexOf(_ == s))
-		case i: InconsistencyParameter =>
-			InconsistencyStartingValueGenerator(i, model, g, bl)
-		case _ => throw new IllegalStateException("Unsupported parameter " + p)
-	}).toString)
-
-*/
 	private List<Pair<String>> initMetaParameters(StartingValueGenerator generator) {
+		Map<BasicParameter, Double> basicValues = new HashMap<BasicParameter, Double>();
 		List<Pair<String>> list = new ArrayList<Pair<String>>();
 		for (NetworkParameter p : d_pmtz.getParameters()) {
 			double relativeEffect;
 			if (p instanceof BasicParameter) {
-				relativeEffect = generator.getRelativeEffect((BasicParameter) p);	
+				relativeEffect = generator.getRelativeEffect((BasicParameter) p);
+				basicValues.put((BasicParameter) p, relativeEffect);
 			} else if (p instanceof SplitParameter) {
 				SplitParameter sp = (SplitParameter) p;
 				relativeEffect = generator.getRelativeEffect(new BasicParameter(sp.getBaseline(), sp.getSubject()));
+			} else if (p instanceof InconsistencyParameter) {
+				relativeEffect = InconsistencyStartingValueGenerator.generate((InconsistencyParameter) p, (InconsistencyParameterization) d_pmtz, generator, basicValues);
 			} else {
-				throw new IllegalStateException("Unhandled parameter: " + p + " of type " + p.getClass().getCanonicalName());
+				throw new IllegalStateException("Unhandled parameter " + p + " of type " + p.getClass().getCanonicalName());
 			}
 			list.add(new Pair<String>(p.getName(), String.valueOf(relativeEffect)));
 		}

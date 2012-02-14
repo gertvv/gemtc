@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +11,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import org.drugis.common.ResourceUtil;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
@@ -71,16 +70,7 @@ public class JagsSyntaxModelTest {
 	}
 	
 	private static String read(String path) throws IOException {
-		InputStream is = JagsSyntaxModelTest.class.getResourceAsStream(path);
-		StringBuilder str = new StringBuilder();
-		Reader reader = new InputStreamReader(is, "UTF-8");
-		char[] buffer = new char[2048];
-		int read;
-		while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
-			str.append(buffer, 0, read);
-		}
-		reader.close();
-		return str.toString();
+		return ResourceUtil.read(JagsSyntaxModel.class, path);
 	}
 	
 	@Before
