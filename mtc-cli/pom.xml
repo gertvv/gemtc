@@ -22,16 +22,10 @@
 	</distributionManagement>
 
 	<properties>
-		<scala.version>2.8.0</scala.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<repositories>
-		<repository>
-			<id>scala-tools.org</id>
-			<name>Scala-Tools Maven2 Repository</name>
-			<url>http://scala-tools.org/repo-releases</url>
-		</repository>
 		<repository>
 			<id>drugis.org</id>
 			<name>drugis.org Maven2 Repository</name>
@@ -44,30 +38,11 @@
 		</repository>
 	</repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>scala-tools.org</id>
-			<name>Scala-Tools Maven2 Repository</name>
-			<url>http://scala-tools.org/repo-releases</url>
-		</pluginRepository>
-	</pluginRepositories>
-
 	<dependencies>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>${scala.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.6</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.scalatest</groupId>
-			<artifactId>scalatest</artifactId>
-			<version>1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -109,39 +84,6 @@
 
 	<build>
 		<plugins>
-			<!-- scala support -->
-			<plugin>
-				<groupId>org.scala-tools</groupId>
-				<artifactId>maven-scala-plugin</artifactId>
-				<version>2.13.1</version>
-				<executions>
-					<execution>
-						<id>compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>test-compile</id>
-						<phase>test-compile</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>process-resources</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<scalaVersion>${scala.version}</scalaVersion>
-				</configuration>
-			</plugin>
-
 			<!-- java support -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -182,15 +124,8 @@
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<downloadSources>true</downloadSources>
-					<buildcommands>
-						<buildcommand>ch.epfl.lamp.sdt.core.scalabuilder</buildcommand>
-					</buildcommands>
-					<additionalProjectnatures>
-						<projectnature>ch.epfl.lamp.sdt.core.scalanature</projectnature>
-					</additionalProjectnatures>
 					<classpathContainers>
 						<classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
-						<classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
 					</classpathContainers>
 				</configuration>
 			</plugin>
@@ -213,14 +148,6 @@
 
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.scala-tools</groupId>
-				<artifactId>maven-scala-plugin</artifactId>
-				<configuration>
-					<scalaVersion>${scala.version}</scalaVersion>
-				</configuration>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
