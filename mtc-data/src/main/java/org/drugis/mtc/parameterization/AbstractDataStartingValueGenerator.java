@@ -7,7 +7,10 @@ import java.util.Set;
 
 import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.collections15.Predicate;
+import org.apache.commons.collections15.Transformer;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.random.RandomGenerator;
+import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.drugis.common.stat.EstimateWithPrecision;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
@@ -43,8 +46,27 @@ abstract public class AbstractDataStartingValueGenerator implements StartingValu
 
 	@Override
 	public double getRelativeEffect(BasicParameter p) {
-		EstimateWithPrecision pooled = (new DerSimonianLairdPooling(estimateRelativeEffects(p))).getPooled();
-		return generate(pooled);
+		return generate(getPooledEffect(p));
+	}
+	
+	@Override
+	public double getStandardDeviation() { // FIXME: needs tests
+		List<Double> errors = NetworkModel.transformTreatmentPairs(d_network, new Transformer<Pair<Treatment>, Double>() {
+			public Double transform(Pair<Treatment> input) {
+				return getPooledEffect(new BasicParameter(input.getFirst(), input.getSecond())).getStandardError();
+			}
+		});
+
+		if (d_rng == null) {
+			double[] primitive = ArrayUtils.toPrimitive(errors.toArray(new Double[] {}));
+			return new Mean().evaluate(primitive);
+		} else {
+			return errors.get(d_rng.nextInt(errors.size()));
+		}
+	}
+
+	private EstimateWithPrecision getPooledEffect(BasicParameter p) {
+		return (new DerSimonianLairdPooling(estimateRelativeEffects(p))).getPooled();
 	}
 
 	private double generate(EstimateWithPrecision estimate) {

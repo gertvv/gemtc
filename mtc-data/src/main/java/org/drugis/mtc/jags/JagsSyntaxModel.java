@@ -4,12 +4,15 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.collections15.CollectionUtils;
+import org.apache.commons.collections15.PredicateUtils;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.lang.StringUtils;
 import org.drugis.common.CollectionHelper;
@@ -125,66 +128,65 @@ public class JagsSyntaxModel {
 		case _ => throw new IllegalStateException("Unsupported parameter " + p)
 	}).toString)
 
-	private def initBaselineEffects(g: StartingValueGenerator[M]): (String, String) = 
-		("mu", JagsSyntaxModel.writeVector(model.studyList.map(s => g.getBaselineEffect(s).asInstanceOf[java.lang.Double]), isJags))
-
-	private def initRelativeEffects(g: StartingValueGenerator[M]): (String, String) = 
-		("delta", JagsSyntaxModel.writeMatrix(model.studyList.map(
-				s => studyArms(s).map(init(s, _, g))), isJags))
-	
-
-	private def init(s: Study[M], t: Treatment, g: StartingValueGenerator[M])
-	: java.lang.Double = {
-		if (t == null || t == model.studyBaseline(s)) null
-		else g.getRandomEffect(s, new BasicParameter(model.studyBaseline(s), t))
-	}
-
-	private def initVarianceParameters(g: StartingValueGenerator[M]): List[(String, String)] = {
-		("sd.d", g.getRandomEffectsVariance().toString) :: {
-			if (inconsistency) List(("sd.w", g.getRandomEffectsVariance().toString))
-			else Nil
-		}
-	}
 */
-	private Collection<? extends Pair<String>> initBaselineEffects(
-			StartingValueGenerator generator) {
-		// TODO Auto-generated method stub
-		return null;
+	private List<Pair<String>> initMetaParameters(StartingValueGenerator generator) {
+		List<Pair<String>> list = new ArrayList<Pair<String>>();
+		for (NetworkParameter p : d_pmtz.getParameters()) {
+			if (p instanceof BasicParameter) {
+				final double relativeEffect = generator.getRelativeEffect((BasicParameter) p);
+				list.add(new Pair<String>(p.getName(), String.valueOf(relativeEffect)));
+			}
+		}
+		return list;
 	}
 
-	private Collection<? extends Pair<String>> initMetaParameters(
-			StartingValueGenerator generator) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	private Collection<? extends Pair<String>> initVarianceParameters(
-			StartingValueGenerator generator) {
-		// TODO Auto-generated method stub
-		return null;
+	private List<Pair<String>> initBaselineEffects(StartingValueGenerator generator) {
+		Double[] baselineEffects = new Double[d_network.getStudies().size()];
+		for (int i = 0; i < d_network.getStudies().size(); ++i) {
+			final Study study = d_network.getStudies().get(i);
+			final Treatment baseline = d_pmtz.getStudyBaseline(study);
+			baselineEffects[i] = generator.getTreatmentEffect(study, baseline);
+		}
+		return Collections.singletonList(new Pair<String>("mu", writeVector(baselineEffects, d_isJags)));
 	}
 
-	private Collection<? extends Pair<String>> initRelativeEffects(
-			StartingValueGenerator generator) {
-		// TODO Auto-generated method stub
-		return null;
+	private List<Pair<String>> initRelativeEffects(final StartingValueGenerator generator) {
+		Double[][] relativeEffects = getMatrix(new StudyTreatmentTransformer<Double>() {
+			public Double transform(final Study s, final Treatment t) {
+				final Treatment b = d_pmtz.getStudyBaseline(s);
+				if (b.equals(t)) {
+					return null;
+				}
+				return generator.getRelativeEffect(s, new BasicParameter(b, t));
+			}});
+		return Collections.singletonList(new Pair<String>("delta", writeMatrix(relativeEffects, d_isJags)));
 	}
+	
+	private List<Pair<String>> initVarianceParameters(StartingValueGenerator generator) {
+		List<Pair<String>> list = new ArrayList<Pair<String>>();
+		list.add(new Pair<String>("sd.d", String.valueOf(generator.getStandardDeviation())));
+		if (d_inconsistency) {
+			list.add(new Pair<String>("sd.w", String.valueOf(generator.getStandardDeviation())));
+		}
+		return list;
+	}
+
 	
 	private String getDerivations() {
-		int n = d_network.getTreatments().size();
-		List<String> lines = new ArrayList<String>();
-		for (int i = 0; i < n - 1; ++i) {
-			for (int j = i + 1; j < n; ++j) {
-				final Treatment ti = d_network.getTreatments().get(i);
-				final Treatment tj = d_network.getTreatments().get(j);
+		Collection<String> lines = NetworkModel.transformTreatmentPairs(d_network, new Transformer<Pair<Treatment>, String>() {
+			public String transform(Pair<Treatment> input) {
+				Treatment ti = input.getFirst();
+				Treatment tj = input.getSecond();
 				BasicParameter p = new BasicParameter(ti, tj);
 				BasicParameter q = new BasicParameter(tj, ti);
 				if (!d_pmtz.getParameters().contains(p) && !d_pmtz.getParameters().contains(q)) {
 					String e = expressRelativeEffect(ti, tj, s_rTransform);
-					lines.add("\t`" + p + "` = function(x) { " + e + " }");
+					return "\t`" + p + "` = function(x) { " + e + " }";
 				}
+				return null;
 			}
-		}
-		
+		});
+		CollectionUtils.filter(lines, PredicateUtils.notNullPredicate());
 		return StringUtils.join(lines, ",\n");
 	}
 	

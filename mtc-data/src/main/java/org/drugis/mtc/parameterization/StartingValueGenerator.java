@@ -19,5 +19,9 @@ public interface StartingValueGenerator {
 	 * Generates a starting value for $d_{x,y}$.
 	 */
 	double getRelativeEffect(BasicParameter p);
+	/**
+	 * Generates a starting value for $\sigma$.
+	 */
+	double getStandardDeviation();
 }
 

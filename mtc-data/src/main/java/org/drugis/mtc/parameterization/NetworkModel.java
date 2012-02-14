@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.collections15.Predicate;
+import org.apache.commons.collections15.Transformer;
 import org.drugis.mtc.graph.GraphUtil;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
@@ -20,6 +21,7 @@ import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.SetHypergraph;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class NetworkModel {
 	public static Hypergraph<Treatment, Study> createStudyGraph(Network network) {
@@ -73,5 +75,21 @@ public class NetworkModel {
 		List<Treatment> treatments = new ArrayList<Treatment>(study.getTreatments());
 		Collections.sort(treatments, TreatmentComparator.INSTANCE);
 		return treatments;
+	}
+	
+	/**
+	 * Apply a transformation to all (t_1, t_2) pairs of treatments where indexOf(t_1) < indexOf(t_2).
+	 */
+	public static <O> List<O> transformTreatmentPairs(Network network, Transformer<Pair<Treatment>, ? extends O> transformer) {
+		int n = network.getTreatments().size();
+		List<O> list = new ArrayList<O>();
+		for (int i = 0; i < n - 1; ++i) {
+			for (int j = i + 1; j < n; ++j) {
+				final Treatment ti = network.getTreatments().get(i);
+				final Treatment tj = network.getTreatments().get(j);
+				list.add(transformer.transform(new Pair<Treatment>(ti, tj)));
+			}
+		}
+		return list;		
 	}
 }
