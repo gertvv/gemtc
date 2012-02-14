@@ -1,5 +1,5 @@
 ns <- 3L
 na <- c(3L, 2L, 2L)
-t <- structure(c(2L, 1L, 1L, 1L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
-r <- structure(c(23L, 79L, 18L, 9L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
+t <- structure(c(1L, 1L, 1L, 2L, 2L, 3L, 3L, NA, NA), .Dim = c(3L, 3L))
+r <- structure(c(9L, 79L, 18L, 23L, 77L, 21L, 10L, NA, NA), .Dim = c(3L, 3L))
 n <- structure(c(140L, 702L, 671L, 140L, 694L, 535L, 138L, NA, NA), .Dim = c(3L, 3L))

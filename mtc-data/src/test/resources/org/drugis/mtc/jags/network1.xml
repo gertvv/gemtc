@@ -1,8 +1,8 @@
 <network description="Smoking cessation rates">
 	<treatments>
-		<treatment id="A">No Contact</treatment>
-		<treatment id="B">Self-help</treatment>
-		<treatment id="C">Individual Counseling</treatment>
+		<treatment id="A"/>
+		<treatment id="B"/>
+		<treatment id="C"/>
 	</treatments>
 	<studies>
 		<study id="01">

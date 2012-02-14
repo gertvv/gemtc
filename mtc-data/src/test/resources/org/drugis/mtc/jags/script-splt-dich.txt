@@ -8,9 +8,9 @@ initialize
 
 adapt 30000
 
-monitor d.A.B.dir
-monitor d.A.B.ind
-monitor d.B.C
+monitor d.A.B
+monitor d.A.C
+monitor d.B.C.dir
 monitor sd.d
 
 update 20000

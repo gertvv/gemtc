@@ -1,6 +1,6 @@
-d.A.B.dir <- 0.0
-d.A.B.ind <- 0.0
-d.B.C <- 0.0
+d.A.B <- 0.0
+d.A.C <- 0.0
+d.B.C.dir <- 0.0
 mu <- c(0.0, 0.0, 0.0)
 delta <- structure(c(NA, NA, NA, 0.0, 0.0, 0.0, 0.0, NA, NA), .Dim = c(3L, 3L))
 sd.d <- 0.5012338759470988

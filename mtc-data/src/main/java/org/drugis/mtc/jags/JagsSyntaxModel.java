@@ -29,6 +29,7 @@ import org.drugis.mtc.parameterization.NetworkParameter;
 import org.drugis.mtc.parameterization.NetworkParameterComparator;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.PriorGenerator;
+import org.drugis.mtc.parameterization.SplitParameter;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
@@ -132,10 +133,16 @@ public class JagsSyntaxModel {
 	private List<Pair<String>> initMetaParameters(StartingValueGenerator generator) {
 		List<Pair<String>> list = new ArrayList<Pair<String>>();
 		for (NetworkParameter p : d_pmtz.getParameters()) {
+			double relativeEffect;
 			if (p instanceof BasicParameter) {
-				final double relativeEffect = generator.getRelativeEffect((BasicParameter) p);
-				list.add(new Pair<String>(p.getName(), String.valueOf(relativeEffect)));
+				relativeEffect = generator.getRelativeEffect((BasicParameter) p);	
+			} else if (p instanceof SplitParameter) {
+				SplitParameter sp = (SplitParameter) p;
+				relativeEffect = generator.getRelativeEffect(new BasicParameter(sp.getBaseline(), sp.getSubject()));
+			} else {
+				throw new IllegalStateException("Unhandled parameter: " + p + " of type " + p.getClass().getCanonicalName());
 			}
+			list.add(new Pair<String>(p.getName(), String.valueOf(relativeEffect)));
 		}
 		return list;
 	}
