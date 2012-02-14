@@ -60,9 +60,8 @@ import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.BasicParameter;
-import org.drugis.mtc.parameterization.ContinuousDataStartingValueGenerator;
-import org.drugis.mtc.parameterization.DichotomousDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
 import org.drugis.mtc.parameterization.InconsistencyVariance;
 import org.drugis.mtc.parameterization.NetworkModel;
@@ -259,16 +258,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		JDKRandomGenerator rng = new JDKRandomGenerator();
 		double scale = 2.5;
 		for (int i = 0; i < d_nChains; ++i) {
-			switch (d_network.getType()) {
-			case CONTINUOUS:
-				d_startGen.add(new ContinuousDataStartingValueGenerator(d_network, rng, scale));
-				break;
-			case RATE:
-				d_startGen.add(new DichotomousDataStartingValueGenerator(d_network, rng, scale));
-				break;
-			default:
-				throw new IllegalArgumentException("Don't know how to generate starting values for " + d_network.getType() + " data");					
-			}
+			d_startGen.add(AbstractDataStartingValueGenerator.create(d_network, rng, scale));
 		}
 		
 		d_priorGen = new PriorGenerator(d_network);

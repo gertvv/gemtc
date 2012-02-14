@@ -24,6 +24,17 @@ abstract public class AbstractDataStartingValueGenerator implements StartingValu
 	private final RandomGenerator d_rng;
 	private final double d_scale;
 	
+	public static StartingValueGenerator create(Network network, RandomGenerator rng, double scale) {
+		switch (network.getType()) {
+		case CONTINUOUS:
+			return new ContinuousDataStartingValueGenerator(network, rng, scale);
+		case RATE:
+			return new DichotomousDataStartingValueGenerator(network, rng, scale);
+		default:
+			throw new IllegalArgumentException("Don't know how to generate starting values for " + network.getType() + " data");					
+		}
+	}
+	
 	public AbstractDataStartingValueGenerator(Network network, RandomGenerator rng, double scale) {
 		d_network = network;
 		d_rng = rng;
