@@ -9,8 +9,8 @@
 	</parent>
 
 	<groupId>org.drugis.mtc</groupId>
-	<artifactId>mtc-data</artifactId>
-	<name>MTC data objects</name>
+	<artifactId>mtc-model</artifactId>
+	<name>MTC model generation</name>
 
 	<packaging>jar</packaging>
     

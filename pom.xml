@@ -136,8 +136,8 @@
 
 	<modules>
 		<module>mtc-graph</module>
-		<module>mtc-data</module>
-		<module>mtc-lib</module>
+		<module>mtc-model</module>
+		<module>mtc-mcmc</module>
 		<module>mtc-cli</module>
 		<module>mtc-gui</module>
 	</modules>

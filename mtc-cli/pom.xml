@@ -28,7 +28,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mtc-data</artifactId>
+			<artifactId>mtc-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

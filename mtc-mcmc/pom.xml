@@ -9,8 +9,8 @@
 	</parent>
 
 	<groupId>org.drugis.mtc</groupId>
-	<artifactId>mtc-lib</artifactId>
-	<name>mtc-lib</name>
+	<artifactId>mtc-mcmc</artifactId>
+	<name>MTC MCMC models</name>
 
 	<packaging>jar</packaging>
 
@@ -32,7 +32,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mtc-data</artifactId>
+			<artifactId>mtc-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
