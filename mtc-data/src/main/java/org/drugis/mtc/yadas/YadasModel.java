@@ -258,7 +258,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		JDKRandomGenerator rng = new JDKRandomGenerator();
 		double scale = 2.5;
 		for (int i = 0; i < d_nChains; ++i) {
-			d_startGen.add(AbstractDataStartingValueGenerator.create(d_network, rng, scale));
+			d_startGen.add(AbstractDataStartingValueGenerator.create(d_network, NetworkModel.createComparisonGraph(d_network), rng, scale));
 		}
 		
 		d_priorGen = new PriorGenerator(d_network);

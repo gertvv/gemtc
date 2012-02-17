@@ -41,7 +41,7 @@ public class InconsistencyStartingValueGeneratorTest {
 		Map<Study, Treatment> baselines = InconsistencyParameterization.findStudyBaselines(network.getStudies(), cGraph, cycleClasses);
 		InconsistencyParameterization pmtz = new InconsistencyParameterization(network, tree, cycleClasses, baselines);
 		
-		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(network);
+		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(network, cGraph);
 		
 		Map<BasicParameter, Double> basicStart = new HashMap<BasicParameter, Double>();
 		final BasicParameter pab = new BasicParameter(ta, tb);

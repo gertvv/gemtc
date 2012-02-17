@@ -44,9 +44,10 @@ import org.drugis.mtc.gui.CodeGenerationDialog.ModelType;
 import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.Network;
+import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.ConsistencyParameterization;
-import org.drugis.mtc.parameterization.DichotomousDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
+import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
 
@@ -114,14 +115,7 @@ public class GeneratedCodeWindow extends JFrame {
 	}
 
 	private StartingValueGenerator buildStartingValueGenerator() {
-		switch (d_network.getType()) {
-		case RATE:
-			return new DichotomousDataStartingValueGenerator(d_network, new JDKRandomGenerator(), d_scale);
-		case CONTINUOUS:
-			return new DichotomousDataStartingValueGenerator(d_network, new JDKRandomGenerator(), d_scale);
-		default:
-			throw new IllegalStateException("Unknown measurement type " + d_network.getType());	
-		}
+		return AbstractDataStartingValueGenerator.create(d_network, NetworkModel.createComparisonGraph(d_network), new JDKRandomGenerator(), d_scale);
 	}
 
 	private String buildSuffix() {

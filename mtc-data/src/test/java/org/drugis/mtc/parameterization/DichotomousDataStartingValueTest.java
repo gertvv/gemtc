@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.math.random.RandomGenerator;
@@ -17,6 +18,9 @@ import org.drugis.mtc.util.DerSimonianLairdPooling;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
+
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
+import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class DichotomousDataStartingValueTest {
 	private static final double EPSILON = 0.0000001;
@@ -32,6 +36,7 @@ public class DichotomousDataStartingValueTest {
 	private Study d_s6;
 	private Study d_s7;
 	private Network d_network;
+	private UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> d_cGraph;
 	
 	@Before
 	public void setUp() {
@@ -65,11 +70,13 @@ public class DichotomousDataStartingValueTest {
 		d_network = new Network();
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td));
 		d_network.getStudies().addAll(Arrays.asList(d_s1, d_s2, d_s3, d_s4, d_s5, d_s6, d_s7));
+		
+		d_cGraph = NetworkModel.createComparisonGraph(d_network);
 	}
 	
 	@Test
 	public void testGenerateTreatmentEffect() {
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
 
 		Measurement m0 = d_s1.getMeasurements().get(0);
 		assertEquals(d_ta, m0.getTreatment()); // Check assumption
@@ -92,7 +99,7 @@ public class DichotomousDataStartingValueTest {
 	@Test 
 	public void testRandomizedTreatmentEffect1() {
 		RandomGenerator rng = mockRandom(1.0);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 1.0);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.0);
 
 		Measurement m0 = d_s1.getMeasurements().get(0);
 
@@ -105,7 +112,7 @@ public class DichotomousDataStartingValueTest {
 	@Test 
 	public void testRandomizedTreatmentEffect2() {
 		RandomGenerator rng = mockRandom(0.23);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 2.0);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
 
 		Measurement m0 = d_s2.getMeasurements().get(0);
 
@@ -117,7 +124,7 @@ public class DichotomousDataStartingValueTest {
 	
 	@Test
 	public void testGenerateStudyRelativeEffect() {
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
 
 		assertEquals(getLOR(d_s4, d_ta, d_td).getPointEstimate(),
 				generator.getRelativeEffect(d_s4, new BasicParameter(d_ta, d_td)), EPSILON);
@@ -126,7 +133,7 @@ public class DichotomousDataStartingValueTest {
 	@Test
 	public void testRandomizedStudyRelativeEffect() {
 		RandomGenerator rng = mockRandom(-0.34);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 2.0);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
 
 		EstimateWithPrecision lor = getLOR(d_s4, d_ta, d_td);
 		assertEquals(lor.getPointEstimate() - 2.0 * 0.34 * lor.getStandardError(),
@@ -136,7 +143,7 @@ public class DichotomousDataStartingValueTest {
 
 	@Test
 	public void testGenerateRelativeEffect() {
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
 
 		List<EstimateWithPrecision> lors = getLORs(Arrays.asList(d_s1, d_s4), d_ta, d_td);
 		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(lors);
@@ -148,7 +155,7 @@ public class DichotomousDataStartingValueTest {
 	@Test
 	public void testRandomizedRelativeEffect() {
 		RandomGenerator rng = mockRandom(0.12);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 1.5);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.5);
 
 		List<EstimateWithPrecision> lors = getLORs(Arrays.asList(d_s1, d_s4), d_ta, d_td);
 		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(lors);
@@ -158,13 +165,33 @@ public class DichotomousDataStartingValueTest {
 		EasyMock.verify(rng);
 	}
 	
+	@Test
+	public void testStandardDeviation() {
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
+		assertEquals(0.5730384546975756, generator.getStandardDeviation(), EPSILON);
+	}
+	
+	@Test
+	public void testRandomizedStandardDeviation() {
+		RandomGenerator rng = EasyMock.createMock(RandomGenerator.class);
+		EasyMock.expect(rng.nextInt(d_cGraph.getEdgeCount())).andReturn(4);
+		EasyMock.replay(rng);
+		
+		List<FoldedEdge<Treatment, Study>> edges = new ArrayList<FoldedEdge<Treatment,Study>>(d_cGraph.getEdges());
+		List<EstimateWithPrecision> lors = getLORs(edges.get(4).getFolded(), edges.get(4).getVertices().getFirst(), edges.get(4).getVertices().getSecond());
+		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(lors);
+		
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.5);
+		assertEquals(pooling.getPooled().getStandardError(), generator.getStandardDeviation(), EPSILON);
+	}
+	
 	public static EstimateWithPrecision getLOR(Study s, Treatment t0, Treatment t1) {
 		Measurement m0 = NetworkModel.findMeasurement(s, t0);
 		Measurement m1 = NetworkModel.findMeasurement(s, t1);
 		return Statistics.logOddsRatio(m0.getResponders(), m0.getSampleSize(), m1.getResponders(), m1.getSampleSize(), true);
 	}
 	
-	public static List<EstimateWithPrecision> getLORs(List<Study> studies, Treatment t0, Treatment t1) {
+	public static List<EstimateWithPrecision> getLORs(Collection<Study> studies, Treatment t0, Treatment t1) {
 		List<EstimateWithPrecision> list = new ArrayList<EstimateWithPrecision>();
 		for (Study study : studies) {
 			list.add(getLOR(study, t0, t1));

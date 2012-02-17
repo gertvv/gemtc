@@ -79,7 +79,8 @@ public class JagsGenerator {
 
 	private ModelSpecification createJagsModel(Network network, Parameterization pmtz, String suffix) {
 		return new ModelSpecification(new JagsSyntaxModel(network, pmtz, !d_options.getBugsOutput()),
-				AbstractDataStartingValueGenerator.create(network, new JDKRandomGenerator(), d_options.getScale()),
+				AbstractDataStartingValueGenerator.create(network, NetworkModel.createComparisonGraph(network), 
+						new JDKRandomGenerator(), d_options.getScale()),
 				suffix);
 	}
 

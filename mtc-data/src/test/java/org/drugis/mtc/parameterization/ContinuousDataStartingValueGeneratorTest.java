@@ -16,6 +16,9 @@ import org.drugis.mtc.util.DerSimonianLairdPooling;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
+import edu.uci.ics.jung.graph.UndirectedGraph;
+
 public class ContinuousDataStartingValueGeneratorTest {
 	private static final double EPSILON = 0.0000001;
 	Treatment d_ta;
@@ -26,6 +29,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	Study d_s3;
 	Study d_s4;
 	Network d_network;
+	private UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> d_cGraph;
 	
 	@Before
 	public void setUp() {
@@ -48,11 +52,13 @@ public class ContinuousDataStartingValueGeneratorTest {
 		d_network = new Network();
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc));
 		d_network.getStudies().addAll(Arrays.asList(d_s1, d_s2, d_s3, d_s4));
+		
+		d_cGraph = NetworkModel.createComparisonGraph(d_network);
 	}
 
 	@Test
 	public void testGenerateBaselineEffect() {
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
 		
 		Measurement m0 = NetworkModel.findMeasurement(d_s1, d_tb);
 		assertEquals(m0.getMean(), generator.getTreatmentEffect(d_s1, d_tb), EPSILON);
@@ -63,7 +69,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	
 	@Test
 	public void testGenerateStudyRelativeEffect() {
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
 
 		Measurement m0 = NetworkModel.findMeasurement(d_s2, d_ta);
 		Measurement m1 = NetworkModel.findMeasurement(d_s2, d_tb);
@@ -72,13 +78,19 @@ public class ContinuousDataStartingValueGeneratorTest {
 	
 	@Test
 	public void testGenerateRelativeEffect() {
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
 
 		List<EstimateWithPrecision> mds = getMDs(Arrays.asList(d_s2, d_s3), d_ta, d_tb);
 		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(mds);
 
 		assertEquals(pooling.getPooled().getPointEstimate(), 
 				generator.getRelativeEffect(new BasicParameter(d_ta, d_tb)), EPSILON);
+	}
+	
+	@Test
+	public void testStandardDeviation() {
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
+		assertEquals(0.2069597561228883, generator.getStandardDeviation(), EPSILON);
 	}
 	
 	// FIXME: add tests for randomized case

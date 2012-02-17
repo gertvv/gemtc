@@ -11,6 +11,9 @@ import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
+import edu.uci.ics.jung.graph.UndirectedGraph;
+
 
 /**
  * Generate starting values for a network with dichotomous data.
@@ -20,8 +23,8 @@ public class DichotomousDataStartingValueGenerator extends AbstractDataStartingV
 	 * Create a deterministic starting value generator.
 	 * @param network Network to generate starting values for.
 	 */
-	public DichotomousDataStartingValueGenerator(Network network) {
-		super(network, null, 0.0);
+	public DichotomousDataStartingValueGenerator(Network network, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph) {
+		super(network, cGraph, null, 0.0);
 		if (!network.getType().equals(DataType.RATE)) {
 			throw new IllegalArgumentException("The network must be RATE");
 		}
@@ -33,8 +36,8 @@ public class DichotomousDataStartingValueGenerator extends AbstractDataStartingV
 	 * @param rng The random generator to use.
 	 * @param scale Scaling factor for the second moment of the error distribution.
 	 */	
-	public DichotomousDataStartingValueGenerator(Network network, RandomGenerator rng, double scale) {
-		super(network, rng, scale);
+	public DichotomousDataStartingValueGenerator(Network network, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph, RandomGenerator rng, double scale) {
+		super(network, cGraph, rng, scale);
 		if (!network.getType().equals(DataType.RATE)) {
 			throw new IllegalArgumentException("The network must be RATE");
 		}
