@@ -12,26 +12,8 @@
 	<artifactId>mtc-cli</artifactId>
 	<name>GeMTC CLI</name>
 
-	<distributionManagement>
-		<repository>
-			<uniqueVersion>true</uniqueVersion>
-			<id>ssh-drugis.org</id>
-			<url>scpexe://drugis.org/var/www/drugis.org/mvn</url>
-			<layout>default</layout>
-		</repository>
-	</distributionManagement>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<repositories>
-		<repository>
-			<id>drugis.org</id>
-			<name>drugis.org Maven2 Repository</name>
-			<url>http://drugis.org/mvn</url>
-		</repository>
-		<repository>
+		<repository> <!-- for jargs -->
 			<id>dist.swo2.org</id>
 			<name>wso2 Maven2 Repository</name>
 			<url>http://dist.wso2.org/maven2</url>
@@ -39,27 +21,6 @@
 	</repositories>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.6</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>gov.lanl</groupId>
-			<artifactId>yadas</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>	
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math</artifactId>
-			<version>2.0</version>
-		</dependency>	
-		<dependency>
-			<groupId>org.drugis</groupId>
-			<artifactId>common-lib</artifactId>
-			<version>${drugis-common.version}</version>
-		</dependency>
 		<dependency>	
 			<groupId>jargs</groupId>
 			<artifactId>jargs</artifactId>
@@ -67,34 +28,14 @@
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mtc-mcmc</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
 			<artifactId>mtc-data</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>mtc-lib</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<!-- java support -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
-			</plugin>
-
-			<!-- jar building -->
+			<!-- jar with dependencies -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
@@ -117,45 +58,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- eclipse integration -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<classpathContainers>
-						<classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
-					</classpathContainers>
-				</configuration>
-			</plugin>
-
-			<!-- attach javadoc to jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.6.1</version>
-				<configuration>
-					<show>private</show>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>

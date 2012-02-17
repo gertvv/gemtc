@@ -13,20 +13,6 @@
 	<name>MTC data objects</name>
 
 	<packaging>jar</packaging>
-
-	<repositories>
-		<repository>
-  			<id>maven2-repository.dev.java.net</id>
-	  		<name>Java.net Repository for Maven</name>
-  			<url>http://download.java.net/maven/2/</url>
-  			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>drugis.org</id>
-			<name>drugis.org Maven2 Repository</name>
-			<url>http://drugis.org/mvn</url>
-		</repository>
-	</repositories>
     
 	<dependencies>
 		<dependency>
@@ -37,7 +23,7 @@
 		<dependency>
 			<groupId>org.drugis</groupId>
 			<artifactId>common-lib</artifactId>
-			<version>0.4.8-SNAPSHOT</version>
+			<version>${drugis-common.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
@@ -54,32 +40,15 @@
 			<artifactId>mvel2</artifactId>
 			<version>2.0.19</version>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.10</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.drugis</groupId>
-			<artifactId>common-test</artifactId>
-			<version>0.4.8-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
+			<!-- generate code from XML Schema -->
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.8.0</version>
 				<executions>
 					<execution>
 						<id>MTC schema</id>
