@@ -29,7 +29,7 @@ public class ContinuousDataIT {
 
 	@Before
 	public void setUp() throws JAXBException {
-		// data from Welton et. al., Am J Epidemiol 2009;169:1158–1165
+		// data from Welton et. al., Am J Epidemiol 2009;169:1158-1165
 		d_m = -1.362791; // mean(d)
 		d_s = 0.982033; // sd(d)
 		d_mean = new Mean();
