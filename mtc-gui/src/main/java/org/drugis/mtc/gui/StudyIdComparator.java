@@ -1,7 +1,7 @@
 /*
- * This file is part of drugis.org MTC.
- * MTC is distributed from http://drugis.org/mtc.
- * Copyright (C) 2009-2011 Gert van Valkenhoef.
+ * This file is part of the GeMTC software for MTC model generation and
+ * analysis. GeMTC is distributed from http://drugis.org/gemtc.
+ * Copyright (C) 2009-2012 Gert van Valkenhoef.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
