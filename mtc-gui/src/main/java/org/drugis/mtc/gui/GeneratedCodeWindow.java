@@ -45,9 +45,11 @@ import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.ConsistencyParameterization;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
 import org.drugis.mtc.parameterization.NetworkModel;
+import org.drugis.mtc.parameterization.NodeSplitParameterization;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
 
@@ -77,15 +79,17 @@ public class GeneratedCodeWindow extends JFrame {
 	private final String d_name;
 	private final String d_suffix;
 	private final List<GeneratedFile> d_files;
+	private final BasicParameter d_splitNode;
 
 
 	public GeneratedCodeWindow(String name, Network network, SyntaxType syntaxType, ModelType modelType,
-			int nchains, int tuning, int simulation, double scale) {
+			BasicParameter splitNode, int nchains, int tuning, int simulation, double scale) {
 		super(syntaxType.toString() + " " + modelType.toString() + " model: " + name);
 		d_name = name;
 		d_network = network;
 		d_syntaxType = syntaxType;
 		d_modelType = modelType;
+		d_splitNode = splitNode;
 		d_nchains = nchains;
 		d_tuning = tuning;
 		d_simulation = simulation;
@@ -119,11 +123,15 @@ public class GeneratedCodeWindow extends JFrame {
 	}
 
 	private String buildSuffix() {
-		if (d_modelType == ModelType.Consistency) {
+		switch (d_modelType) {
+		case Consistency:
 			return "cons";
-		} else {
+		case Inconsistency:
 			return "inco";
+		case NodeSplit:
+			return "splt." + d_splitNode.getBaseline().getId() + "." + d_splitNode.getSubject().getId();
 		}
+		throw new IllegalStateException("Unhandled model type + " + d_modelType);
 	}
 
 	private void initComponents() {
@@ -187,11 +195,15 @@ public class GeneratedCodeWindow extends JFrame {
 	}
 
 	private Parameterization buildParameterization() {
-		if (d_modelType == ModelType.Consistency) {
+		switch (d_modelType) {
+		case Consistency:
 			return ConsistencyParameterization.create(d_network);
-		} else {
+		case Inconsistency:
 			return InconsistencyParameterization.create(d_network);
+		case NodeSplit:
+			return NodeSplitParameterization.create(d_network, d_splitNode);
 		}
+		throw new IllegalStateException("Unhandled model type + " + d_modelType);
 	}
 	
 	private JagsSyntaxModel buildSyntaxModel() {

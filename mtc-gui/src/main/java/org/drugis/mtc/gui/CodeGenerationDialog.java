@@ -19,17 +19,19 @@
 
 package org.drugis.mtc.gui;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,11 +40,18 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import org.drugis.mtc.model.Network;
+import org.drugis.mtc.parameterization.BasicParameter;
+import org.drugis.mtc.parameterization.NodeSplitParameterization;
 
+import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.adapter.Bindings;
 import com.jgoodies.binding.adapter.RadioButtonAdapter;
+import com.jgoodies.binding.beans.PropertyConnector;
+import com.jgoodies.binding.list.SelectionInList;
+import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ConverterFactory;
 import com.jgoodies.binding.value.ValueHolder;
+import com.jgoodies.binding.value.ValueModel;
 
 public class CodeGenerationDialog extends JDialog {
 	public enum SyntaxType {
@@ -60,11 +69,93 @@ public class CodeGenerationDialog extends JDialog {
 	private final Network d_network;
 	private ValueHolder d_syntaxType = new ValueHolder(SyntaxType.BUGS);
 	private ValueHolder d_modelType = new ValueHolder(ModelType.Consistency);
+	private ValueHolder d_splitNode = new ValueHolder();
 
 	private ValueHolder d_chains = new ValueHolder(4L);
 	private ValueHolder d_scale = new ValueHolder(2.5);
 	private ValueHolder d_tuning = new ValueHolder(20000L);
 	private ValueHolder d_simulation = new ValueHolder(40000L);
+	
+	public static class NodeSplitSelectedModel extends AbstractValueModel {
+		private static final long serialVersionUID = 4356976776557424644L;
+
+		private ValueHolder d_holder;
+		private boolean d_value;
+
+		public NodeSplitSelectedModel(ValueHolder holder) {
+			d_holder = holder;
+			d_holder.addPropertyChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					update();
+				}
+			});
+			update();
+		}
+
+		private void update() {
+			boolean oldValue = d_value;
+			boolean newValue = ModelType.NodeSplit.equals(d_holder.getValue());
+			d_value = newValue;
+			fireValueChange(oldValue, newValue);
+		}
+
+		@Override
+		public Object getValue() {
+			return d_value;
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	public class CompleteModel extends AbstractValueModel {
+		private static final long serialVersionUID = 5139716568335240809L;
+
+		private boolean d_value;
+		
+		public CompleteModel() {
+			PropertyChangeListener listener = new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent evt) {
+					update();
+				}
+			};
+			d_modelType.addPropertyChangeListener(listener);
+			d_splitNode.addPropertyChangeListener(listener);
+			d_chains.addPropertyChangeListener(listener);
+			d_scale.addPropertyChangeListener(listener);
+			d_tuning.addPropertyChangeListener(listener);
+			d_simulation.addPropertyChangeListener(listener);
+			update();
+		}
+		
+		private void update() {
+			boolean oldValue = d_value;
+			boolean newValue = 
+				d_chains.getValue() != null && d_scale.getValue() != null && 
+				d_tuning.getValue() != null && d_simulation.getValue() != null &&
+				getInt(d_chains) > 0 && getDouble(d_scale) > 0.0 &&
+				getInt(d_tuning) > 0 && getInt(d_tuning) % 100 == 0 &&
+				getInt(d_simulation) > 0 && getInt(d_simulation) % 100 == 0;
+			if (newValue && ModelType.NodeSplit.equals(d_modelType.getValue())) {
+				newValue = newValue && (d_splitNode.getValue() != null);
+			}
+			d_value = newValue;
+			fireValueChange(oldValue, newValue);
+			System.out.println("update " + newValue);
+		}
+
+		@Override
+		public Object getValue() {
+			return d_value;
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			throw new UnsupportedOperationException();
+		}
+	}
 
 	public CodeGenerationDialog(JFrame parent, String name, Network network) {
 		super(parent, "Generate BUGS/JAGS code for " + name, true);
@@ -98,15 +189,18 @@ public class CodeGenerationDialog extends JDialog {
 		JPanel modelPanel = new JPanel(new FlowLayout());
 		modelPanel.add(createRadioButton(d_modelType, ModelType.Consistency));
 		modelPanel.add(createRadioButton(d_modelType, ModelType.Inconsistency));
-		modelPanel.add(createRadioButton(d_modelType, ModelType.NodeSplit, false));
+		modelPanel.add(createRadioButton(d_modelType, ModelType.NodeSplit));
 		add(modelPanel, rightC);
 		
 		leftC.gridy++;
 		rightC.gridy++;
+
 		
-		JLabel label = new JLabel("Sorry, node-split models are not available yet");
-		label.setForeground(Color.RED);
-		add(label, rightC);
+		add(new JLabel("Split node: "), leftC);
+		SelectionInList<BasicParameter> splitNodeSelect = new SelectionInList<BasicParameter>(NodeSplitParameterization.getSplittableNodes(d_network), d_splitNode);
+		JComboBox splitNode = BasicComponentFactory.createComboBox(splitNodeSelect);
+		add(splitNode, rightC);
+		PropertyConnector.connectAndUpdate(new NodeSplitSelectedModel(d_modelType), splitNode, "enabled");
 		
 		leftC.gridy++;
 		rightC.gridy++;
@@ -187,17 +281,22 @@ public class CodeGenerationDialog extends JDialog {
 				generate();
 			}
 		});
+		PropertyConnector.connectAndUpdate(new CompleteModel(), button, "enabled");
 		return button;
 	}
 
 	private void generate() {
 		JFrame window = new GeneratedCodeWindow(d_name, d_network, 
-				(SyntaxType)d_syntaxType.getValue(), (ModelType)d_modelType.getValue(), 
-				getInt(d_chains), getInt(d_tuning), getInt(d_simulation), (Double)d_scale.getValue());
+				(SyntaxType)d_syntaxType.getValue(), (ModelType)d_modelType.getValue(), (BasicParameter)d_splitNode.getValue(),
+				getInt(d_chains), getInt(d_tuning), getInt(d_simulation), getDouble(d_scale));
 		window.setVisible(true);
 	}
 
-	private int getInt(ValueHolder model) {
-		return ((Long)model.getValue()).intValue();
+	private int getInt(ValueModel model) {
+		return ((Number)model.getValue()).intValue();
+	}
+	
+	private double getDouble(ValueModel model) {
+		return ((Number)model.getValue()).doubleValue();
 	}
 }

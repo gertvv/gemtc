@@ -66,6 +66,16 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 	 * Determine which nodes should be split.
 	 * @see isSplittable
 	 */
+	public static List<BasicParameter> getSplittableNodes(Network network) {
+		Hypergraph<Treatment, Study> studyGraph = NetworkModel.createStudyGraph(network);
+		UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph = NetworkModel.createComparisonGraph(studyGraph);
+		return getSplittableNodes(studyGraph, cGraph);
+	}
+	
+	/**
+	 * Determine which nodes should be split.
+	 * @see isSplittable
+	 */
 	public static List<BasicParameter> getSplittableNodes(Hypergraph<Treatment, Study> studyGraph, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph) {
 		// Get any spanning tree
 		PrimMinimumSpanningTree<Treatment, FoldedEdge<Treatment, Study>> treeBuilder = 
