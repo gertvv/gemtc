@@ -63,6 +63,8 @@ import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
+import org.drugis.mtc.parameterization.InconsistencyParameterization;
+import org.drugis.mtc.parameterization.InconsistencyStartingValueGenerator;
 import org.drugis.mtc.parameterization.InconsistencyVariance;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
@@ -223,15 +225,24 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	}
 
 
-	private double getStartingValue(StartingValueGenerator startVal, NetworkParameter p) {
+	private double getStartingValue(StartingValueGenerator startVal, NetworkParameter p, double[] basicStart) {
 		if (p instanceof BasicParameter) {
 			return startVal.getRelativeEffect((BasicParameter) p);
 		} else if (p instanceof SplitParameter) {
 			SplitParameter sp = (SplitParameter) p;
 			BasicParameter bp = new BasicParameter(sp.getBaseline(), sp.getSubject());
 			return startVal.getRelativeEffect(bp);
+		} else if (p instanceof InconsistencyParameter) {
+			Map<BasicParameter, Double> basicValues = new HashMap<BasicParameter, Double>();
+			final List<NetworkParameter> parameters = d_pmtz.getParameters();
+			for (int i = 0; i < parameters.size(); ++i) {
+				if (parameters.get(i) instanceof BasicParameter) {
+					basicValues.put((BasicParameter) parameters.get(i), basicStart[i]);
+				}
+			}
+			return InconsistencyStartingValueGenerator.generate((InconsistencyParameter) p, (InconsistencyParameterization) d_pmtz, startVal, basicValues);
 		}
-		return 0; // FIXME
+		throw new IllegalStateException("Unhandled parameter " + p + " of type " + p.getClass());
 	}
 	
 	////
@@ -326,7 +337,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		double[] basicStep = new double[parameters.size()];
 		Arrays.fill(basicStep, 0.1);
 		for (int i = 0; i < parameters.size(); ++i) {
-			basicStart[i] = getStartingValue(startVal, parameters.get(i));
+			basicStart[i] = getStartingValue(startVal, parameters.get(i), basicStart);
 		}
 		MCMCParameter basic = new MCMCParameter(basicStart, basicStep, null);
 		// variance
