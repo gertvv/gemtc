@@ -71,6 +71,13 @@ public class YadasResultsTest {
 		d_results.setDirectParameters(Arrays.<Parameter>asList(d_param1, d_param2));
 		d_results.setDerivedParameters(Collections.<Parameter,Derivation>singletonMap(d_param3, d_deriv));
 	}
+    
+    @Test
+    public void testOtherInitializerOrder() {
+		d_results = new YadasResults();
+		d_results.setNumberOfIterations(10);
+		d_results.setNumberOfChains(1);
+    }
 
 	@Test 
 	public void testGetters() {

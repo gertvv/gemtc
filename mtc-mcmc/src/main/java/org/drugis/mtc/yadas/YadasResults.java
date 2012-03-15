@@ -59,7 +59,7 @@ public class YadasResults implements MCMCResults {
 		d_nChains = 0;
 		d_availableSamples = 0;
 		d_reservedSamples = 0;
-		d_results = null;
+		initResults();
 	}
 
 	/**
