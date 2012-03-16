@@ -47,6 +47,7 @@ import org.drugis.mtc.parameterization.InconsistencyStartingValueGenerator;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
 import org.drugis.mtc.parameterization.NetworkParameterComparator;
+import org.drugis.mtc.parameterization.NodeSplitParameterization;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.PriorGenerator;
 import org.drugis.mtc.parameterization.SplitParameter;
@@ -75,6 +76,7 @@ public class JagsSyntaxModel {
 	private final Parameterization d_pmtz;
 	private final boolean d_isJags;
 	private final boolean d_inconsistency;
+	private final boolean d_nodeSplit;
 	private final Network d_network;
 	private final PriorGenerator d_priorGen;
 
@@ -83,6 +85,7 @@ public class JagsSyntaxModel {
 		d_pmtz = pmtz;
 		d_isJags = isJags;
 		d_inconsistency = pmtz instanceof InconsistencyParameterization;
+		d_nodeSplit = pmtz instanceof NodeSplitParameterization;
 		d_priorGen = new PriorGenerator(network);
 	}
 
@@ -208,6 +211,10 @@ public class JagsSyntaxModel {
 		CompiledTemplate template = readTemplate("modelTemplate.txt");
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("dichotomous", d_network.getType().equals(DataType.RATE));
+		map.put("nodeSplit", d_nodeSplit);
+		if (d_nodeSplit) {
+			map.put("indirectNode", getIndirectEvidenceExpression());
+		}
 		map.put("inconsistency", d_inconsistency);
 		map.put("relativeEffectMatrix", getRelativeEffectMatrix());
 		double sd = d_priorGen.getVagueNormalSigma();
@@ -216,6 +223,11 @@ public class JagsSyntaxModel {
 		map.put("parameters", d_pmtz.getParameters());
 		map.put("inconsClass", InconsistencyParameter.class);
 		return String.valueOf(TemplateRuntime.execute(template, map));
+	}
+
+	private String getIndirectEvidenceExpression() {
+		NodeSplitParameterization pmtz = (NodeSplitParameterization) d_pmtz;
+		return pmtz.getIndirectParameter().toString() + " <- " + writeExpression(pmtz.parameterizeIndirect(), s_idTrans);
 	}
 
 	private String expressRelativeEffect(Treatment t1, Treatment t2, Transformer<NetworkParameter, String> transform) {
@@ -250,12 +262,25 @@ public class JagsSyntaxModel {
 		map.put("tuning", tuning);
 		map.put("simulation", simulation);
 		map.put("inconsistency", d_inconsistency);
-		map.put("parameters", d_pmtz.getParameters());
+		final List<NetworkParameter> parameters = new ArrayList<NetworkParameter>(d_pmtz.getParameters());
+		if (d_nodeSplit) {
+			NodeSplitParameterization pmtz = (NodeSplitParameterization) d_pmtz;
+			parameters.add(pmtz.getIndirectParameter());
+		}
+		map.put("parameters", parameters);
 		return String.valueOf(TemplateRuntime.execute(template, map));
 	}
 	
 	public String dataText() {
 		List<Pair<String>> list = new ArrayList<Pair<String>>();
+		if (d_nodeSplit) {
+			Treatment baseline = ((NodeSplitParameterization) d_pmtz).getDirectParameter().getBaseline();
+			Treatment subject = ((NodeSplitParameterization) d_pmtz).getDirectParameter().getSubject();
+			Integer[] split = new Integer[] {
+					d_network.getTreatments().indexOf(baseline) + 1,
+					d_network.getTreatments().indexOf(subject) + 1 }; 
+			list.add(new Pair<String>("split", writeVector(split, d_isJags)));
+		}
 		list.add(new Pair<String>("ns", writeNumber(d_network.getStudies().size(), d_isJags)));
 		list.add(new Pair<String>("na", writeVector(getArmCounts(), d_isJags)));
 		list.add(new Pair<String>("t", writeMatrix(getTreatmentMatrix(), d_isJags)));

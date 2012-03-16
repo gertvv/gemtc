@@ -143,7 +143,6 @@ public class CodeGenerationDialog extends JDialog {
 			}
 			d_value = newValue;
 			fireValueChange(oldValue, newValue);
-			System.out.println("update " + newValue);
 		}
 
 		@Override

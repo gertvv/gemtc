@@ -99,6 +99,8 @@ public class GeneratedCodeWindow extends JFrame {
 		d_syntaxModel = buildSyntaxModel();
 		d_files = buildFiles();
 		
+		MainWindow.setAppIcon(this);
+		
 		initComponents();
 		pack();
 	}

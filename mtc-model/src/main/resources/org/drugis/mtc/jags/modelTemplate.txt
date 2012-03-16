@@ -9,19 +9,33 @@ model {
 		}
 
 		# Study-level relative effects
+		# The arms are given in the order (arm_1, arm_2, ..., arm_{n_a-1}, arm_{n_a}).@if{nodeSplit}
+		# If the study contains the split node, d[arm_{n_a-1}, arm_{n_a}] is the split node.
+		# The other relative effects are parameterized as d[arm_1, arm_k].@else{}
+		# The relative effects are parameterized as d[arm_1, arm_k].@end{}
 		w[i, 1] <- 0
 		delta[i, 1] <- 0
 		for (k in 2:na[i]) { # parameterize multi-arm trials using a trick to avoid dmnorm
-			delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+			delta[i, k] ~ dnorm(md[i, k], taud[i, k])@if{nodeSplit}
+			# Determine whether this is the split node
+			isSplit[i, k] <- step(equals(t[i, k - 1], split[1]) + equals(t[i, k], split[2]) - 2)
+			# Model so that the split-node is independent of the other relative effects
+			md[i, k] <- 
+				(1 - isSplit[i, k]) * (d[t[i, 1], t[i, k]] + sw[i, k]) +
+				isSplit[i, k] * d[t[i, k - 1], t[i, k]]
+			taud[i, k] <- 
+				(1 - isSplit[i, k]) * (tau.d * 2 * (k - 1) / k) +
+				isSplit[i, k] * tau.d@else{}
 			md[i, k] <- d[t[i, 1], t[i, k]] + sw[i, k]
-			taud[i, k] <- tau.d * 2 * (k - 1) / k
+			taud[i, k] <- tau.d * 2 * (k - 1) / k@end{}
 			w[i, k] <- delta[i, k] - d[t[i, 1], t[i, k]]
 			sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
 		}
 	}
 
 	# Relative effect matrix
-@{relativeEffectMatrix}
+@{relativeEffectMatrix}@if{nodeSplit}
+	@{indirectNode}@end{}
 
 	# Study baseline priors
 	for (i in 1:ns) {

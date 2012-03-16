@@ -113,7 +113,7 @@ public class MainWindow extends JFrame {
 	public MainWindow() {
 		super(AppInfo.getAppName() + " " + AppInfo.getAppVersion());
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setAppIcon();
+		setAppIcon(this);
 
 		setMinimumSize(new Dimension(750, 550));
 		setLayout(new BorderLayout());
@@ -123,7 +123,7 @@ public class MainWindow extends JFrame {
 		add(d_mainPane , BorderLayout.CENTER);
 	}
 
-	private void setAppIcon() {
+	public static void setAppIcon(JFrame frame) {
 		Image image = null;
 		try {
 			image = ((ImageIcon)ImageLoader.getIcon("appicon.png")).getImage();
@@ -131,7 +131,7 @@ public class MainWindow extends JFrame {
 			// suppress
 		}
 		if (image != null) {
-			setIconImage(image);
+			frame.setIconImage(image);
 		}
 	}
 	

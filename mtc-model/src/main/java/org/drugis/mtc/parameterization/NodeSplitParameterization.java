@@ -192,7 +192,7 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 	}
 	
 	public SplitParameter getIndirectParameter() {
-		return new SplitParameter(d_splitNode.getBaseline(), d_splitNode.getSubject(), true);
+		return new SplitParameter(d_splitNode.getBaseline(), d_splitNode.getSubject(), false);
 	}
 	
 	public Map<NetworkParameter, Integer> parameterizeIndirect() {

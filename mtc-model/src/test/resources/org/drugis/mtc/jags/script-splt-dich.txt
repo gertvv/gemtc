@@ -11,6 +11,7 @@ adapt 30000
 monitor d.A.B
 monitor d.A.C
 monitor d.B.C.dir
+monitor d.B.C.ind
 monitor sd.d
 
 update 20000
