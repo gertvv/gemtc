@@ -19,7 +19,7 @@
 
 package org.drugis.mtc.parameterization;
 
-import org.apache.commons.math.random.RandomGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.drugis.common.stat.EstimateWithPrecision;
 import org.drugis.common.stat.Statistics;
 import org.drugis.mtc.model.Measurement;

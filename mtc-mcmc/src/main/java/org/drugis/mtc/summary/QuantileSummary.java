@@ -22,7 +22,7 @@ package org.drugis.mtc.summary;
 import java.util.List;
 import java.util.Arrays;
 
-import org.apache.commons.math.stat.descriptive.rank.Percentile;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.drugis.common.beans.AbstractObservable;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MCMCResultsEvent;

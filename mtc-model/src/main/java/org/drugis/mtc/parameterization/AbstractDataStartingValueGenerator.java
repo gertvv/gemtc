@@ -26,8 +26,8 @@ import java.util.Set;
 
 import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.collections15.Predicate;
-import org.apache.commons.math.random.RandomGenerator;
-import org.apache.commons.math.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.drugis.common.stat.EstimateWithPrecision;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;

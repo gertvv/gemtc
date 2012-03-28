@@ -28,7 +28,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.math.random.JDKRandomGenerator;
+import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.drugis.mtc.graph.MinimumDiameterSpanningTree;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.JAXBHandler;

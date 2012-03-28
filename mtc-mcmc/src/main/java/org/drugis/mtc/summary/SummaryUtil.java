@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.Parameter;
 
-import org.apache.commons.math.stat.descriptive.StorelessUnivariateStatistic;
+import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
 
 public class SummaryUtil {
 	/**

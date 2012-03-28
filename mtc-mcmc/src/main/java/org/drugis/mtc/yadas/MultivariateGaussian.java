@@ -19,14 +19,14 @@
 
 package org.drugis.mtc.yadas;
 
+import gov.lanl.yadas.Likelihood;
+
 import java.util.Arrays;
 
-import gov.lanl.yadas.Likelihood;
-import org.apache.commons.math.linear.Array2DRowRealMatrix;
-import org.apache.commons.math.linear.LUDecomposition;
-import org.apache.commons.math.linear.LUDecompositionImpl;
-import org.apache.commons.math.linear.RealMatrix;
-import org.apache.commons.math.util.MathUtils;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.util.Precision;
 
 /**
  * Computes the log of the probability density for a multivariate Gaussian.
@@ -53,7 +53,7 @@ public class MultivariateGaussian implements Likelihood {
 		// Which is:
 		// -log(sqrt(2pi^d * det(sigma))) + -.5 (x - mu)' inv(sigma) (x - mu) 
 		Array2DRowRealMatrix dM = xM.subtract(muM);
-		LUDecomposition sigmaD = new LUDecompositionImpl(sigmaM, MathUtils.SAFE_MIN);
+		LUDecomposition sigmaD = new LUDecomposition(sigmaM, Precision.SAFE_MIN);
 		try {
 			RealMatrix sigmaInv = sigmaD.getSolver().getInverse();
 			return -0.5 * (

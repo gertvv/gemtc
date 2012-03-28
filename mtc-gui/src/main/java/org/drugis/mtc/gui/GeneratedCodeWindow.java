@@ -38,7 +38,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
-import org.apache.commons.math.random.JDKRandomGenerator;
+import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.drugis.common.ImageLoader;
 import org.drugis.mtc.gui.CodeGenerationDialog.ModelType;
 import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;

@@ -10,7 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<drugis-common.version>0.4.8</drugis-common.version>
+		<drugis-common.version>0.4.9-SNAPSHOT</drugis-common.version>
 		<jung.version>2.0.1</jung.version>
 	</properties> 
 

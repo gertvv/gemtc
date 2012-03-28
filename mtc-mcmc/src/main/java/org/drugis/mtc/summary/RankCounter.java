@@ -19,8 +19,8 @@
 
 package org.drugis.mtc.summary;
 
-import org.apache.commons.math.stat.ranking.NaturalRanking;
-import org.apache.commons.math.stat.ranking.TiesStrategy;
+import org.apache.commons.math3.stat.ranking.NaturalRanking;
+import org.apache.commons.math3.stat.ranking.TiesStrategy;
 
 public class RankCounter {
 	private static final NaturalRanking s_ranker = new NaturalRanking(TiesStrategy.RANDOM);

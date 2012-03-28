@@ -26,8 +26,8 @@ import java.io.InputStream;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.math.stat.descriptive.moment.Mean;
-import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.drugis.common.threading.TaskUtil;
 import org.drugis.mtc.ResultsUtil;
 import org.drugis.mtc.model.JAXBHandler;
