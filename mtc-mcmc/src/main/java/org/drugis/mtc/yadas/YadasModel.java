@@ -141,6 +141,10 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	public YadasModel(Network network) {
 		d_network = network;
 
+		buildActivityModel();
+	}
+
+	private void buildActivityModel() {
 		// Create tasks for each phase of the MCMC simulation
 		Task buildModelPhase = new SimpleSuspendableTask(new Runnable() {
 			public void run() {
@@ -190,6 +194,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	public void setBurnInIterations(int it) {
 		validIt(it);
 		d_burnInIter = it;
+		buildActivityModel();
 	}
 
 	public int getSimulationIterations() {
@@ -199,6 +204,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	public void setSimulationIterations(int it) {
 		validIt(it);
 		d_simulationIter = it;
+		buildActivityModel();
 	}
 
 	@Override
