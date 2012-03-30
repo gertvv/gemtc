@@ -20,16 +20,17 @@
 package org.drugis.mtc;
 
 import org.apache.commons.collections15.Transformer;
+import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Treatment;
 
 public class DichotomousNetworkBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
 	public DichotomousNetworkBuilder() {
-		super();
+		super(DataType.RATE);
 	}
 	
 	public DichotomousNetworkBuilder(Transformer<TreatmentType, String> idToString) {
-		super(idToString);
+		super(idToString, DataType.RATE);
 	}
 	
 	public void add(String studyId, TreatmentType treatmentId, int responders, int sampleSize) {

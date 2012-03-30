@@ -32,6 +32,7 @@ import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.commons.collections15.bidimap.UnmodifiableBidiMap;
 import org.drugis.common.EqualsUtil;
+import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
@@ -73,17 +74,20 @@ public class NetworkBuilder<TreatmentType> {
 	private BidiMap<TreatmentType, Treatment> d_treatmentMap = new DualHashBidiMap<TreatmentType, Treatment>();
 	private Map<MKey, Measurement> d_measurementMap = new HashMap<MKey, Measurement>();
 	private Transformer<TreatmentType, String> d_idToString;
+	private DataType d_dataType;
 
-	public NetworkBuilder() {
-		this(new ToStringTransformer<TreatmentType>());
+	public NetworkBuilder(DataType type) {
+		this(new ToStringTransformer<TreatmentType>(), type);
 	}
 	
-	public NetworkBuilder(Transformer<TreatmentType, String> idToString) {
+	public NetworkBuilder(Transformer<TreatmentType, String> idToString, DataType type) {
 		d_idToString = idToString;
+		d_dataType = type;
 	}
 	
 	public Network buildNetwork() {
 		final Network network = new Network();
+		network.setType(d_dataType);
 		network.getTreatments().addAll(getTreatments());
 		network.getStudies().addAll(getStudies());
 		return network;

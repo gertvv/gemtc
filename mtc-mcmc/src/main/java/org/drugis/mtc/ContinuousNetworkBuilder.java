@@ -20,16 +20,24 @@
 package org.drugis.mtc;
 
 import org.apache.commons.collections15.Transformer;
+import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.model.Measurement;
+import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Treatment;
 
 public class ContinuousNetworkBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
 	public ContinuousNetworkBuilder() {
-		super();
+		super(DataType.CONTINUOUS);
 	}
 	
 	public ContinuousNetworkBuilder(Transformer<TreatmentType, String> idToString) {
-		super(idToString);
+		super(idToString, DataType.CONTINUOUS);
+	}
+	
+	@Override
+	public Network buildNetwork() {
+		final Network network = super.buildNetwork();
+		return network;
 	}
 	
 	public void add(String studyId, TreatmentType treatmentId, double mean, double stdDev, int sampleSize) {

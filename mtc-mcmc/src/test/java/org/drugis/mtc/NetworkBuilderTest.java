@@ -28,6 +28,7 @@ import java.util.HashMap;
 
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.lang.StringUtils;
+import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
@@ -38,11 +39,11 @@ import org.junit.Test;
 public class NetworkBuilderTest {
 	public static class NoneBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
 		public NoneBuilder() {
-			super();
+			super(DataType.NONE);
 		}
 		
 		public NoneBuilder(Transformer<TreatmentType, String> idToString) {
-			super(idToString);
+			super(idToString, DataType.NONE);
 		}
 		
 		public void add(String studyId, TreatmentType treatmentId) {
