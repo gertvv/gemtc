@@ -26,7 +26,7 @@ ant license || exit
 
 # Package
 echo '---- Building JAR'
-#mvn clean package -q|| exit
+mvn clean package -q|| exit
 
 generate-readme() {
 	echo '<html><head><style type="text/css">h1 {font-size: 20pt;}</style><title>GeMTC README</title></head><body>' > $2
@@ -63,7 +63,7 @@ cp r-code/gemtc/R/mtc.R $CLIDIR/
 zip -r gemtc-cli-$VERSION.zip $CLIDIR
 
 # Package the R package
-cd r-code
-make gemtc_$VERSION.tar.gz
-mv gemtc_$VERSION.tar.gz ../gemtc_$VERSION-EXPERIMENTAL.tar.gz
-cd ..
+#cd r-code
+#make gemtc_$VERSION.tar.gz
+#mv gemtc_$VERSION.tar.gz ../gemtc_$VERSION-EXPERIMENTAL.tar.gz
+#cd ..
