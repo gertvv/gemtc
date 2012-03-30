@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo '---- Getting version from Maven'
-mvn validate
+mvn validate || exit
 
 VERSION=`cat version`
 rm version
@@ -26,7 +26,7 @@ ant license || exit
 
 # Package
 echo '---- Building JAR'
-mvn clean package -q|| exit
+mvn clean package -q || exit
 
 generate-readme() {
 	echo '<html><head><style type="text/css">h1 {font-size: 20pt;}</style><title>GeMTC README</title></head><body>' > $2

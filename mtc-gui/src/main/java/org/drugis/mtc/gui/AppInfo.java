@@ -36,7 +36,7 @@ public class AppInfo {
 
 	private static String getProperty(String property, String fallback) {
 		try {
-			InputStream is = AppInfo.class.getResourceAsStream("/META-INF/maven/org.drugis/mtc-gui/pom.properties");
+			InputStream is = AppInfo.class.getResourceAsStream("/META-INF/maven/org.drugis.mtc/mtc-gui/pom.properties");
 			Properties props = new Properties();
 			props.load(is);
 			return props.getProperty(property, fallback);
