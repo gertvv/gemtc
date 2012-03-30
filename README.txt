@@ -1,7 +1,7 @@
 GeMTC - Mixed Treatment Comparison library
 ==========================================
 
-GeMTC is a library for Mixed Treatment Comparison (MTC) model
+[GeMTC][0] is a library for Mixed Treatment Comparison (MTC) model
 generation. MTC is also known as Network Meta-Analysis.
 
 The library is capable of generating JAGS and BUGS models for both
@@ -35,22 +35,16 @@ papers are in the respective XML files.
 Requirements
 ------------
 
-GeMTC is written in a mixture of Java and Scala, and requires Java 5
-(JRE 1.5) to run (http://java.com/). To run the generated models, you
-need JAGS 1.0.4 (http://sourceforge.net/projects/mcmc-jags/), and you
-may want to use R (http://r-project.org/) to perform post-processing and
-analysis. It is also possible to generate models for use with BUGS (both
-WinBUGS and OpenBUGS work) instead of JAGS.
-
-Known issues
-------------
-
-The node-split model generation algorithm is not completely developed
-yet, and in some cases it generates a model that will not converge; this
-should be evident from the time-series plot for the split node.
+GeMTC is built in [Java][1], and requires Java 6 (JRE 1.6) or newer. To
+run the generated models, you need [JAGS][2] 3.0 or newer, or
+[OpenBUGS][3], or [WinBUGS][4]. You may want to use [R][5] to perform
+post-processing and analysis.
 
 Versions
 --------
+
+0.12: Complete rewrite in Java, redesigned node-splitting model
+generation.
 
 0.10.1: Bugfixes, generate R code for JAGS models.
 
@@ -73,12 +67,12 @@ running MTC models.
 Building from source
 --------------------
 
-Source code can be obtained from http://drugis.org/mtc. In order to
-build GeMTC you need:
+Source code can be obtained from [the GeMTC site][0]. In order to build
+GeMTC you need:
 
- - Java >= 1.5
- - Maven 2
- - Other dependencies are downloaded automatically by Maven2
+ - [Java >= 1.5][1]
+ - [Maven 2][6]
+ - Other dependencies are downloaded automatically by Maven
 
 To build, use "mvn package". Due to downloading dependencies, the first
 time this may take a while.
@@ -93,4 +87,13 @@ Contact
 -------
 
 Contact the author, Gert van Valkenhoef, g.h.m.van.valkenhoef@rug.nl,
-for more information. Also see http://drugis.org/mtc.
+for more information.
+
+
+[0]: http://drugis.org/gemtc
+[1]: http://www.java.com/getjava/
+[2]: http://sourceforge.net/projects/mcmc-jags/
+[3]: http://www.openbugs.info/
+[4]: http://www.mrc-bsu.cam.ac.uk/bugs/
+[5]: http://r-project.org/
+[6]: http://maven.apache.org/
