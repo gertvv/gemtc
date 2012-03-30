@@ -1,7 +1,7 @@
 GeMTC CLI - Mixed Treatment Comparison model generation
 =======================================================
 
-GeMTC CLI is a program for Mixed Treatment Comparison (MTC) model
+[GeMTC][1] CLI is a program for Mixed Treatment Comparison (MTC) model
 generation. MTC is also known as Network Meta-Analysis.
 
 The software is capable of generating JAGS and BUGS models for both
@@ -24,8 +24,8 @@ Several flavours of GeMTC are available:
     full analysis capabilities (EXPERIMENTAL).
 
   * A Java library  that can also run the MTC models using the YADAS
-	pure Java MCMC package. This option is used by ADDIS
-    (http://drugis.org/addis) to perform network meta-analysis.
+    pure Java MCMC package. This option is used by [ADDIS][2] to perform
+    network meta-analysis.
 
 Several example XML files are provided with the GeMTC distribution to
 demonstrate the capabilities of the library. All examples were taken
@@ -35,19 +35,10 @@ papers are in the respective XML files.
 Requirements
 ------------
 
-GeMTC is written in a mixture of Java and Scala, and requires Java 5
-(JRE 1.5) to run (http://java.com/). To run the generated models, you
-need JAGS 1.0.4 (http://sourceforge.net/projects/mcmc-jags/), and you
-may want to use R (http://r-project.org/) to perform post-processing and
-analysis. It is also possible to generate models for use with BUGS (both
-WinBUGS and OpenBUGS work) instead of JAGS.
-
-Known issues
-------------
-
-The node-split model generation algorithm is not completely developed
-yet, and in some cases it generates a model that will not converge; this
-should be evident from the time-series plot for the split node.
+GeMTC is built in [Java][3], and requires Java 6 (JRE 1.6) or newer. To
+run the generated models, you need [JAGS][4] 3.0 or newer, or
+[OpenBUGS][5], or [WinBUGS][6]. You may want to use [R][7] to perform
+post-processing and analysis.
 
 Using GeMTC CLI with JAGS
 -------------------------
@@ -114,6 +105,11 @@ To evaluate the P-values for all generated node-split models, use:
 Versions
 --------
 
+0.12: Complete rewrite in Java, redesigned node-splitting model
+generation.
+
+0.10.1: Bugfixes, generate R code for JAGS models.
+
 0.10: Addition of GUI module, improved consistency model generation,
 support for BUGS. Renamed to GeMTC CLI and GeMTC GUI.
 
@@ -133,12 +129,12 @@ running MTC models.
 Building from source
 --------------------
 
-Source code can be obtained from http://drugis.org/mtc. In order to
-build GeMTC you need:
+Source code can be obtained from [the GeMTC site][1]. In order to build
+GeMTC you need:
 
- - Java >= 1.5
- - Maven 2
- - Other dependencies are downloaded automatically by Maven2
+ - [Java >= 1.5][3]
+ - [Maven 2][8]
+ - Other dependencies are downloaded automatically by Maven
 
 To build, use "mvn package". Due to downloading dependencies, the first
 time this may take a while.
@@ -153,4 +149,14 @@ Contact
 -------
 
 Contact the author, Gert van Valkenhoef, g.h.m.van.valkenhoef@rug.nl,
-for more information. Also see http://drugis.org/mtc.
+for more information.
+
+
+[1]: http://drugis.org/gemtc
+[2]: http://drugis.org/addis
+[3]: http://www.java.com/getjava/
+[4]: http://sourceforge.net/projects/mcmc-jags/
+[5]: http://www.openbugs.info/
+[6]: http://www.mrc-bsu.cam.ac.uk/bugs/
+[7]: http://r-project.org/
+[8]: http://maven.apache.org/
