@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.drugis.common.stat.EstimateWithPrecision;
 import org.drugis.common.stat.Statistics;
 import org.drugis.mtc.model.Measurement;
@@ -32,6 +33,7 @@ import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.util.DerSimonianLairdPooling;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,9 +76,16 @@ public class ContinuousDataStartingValueGeneratorTest {
 		
 		d_cGraph = NetworkModel.createComparisonGraph(d_network);
 	}
+		
+	private RandomGenerator mockRandom(double value) {
+		RandomGenerator rng = EasyMock.createMock(RandomGenerator.class);
+		EasyMock.expect(rng.nextGaussian()).andReturn(value);
+		EasyMock.replay(rng);
+		return rng;
+	}
 
 	@Test
-	public void testGenerateBaselineEffect() {
+	public void testGenerateTreatmentEffect() {
 		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
 		
 		Measurement m0 = NetworkModel.findMeasurement(d_s1, d_tb);
@@ -86,6 +95,29 @@ public class ContinuousDataStartingValueGeneratorTest {
 		assertEquals(m1.getMean(), generator.getTreatmentEffect(d_s2, d_ta), EPSILON);
 	}
 	
+
+	@Test 
+	public void testRandomizedTreatmentEffect1() {
+		RandomGenerator rng = mockRandom(1.0);
+		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.0);
+
+		Measurement m0 = NetworkModel.findMeasurement(d_s1, d_tb);
+
+		assertEquals(m0.getMean() + m0.getStdDev() / Math.sqrt(m0.getSampleSize()), generator.getTreatmentEffect(d_s1, d_tb), EPSILON);
+		EasyMock.verify(rng);
+	}
+	
+	@Test 
+	public void testRandomizedTreatmentEffect2() {
+		RandomGenerator rng = mockRandom(0.23);
+		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
+
+		Measurement m0 = NetworkModel.findMeasurement(d_s2, d_tb);
+
+		assertEquals(m0.getMean() + 0.46 * m0.getStdDev() / Math.sqrt(m0.getSampleSize()), generator.getTreatmentEffect(d_s2, d_tb), EPSILON);
+		EasyMock.verify(rng);
+	}
+	
 	@Test
 	public void testGenerateStudyRelativeEffect() {
 		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
@@ -93,6 +125,18 @@ public class ContinuousDataStartingValueGeneratorTest {
 		Measurement m0 = NetworkModel.findMeasurement(d_s2, d_ta);
 		Measurement m1 = NetworkModel.findMeasurement(d_s2, d_tb);
 		assertEquals(m1.getMean() - m0.getMean(), generator.getRelativeEffect(d_s2, new BasicParameter(d_ta, d_tb)), EPSILON);
+	}
+	
+	@Test
+	public void testRandomizedStudyRelativeEffect() {
+		RandomGenerator rng = mockRandom(0.23);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
+
+		Measurement m0 = NetworkModel.findMeasurement(d_s2, d_ta);
+		Measurement m1 = NetworkModel.findMeasurement(d_s2, d_tb);
+		double s0 = m0.getStdDev() / Math.sqrt(m0.getSampleSize());
+		double s1 = m1.getStdDev() / Math.sqrt(m1.getSampleSize());
+		assertEquals(m1.getMean() - m0.getMean() + 0.46 * Math.sqrt(s0 * s0 + s1 * s1), generator.getRelativeEffect(d_s2, new BasicParameter(d_ta, d_tb)), EPSILON);
 	}
 	
 	@Test
@@ -107,12 +151,22 @@ public class ContinuousDataStartingValueGeneratorTest {
 	}
 	
 	@Test
+	public void testRandomizedRelativeEffect() {
+		RandomGenerator rng = mockRandom(0.08);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 3.0);
+
+		List<EstimateWithPrecision> mds = getMDs(Arrays.asList(d_s2, d_s3), d_ta, d_tb);
+		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(mds);
+
+		assertEquals(pooling.getPooled().getPointEstimate() + 3.0 * 0.08 * pooling.getPooled().getStandardError(), 
+				generator.getRelativeEffect(new BasicParameter(d_ta, d_tb)), EPSILON);
+	}
+	
+	@Test
 	public void testStandardDeviation() {
 		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
 		assertEquals(0.2069597561228883, generator.getStandardDeviation(), EPSILON);
 	}
-	
-	// FIXME: add tests for randomized case
 	
 	public static EstimateWithPrecision getMD(Study s, Treatment t0, Treatment t1) {
 		Measurement m0 = NetworkModel.findMeasurement(s, t0);
