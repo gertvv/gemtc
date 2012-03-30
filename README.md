@@ -1,7 +1,7 @@
 GeMTC - Mixed Treatment Comparison library
 ==========================================
 
-[GeMTC][0] is a library for Mixed Treatment Comparison (MTC) model
+[GeMTC][1] is a library for Mixed Treatment Comparison (MTC) model
 generation. MTC is also known as Network Meta-Analysis.
 
 The library is capable of generating JAGS and BUGS models for both
@@ -24,8 +24,8 @@ Currently, the GeMTC library can be used as either:
     full analysis capabilities (EXPERIMENTAL).
 
   * A Java library  that can also run the MTC models using the YADAS
-	pure Java MCMC package. This option is used by ADDIS
-    (http://drugis.org/addis) to perform network meta-analysis.
+    pure Java MCMC package. This option is used by [ADDIS][2] to perform
+    network meta-analysis.
 
 Several example XML files are provided with the GeMTC distribution to
 demonstrate the capabilities of the library. All examples were taken
@@ -35,9 +35,9 @@ papers are in the respective XML files.
 Requirements
 ------------
 
-GeMTC is built in [Java][1], and requires Java 6 (JRE 1.6) or newer. To
-run the generated models, you need [JAGS][2] 3.0 or newer, or
-[OpenBUGS][3], or [WinBUGS][4]. You may want to use [R][5] to perform
+GeMTC is built in [Java][3], and requires Java 6 (JRE 1.6) or newer. To
+run the generated models, you need [JAGS][4] 3.0 or newer, or
+[OpenBUGS][5], or [WinBUGS][6]. You may want to use [R][7] to perform
 post-processing and analysis.
 
 Versions
@@ -67,11 +67,11 @@ running MTC models.
 Building from source
 --------------------
 
-Source code can be obtained from [the GeMTC site][0]. In order to build
+Source code can be obtained from [the GeMTC site][1]. In order to build
 GeMTC you need:
 
- - [Java >= 1.5][1]
- - [Maven 2][6]
+ - [Java >= 1.5][3]
+ - [Maven 2][8]
  - Other dependencies are downloaded automatically by Maven
 
 To build, use "mvn package". Due to downloading dependencies, the first
@@ -90,10 +90,11 @@ Contact the author, Gert van Valkenhoef, g.h.m.van.valkenhoef@rug.nl,
 for more information.
 
 
-[0]: http://drugis.org/gemtc
-[1]: http://www.java.com/getjava/
-[2]: http://sourceforge.net/projects/mcmc-jags/
-[3]: http://www.openbugs.info/
-[4]: http://www.mrc-bsu.cam.ac.uk/bugs/
-[5]: http://r-project.org/
-[6]: http://maven.apache.org/
+[1]: http://drugis.org/gemtc
+[2]: http://drugis.org/addis
+[3]: http://www.java.com/getjava/
+[4]: http://sourceforge.net/projects/mcmc-jags/
+[5]: http://www.openbugs.info/
+[6]: http://www.mrc-bsu.cam.ac.uk/bugs/
+[7]: http://r-project.org/
+[8]: http://maven.apache.org/
