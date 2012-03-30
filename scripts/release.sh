@@ -28,6 +28,12 @@ ant license || exit
 echo '---- Building JAR'
 #mvn clean package -q|| exit
 
+generate-readme() {
+	echo '<html><head><style type="text/css">h1 {font-size: 20pt;}</style><title>GeMTC README</title></head><body>' > $2
+	markdown $1 >> $2
+	echo '</body></html>' >> $2
+}
+
 # Package the GUI
 rm -Rf $GUIDIR
 mkdir $GUIDIR
@@ -35,7 +41,8 @@ ARTIFACT=$GUIDIR/gemtc-gui-$VERSION.jar
 cp mtc-gui/target/mtc-gui-$VERSION-jar-with-dependencies.jar $ARTIFACT
 chmod a+x $ARTIFACT 
 cp LICENSE.txt $GUIDIR
-cp mtc-gui/README.txt $GUIDIR
+generate-readme mtc-gui/README.md $GUIDIR/README.html
+cp mtc-gui/README.md $GUIDIR/README.txt
 mkdir $GUIDIR/example
 cp example/*.gemtc $GUIDIR/example/
 cp r-code/gemtc/R/mtc.R $GUIDIR/
@@ -48,7 +55,8 @@ ARTIFACT=$CLIDIR/gemtc-cli-$VERSION.jar
 cp mtc-cli/target/mtc-cli-$VERSION-jar-with-dependencies.jar $ARTIFACT
 chmod a+x $ARTIFACT 
 cp LICENSE.txt $CLIDIR
-cp mtc-cli/README.txt $CLIDIR
+generate-readme mtc-cli/README.md $CLIDIR/README.html
+cp mtc-cli/README.md $CLIDIR/README.txt
 mkdir $CLIDIR/example
 cp example/*.gemtc $CLIDIR/example/
 cp r-code/gemtc/R/mtc.R $CLIDIR/
