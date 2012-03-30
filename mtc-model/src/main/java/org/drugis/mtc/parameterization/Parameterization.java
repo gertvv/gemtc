@@ -25,6 +25,8 @@ import java.util.Map;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 
+import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
+import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.Pair;
 
 /**
@@ -61,4 +63,9 @@ public interface Parameterization {
 	 * What is the definite baseline in the given study.
 	 */
 	public Treatment getStudyBaseline(Study s);
+
+	/**
+	 * Get the tree of basic parameters.
+	 */
+	public Graph<Treatment, FoldedEdge<Treatment, Study>> getBasicParameterTree();
 }

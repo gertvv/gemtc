@@ -20,17 +20,31 @@
 package org.drugis.mtc;
 
 import org.drugis.mtc.jags.JagsSyntaxModel;
+import org.drugis.mtc.model.Network;
+import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
 
 public class ModelSpecification {
+	private final Network d_network;
+	private final Parameterization d_pmtz;
 	private final JagsSyntaxModel d_model;
 	private final StartingValueGenerator d_generator;
 	private final String d_nameSuffix;
 
-	public ModelSpecification(JagsSyntaxModel model, StartingValueGenerator generator, String nameSuffix) {
+	public ModelSpecification(Network network, Parameterization pmtz, JagsSyntaxModel model, StartingValueGenerator generator, String nameSuffix) {
+		d_network = network;
+		d_pmtz = pmtz;
 		d_model = model;
 		d_generator = generator;
 		d_nameSuffix = nameSuffix;
+	}
+
+	public Network getNetwork() {
+		return d_network;
+	}
+	
+	public Parameterization getParameterization() {
+		return d_pmtz;
 	}
 
 	public JagsSyntaxModel getModel() {

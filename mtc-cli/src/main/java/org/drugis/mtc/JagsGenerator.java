@@ -29,7 +29,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.drugis.mtc.graph.MinimumDiameterSpanningTree;
+import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
@@ -42,10 +42,10 @@ import org.drugis.mtc.parameterization.InconsistencyParameterization;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NodeSplitParameterization;
 import org.drugis.mtc.parameterization.Parameterization;
+import org.drugis.mtc.parameterization.StartingValueGenerator;
 
 import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.util.Pair;
 
 public class JagsGenerator {
@@ -57,17 +57,7 @@ public class JagsGenerator {
 	
 	public void run() throws FileNotFoundException, JAXBException {
 		Network network = JAXBHandler.readNetwork(new FileInputStream(d_options.getXmlFile()));
-
-		switch (network.getType()) {
-		case RATE:
-		case CONTINUOUS:
-			generateModel(network);
-			break;
-		default:
-			System.out.println("Unsupported measurement type, only generating spanning tree");
-			generateTree(network);
-			break;
-		}
+		generateModel(network);
 	}
 
 	private void generateModel(Network network) throws FileNotFoundException {
@@ -97,17 +87,18 @@ public class JagsGenerator {
 	}
 
 	private ModelSpecification createJagsModel(Network network, Parameterization pmtz, String suffix) {
-		return new ModelSpecification(new JagsSyntaxModel(network, pmtz, !d_options.getBugsOutput()),
-				AbstractDataStartingValueGenerator.create(network, NetworkModel.createComparisonGraph(network), 
-						new JDKRandomGenerator(), d_options.getScale()),
-				suffix);
+		if (!isSupported(network.getType())) {
+			return new ModelSpecification(network, pmtz, null, null, suffix);
+		}
+		final JagsSyntaxModel model = new JagsSyntaxModel(network, pmtz, !d_options.getBugsOutput());
+		final StartingValueGenerator generator = AbstractDataStartingValueGenerator.create(
+				network, NetworkModel.createComparisonGraph(network), 
+				new JDKRandomGenerator(), d_options.getScale());
+		return new ModelSpecification(network, pmtz, model, generator, suffix);
 	}
 
-	private void generateTree(Network network) {
-		MinimumDiameterSpanningTree<Treatment, FoldedEdge<Treatment, Study>> finder =
-			new MinimumDiameterSpanningTree<Treatment, FoldedEdge<Treatment, Study>>(NetworkModel.createComparisonGraph(network));
-		Tree<Treatment, FoldedEdge<Treatment, Study>> tree = finder.getMinimumDiameterSpanningTree();
-		printGraph(tree);
+	private boolean isSupported(DataType type) {
+		return DataType.RATE.equals(type) || DataType.CONTINUOUS.equals(type);
 	}
 	
 	private void printGraph(Graph<Treatment, FoldedEdge<Treatment, Study>> g) {
@@ -120,11 +111,17 @@ public class JagsGenerator {
 	}
 	
 	public void writeModel(ModelSpecification spec) throws FileNotFoundException {
-		// FIXME: enable printing again
-//		printGraph(spec.getModel().model.network.treatmentGraph)
-//		printTree(spec.getModel().model.basis.tree)
-
+		boolean suppress = false;
 		if (d_options.getSuppressOutput()) {
+			System.out.println("Detected --suppress, not generating a model.");
+			suppress = true;
+		} else if (spec.getModel() == null) {
+			System.out.println("Unsupported measurement type, not generating a model.");
+			suppress = true;
+		}
+		printStructure(NetworkModel.createComparisonGraph(spec.getNetwork()), spec.getParameterization().getBasicParameterTree());
+
+		if (suppress) {
 			return;
 		}
 
@@ -156,5 +153,14 @@ public class JagsGenerator {
 			analysisOut.println(spec.getModel().analysisText(d_options.getBaseName() + spec.getNameSuffix()));
 			analysisOut.close();
 		}
+	}
+
+	private void printStructure(
+			final Graph<Treatment, FoldedEdge<Treatment, Study>> comparisonGraph,
+			final Graph<Treatment, FoldedEdge<Treatment, Study>> tree) {
+		System.out.println("Comparison graph: ");
+		printGraph(comparisonGraph);
+		System.out.println("Basic parameters: ");
+		printGraph(tree);
 	}
 }

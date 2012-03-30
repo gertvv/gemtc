@@ -34,6 +34,7 @@ import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 
 import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
+import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.graph.UndirectedGraph;
@@ -182,5 +183,10 @@ public class ConsistencyParameterization implements Parameterization {
 		}
 		
 		return Collections.singletonList(list);
+	}
+
+	@Override
+	public Graph<Treatment, FoldedEdge<Treatment, Study>> getBasicParameterTree() {
+		return d_tree;
 	}
 }
