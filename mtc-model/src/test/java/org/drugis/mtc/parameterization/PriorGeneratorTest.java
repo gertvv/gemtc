@@ -80,13 +80,13 @@ public class PriorGeneratorTest {
 
 	@Test
 	public void testPriors() {
-		assertEquals(0.43414982369413, new PriorGenerator(d_networkDich).getRandomEffectsSigma(), EPSILON);
-		assertEquals(0.43414982369413, new PriorGenerator(d_networkDich).getInconsistencySigma(), EPSILON);
+		assertEquals(0.52994627207529, new PriorGenerator(d_networkDich).getRandomEffectsSigma(), EPSILON);
+		assertEquals(0.52994627207529, new PriorGenerator(d_networkDich).getInconsistencySigma(), EPSILON);
 
-		assertEquals(7.0, new PriorGenerator(d_networkCont).getRandomEffectsSigma(), EPSILON);
-		assertEquals(7.0, new PriorGenerator(d_networkCont).getInconsistencySigma(), EPSILON);
+		assertEquals(10.0, new PriorGenerator(d_networkCont).getRandomEffectsSigma(), EPSILON);
+		assertEquals(10.0, new PriorGenerator(d_networkCont).getInconsistencySigma(), EPSILON);
 		
-		assertEquals(Math.sqrt(42.4093656180699), new PriorGenerator(d_networkDich).getVagueNormalSigma(), EPSILON);
-		assertEquals(Math.sqrt(11025.00), new PriorGenerator(d_networkCont).getVagueNormalSigma(), EPSILON);
+		assertEquals(15 * 0.52994627207529, new PriorGenerator(d_networkDich).getVagueNormalSigma(), EPSILON);
+		assertEquals(150, new PriorGenerator(d_networkCont).getVagueNormalSigma(), EPSILON);
 	}
 }

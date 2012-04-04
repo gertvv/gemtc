@@ -93,16 +93,13 @@ public class PriorGenerator {
 	}
 
 	private double range(List<Double> means) {
-		double min = means.get(0);
 		double max = means.get(0);
 		for (int i = 1; i < means.size(); ++i) {
-			if (means.get(i) < min) {
-				min = means.get(i);
-			} else if (means.get(i) > max) {
+			if (means.get(i) > max) {
 				max = means.get(i);
 			}
 		}
-		return max - min;
+		return max;
 	}
 
 	private List<Double> means(Network network, Diff diff) {

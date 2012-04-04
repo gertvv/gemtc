@@ -33,17 +33,17 @@ model {
 
 	# Study baseline priors
 	for (i in 1:ns) {
-		mu[i] ~ dnorm(0, 4.423*10^-3)
+		mu[i] ~ dnorm(0, 4.286*10^-3)
 	}
 
 	# Variance prior
-	sd.d ~ dunif(0, 1.002*10^0)
+	sd.d ~ dunif(0, 1.018*10^0)
 	tau.d <- pow(sd.d, -2)
-	sd.w ~ dunif(0, 1.002*10^0)
+	sd.w ~ dunif(0, 1.018*10^0)
 	tau.w <- pow(sd.w, -2)
 
 	# Effect parameter priors
-	d.A.B ~ dnorm(0, 4.423*10^-3)
-	d.B.C ~ dnorm(0, 4.423*10^-3)
+	d.A.B ~ dnorm(0, 4.286*10^-3)
+	d.B.C ~ dnorm(0, 4.286*10^-3)
 	w.A.B.C ~ dnorm(0, tau.w)
 }
