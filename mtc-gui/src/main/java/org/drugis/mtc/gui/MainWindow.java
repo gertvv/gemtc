@@ -103,6 +103,7 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static void main(String[] args) {
+		ImageLoader.setImagePath("/org/drugis/mtc/gui/");
 		new MainWindow().setVisible(true);
 	}
 
@@ -111,8 +112,7 @@ public class MainWindow extends JFrame {
 
 	public MainWindow() {
 		super(AppInfo.getAppName() + " " + AppInfo.getAppVersion());
-		ImageLoader.setImagePath("/org/drugis/mtc/gui/");
-		createMainWindow(true);
+		createMainWindow();
 	}
 	
 	
@@ -126,7 +126,7 @@ public class MainWindow extends JFrame {
 		});
 	}
 
-	private void createMainWindow(boolean exitOnClose) { 
+	private void createMainWindow() { 
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);			
 		
 		setAppIcon(this);
