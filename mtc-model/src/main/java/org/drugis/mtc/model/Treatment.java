@@ -28,7 +28,7 @@ import org.drugis.mtc.data.TreatmentData;
 
 import com.jgoodies.binding.beans.Observable;
 
-public class Treatment extends TreatmentData implements Observable {
+public class Treatment extends TreatmentData implements Observable, Comparable<Treatment> {
 	public static final String PROPERTY_DESCRIPTION = "description";
 	public static final String PROPERTY_ID = "id";
 	
@@ -85,5 +85,10 @@ public class Treatment extends TreatmentData implements Observable {
 	@Override
 	public String toString() {
 		return "Treatment[" + getId() + "]";
+	}
+
+	@Override
+	public int compareTo(Treatment t) {
+		return getId().compareTo(t.getId());
 	}
 }

@@ -34,7 +34,7 @@ import org.drugis.mtc.data.StudyData;
 import com.jgoodies.binding.beans.Observable;
 import com.jgoodies.binding.list.ObservableList;
 
-public class Study extends StudyData implements Observable {
+public class Study extends StudyData implements Observable, Comparable<Study> {
 	public static final String PROPERTY_ID = "id";
 	
 	@XmlTransient
@@ -102,5 +102,10 @@ public class Study extends StudyData implements Observable {
 			treatments.add(m.getTreatment());
 		}
 		return treatments;
+	}
+
+	@Override
+	public int compareTo(Study s) {
+		return getId().compareTo(s.getId());
 	}
 }

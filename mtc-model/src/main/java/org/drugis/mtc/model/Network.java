@@ -24,8 +24,11 @@ import java.beans.PropertyChangeListener;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.drugis.common.beans.ObserverManager;
+import org.drugis.common.beans.SortedSetModel;
 import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.data.NetworkData;
+import org.drugis.mtc.data.StudyData;
+import org.drugis.mtc.data.TreatmentData;
 
 import com.jgoodies.binding.beans.Observable;
 import com.jgoodies.binding.list.ObservableList;
@@ -34,19 +37,37 @@ public class Network extends NetworkData implements Observable {
 	public static final String PROPERTY_DESCRIPTION = "description";
 	public static final String PROPERTY_TYPE = "type";
 	
+	private static class SortedStudies extends NetworkData.Studies {
+		public SortedStudies(NetworkData.Studies studies) {
+			this.study = new SortedSetModel<StudyData>(studies.getStudy());
+		}
+		public SortedStudies() {
+			this.study = new SortedSetModel<StudyData>();
+		}
+	}
+	
+	private static class SortedTreatments extends NetworkData.Treatments {
+		public SortedTreatments(NetworkData.Treatments treatments) {
+			this.treatment = new SortedSetModel<TreatmentData>(treatments.getTreatment());
+		}
+		public SortedTreatments() {
+			this.treatment = new SortedSetModel<TreatmentData>();
+		}
+	}
+	
 	@XmlTransient
 	ObserverManager d_obsManager = new ObserverManager(this);
 	
 	public Network() {
-		this.studyList = new NetworkData.Studies();
-		this.treatmentList = new NetworkData.Treatments();
+		this.studyList = new SortedStudies();
+		this.treatmentList = new SortedTreatments();
 	}
 	
 	public Network(NetworkData data) {
 		this.description = data.getDescription();
 		this.type = data.getType();
-		this.studyList = data.getStudyList();
-		this.treatmentList = data.getTreatmentList();
+		this.studyList = new SortedStudies(data.getStudyList());
+		this.treatmentList = new SortedTreatments(data.getTreatmentList());
 	}
 	
 	@Override

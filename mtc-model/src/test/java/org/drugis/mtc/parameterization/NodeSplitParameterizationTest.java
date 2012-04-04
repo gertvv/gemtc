@@ -61,15 +61,15 @@ public class NodeSplitParameterizationTest {
 		d_td = new Treatment("D");
 		d_te = new Treatment("E");
 		
-		d_s1 = new Study();
+		d_s1 = new Study("1");
 		d_s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb)));
-		d_s2 = new Study();
+		d_s2 = new Study("2");
 		d_s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tc)));
-		d_s3 = new Study();
+		d_s3 = new Study("3");
 		d_s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_tb), new Measurement(d_tc)));
-		d_s4 = new Study();
+		d_s4 = new Study("4");
 		d_s4.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_td)));
-		d_s5 = new Study();
+		d_s5 = new Study("5");
 		d_s5.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_te)));
 		d_network = new Network();
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td, d_te));
@@ -88,9 +88,9 @@ public class NodeSplitParameterizationTest {
 	
 	@Test
 	public void testSplittableNodesNone() {
-		Study s1 = new Study();
+		Study s1 = new Study("1");
 		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb)));
-		Study s2 = new Study();
+		Study s2 = new Study("2");
 		s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tc)));
 		Network network = new Network();
 		network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc));
@@ -102,11 +102,11 @@ public class NodeSplitParameterizationTest {
 	
 	@Test
 	public void testSplittableNodesFourArm() {
-		Study s1 = new Study();
+		Study s1 = new Study("1");
 		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb)));
-		Study s2 = new Study();
+		Study s2 = new Study("2");
 		s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_td)));
-		Study s3 = new Study();
+		Study s3 = new Study("3");
 		s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb), new Measurement(d_tc), new Measurement(d_td)));
 		Network network = new Network();
 		network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td));
@@ -129,11 +129,11 @@ public class NodeSplitParameterizationTest {
 	
 	@Test
 	public void testAssignBaselines() {
-		Study s1 = new Study();
+		Study s1 = new Study("1");
 		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb)));
-		Study s2 = new Study();
+		Study s2 = new Study("2");
 		s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_td)));
-		Study s3 = new Study();
+		Study s3 = new Study("3");
 		s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb), new Measurement(d_tc), new Measurement(d_td)));
 		Network network = new Network();
 		network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td));
@@ -184,11 +184,11 @@ public class NodeSplitParameterizationTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testParameterizeStudy() {
-		Study s1 = new Study();
+		Study s1 = new Study("1");
 		s1.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb)));
-		Study s2 = new Study();
+		Study s2 = new Study("2");
 		s2.getMeasurements().addAll(Arrays.asList(new Measurement(d_tc), new Measurement(d_td)));
-		Study s3 = new Study();
+		Study s3 = new Study("3");
 		s3.getMeasurements().addAll(Arrays.asList(new Measurement(d_ta), new Measurement(d_tb), new Measurement(d_tc), new Measurement(d_td)));
 		Network network = new Network();
 		network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td));
