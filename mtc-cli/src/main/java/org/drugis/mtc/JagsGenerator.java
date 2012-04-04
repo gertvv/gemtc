@@ -143,7 +143,7 @@ public class JagsGenerator {
 		scriptOut.close();
 
 		for (int i = 0; i < nChains; ++i) {
-			PrintStream paramOut = new PrintStream(d_options.getBaseName() + spec.getNameSuffix() + ".inits" + i);
+			PrintStream paramOut = new PrintStream(d_options.getBaseName() + spec.getNameSuffix() + ".inits" + (i + 1));
 			paramOut.println(spec.getModel().initialValuesText(spec.getGenerator()));
 			paramOut.close();
 		}
