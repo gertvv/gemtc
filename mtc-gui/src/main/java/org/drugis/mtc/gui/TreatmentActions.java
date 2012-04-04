@@ -99,7 +99,11 @@ class TreatmentActions implements ListActions<Treatment> {
 		return item.getId();
 	}
 	public String getTooltip(Treatment item) {
-		return item.getDescription();
+		String description = item.getDescription();
+		if(description == null || description.length() == 0) {
+			description = item.getId();
+		} 
+		return description;
 	}
 
 	public ListModel listPresentation(ObservableList<Treatment> list) {

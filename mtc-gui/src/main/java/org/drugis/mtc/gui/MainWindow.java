@@ -112,7 +112,23 @@ public class MainWindow extends JFrame {
 
 	public MainWindow() {
 		super(AppInfo.getAppName() + " " + AppInfo.getAppVersion());
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		createMainWindow();
+	}
+	
+	
+	public MainWindow(final InputStream is) { 
+		this();
+		final DataSetModel model = readFromStream(is);
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				addModel(model);
+			}
+		});
+	}
+
+	private void createMainWindow() { 
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);			
+		
 		setAppIcon(this);
 
 		setMinimumSize(new Dimension(750, 550));
@@ -122,7 +138,7 @@ public class MainWindow extends JFrame {
 		add(createToolBar(), BorderLayout.NORTH);
 		add(d_mainPane , BorderLayout.CENTER);
 	}
-
+	
 	public static void setAppIcon(JFrame frame) {
 		Image image = null;
 		try {
@@ -258,10 +274,16 @@ public class MainWindow extends JFrame {
 	private DataSetModel readFromFile(final File file) {
 		try {
 			InputStream is = new FileInputStream(file);
-			Network network = JAXBHandler.readNetwork(is);
-			return new DataSetModel(network);
+			return readFromStream(is);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	private DataSetModel readFromStream(final InputStream is) {
+		try {
+			Network network = JAXBHandler.readNetwork(is);
+			return new DataSetModel(network);
 		} catch (JAXBException e) {
 			throw new RuntimeException(e);
 		}
