@@ -102,7 +102,7 @@ public class PriorGenerator {
 				max = means.get(i);
 			}
 		}
-		return max - min;
+		return max;
 	}
 
 	private List<Double> means(Network network, Diff diff) {
