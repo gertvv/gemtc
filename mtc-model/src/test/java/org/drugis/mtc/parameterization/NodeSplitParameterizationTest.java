@@ -197,12 +197,12 @@ public class NodeSplitParameterizationTest {
 		BasicParameter split = new BasicParameter(d_ta, d_tc);
 		NodeSplitParameterization pmtz = NodeSplitParameterization.create(network, split);
 		
-		assertEquals(new BasicParameter(d_td, d_ta), pmtz.getParameters().get(0)); // Check assumption
+		assertEquals(new BasicParameter(d_tb, d_ta), pmtz.getParameters().get(0)); // Check assumption
 		
-		assertEquals(Collections.singletonList(Collections.singletonList(new Pair<Treatment>(d_ta, d_tb))),
+		assertEquals(Collections.singletonList(Collections.singletonList(new Pair<Treatment>(d_tb, d_ta))),
 				pmtz.parameterizeStudy(s1));
 		
-		List<Pair<Treatment>> l1 = Arrays.asList(new Pair<Treatment>(d_td, d_ta), new Pair<Treatment>(d_td, d_tb));
+		List<Pair<Treatment>> l1 = Arrays.asList(new Pair<Treatment>(d_tb, d_ta), new Pair<Treatment>(d_tb, d_td));
 		List<Pair<Treatment>> l2 = Arrays.asList(new Pair<Treatment>(d_ta, d_tc));
 		List<List<Pair<Treatment>>> expected = Arrays.asList(l1, l2);
 		assertEquals(expected, pmtz.parameterizeStudy(s3));

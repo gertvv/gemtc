@@ -31,6 +31,7 @@ import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.algorithms.shortestpath.Distance;
 import edu.uci.ics.jung.graph.UndirectedGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 /**
  * Find the absolute 1-center of an undirected graph.
@@ -111,12 +112,26 @@ public class AbsoluteOneCenter<V, E> {
 		Center<V, E> c = null;
 		for (E e : d_graph.getEdges()) {
 			Center<V, E> lc = localCenter.transform(e);
-			if (c == null || lc.getRadius() < c.getRadius()) {
+			if (c == null || lc.getRadius() < c.getRadius() ||
+					(lc.getRadius() == c.getRadius() && compareEdge(lc.getEdge(), c.getEdge()) < 0)) {
 				c = lc;
 			}
 		}
 		
 		return c;
+	}
+
+	private int compareEdge(E e1, E e2) {
+		if (d_comparator == null) {
+			return 0;
+		}
+		Pair<V> x = new Pair<V>(d_graph.getIncidentVertices(e1));
+		Pair<V> y = new Pair<V>(d_graph.getIncidentVertices(e2));
+		final int compareFirst = d_comparator.compare(x.getFirst(), y.getFirst());
+		if (compareFirst != 0) {
+			return compareFirst;
+		}
+		return d_comparator.compare(x.getSecond(), y.getSecond());
 	}
 
 	/**

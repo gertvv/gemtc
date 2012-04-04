@@ -98,7 +98,7 @@ public class MinimumDiameterSpanningTree<V, E> {
 	}
 
 	public Tree<V, E> getMinimumDiameterSpanningTree() {
-		PointOnEdge<V, E> center = new AbsoluteOneCenter<V, E>(d_graph, d_edgeLength, d_distance).getCenter();
+		PointOnEdge<V, E> center = new AbsoluteOneCenter<V, E>(d_graph, d_edgeLength, d_distance, d_vertexComparator).getCenter();
 		DelegateTree<V,E> tree = new DelegateTree<V, E>();
 		
 		// add the center edge
@@ -121,7 +121,8 @@ public class MinimumDiameterSpanningTree<V, E> {
 			}
 			double d0 = d_distance.getDistance(center.getVertex0(), v).doubleValue();
 			double d1 = d_distance.getDistance(center.getVertex1(), v).doubleValue();
-			if (d0 + center.getDistance() <= d1 + l(center.getEdge()) - center.getDistance()) {
+			double d = (d0 + center.getDistance()) - (d1 + l(center.getEdge()) - center.getDistance());
+			if (d < 0 || (d == 0 && vc <= 0)) {
 				addPath(tree, center.getVertex0(), v);
 			} else {
 				addPath(tree, center.getVertex1(), v);
