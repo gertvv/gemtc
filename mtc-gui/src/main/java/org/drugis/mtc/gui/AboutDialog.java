@@ -34,8 +34,6 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
-import org.drugis.common.ImageLoader;
-
 public class AboutDialog extends JDialog {
 	private static final long serialVersionUID = -1058158913598958769L;
 
@@ -82,7 +80,7 @@ public class AboutDialog extends JDialog {
 		textArea.setBorder(border);
 		add(textArea, BorderLayout.CENTER);
 		
-		JLabel logoLabel = new JLabel(ImageLoader.getIcon("gemtc.png"));
+		JLabel logoLabel = new JLabel(MainWindow.IMAGELOADER.getIcon("gemtc.png"));
 		logoLabel.setBorder(border);
 		add(logoLabel, BorderLayout.EAST);
 		
