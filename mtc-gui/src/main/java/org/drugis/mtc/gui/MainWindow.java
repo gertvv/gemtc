@@ -99,11 +99,10 @@ public class MainWindow extends JFrame {
 
 	}
 
-
+	public static final ImageLoader IMAGELOADER = new ImageLoader("/org/drugis/mtc/gui/");
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static void main(String[] args) {
-		ImageLoader.setImagePath("/org/drugis/mtc/gui/");
 		new MainWindow().setVisible(true);
 	}
 
@@ -116,9 +115,9 @@ public class MainWindow extends JFrame {
 	}
 	
 	
-	public MainWindow(final InputStream is) { 
+	public MainWindow(final Network network) { 
 		this();
-		final DataSetModel model = readFromStream(is);
+		final DataSetModel model = new DataSetModel(network);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				addModel(model);
@@ -142,7 +141,7 @@ public class MainWindow extends JFrame {
 	public static void setAppIcon(JFrame frame) {
 		Image image = null;
 		try {
-			image = ((ImageIcon)ImageLoader.getIcon("appicon.png")).getImage();
+			image = ((ImageIcon)MainWindow.IMAGELOADER.getIcon("appicon.png")).getImage();
 		} catch (Exception e) {
 			// suppress
 		}
@@ -174,7 +173,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createNewButton() {
-		JButton newButton = new JButton("New", ImageLoader.getIcon("newfile.gif"));
+		JButton newButton = new JButton("New", MainWindow.IMAGELOADER.getIcon("newfile.gif"));
 		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addModel(new DataSetModel());
@@ -184,7 +183,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createOpenButton() {
-		JButton openButton = new JButton("Open", ImageLoader.getIcon("openfile.gif"));
+		JButton openButton = new JButton("Open", MainWindow.IMAGELOADER.getIcon("openfile.gif"));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				FileLoadDialog dialog = new FileLoadDialog(MainWindow.this, "gemtc", "GeMTC files") {
@@ -206,7 +205,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createSaveButton() {
-		JButton saveButton = new JButton("Save", ImageLoader.getIcon("savefile.gif"));
+		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon("savefile.gif"));
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
@@ -232,7 +231,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createGenerateButton() {
-		JButton button = new JButton("Generate", ImageLoader.getIcon("generate.gif"));
+		JButton button = new JButton("Generate", MainWindow.IMAGELOADER.getIcon("generate.gif"));
 		button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
@@ -262,7 +261,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	private JButton createAboutButton() {
-		JButton aboutButton = new JButton("About", ImageLoader.getIcon("about.gif"));
+		JButton aboutButton = new JButton("About", MainWindow.IMAGELOADER.getIcon("about.gif"));
 		aboutButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				(new AboutDialog(MainWindow.this)).setVisible(true);

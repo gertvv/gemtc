@@ -39,7 +39,6 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.drugis.common.ImageLoader;
 import org.drugis.mtc.gui.CodeGenerationDialog.ModelType;
 import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
@@ -172,7 +171,7 @@ public class GeneratedCodeWindow extends JFrame {
 	}
 
 	private JButton createSaveButton() {
-		JButton saveButton = new JButton("Save", ImageLoader.getIcon("savefile.gif"));
+		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon("savefile.gif"));
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
