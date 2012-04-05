@@ -63,7 +63,6 @@ import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueModel;
 
 public class MainWindow extends JFrame {
-	public static final ImageLoader IMAGELOADER = new ImageLoader("/org/drugis/mtc/gui/");
 	public class FileNameModel extends AbstractValueModel {
 		private static final long serialVersionUID = -8194830838726012699L;
 
@@ -100,7 +99,7 @@ public class MainWindow extends JFrame {
 
 	}
 
-
+	public static final ImageLoader IMAGELOADER = new ImageLoader("/org/drugis/mtc/gui/");
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static void main(String[] args) {
@@ -116,9 +115,9 @@ public class MainWindow extends JFrame {
 	}
 	
 	
-	public MainWindow(final InputStream is) { 
+	public MainWindow(final Network network) { 
 		this();
-		final DataSetModel model = readFromStream(is);
+		final DataSetModel model = new DataSetModel(network);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				addModel(model);
