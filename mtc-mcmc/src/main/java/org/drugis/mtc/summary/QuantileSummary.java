@@ -42,7 +42,6 @@ public class QuantileSummary extends AbstractObservable implements MCMCResultsLi
 	private MCMCResults d_results;
 	private double[] d_quantiles;
 	private boolean d_defined = false;
-	private boolean d_continuous = false; 
 
 	public QuantileSummary(MCMCResults results, Parameter parameter, double[] probabilities) {
 		this.d_probabilities = probabilities;
@@ -132,13 +131,5 @@ public class QuantileSummary extends AbstractObservable implements MCMCResultsLi
 	
 	public boolean getDefined() {
 		return d_defined;
-	}
-
-	public boolean isContinuous() {
-		return d_continuous;
-	}
-
-	public void setContinuous(boolean continuous) {
-		d_continuous = continuous;
 	}
 }
