@@ -23,6 +23,7 @@ import org.drugis.common.threading.activity.ActivityTask;
 
 
 public interface MCMCModel {
+	
 	/**
 	 * Get the ActivityTask that defines how to execute this MCMC model.
 	 */

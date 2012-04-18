@@ -51,7 +51,7 @@ abstract public class InconsistencyModelTestBase {
 	private Study d_s3;
 	private Network d_network;
 	private InconsistencyModel d_model;
-
+	
 	@Before
 	public void setUp() {
 		d_ta = new Treatment("A");
