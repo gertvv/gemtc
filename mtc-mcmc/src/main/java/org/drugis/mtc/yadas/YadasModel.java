@@ -93,7 +93,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	protected Parameter d_inconsistencyVar = new InconsistencyVariance();
 
 	private int d_burnInIter = 20000;
-	protected int d_simulationIter = 50000;
+	protected int d_simulationIter = 60000;
 	private int d_reportingInterval = 100;
 
 	private YadasResults d_results = new YadasResults();
