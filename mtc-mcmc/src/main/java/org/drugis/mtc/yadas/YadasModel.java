@@ -39,14 +39,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.drugis.common.threading.AbortedException;
 import org.drugis.common.threading.AbstractIterativeComputation;
 import org.drugis.common.threading.IterativeTask;
 import org.drugis.common.threading.NullTask;
+import org.drugis.common.threading.RestartableIterativeTask;
 import org.drugis.common.threading.SimpleSuspendableTask;
 import org.drugis.common.threading.Task;
 import org.drugis.common.threading.TaskListener;
 import org.drugis.common.threading.activity.ActivityModel;
 import org.drugis.common.threading.activity.ActivityTask;
+import org.drugis.common.threading.activity.Condition;
+import org.drugis.common.threading.activity.DecisionTransition;
 import org.drugis.common.threading.activity.DirectTransition;
 import org.drugis.common.threading.activity.ForkTransition;
 import org.drugis.common.threading.activity.JoinTransition;
@@ -89,14 +93,17 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	protected Parameter d_inconsistencyVar = new InconsistencyVariance();
 
 	private int d_burnInIter = 20000;
-	protected int d_simulationIter = 100000;
+	protected int d_simulationIter = 50000;
 	private int d_reportingInterval = 100;
 
 	private YadasResults d_results = new YadasResults();
 	private ActivityTask d_activityTask;
 
 	private SimpleSuspendableTask d_finalPhase;
-
+	private ExtendSimulation d_extendSimulation = ExtendSimulation.WAIT;
+	private Task d_extendDecisionPhase;
+	private Task d_extendSimulationPhase;	
+	
 	private class BurnInChain extends AbstractIterativeComputation {
 		private final int d_chain;
 		
@@ -131,13 +138,25 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		}
 	}
 	
-	private class SimulationTask extends IterativeTask {
+	private class SimulationTask extends RestartableIterativeTask {
 		public SimulationTask(int chain) {
 			super(new SimulationChain(chain), "simulation:" + chain);
 			setReportingInterval(d_reportingInterval);
 		}
 	}
+	
+	private class SimpleRestartableSuspendableTask extends SimpleSuspendableTask {
 
+		public SimpleRestartableSuspendableTask(Runnable runnable, String string) {
+			super(runnable, string);
+		} 
+		
+		public void reset() {
+			d_finished = false;
+			d_mgr.fireTaskRestarted();
+		}
+	}
+	
 	public YadasModel(Network network) {
 		d_network = network;
 
@@ -151,31 +170,61 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				buildModel();
 			}
 		}, "building model");
-		List<Task> burnInPhase = new ArrayList<Task>(d_nChains);
-		List<Task> simulationPhase = new ArrayList<Task>(d_nChains);
+		final List<Task> burnInPhase = new ArrayList<Task>(d_nChains);
+		final List<Task> simulationPhase = new ArrayList<Task>(d_nChains);
 		for (int i = 0; i < d_nChains; ++i) {
 			burnInPhase.add(new BurnInTask(i));
 			simulationPhase.add(new SimulationTask(i));
 		}
+		
+		d_extendDecisionPhase = new SimpleRestartableSuspendableTask(new Runnable() {
+			@Override
+			public void run() {
+				while (d_extendSimulation == ExtendSimulation.WAIT) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						throw new AbortedException("Interruption while waiting; " + e);
+					}
+				}
+				((SimpleRestartableSuspendableTask) d_extendSimulationPhase).reset();
+			}
+		}, "waiting to extend the simulation");
+				
+		d_extendSimulationPhase = new SimpleRestartableSuspendableTask(new Runnable() {
+			public void run() {
+				((SimpleRestartableSuspendableTask) d_extendDecisionPhase).reset();
+				for(Task t : simulationPhase) {
+					((RestartableIterativeTask) t).restart();
+				}
+				d_extendSimulation = ExtendSimulation.WAIT;
+			}
+		}, "restarting simulation");
+		
 		d_finalPhase = new NullTask();
-
 		// Build transition graph between phases of the MCMC simulation
 		List<Transition> transitions = new ArrayList<Transition>();
 		transitions.add(new ForkTransition(buildModelPhase, burnInPhase));
-		transitions.add(new JoinTransition(simulationPhase, d_finalPhase));
 		for (int i = 0; i < d_nChains; ++i) {
 			transitions.add(new DirectTransition(burnInPhase.get(i), simulationPhase.get(i)));
 		}
-		
+		transitions.add(new JoinTransition(simulationPhase, d_extendDecisionPhase));
+		transitions.add(new DecisionTransition(d_extendDecisionPhase, d_extendSimulationPhase, d_finalPhase, new Condition() {
+			public boolean evaluate() {
+				return d_extendSimulation == ExtendSimulation.EXTEND;
+			}
+		}));
+		transitions.add(new ForkTransition(d_extendSimulationPhase, simulationPhase));
 		// Together they form the full "activity"
 		ActivityModel activityModel = new ActivityModel(buildModelPhase, d_finalPhase, transitions);
 		d_activityTask = new ActivityTask(activityModel, "MCMC model");
 	}
 
+
 	abstract protected boolean isInconsistency();
 	
 	public boolean isReady() {
-		return d_finalPhase.isFinished();
+		return d_activityTask.isFinished() || d_extendDecisionPhase.isStarted();
 	}
 
 	public ActivityTask getActivityTask() {
@@ -291,18 +340,35 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		d_results.setNumberOfIterations(d_simulationIter);
 
 		d_results.setDerivedParameters(getDerivedParameters());
-//		results.setDerivedParameters(
-//			indirectParameters.map(p => (p, derivation(p))).toList)
-		
+
 		for (int i = 0 ; i < d_nChains; ++i) {
 			createChain(i);
 		}
-
+		
+		
 		d_finalPhase.addTaskListener(new TaskListener() {
 			@Override
 			public void taskEvent(TaskEvent event) {
 				if (event.getType() == EventType.TASK_FINISHED) {
 					d_results.simulationFinished();
+				}
+			}
+		});
+		d_extendDecisionPhase.addTaskListener(new TaskListener() {
+			@Override
+			public void taskEvent(TaskEvent event) {
+				if (event.getType() == EventType.TASK_STARTED) {
+					d_results.simulationFinished();
+				}
+			}
+		});
+		
+		d_extendSimulationPhase.addTaskListener(new TaskListener() {
+			@Override
+			public void taskEvent(TaskEvent event) {
+				if (event.getType() == EventType.TASK_STARTED) {
+					d_results.setNumberOfIterations(d_results.getNumberOfIterations() + d_simulationIter);
+					d_results.setDerivedParameters(getDerivedParameters());
 				}
 			}
 		});
@@ -590,4 +656,10 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			p.output();
 		}
 	}
+
+	public void setExtendSimulation(ExtendSimulation s) {
+		d_extendSimulation = s;
+	}
+
+
 }

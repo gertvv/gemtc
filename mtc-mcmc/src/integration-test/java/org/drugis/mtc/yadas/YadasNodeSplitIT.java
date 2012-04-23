@@ -29,6 +29,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.drugis.common.threading.TaskUtil;
+import org.drugis.mtc.MixedTreatmentComparison.ExtendSimulation;
 import org.drugis.mtc.ResultsUtil;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
@@ -44,7 +45,6 @@ public class YadasNodeSplitIT {
 	private StandardDeviation d_stdDev = new StandardDeviation();
 	
 	private Network d_network;
-//	private Treatment d_ipci;
 	private Treatment d_mpci;
 	private Treatment d_spci;
 
@@ -53,7 +53,6 @@ public class YadasNodeSplitIT {
 		InputStream is = ContinuousDataIT.class.getResourceAsStream("vlaar-longterm.xml");
 		d_network = JAXBHandler.readNetwork(is);
 
-//		d_ipci = new Treatment("iPCI");
 		d_mpci = new Treatment("mPCI");
 		d_spci = new Treatment("sPCI");
 	}
@@ -61,6 +60,7 @@ public class YadasNodeSplitIT {
 	@Test
 	public void testResult() throws InterruptedException {
 		YadasNodeSplitModel model = new YadasNodeSplitModel(d_network, new BasicParameter(d_mpci, d_spci));
+		model.setExtendSimulation(ExtendSimulation.FINISH);
 		TaskUtil.run(model.getActivityTask());
 		
 		assertTrue(model.isReady());
