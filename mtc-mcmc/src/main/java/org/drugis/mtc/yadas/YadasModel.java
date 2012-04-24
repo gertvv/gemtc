@@ -40,10 +40,11 @@ import java.util.Map;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.drugis.common.threading.AbortedException;
+import org.drugis.common.threading.AbstractExtendableIterativeComputation;
 import org.drugis.common.threading.AbstractIterativeComputation;
+import org.drugis.common.threading.ExtendableIterativeTask;
 import org.drugis.common.threading.IterativeTask;
 import org.drugis.common.threading.NullTask;
-import org.drugis.common.threading.RestartableIterativeTask;
 import org.drugis.common.threading.SimpleSuspendableTask;
 import org.drugis.common.threading.Task;
 import org.drugis.common.threading.TaskListener;
@@ -117,7 +118,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		}
 	}
 
-	private class SimulationChain extends AbstractIterativeComputation {
+	private class SimulationChain extends AbstractExtendableIterativeComputation {
 		private final int d_chain;
 		
 		public SimulationChain(int chain) {
@@ -138,7 +139,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		}
 	}
 	
-	private class SimulationTask extends RestartableIterativeTask {
+	private class SimulationTask extends ExtendableIterativeTask {
 		public SimulationTask(int chain) {
 			super(new SimulationChain(chain), "simulation:" + chain);
 			setReportingInterval(d_reportingInterval);
@@ -195,7 +196,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			public void run() {
 				((SimpleRestartableSuspendableTask) d_extendDecisionPhase).reset();
 				for(Task t : simulationPhase) {
-					((RestartableIterativeTask) t).restart();
+					((ExtendableIterativeTask) t).extend(d_simulationIter);
 				}
 				d_extendSimulation = ExtendSimulation.WAIT;
 			}
