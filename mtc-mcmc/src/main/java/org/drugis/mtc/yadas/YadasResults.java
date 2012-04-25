@@ -22,6 +22,7 @@ package org.drugis.mtc.yadas;
 import gov.lanl.yadas.MCMCParameter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -204,8 +205,9 @@ public class YadasResults implements MCMCResults {
 	public void simulationFinished() {
 		d_availableSamples = d_reservedSamples;
 		MCMCResultsEvent event = new MCMCResultsEvent(this);
-		for (MCMCResultsListener l : d_listeners) {
-			l.resultsEvent(event);
+		for (Iterator<MCMCResultsListener> l = d_listeners.iterator(); l.hasNext() ; ) {
+			MCMCResultsListener listener = l.next();
+			listener.resultsEvent(event);
 		}
 	}
 	
