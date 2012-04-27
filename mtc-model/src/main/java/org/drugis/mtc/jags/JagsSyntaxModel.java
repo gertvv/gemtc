@@ -360,7 +360,7 @@ public class JagsSyntaxModel {
 	/**
 	 * Fill a matrix with Doubles that correspond to each (study, arm) combination.
 	 * @see getTreatments() for the order in which arms are listed. 
-	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponsing number.
+	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponding number.
 	 * @return The generated matrix, containing "null" for missing combinations.
 	 */
 	public Double[][] getMatrix(StudyTreatmentTransformer<Double> transformer) {
@@ -372,7 +372,7 @@ public class JagsSyntaxModel {
 	/**
 	 * Fill a matrix with Integers that correspond to each (study, arm) combination.
 	 * @see getTreatments() for the order in which arms are listed.
-	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponsing number.
+	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponding number.
 	 * @return The generated matrix, containing "null" for missing combinations.
 	 */
 	public Integer[][] getMatrix(StudyTreatmentTransformer<Integer> transformer) {
