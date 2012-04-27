@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.drugis.common.threading.AbortedException;
 import org.drugis.common.threading.AbstractExtendableIterativeComputation;
 import org.drugis.common.threading.AbstractIterativeComputation;
 import org.drugis.common.threading.ExtendableIterativeTask;
@@ -48,6 +47,7 @@ import org.drugis.common.threading.NullTask;
 import org.drugis.common.threading.SimpleSuspendableTask;
 import org.drugis.common.threading.Task;
 import org.drugis.common.threading.TaskListener;
+import org.drugis.common.threading.WaitingTask;
 import org.drugis.common.threading.activity.ActivityModel;
 import org.drugis.common.threading.activity.ActivityTask;
 import org.drugis.common.threading.activity.Condition;
@@ -105,6 +105,34 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	private Task d_extendDecisionPhase;
 	private Task d_extendSimulationPhase;	
 	
+	private final class ExtendDecisionTask extends WaitingTask {
+		@Override
+		public boolean isWaiting() {
+			return d_extendSimulation == ExtendSimulation.WAIT;
+		}
+
+		@Override
+		public void onEndWaiting() {
+			d_started = false;
+			d_finished = true;
+			if (d_extendSimulation == ExtendSimulation.EXTEND) {
+				((SimpleRestartableSuspendableTask) d_extendSimulationPhase).reset();
+			}
+			d_mgr.fireTaskFinished();
+		}
+		
+		public void reset() {
+			d_extendSimulation = ExtendSimulation.WAIT;
+			d_finished = false;
+			d_mgr.fireTaskRestarted();
+		}
+		
+		@Override
+		public String toString() {
+			return "Assess convergence";
+		}
+	}
+
 	private class BurnInChain extends AbstractIterativeComputation {
 		private final int d_chain;
 		
@@ -134,14 +162,14 @@ abstract class YadasModel implements MixedTreatmentComparison {
 
 	private class BurnInTask extends IterativeTask {
 		public BurnInTask(int chain) {
-			super(new BurnInChain(chain), "burn-in:" + chain);
+			super(new BurnInChain(chain), "Tuning: " + chain);
 			setReportingInterval(d_reportingInterval);
 		}
 	}
 	
 	private class SimulationTask extends ExtendableIterativeTask {
 		public SimulationTask(int chain) {
-			super(new SimulationChain(chain), "simulation:" + chain);
+			super(new SimulationChain(chain), "Simulation: " + chain);
 			setReportingInterval(d_reportingInterval);
 		}
 	}
@@ -170,37 +198,28 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			public void run() {
 				buildModel();
 			}
-		}, "building model");
+		}, "Building model");
 		final List<Task> burnInPhase = new ArrayList<Task>(d_nChains);
 		final List<Task> simulationPhase = new ArrayList<Task>(d_nChains);
 		for (int i = 0; i < d_nChains; ++i) {
 			burnInPhase.add(new BurnInTask(i));
 			simulationPhase.add(new SimulationTask(i));
 		}
-		
-		d_extendDecisionPhase = new SimpleRestartableSuspendableTask(new Runnable() {
-			@Override
-			public void run() {
-				while (d_extendSimulation == ExtendSimulation.WAIT) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						throw new AbortedException("Interruption while waiting; " + e);
-					}
-				}
-				((SimpleRestartableSuspendableTask) d_extendSimulationPhase).reset();
-			}
-		}, "assess convergence");
+
+		d_extendDecisionPhase = new ExtendDecisionTask();
 				
 		d_extendSimulationPhase = new SimpleRestartableSuspendableTask(new Runnable() {
 			public void run() {
-				((SimpleRestartableSuspendableTask) d_extendDecisionPhase).reset();
+				// Extend the simulations. This is safe because they won't be started before this task is finished.
 				for(Task t : simulationPhase) {
 					((ExtendableIterativeTask) t).extend(d_simulationIter);
 				}
-				d_extendSimulation = ExtendSimulation.WAIT;
+				d_results.setNumberOfIterations(d_results.getNumberOfIterations() + d_simulationIter);
+				d_results.setDerivedParameters(getDerivedParameters());
+				// Finally, reset the decision phase. Must be done last otherwise it becomes a next state.
+				((ExtendDecisionTask) d_extendDecisionPhase).reset();
 			}
-		}, "extending simulation");
+		}, "Extending simulation");
 		
 		d_finalPhase = new NullTask();
 		// Build transition graph between phases of the MCMC simulation
@@ -364,15 +383,6 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			}
 		});
 		
-		d_extendSimulationPhase.addTaskListener(new TaskListener() {
-			@Override
-			public void taskEvent(TaskEvent event) {
-				if (event.getType() == EventType.TASK_STARTED) {
-					d_results.setNumberOfIterations(d_results.getNumberOfIterations() + d_simulationIter);
-					d_results.setDerivedParameters(getDerivedParameters());
-				}
-			}
-		});
 	}
 	
 	////
