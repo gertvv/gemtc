@@ -205,9 +205,9 @@ public class YadasResults implements MCMCResults {
 	public void simulationFinished() {
 		d_availableSamples = d_reservedSamples;
 		MCMCResultsEvent event = new MCMCResultsEvent(this);
-		for (Iterator<MCMCResultsListener> l = d_listeners.iterator(); l.hasNext() ; ) {
-			MCMCResultsListener listener = l.next();
-			listener.resultsEvent(event);
+		List<MCMCResultsListener> listeners = new ArrayList<MCMCResultsListener>(d_listeners);
+		for (MCMCResultsListener l : listeners) {
+			l.resultsEvent(event);
 		}
 	}
 	
