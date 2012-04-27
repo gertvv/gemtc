@@ -190,7 +190,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				}
 				((SimpleRestartableSuspendableTask) d_extendSimulationPhase).reset();
 			}
-		}, "waiting to extend the simulation");
+		}, "assess convergence");
 				
 		d_extendSimulationPhase = new SimpleRestartableSuspendableTask(new Runnable() {
 			public void run() {
@@ -200,7 +200,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				}
 				d_extendSimulation = ExtendSimulation.WAIT;
 			}
-		}, "restarting simulation");
+		}, "extending simulation");
 		
 		d_finalPhase = new NullTask();
 		// Build transition graph between phases of the MCMC simulation
