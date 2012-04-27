@@ -39,5 +39,4 @@ public class YadasConsistencyModel extends YadasModel implements ConsistencyMode
 	protected boolean isInconsistency() {
 		return false;
 	}
-
 }

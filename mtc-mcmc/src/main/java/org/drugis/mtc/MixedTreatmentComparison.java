@@ -27,6 +27,11 @@ import org.drugis.mtc.model.Treatment;
  * the model has been run (by executing the ActivityModel).
  */
 public interface MixedTreatmentComparison extends MCMCModel {
+	
+	public enum ExtendSimulation { 
+		WAIT, EXTEND, FINISH
+	}
+	
 	/**
 	 * Get the relative effect MCMCParameter.
 	 * @return The effect parameter.
@@ -43,4 +48,11 @@ public interface MixedTreatmentComparison extends MCMCModel {
 	 * @return The variance parameter.
 	 */
 	public Parameter getRandomEffectsVariance();
+
+	
+	/**
+	 * @param s Whether to finish or extend the simulation, or to wait for input.
+	 */
+	public void setExtendSimulation(ExtendSimulation s);
+	
 }

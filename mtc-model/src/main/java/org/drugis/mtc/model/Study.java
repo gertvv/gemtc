@@ -56,7 +56,7 @@ public class Study extends StudyData implements Observable, Comparable<Study> {
 		d_obsManager.firePropertyChange(PROPERTY_ID, oldValue, newValue);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ObservableList<Measurement> getMeasurements() {
 		return (ObservableList) super.getMeasurementList();
 	}

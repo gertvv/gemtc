@@ -53,7 +53,7 @@ public class YadasConsistencyModelTest {
 
 	@Test 
 	public void testSimulationIterations() {
-		assertEquals(100000, d_model.getSimulationIterations());
+		assertEquals(60000, d_model.getSimulationIterations());
 		d_model.setSimulationIterations(10000);
 		assertEquals(10000, d_model.getSimulationIterations());
 	}

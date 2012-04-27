@@ -191,6 +191,10 @@ public class YadasResults implements MCMCResults {
 			}
 		}
 	}
+	
+	public int getNumberOfIterations() { 
+		return d_reservedSamples;
+	}
 
 	@Override
 	public int getNumberOfSamples() {
@@ -200,10 +204,13 @@ public class YadasResults implements MCMCResults {
 	public void simulationFinished() {
 		d_availableSamples = d_reservedSamples;
 		MCMCResultsEvent event = new MCMCResultsEvent(this);
-		for (MCMCResultsListener l : d_listeners) {
+		List<MCMCResultsListener> listeners = new ArrayList<MCMCResultsListener>(d_listeners);
+		for (MCMCResultsListener l : listeners) {
 			l.resultsEvent(event);
 		}
 	}
+	
+
 	
 	@Override
 	public void addResultsListener(MCMCResultsListener l) {

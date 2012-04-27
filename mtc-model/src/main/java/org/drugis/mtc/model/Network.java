@@ -84,12 +84,12 @@ public class Network extends NetworkData implements Observable {
 		d_obsManager.firePropertyChange(PROPERTY_DESCRIPTION, oldValue, newValue);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ObservableList<Treatment> getTreatments() {
 		return (ObservableList<Treatment>) (ObservableList) super.getTreatmentList().getTreatment();
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ObservableList<Study> getStudies() {
 		return (ObservableList<Study>) (ObservableList) super.getStudyList().getStudy();
 	}

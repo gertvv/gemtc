@@ -29,6 +29,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.drugis.common.threading.TaskUtil;
+import org.drugis.mtc.MixedTreatmentComparison.ExtendSimulation;
 import org.drugis.mtc.ResultsUtil;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
@@ -65,6 +66,7 @@ public class ContinuousDataIT {
 	@Test
 	public void testResult() throws InterruptedException {
 		YadasConsistencyModel model = new YadasConsistencyModel(d_network);
+		model.setExtendSimulation(ExtendSimulation.FINISH);
 		TaskUtil.run(model.getActivityTask());
 		
 		assertTrue(model.isReady());
