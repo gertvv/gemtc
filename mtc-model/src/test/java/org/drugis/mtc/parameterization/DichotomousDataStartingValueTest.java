@@ -183,7 +183,7 @@ public class DichotomousDataStartingValueTest {
 				generator.getRelativeEffect(new BasicParameter(d_ta, d_td)), EPSILON);
 		EasyMock.verify(rng);
 	}
-	
+
 	@Test
 	public void testStandardDeviation() {
 		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);

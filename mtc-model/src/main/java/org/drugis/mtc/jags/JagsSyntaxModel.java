@@ -164,7 +164,7 @@ public class JagsSyntaxModel {
 	}
 
 	private List<Pair<String>> initRelativeEffects(final StartingValueGenerator generator) {
-		Double[][] relativeEffects = getMatrix(new StudyTreatmentTransformer<Double>() {
+		Double[][] relativeEffects = getDoubleMatrix(new StudyTreatmentTransformer<Double>() {
 			public Double transform(final Study s, final Treatment t) {
 				final Treatment b = d_pmtz.getStudyBaseline(s);
 				if (b.equals(t)) {
@@ -318,28 +318,28 @@ public class JagsSyntaxModel {
 	}
 	
 	public Integer[][] getTreatmentMatrix() {
-		return getMatrix(new StudyTreatmentTransformer<Integer>() {
+		return getIntegerMatrix(new StudyTreatmentTransformer<Integer>() {
 			public Integer transform(Study s, Treatment t) {
 				return d_network.getTreatments().indexOf(t) + 1;
 			}});
 	}
 	
 	public Integer[][] getResponderMatrix() {
-		return getMatrix(new StudyTreatmentTransformer<Integer>() {
+		return getIntegerMatrix(new StudyTreatmentTransformer<Integer>() {
 			public Integer transform(Study s, Treatment t) {
 				return NetworkModel.findMeasurement(s, t).getResponders();
 			}});
 	}
 
 	public Double[][] getMeanMatrix() {
-		return getMatrix(new StudyTreatmentTransformer<Double>() {
+		return getDoubleMatrix(new StudyTreatmentTransformer<Double>() {
 			public Double transform(Study s, Treatment t) {
 				return NetworkModel.findMeasurement(s, t).getMean();
 			}});
 	}
 	
 	public Double[][] getStdErrMatrix() {
-		return getMatrix(new StudyTreatmentTransformer<Double>() {
+		return getDoubleMatrix(new StudyTreatmentTransformer<Double>() {
 			public Double transform(Study s, Treatment t) {
 				final Measurement m = NetworkModel.findMeasurement(s, t);
 				return m.getStdDev() / Math.sqrt(m.getSampleSize());
@@ -347,7 +347,7 @@ public class JagsSyntaxModel {
 	}
 	
 	public Integer[][] getSampleSizeMatrix() {
-		return getMatrix(new StudyTreatmentTransformer<Integer>() {
+		return getIntegerMatrix(new StudyTreatmentTransformer<Integer>() {
 			public Integer transform(Study s, Treatment t) {
 				return NetworkModel.findMeasurement(s, t).getSampleSize();
 			}});
@@ -363,7 +363,7 @@ public class JagsSyntaxModel {
 	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponding number.
 	 * @return The generated matrix, containing "null" for missing combinations.
 	 */
-	public Double[][] getMatrix(StudyTreatmentTransformer<Double> transformer) {
+	public Double[][] getDoubleMatrix(StudyTreatmentTransformer<Double> transformer) {
 		Double[][] m = new Double[d_network.getStudies().size()][getMaxArmCount()];
 		getMatrix(m, transformer);
 		return m;
@@ -375,7 +375,7 @@ public class JagsSyntaxModel {
 	 * @param transformer Takes a pair of (Study, Treatment) and gives the corresponding number.
 	 * @return The generated matrix, containing "null" for missing combinations.
 	 */
-	public Integer[][] getMatrix(StudyTreatmentTransformer<Integer> transformer) {
+	public Integer[][] getIntegerMatrix(StudyTreatmentTransformer<Integer> transformer) {
 		Integer[][] m = new Integer[d_network.getStudies().size()][getMaxArmCount()];
 		getMatrix(m, transformer);
 		return m;
