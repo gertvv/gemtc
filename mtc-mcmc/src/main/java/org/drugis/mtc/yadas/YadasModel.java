@@ -103,7 +103,8 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	private SimpleSuspendableTask d_finalPhase;
 	private ExtendSimulation d_extendSimulation = ExtendSimulation.WAIT;
 	private Task d_extendDecisionPhase;
-	private Task d_extendSimulationPhase;	
+	private Task d_extendSimulationPhase;
+	private SimpleSuspendableTask d_notifyResults;	
 	
 	private final class ExtendDecisionTask extends WaitingTask {
 		@Override
@@ -222,13 +223,22 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		}, "Extending simulation");
 		
 		d_finalPhase = new NullTask();
+		
+		d_notifyResults = new SimpleSuspendableTask(new Runnable() {	
+			@Override
+			public void run() {
+				d_results.simulationFinished();
+			}
+		}, "Calculating summaries");
+		
 		// Build transition graph between phases of the MCMC simulation
 		List<Transition> transitions = new ArrayList<Transition>();
 		transitions.add(new ForkTransition(buildModelPhase, burnInPhase));
 		for (int i = 0; i < d_nChains; ++i) {
 			transitions.add(new DirectTransition(burnInPhase.get(i), simulationPhase.get(i)));
 		}
-		transitions.add(new JoinTransition(simulationPhase, d_extendDecisionPhase));
+		transitions.add(new JoinTransition(simulationPhase, d_notifyResults));
+		transitions.add(new DirectTransition(d_notifyResults, d_extendDecisionPhase));
 		transitions.add(new DecisionTransition(d_extendDecisionPhase, d_extendSimulationPhase, d_finalPhase, new Condition() {
 			public boolean evaluate() {
 				return d_extendSimulation == ExtendSimulation.EXTEND;
@@ -364,25 +374,6 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		for (int i = 0 ; i < d_nChains; ++i) {
 			createChain(i);
 		}
-		
-		
-		d_finalPhase.addTaskListener(new TaskListener() {
-			@Override
-			public void taskEvent(TaskEvent event) {
-				if (event.getType() == EventType.TASK_FINISHED) {
-					d_results.simulationFinished();
-				}
-			}
-		});
-		d_extendDecisionPhase.addTaskListener(new TaskListener() {
-			@Override
-			public void taskEvent(TaskEvent event) {
-				if (event.getType() == EventType.TASK_STARTED) {
-					d_results.simulationFinished();
-				}
-			}
-		});
-		
 	}
 	
 	////
