@@ -38,13 +38,24 @@ import org.junit.Test;
 
 public class NetworkBuilderTest {
 	public static class NoneBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
+		private static final class EmptyStringTransformer<TreatmentType> implements Transformer<TreatmentType, String> {
+			public String transform(TreatmentType input) {
+				return "";
+			}
+		}
+
 		public NoneBuilder() {
-			super(DataType.NONE);
+			super(new ToStringTransformer<TreatmentType>(), new EmptyStringTransformer<TreatmentType>(), DataType.NONE);
 		}
 		
 		public NoneBuilder(Transformer<TreatmentType, String> idToString) {
-			super(idToString, DataType.NONE);
+			super(idToString, new EmptyStringTransformer<TreatmentType>(), DataType.NONE);
 		}
+		
+		public NoneBuilder(Transformer<TreatmentType, String> idToString, Transformer<TreatmentType, String> description) {
+			super(idToString, description, DataType.NONE);
+		}
+		
 		
 		public void add(String studyId, TreatmentType treatmentId) {
 			Treatment t = makeTreatment(treatmentId);
@@ -114,6 +125,21 @@ public class NetworkBuilderTest {
 		builder.add("1", 5);
 		HashMap<Integer, Treatment> expected = new HashMap<Integer, Treatment>();
 		expected.put(5, new Treatment("AAAAA"));
+		assertEquals(expected, builder.getTreatmentMap());
+	}
+	
+	@Test
+	public void testDescriptionTransform() {
+		NoneBuilder<Integer> builder = new NoneBuilder<Integer>(new NetworkBuilder.ToStringTransformer<Integer>(),
+				new Transformer<Integer, String>() {
+					public String transform(Integer input) {
+						return StringUtils.repeat("A", input.intValue());
+					}
+				});
+		
+		builder.add("1", 5);
+		HashMap<Integer, Treatment> expected = new HashMap<Integer, Treatment>();
+		expected.put(5, new Treatment("5", "AAAAA"));
 		assertEquals(expected, builder.getTreatmentMap());
 	}
 	
