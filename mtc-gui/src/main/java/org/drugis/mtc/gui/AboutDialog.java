@@ -58,7 +58,7 @@ public class AboutDialog extends JDialog {
 		add(titleLabel, BorderLayout.NORTH);
 		
 		String aboutText = "GeMTC is open source software for Mixed Treatment Comparison model generation.\n" +
-			"Copyright \u00A92009-2011 Gert van Valkenhoef\n\n" +
+			"Copyright \u00A92009-2012 Gert van Valkenhoef\n\n" +
 			"Get GeMTC at <http://drugis.org/mtc>.\n\n" +
 			"This program is free software: you can redistribute it and/or modify " +
 			"it under the terms of the GNU General Public License as published by " +
