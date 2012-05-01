@@ -73,15 +73,20 @@ public class NetworkBuilder<TreatmentType> {
 
 	private BidiMap<TreatmentType, Treatment> d_treatmentMap = new DualHashBidiMap<TreatmentType, Treatment>();
 	private Map<MKey, Measurement> d_measurementMap = new HashMap<MKey, Measurement>();
-	private Transformer<TreatmentType, String> d_idToString;
+	private Transformer<TreatmentType, String> d_treatmentToIdString;
+	private Transformer<TreatmentType, String> d_treatmentToDescription;
 	private DataType d_dataType;
 
 	public NetworkBuilder(DataType type) {
-		this(new ToStringTransformer<TreatmentType>(), type);
+		this(new ToStringTransformer<TreatmentType>(), new ToStringTransformer<TreatmentType>(), type);
 	}
 	
-	public NetworkBuilder(Transformer<TreatmentType, String> idToString, DataType type) {
-		d_idToString = idToString;
+	public NetworkBuilder(
+			Transformer<TreatmentType, String> treatmentToIdString,
+			Transformer<TreatmentType, String> treatmentToDescription,
+			DataType type) {
+		d_treatmentToIdString = treatmentToIdString;
+		d_treatmentToDescription = treatmentToDescription;
 		d_dataType = type;
 	}
 	
@@ -107,13 +112,13 @@ public class NetworkBuilder<TreatmentType> {
 
 	protected Treatment makeTreatment(TreatmentType id) {
 		if (!d_treatmentMap.containsKey(id)) {
-			d_treatmentMap.put(id, new Treatment(createId(id)));
+			d_treatmentMap.put(id, new Treatment(createId(id), createDescription(id)));
 		}
 		return d_treatmentMap.get(id);
 	}
 
 	private String createId(TreatmentType id) {
-		String transformed = d_idToString.transform(id);
+		String transformed = d_treatmentToIdString.transform(id);
 		Matcher matcher = s_treatmentIdPattern.matcher(transformed);
 		if (matcher.matches()) {
 			return transformed;
@@ -122,6 +127,10 @@ public class NetworkBuilder<TreatmentType> {
 		}
 	}
 
+	private String createDescription(TreatmentType id) {
+		return d_treatmentToDescription.transform(id);
+	}
+	
 	private Set<Study> getStudies() {
 		Set<String> ids = new HashSet<String>();
 		for (MKey key : d_measurementMap.keySet()) {

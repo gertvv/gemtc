@@ -29,8 +29,8 @@ public class DichotomousNetworkBuilder<TreatmentType> extends NetworkBuilder<Tre
 		super(DataType.RATE);
 	}
 	
-	public DichotomousNetworkBuilder(Transformer<TreatmentType, String> idToString) {
-		super(idToString, DataType.RATE);
+	public DichotomousNetworkBuilder(Transformer<TreatmentType, String> treatmentToIdString, Transformer<TreatmentType, String> treatmentToDescription) {
+		super(treatmentToIdString, treatmentToDescription, DataType.RATE);
 	}
 	
 	public void add(String studyId, TreatmentType treatmentId, int responders, int sampleSize) {

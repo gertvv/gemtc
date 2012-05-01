@@ -30,8 +30,8 @@ public class ContinuousNetworkBuilder<TreatmentType> extends NetworkBuilder<Trea
 		super(DataType.CONTINUOUS);
 	}
 	
-	public ContinuousNetworkBuilder(Transformer<TreatmentType, String> idToString) {
-		super(idToString, DataType.CONTINUOUS);
+	public ContinuousNetworkBuilder(Transformer<TreatmentType, String> treatmentToIdString, Transformer<TreatmentType, String> treatmentToDescription) {
+		super(treatmentToIdString, treatmentToDescription, DataType.CONTINUOUS);
 	}
 	
 	@Override
