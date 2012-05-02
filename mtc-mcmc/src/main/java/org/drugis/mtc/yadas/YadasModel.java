@@ -46,7 +46,6 @@ import org.drugis.common.threading.IterativeTask;
 import org.drugis.common.threading.NullTask;
 import org.drugis.common.threading.SimpleSuspendableTask;
 import org.drugis.common.threading.Task;
-import org.drugis.common.threading.TaskListener;
 import org.drugis.common.threading.WaitingTask;
 import org.drugis.common.threading.activity.ActivityModel;
 import org.drugis.common.threading.activity.ActivityTask;
@@ -56,8 +55,6 @@ import org.drugis.common.threading.activity.DirectTransition;
 import org.drugis.common.threading.activity.ForkTransition;
 import org.drugis.common.threading.activity.JoinTransition;
 import org.drugis.common.threading.activity.Transition;
-import org.drugis.common.threading.event.TaskEvent;
-import org.drugis.common.threading.event.TaskEvent.EventType;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
@@ -218,13 +215,14 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				d_results.setNumberOfIterations(d_results.getNumberOfIterations() + d_simulationIter);
 				d_results.setDerivedParameters(getDerivedParameters());
 				// Finally, reset the decision phase. Must be done last otherwise it becomes a next state.
+				((SimpleRestartableSuspendableTask) d_notifyResults).reset();
 				((ExtendDecisionTask) d_extendDecisionPhase).reset();
 			}
 		}, "Extending simulation");
 		
 		d_finalPhase = new NullTask();
 		
-		d_notifyResults = new SimpleSuspendableTask(new Runnable() {	
+		d_notifyResults = new SimpleRestartableSuspendableTask(new Runnable() {	
 			@Override
 			public void run() {
 				d_results.simulationFinished();
