@@ -27,6 +27,11 @@ import org.drugis.mtc.model.Treatment;
  * the model has been run (by executing the ActivityModel).
  */
 public interface MixedTreatmentComparison extends MCMCModel {
+	public static final String ASSESS_CONVERGENCE_PHASE = "Assess convergence";
+	public static final String CALCULATING_SUMMARIES_PHASE = "Calculating summaries";
+	public static final String EXTENDING_SIMULATION_PHASE = "Extending simulation";
+	public static final String STARTING_SIMULATION_PHASE = "Building model";
+
 	
 	public enum ExtendSimulation { 
 		WAIT, EXTEND, FINISH
