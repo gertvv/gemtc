@@ -127,7 +127,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		
 		@Override
 		public String toString() {
-			return "Assess convergence";
+			return MixedTreatmentComparison.ASSESS_CONVERGENCE_PHASE;
 		}
 	}
 
@@ -196,7 +196,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			public void run() {
 				buildModel();
 			}
-		}, "Building model");
+		}, STARTING_SIMULATION_PHASE);
 		final List<Task> burnInPhase = new ArrayList<Task>(d_nChains);
 		final List<Task> simulationPhase = new ArrayList<Task>(d_nChains);
 		for (int i = 0; i < d_nChains; ++i) {
@@ -218,7 +218,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 				((SimpleRestartableSuspendableTask) d_notifyResults).reset();
 				((ExtendDecisionTask) d_extendDecisionPhase).reset();
 			}
-		}, "Extending simulation");
+		}, MixedTreatmentComparison.EXTENDING_SIMULATION_PHASE);
 		
 		d_finalPhase = new NullTask();
 		
@@ -227,7 +227,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 			public void run() {
 				d_results.simulationFinished();
 			}
-		}, "Calculating summaries");
+		}, MixedTreatmentComparison.CALCULATING_SUMMARIES_PHASE);
 		
 		// Build transition graph between phases of the MCMC simulation
 		List<Transition> transitions = new ArrayList<Transition>();
