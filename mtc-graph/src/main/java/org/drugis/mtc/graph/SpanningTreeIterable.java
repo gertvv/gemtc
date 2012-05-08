@@ -21,6 +21,7 @@ package org.drugis.mtc.graph;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,7 +59,7 @@ public class SpanningTreeIterable<V, E> implements Iterable<Tree<V, E>> {
 		public SpanningTreeIterator() {
 			DelegateTree<V, E> initialTree = new DelegateTree<V, E>();
 			initialTree.setRoot(d_root);
-			d_queue.add(new ProblemState<V, E>(d_graph, initialTree, new ArrayList<E>(d_graph.getOutEdges(d_root)), false));
+			d_queue.add(new ProblemState<V, E>(d_graph, initialTree, getOutEdges(d_graph, d_root), false));
 		}
 
 		@Override
@@ -152,7 +153,7 @@ public class SpanningTreeIterable<V, E> implements Iterable<Tree<V, E>> {
 			newTree.addChild(e, state.graph.getSource(e), v);
 			List<E> newFringe = new ArrayList<E>();
 			// Add to the fringe forall_w (v, w) \in g, w \not\in t
-			for (E x : state.graph.getOutEdges(v)) {
+			for (E x : getOutEdges(state.graph, v)) {
 				if (!newTree.containsVertex(state.graph.getDest(x))) {
 					newFringe.add(x);
 				}
@@ -180,26 +181,48 @@ public class SpanningTreeIterable<V, E> implements Iterable<Tree<V, E>> {
 			}
 			return true;
 		}
+		
+		/**
+		 * Sort the edges to guarantee the same tree is always returned.
+		 */
+		private List<E> getOutEdges(final DirectedGraph<V, E> graph, final V v0) {
+			final ArrayList<E> edges = new ArrayList<E>(graph.getOutEdges(v0));
+			if (d_vertexComparator != null) {
+				Collections.sort(edges, new Comparator<E>() {
+					public int compare(E e1, E e2) {
+						V v1 = graph.getDest(e1);
+						V v2 = graph.getDest(e2);
+						return d_vertexComparator.compare(v1, v2); // Otherwise: natural order
+					}});
+			}
+			return edges;
+		}
 	}
 
 	private final DirectedGraph<V, E> d_graph;
 	private final V d_root;
+	private final Comparator<V> d_vertexComparator;
 
 	/**
 	 * Create a java.lang.Iterable for all spanning trees of the given graph, rooted at the given root.
-	 * @param graph
-	 * @param root
 	 */
 	public SpanningTreeIterable(DirectedGraph<V, E> graph, V root) {
-		d_graph = graph;
-		d_root = root;
+		this(graph, root, null);
 	}
 
+	/**
+	 * Create a java.lang.Iterable for all spanning trees of the given graph, rooted at the given root.
+	 */
+	public SpanningTreeIterable(DirectedGraph<V, E> graph, V root, Comparator<V> vertexComparator) {
+		d_graph = graph;
+		d_root = root;
+		d_vertexComparator = vertexComparator;
+	}
+	
 	/**
 	 * Iterate over the spanning trees of the graph.
 	 */
 	public Iterator<Tree<V, E>> iterator() {
 		return new SpanningTreeIterator();
 	}
-
 }

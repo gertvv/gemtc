@@ -152,7 +152,7 @@ public class InconsistencyParameterization extends ConsistencyParameterization {
 		int max = -1;
 		Tree<Treatment, FoldedEdge<Treatment, Study>> best = null;
 		Treatment root = CompareUtil.findLeast(cGraph.getVertices(), TreatmentComparator.INSTANCE);
-		SpanningTreeIterable<Treatment, FoldedEdge<Treatment, Study>> spanningTreeIterable = new SpanningTreeIterable<Treatment, FoldedEdge<Treatment, Study>>(NetworkModel.toDirected(cGraph), root);
+		SpanningTreeIterable<Treatment, FoldedEdge<Treatment, Study>> spanningTreeIterable = new SpanningTreeIterable<Treatment, FoldedEdge<Treatment, Study>>(NetworkModel.toDirected(cGraph), root, TreatmentComparator.INSTANCE);
 		for (Tree<Treatment, FoldedEdge<Treatment, Study>> tree : spanningTreeIterable) {
 			Map<Partition, Set<List<Treatment>>> cycleClasses = getCycleClasses(cGraph, tree);
 			int icd = getInconsistencyDegree(cycleClasses);
