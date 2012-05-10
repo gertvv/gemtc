@@ -19,8 +19,8 @@
 
 package org.drugis.mtc.summary;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.drugis.common.beans.AbstractObservable;
@@ -37,18 +37,24 @@ import org.drugis.mtc.Parameter;
  */
 public class QuantileSummary extends AbstractObservable implements MCMCResultsListener, Summary {
 	private static final double[] DEFAULT_PROBABILITIES = new double[] {0.025, 0.5, 0.975};
-	private final double[] d_probabilities;
+	private double[] d_probabilities;
 	private Parameter d_parameter;
 	private MCMCResults d_results;
 	private double[] d_quantiles;
 	private boolean d_defined = false;
 
 	public QuantileSummary(MCMCResults results, Parameter parameter, double[] probabilities) {
-		this.d_probabilities = probabilities;
+		d_probabilities = probabilities;
 		d_results = results;
 		d_parameter = parameter;
 		d_results.addResultsListener(this);
 		calculateResults();
+	}
+	
+	public QuantileSummary(double[] probabilities, double[] quantiles) {
+		 System.arraycopy(probabilities, 0, d_probabilities, 0, probabilities.length);
+		 System.arraycopy(quantiles, 0, d_quantiles, 0, quantiles.length);
+		 d_defined = true;
 	}
 	
 	/**
@@ -87,6 +93,10 @@ public class QuantileSummary extends AbstractObservable implements MCMCResultsLi
 	 */
 	public double getQuantile(int idx) {
 		return d_quantiles[idx];
+	}
+	
+	public int getSize() {
+		return (d_quantiles == null) ? 0 : d_quantiles.length;
 	}
 	
 	private double calculateQuantile(int i, double[] samples) {
