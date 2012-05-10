@@ -46,6 +46,13 @@ public class ConvergenceSummary extends AbstractObservable implements Summary {
 		}
 	}
 	
+	public ConvergenceSummary(double convergence) { 
+		d_results = null;
+		d_parameter = null;
+		d_convergence = convergence;
+		d_defined = true;
+	}
+	
 	private void calc() {
 		d_convergence = GelmanRubinConvergence.diagnose(d_results, d_parameter);
 		d_defined = true;
