@@ -52,9 +52,12 @@ public class QuantileSummary extends AbstractObservable implements MCMCResultsLi
 	}
 	
 	public QuantileSummary(double[] probabilities, double[] quantiles) {
-		 System.arraycopy(probabilities, 0, d_probabilities, 0, probabilities.length);
-		 System.arraycopy(quantiles, 0, d_quantiles, 0, quantiles.length);
-		 d_defined = true;
+		int length = probabilities.length;
+		d_probabilities = new double[length];
+		d_quantiles = new double[length];
+		System.arraycopy(probabilities, 0, d_probabilities, 0, length);
+		System.arraycopy(quantiles, 0, d_quantiles, 0, length);
+		d_defined = true;
 	}
 	
 	/**
