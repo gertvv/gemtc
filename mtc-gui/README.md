@@ -51,6 +51,10 @@ existing data file (e.g. those provided in the examples directory) or
 Versions
 --------
 
+0.12.1: Sort studies and treatments alphabetically, fix flaw in prior
+generation, and other bugfixes. Improve integration with ADDIS and allow
+the simulation to be extended after assessment of convergence.
+
 0.12: Complete rewrite in Java, redesigned node-splitting model
 generation.
 
