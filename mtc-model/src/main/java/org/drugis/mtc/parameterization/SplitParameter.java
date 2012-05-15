@@ -80,4 +80,8 @@ public class SplitParameter implements NetworkParameter, Comparable<SplitParamet
 	public Treatment getSubject() {
 		return d_subj;
 	}
+	
+	public boolean isDirect() { 
+		return d_direct;
+	}
 }
