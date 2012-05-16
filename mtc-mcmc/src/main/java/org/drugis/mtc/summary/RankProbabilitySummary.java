@@ -34,8 +34,8 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 	private List<Treatment> d_treatments;
 	private MCMCResults d_results;
 	private int d_n;
-	private int[][] d_rankCount;
-	private int d_samples;
+	private double[][] d_rankProbability;
+	private boolean d_ready = false;
 
 	public RankProbabilitySummary(MCMCResults results, List<Treatment> treatments) {
 		d_results = results;
@@ -43,10 +43,18 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 		d_treatments = treatments;
 		d_n = treatments.size();
 		calculate();
+	}	
+	
+	public RankProbabilitySummary(double[][] rankProbabilityMatrix, List<Treatment> treatments) {
+		d_rankProbability = rankProbabilityMatrix;
+		d_treatments = treatments;
+		d_n = treatments.size();
+		d_ready = true;
 	}
 
 	public void resultsEvent(MCMCResultsEvent event) {
 		calculate();
+		d_ready =  d_results.getNumberOfSamples() > 0;
 		firePropertyChange(PROPERTY_DEFINED, null, getDefined());
 		firePropertyChange(PROPERTY_VALUE, null, this);
 	}
@@ -55,23 +63,20 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 		return Collections.unmodifiableList(d_treatments);
 	}
 
-	private boolean isReady() {
-		return d_samples > 0;
-	}
-
 	public double getValue(Treatment t, int rank) {
-		if (!isReady()) {
+		if (!d_ready) {
 			return 0.0;
 		}
 		int rIdx = d_n - rank;
 		int tIdx = d_treatments.indexOf(t);
-		return ((double)d_rankCount[tIdx][rIdx]) / ((double)d_samples);
+		return d_rankProbability[tIdx][rIdx];
 	}
 
 	// FIXME: handle multiple chains
 	private synchronized void calculate() {
-		d_samples = d_results.getNumberOfSamples();
-		d_rankCount = new int[d_n][d_n];
+		int samples = d_results.getNumberOfSamples();
+		int[][] rankCount = new int[d_n][d_n];
+		d_rankProbability = new double[d_n][d_n];
 
 		int[] idx = new int[d_n];
 		Treatment base = d_treatments.get(0);
@@ -79,19 +84,24 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 			idx[i] = d_results.findParameter(new BasicParameter(base, d_treatments.get(i)));
 		}
 
-		for (int i = 0; i < d_samples; ++i) {
+		for (int i = 0; i < samples; ++i) {
 			double[] data = new double[d_n];
 			for (int j = 1; j < d_n; ++j) {
-				data[j] = d_results.getSample(idx[j], 0, i);
+				data[j] = d_results.getSample(idx[j], 0, i); // <<< FIXME 
 			}
 			int[] ranks = RankCounter.rank(data);
 			for (int j = 0; j < d_n; ++j) {
-				d_rankCount[j][ranks[j] - 1] += 1;
+				rankCount[j][ranks[j] - 1] += 1;
+			}
+		}
+		for (int i = 0; i < d_n; ++i) {
+			for (int j = 0; j < d_n; ++j) {
+				d_rankProbability[i][j] = ((double)rankCount[i][j]) / ((double)samples);
 			}
 		}
 	}
 
 	public boolean getDefined() {
-		return isReady(); 
+		return d_ready; 
 	}
 }

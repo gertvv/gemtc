@@ -87,4 +87,8 @@ public class SplitParameter extends AbstractParameter implements NetworkParamete
 	public Treatment getSubject() {
 		return d_subj;
 	}
+	
+	public boolean isDirect() { 
+		return d_direct;
+	}
 }
