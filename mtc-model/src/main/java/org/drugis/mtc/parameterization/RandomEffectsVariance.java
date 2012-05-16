@@ -19,9 +19,9 @@
 
 package org.drugis.mtc.parameterization;
 
-import org.drugis.mtc.Parameter;
+import org.drugis.mtc.AbstractParameter;
 
-public class RandomEffectsVariance implements Parameter {
+public class RandomEffectsVariance extends AbstractParameter  {
 	@Override
 	public String getName() {
 		return "var.d";

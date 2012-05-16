@@ -28,13 +28,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.drugis.mtc.AbstractParameter;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MCMCResultsEvent;
 import org.drugis.mtc.MCMCResultsListener;
 import org.drugis.mtc.Parameter;
 
 public class FileResults implements MCMCResults {
-	public static class MyParameter implements Parameter {
+	public static class MyParameter extends AbstractParameter  {
 		private String d_name;
 		public MyParameter(String name) { d_name = name; }
 		public String getName() { return d_name; }
