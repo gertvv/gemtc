@@ -56,6 +56,7 @@ import org.drugis.common.threading.activity.ForkTransition;
 import org.drugis.common.threading.activity.JoinTransition;
 import org.drugis.common.threading.activity.Transition;
 import org.drugis.mtc.MCMCResults;
+import org.drugis.mtc.MCMCSettingsCache;
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Measurement;
@@ -77,6 +78,8 @@ import org.drugis.mtc.parameterization.SplitParameter;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
 
 abstract class YadasModel implements MixedTreatmentComparison {
+	private static final int THINNING_INTERVAL = 1;
+	private static final double VARIANCE_SCALING = 2.5;
 	protected final Network d_network;
 	protected Parameterization d_pmtz = null;
 	
@@ -101,7 +104,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	private ExtendSimulation d_extendSimulation = ExtendSimulation.WAIT;
 	private Task d_extendDecisionPhase;
 	private Task d_extendSimulationPhase;
-	private SimpleSuspendableTask d_notifyResults;	
+	private SimpleSuspendableTask d_notifyResults;
 	
 	private final class ExtendDecisionTask extends WaitingTask {
 		@Override
@@ -350,7 +353,7 @@ abstract class YadasModel implements MixedTreatmentComparison {
 	private void buildModel() {
 		d_pmtz = buildNetworkModel();
 		JDKRandomGenerator rng = new JDKRandomGenerator();
-		double scale = 2.5;
+		double scale = VARIANCE_SCALING;
 		for (int i = 0; i < d_nChains; ++i) {
 			d_startGen.add(AbstractDataStartingValueGenerator.create(d_network, NetworkModel.createComparisonGraph(d_network), rng, scale));
 		}
@@ -661,5 +664,9 @@ abstract class YadasModel implements MixedTreatmentComparison {
 		d_extendSimulation = s;
 	}
 
+	public MCMCSettingsCache getSettings() {
+		return new MCMCSettingsCache(d_simulationIter / (2 * THINNING_INTERVAL), d_simulationIter, 
+				THINNING_INTERVAL, d_burnInIter, VARIANCE_SCALING, d_nChains);
+	}
 
 }
