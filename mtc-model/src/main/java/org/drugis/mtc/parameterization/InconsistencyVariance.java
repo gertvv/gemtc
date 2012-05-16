@@ -19,9 +19,9 @@
 
 package org.drugis.mtc.parameterization;
 
-import org.drugis.mtc.Parameter;
+import org.drugis.mtc.AbstractParameter;
 
-public class InconsistencyVariance implements Parameter {
+public class InconsistencyVariance extends AbstractParameter {
 	@Override
 	public String getName() {
 		return "var.w";

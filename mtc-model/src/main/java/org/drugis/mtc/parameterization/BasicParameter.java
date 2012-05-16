@@ -19,12 +19,14 @@
 
 package org.drugis.mtc.parameterization;
 
+import org.drugis.mtc.AbstractParameter;
+import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 
 /**
  * Represents a relative effect parameter that is 'basic' to the parameterization. 
  */
-public class BasicParameter implements NetworkParameter, Comparable<BasicParameter> {
+public class BasicParameter extends AbstractParameter implements NetworkParameter {
 	private final Treatment d_base;
 	private final Treatment d_subj;
 
@@ -70,9 +72,12 @@ public class BasicParameter implements NetworkParameter, Comparable<BasicParamet
 		return 31 * d_base.hashCode() + d_subj.hashCode();
 	}
 
-	@Override
-	public int compareTo(BasicParameter other) {
-		int c1 = TreatmentComparator.INSTANCE.compare(d_base, other.d_base);
-		return c1 == 0 ? TreatmentComparator.INSTANCE.compare(d_subj, other.d_subj) : c1;
+	public int compareTo(Parameter other) {
+		if (other instanceof BasicParameter) {
+			BasicParameter otherParameter = (BasicParameter) other;
+			int c1 = TreatmentComparator.INSTANCE.compare(d_base, otherParameter.d_base);
+			return c1 == 0 ? TreatmentComparator.INSTANCE.compare(d_subj, otherParameter.d_subj) : c1;
+		}
+		return super.compareTo(other);
 	}
 }

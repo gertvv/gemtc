@@ -19,6 +19,6 @@
 
 package org.drugis.mtc;
 
-public interface Parameter {
+public interface Parameter extends Comparable<Parameter> {
 	public String getName();
 }
