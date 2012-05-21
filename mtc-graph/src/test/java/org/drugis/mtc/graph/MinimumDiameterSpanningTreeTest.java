@@ -78,5 +78,37 @@ public class MinimumDiameterSpanningTreeTest {
 		assertNotNull(tree.findEdge("F", "E"));
 		assertNotNull(tree.findEdge("F", "A"));
 	}
-
+	
+	@Test
+	public void testWithLongShortestPaths() {
+		UndirectedGraph<String, Integer> graph = new UndirectedSparseGraph<String, Integer>();
+		graph.addEdge(1,  "CBGGEM", "CBPPTX");
+		graph.addEdge(2,  "CBGGEM", "DDPGEM");
+		graph.addEdge(3,  "CBGGEM", "DDPVNR");
+		graph.addEdge(4,  "CBPPTX", "DDPDOC");
+		graph.addEdge(5,  "CBPPTX", "DDPPTX");
+		graph.addEdge(6,  "CBPPTX", "DDPETO");
+		graph.addEdge(7,  "CBPPTX", "DDPGEM");
+		graph.addEdge(8,  "CBPPTX", "DDPIRI");
+		graph.addEdge(9,  "CBPPTX", "DDPVNR");
+		graph.addEdge(10, "DDPGEM", "DDPPTX");
+		graph.addEdge(11, "DDPGEM", "DDPPEM");
+		graph.addEdge(12, "DDPGEM", "DDPVNR");
+		graph.addEdge(13, "DDPGEM", "DDPIRI");
+		graph.addEdge(14, "DDPDOC", "DDPVNR");
+		graph.addEdge(15, "DDPDOC", "DDPPTX");
+		graph.addEdge(16, "DDPDOC", "DDPGEM");
+		graph.addEdge(17, "DDPPTX", "DDPVNR");
+		graph.addEdge(18, "DDPETO", "DDPPTX");
+		graph.addEdge(19, "DDPETO", "DDPGEM");
+		graph.addEdge(20, "DDPIRI", "DDPVNR");
+		graph.addEdge(21, "CBPDOC", "DDPVNR");
+		graph.addEdge(22, "CBPPEM", "DDPPEM");
+		
+		new MinimumDiameterSpanningTree<String, Integer>(graph, new Comparator<String>() {
+			public int compare(String o1, String o2) {
+				return o1.compareTo(o2);
+			}
+		}).getMinimumDiameterSpanningTree();
+	}
 }

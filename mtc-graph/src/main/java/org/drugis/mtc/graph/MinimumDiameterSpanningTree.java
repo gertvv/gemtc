@@ -21,6 +21,7 @@ package org.drugis.mtc.graph;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -134,14 +135,19 @@ public class MinimumDiameterSpanningTree<V, E> {
 
 	private void addPath(DelegateTree<V, E> tree, V u, V v) {
 		Map<V, E> incomingEdgeMap = d_shortestPath.getIncomingEdgeMap(u);
+		LinkedList<V> path = new LinkedList<V>();
 		while (!v.equals(u)) {
+			path.addFirst(v);
 			E e = incomingEdgeMap.get(v);
 			List<V> incidentVertices = new ArrayList<V>(d_graph.getIncidentVertices(e));
-			V w = incidentVertices.get(0).equals(v) ? incidentVertices.get(1) : incidentVertices.get(0);
+			v = incidentVertices.get(0).equals(v) ? incidentVertices.get(1) : incidentVertices.get(0);
+		}
+		path.addFirst(u);
+		for (int i = 0; i < path.size() - 1; ++i) {
+			E e = d_graph.findEdge(path.get(i), path.get(i + 1));
 			if (!tree.containsEdge(e)) {
-				tree.addChild(e, w, v);
+				tree.addChild(e, path.get(i), path.get(i + 1));
 			}
-			v = w;
 		}
 	}
 
