@@ -36,9 +36,6 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	public static final String PROPERTY_MEAN = "mean";
 	public static final String PROPERTY_STANDARD_DEVIATION = "standardDeviation";
 	
-	private static final Mean s_mean = new Mean(); 
-	private static final StandardDeviation s_stdev = new StandardDeviation();
-	
 	private final MCMCResults d_results;
 	private final Parameter d_parameter;
 	private double d_mean = 0.0;
@@ -78,8 +75,8 @@ public class NormalSummary extends AbstractObservable implements MCMCResultsList
 	private synchronized void calculateResults() {
 		if (!isReady()) return;
 		List<Double> samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
-		d_mean = SummaryUtil.evaluate(s_mean, samples);
-		d_stdev = SummaryUtil.evaluate(s_stdev, samples);
+		d_mean = SummaryUtil.evaluate(new Mean(), samples);
+		d_stdev = SummaryUtil.evaluate(new StandardDeviation(), samples);	
 		d_defined = true;
 		firePropertyChange(PROPERTY_DEFINED, null, d_defined);
 		firePropertyChange(PROPERTY_MEAN, null, d_mean);
