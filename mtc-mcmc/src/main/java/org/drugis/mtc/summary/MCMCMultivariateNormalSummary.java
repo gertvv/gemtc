@@ -32,8 +32,6 @@ import org.drugis.mtc.Parameter;
 
 public class MCMCMultivariateNormalSummary extends AbstractObservable implements MCMCResultsListener, Summary, MultivariateNormalSummary {
 
-	private static final Mean s_mean = new Mean();
-
 	private final MCMCResults d_results;
 	private final Parameter[] d_parameters;
 	private double[][] d_covMatrix;
@@ -92,7 +90,7 @@ public class MCMCMultivariateNormalSummary extends AbstractObservable implements
 		for (int i = 0; i < getParameters().length; ++i) {
 			List<Double> samples = SummaryUtil.getAllChainsLastHalfSamples(d_results, getParameters()[i]);
 			sampleCache.add(samples);
-			d_means[i] = SummaryUtil.evaluate(s_mean, samples);
+			d_means[i] = SummaryUtil.evaluate(new Mean(), samples);
 		}
 		StorelessCovariance cov = new StorelessCovariance(getParameters().length);
 		double[] rowData = new double[getParameters().length];
