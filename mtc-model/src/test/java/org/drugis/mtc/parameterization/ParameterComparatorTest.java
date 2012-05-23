@@ -27,10 +27,10 @@ import java.util.List;
 import org.drugis.mtc.model.Treatment;
 import org.junit.Test;
 
-public class NetworkParameterComparatorTest {
+public class ParameterComparatorTest {
 	@Test
 	public void testCompareBasicParameters() {
-		NetworkParameterComparator pc = NetworkParameterComparator.INSTANCE;
+		ParameterComparator pc = new ParameterComparator();
 		
 		Treatment ta = new Treatment("A");
 		Treatment tb = new Treatment("B");
@@ -46,7 +46,7 @@ public class NetworkParameterComparatorTest {
 	
 	@Test
 	public void testCompareInconsistencyParameters() {
-		NetworkParameterComparator pc = NetworkParameterComparator.INSTANCE;
+		ParameterComparator pc = new ParameterComparator();
 		
 		Treatment ta = new Treatment("A");
 		Treatment tb = new Treatment("B");
@@ -65,7 +65,7 @@ public class NetworkParameterComparatorTest {
 	
 	@Test
 	public void testCompareSplitParameters() {
-		NetworkParameterComparator pc = NetworkParameterComparator.INSTANCE;
+		ParameterComparator pc = new ParameterComparator();
 		
 		Treatment ta = new Treatment("A");
 		Treatment tb = new Treatment("B");
@@ -76,7 +76,7 @@ public class NetworkParameterComparatorTest {
 	
 	@Test
 	public void testCompareMixed() {
-		NetworkParameterComparator pc = NetworkParameterComparator.INSTANCE;
+		ParameterComparator pc = new ParameterComparator();
 		
 		Treatment ta = new Treatment("A");
 		Treatment tb = new Treatment("B");

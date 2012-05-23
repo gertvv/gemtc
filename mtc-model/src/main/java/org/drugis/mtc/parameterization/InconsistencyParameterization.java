@@ -233,7 +233,7 @@ public class InconsistencyParameterization extends ConsistencyParameterization {
 				parameters.add(param);
 			}
 		}
-		Collections.sort(parameters, NetworkParameterComparator.INSTANCE);
+		Collections.sort(parameters, new ParameterComparator());
 		return parameters;
 	}
 
