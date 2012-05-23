@@ -23,6 +23,20 @@ import org.drugis.common.threading.activity.ActivityTask;
 
 
 public interface MCMCModel {
+	public static final String ASSESS_CONVERGENCE_PHASE = "Assess convergence";
+	public static final String CALCULATING_SUMMARIES_PHASE = "Calculating summaries";
+	public static final String EXTENDING_SIMULATION_PHASE = "Extending simulation";
+	public static final String STARTING_SIMULATION_PHASE = "Building model";
+
+	public enum ExtendSimulation { 
+		WAIT, EXTEND, FINISH
+	}
+
+	/**
+	 * @param s Whether to finish or extend the simulation, or to wait for input.
+	 */
+	public void setExtendSimulation(ExtendSimulation s);
+	
 	/**
 	 * Get the ActivityTask that defines how to execute this MCMC model.
 	 */
