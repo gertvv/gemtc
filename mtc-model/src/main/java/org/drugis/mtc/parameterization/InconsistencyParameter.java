@@ -26,14 +26,12 @@ import java.util.List;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.lang.StringUtils;
 import org.drugis.common.CollectionHelper;
-import org.drugis.mtc.AbstractParameter;
-import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 
 /**
  * A parameter that represents a potential "loop inconsistency" in the network.
  */
-public class InconsistencyParameter extends AbstractParameter implements NetworkParameter {
+public class InconsistencyParameter implements NetworkParameter, Comparable<InconsistencyParameter> {
 	private final List<Treatment> d_cycle;
 	private static final Transformer<Treatment, String> s_idTransformer = new Transformer<Treatment, String>() {
 		public String transform(Treatment input) {
@@ -78,13 +76,8 @@ public class InconsistencyParameter extends AbstractParameter implements Network
 	}
 
 	@Override
-	public int compareTo(Parameter other) {
-		if (!(other instanceof InconsistencyParameter)) {
-			return super.compareTo(other);
-		} else {
-			InconsistencyParameter otherParameter = (InconsistencyParameter) other;
-			return compare(d_cycle, otherParameter.d_cycle, TreatmentComparator.INSTANCE);
-		}
+	public int compareTo(InconsistencyParameter other) {
+		return compare(d_cycle, other.d_cycle, TreatmentComparator.INSTANCE);
 	}
 
 	/**

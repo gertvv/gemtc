@@ -19,11 +19,9 @@
 
 package org.drugis.mtc.parameterization;
 
-import org.drugis.mtc.AbstractParameter;
-import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 
-public class SplitParameter extends AbstractParameter implements NetworkParameter {
+public class SplitParameter implements NetworkParameter, Comparable<SplitParameter> {
 	
 	private final Treatment d_base;
 	private final Treatment d_subj;
@@ -60,23 +58,18 @@ public class SplitParameter extends AbstractParameter implements NetworkParamete
 	}
 
 	@Override
-	public int compareTo(Parameter other) {
-		if (! (other instanceof SplitParameter)) {
-			return super.compareTo(other);
+	public int compareTo(SplitParameter other) {
+		TreatmentComparator tc = TreatmentComparator.INSTANCE;
+		if (tc.compare(d_base, other.d_base) != 0) {
+			return tc.compare(d_base, other.d_base);
+		}
+		if (tc.compare(d_subj, other.d_subj) != 0) {
+			return tc.compare(d_subj, other.d_subj);
+		}
+		if (d_direct) {
+			return other.d_direct ? 0 : -1;
 		} else {
-			SplitParameter otherParameter = (SplitParameter) other;
-			TreatmentComparator tc = TreatmentComparator.INSTANCE;
-			if (tc.compare(d_base, otherParameter.d_base) != 0) {
-				return tc.compare(d_base, otherParameter.d_base);
-			}
-			if (tc.compare(d_subj, otherParameter.d_subj) != 0) {
-				return tc.compare(d_subj, otherParameter.d_subj);
-			}
-			if (d_direct) {
-				return otherParameter.d_direct ? 0 : -1;
-			} else {
-				return otherParameter.d_direct ? 1 : 0;
-			}
+			return other.d_direct ? 1 : 0;
 		}
 	}
 
