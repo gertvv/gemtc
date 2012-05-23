@@ -109,7 +109,7 @@ public class ConsistencyParameterization implements Parameterization {
 	// Documented in Parameterization
 	public List<NetworkParameter> getParameters() {
 		List<NetworkParameter> list = getBasicParameters(d_tree);
-		Collections.sort(list, NetworkParameterComparator.INSTANCE);
+		Collections.sort(list, new ParameterComparator());
 		return list;
 	}
 

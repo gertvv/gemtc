@@ -46,8 +46,8 @@ import org.drugis.mtc.parameterization.InconsistencyParameterization;
 import org.drugis.mtc.parameterization.InconsistencyStartingValueGenerator;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
-import org.drugis.mtc.parameterization.NetworkParameterComparator;
 import org.drugis.mtc.parameterization.NodeSplitParameterization;
+import org.drugis.mtc.parameterization.ParameterComparator;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.PriorGenerator;
 import org.drugis.mtc.parameterization.SplitParameter;
@@ -460,7 +460,7 @@ public class JagsSyntaxModel {
 	 */
 	public static String writeExpression(Map<NetworkParameter, Integer> pmtz, Transformer<NetworkParameter, String> transform) {
 		List<String> terms = new ArrayList<String>();
-		final Set<NetworkParameter> keys = new TreeSet<NetworkParameter>(NetworkParameterComparator.INSTANCE);
+		final Set<NetworkParameter> keys = new TreeSet<NetworkParameter>(new ParameterComparator());
 		keys.addAll(pmtz.keySet());
 		for (NetworkParameter key : keys) {
 			terms.add((pmtz.get(key) == -1 ? "-" : "") + transform.transform(key));
