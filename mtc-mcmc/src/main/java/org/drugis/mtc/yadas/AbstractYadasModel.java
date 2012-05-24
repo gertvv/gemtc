@@ -204,7 +204,7 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		return d_tuningIter;
 	}
 
-	public void setBurnInIterations(int it) {
+	public void setTuningIterations(int it) {
 		validIt(it);
 		d_tuningIter = it;
 		buildActivityModel();

@@ -54,11 +54,11 @@ public interface MCMCModel {
 	public boolean isReady();
 	
 	/**
-	 * @param it The number of burn-in iterations, a multiple of 100.
+	 * @param it The number of tuning iterations, a multiple of 100.
 	 * @throws IllegalArgumentException if it is not a multiple of 100, or
 	 * if it <= 0.
 	 */
-	public void setBurnInIterations(int it);
+	public void setTuningIterations(int it);
 
 	/**
 	 * @param it The number of simulation iterations, a multiple of 100.
