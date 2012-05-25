@@ -70,9 +70,9 @@ public class YadasConsistencyModelTest {
 
 	@Test 
 	public void testBurnInIterations() {
-		assertEquals(20000, d_model.getBurnInIterations());
+		assertEquals(20000, d_model.getSettings().getTuningIterations());
 		d_model.setTuningIterations(10000);
-		assertEquals(10000, d_model.getBurnInIterations());
+		assertEquals(10000, d_model.getSettings().getTuningIterations());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

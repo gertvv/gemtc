@@ -1,16 +1,18 @@
 package org.drugis.mtc;
 
-public final class MCMCSettingsCache {
+import org.drugis.common.beans.AbstractObservable;
 
-	private final Integer d_inferenceIterations;
-	private final Integer d_simulationIterations;
-	private final Integer d_thinningInterval;
-	private final Integer d_tuningIterations;
-	private final Double d_varianceScalingFactor;
-	private final Integer d_numberOfChains ;
+public final class MCMCSettingsCache extends AbstractObservable implements MCMCSettings {
+
+	private final int d_inferenceIterations;
+	private final int d_simulationIterations;
+	private final int d_thinningInterval;
+	private final int d_tuningIterations;
+	private final double d_varianceScalingFactor;
+	private final int d_numberOfChains ;
 	
-	public MCMCSettingsCache(Integer inferenceIterations, Integer simulationIterations, 
-			Integer thinningInterval, Integer tuningIterations, Double varianceScalingFactor, Integer numberOfChains) {
+	public MCMCSettingsCache(int inferenceIterations, int simulationIterations, 
+			int thinningInterval, int tuningIterations, double varianceScalingFactor, int numberOfChains) {
 		d_inferenceIterations = inferenceIterations;
 		d_simulationIterations = simulationIterations;
 		d_thinningInterval = thinningInterval;
@@ -19,27 +21,33 @@ public final class MCMCSettingsCache {
 		d_numberOfChains = numberOfChains;
 	}
 
-	public Double getVarianceScalingFactor() {
+	@Override
+	public double getVarianceScalingFactor() {
 		return d_varianceScalingFactor;
 	}
 
-	public Integer getTuningIterations() {
+	@Override
+	public int getTuningIterations() {
 		return d_tuningIterations;
 	}
 
-	public Integer getThinningInterval() {
+	@Override
+	public int getThinningInterval() {
 		return d_thinningInterval;
 	}
 
-	public Integer getSimulationIterations() {
+	@Override
+	public int getSimulationIterations() {
 		return d_simulationIterations;
 	}
 
-	public Integer getInferenceIterations() {
+	@Override
+	public int getInferenceSamples() {
 		return d_inferenceIterations;
 	}
 
-	public Integer getNumberOfChains() {
+	@Override
+	public int getNumberOfChains() {
 		return d_numberOfChains;
-	}	
+	}
 }

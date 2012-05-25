@@ -122,7 +122,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		d_pmtz = buildNetworkModel();
 		JDKRandomGenerator rng = new JDKRandomGenerator();
 		double scale = VARIANCE_SCALING;
-		for (int i = 0; i < d_nChains; ++i) {
+		for (int i = 0; i < getNumberOfChains(); ++i) {
 			d_startGen.add(AbstractDataStartingValueGenerator.create(d_network, NetworkModel.createComparisonGraph(d_network), rng, scale));
 		}
 		

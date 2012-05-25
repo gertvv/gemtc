@@ -27,7 +27,7 @@ import org.drugis.common.threading.activity.JoinTransition;
 import org.drugis.common.threading.activity.Transition;
 import org.drugis.mtc.MCMCModel;
 import org.drugis.mtc.MCMCResults;
-import org.drugis.mtc.MCMCSettingsCache;
+import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
 
@@ -60,11 +60,11 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		}
 	}
 
-	private class BurnInChain extends AbstractIterativeComputation {
+	private class TuningChain extends AbstractIterativeComputation {
 		private final int d_chain;
 		
-		public BurnInChain(int chain) {
-			super(d_tuningIter);
+		public TuningChain(int chain) {
+			super(getTuningIterations());
 			d_chain = chain;
 		}
 		
@@ -77,7 +77,7 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		private final int d_chain;
 		
 		public SimulationChain(int chain) {
-			super(d_simulationIter);
+			super(getSimulationIterations());
 			d_chain = chain;
 		}
 		
@@ -87,16 +87,16 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		}
 	}
 
-	class BurnInTask extends IterativeTask {
-		public BurnInTask(int chain) {
-			super(new BurnInChain(chain), "Tuning: " + chain);
+	class TuningTask extends IterativeTask {
+		public TuningTask(int chain) {
+			super(new TuningChain(chain), TUNING_CHAIN_PREFIX + chain);
 			setReportingInterval(d_reportingInterval);
 		}
 	}
 	
 	class SimulationTask extends ExtendableIterativeTask {
 		public SimulationTask(int chain) {
-			super(new SimulationChain(chain), "Simulation: " + chain);
+			super(new SimulationChain(chain), SIMULATION_CHAIN_PREFIX + chain);
 			setReportingInterval(d_reportingInterval);
 		}
 	}
@@ -107,6 +107,7 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		} 
 		
 		public void reset() {
+			d_started = false;
 			d_finished = false;
 			d_mgr.fireTaskRestarted();
 		}
@@ -114,16 +115,15 @@ public abstract class AbstractYadasModel implements MCMCModel {
 	
 	protected static final int THINNING_INTERVAL = 1;
 	protected static final double VARIANCE_SCALING = 2.5;
+	protected static final int SIMULATION_ITERATIONS_EXTENSION = 60000;
 
 	protected abstract void createChain(int chain);
 
-	protected final int d_nChains = 4;
 	private List<List<ParameterWriter>> d_writeList = new ArrayList<List<ParameterWriter>>();
 	private List<List<MCMCUpdate>> d_updateList = new ArrayList<List<MCMCUpdate>>();
-	private int d_tuningIter = 20000;
-	private int d_simulationIter = 60000;
 	private int d_reportingInterval = 100;
 	protected YadasResults d_results = new YadasResults();
+	private YadasSettings d_settings = new YadasSettings(20000, 60000, 4);
 	private ActivityTask d_activityTask;
 	private SimpleSuspendableTask d_finalPhase;
 	protected ExtendSimulation d_extendSimulation = ExtendSimulation.WAIT;
@@ -142,10 +142,10 @@ public abstract class AbstractYadasModel implements MCMCModel {
 				buildModel();
 			}
 		}, STARTING_SIMULATION_PHASE);
-		final List<Task> burnInPhase = new ArrayList<Task>(d_nChains);
-		final List<ExtendableIterativeTask> simulationPhase = new ArrayList<ExtendableIterativeTask>(d_nChains);
-		for (int i = 0; i < d_nChains; ++i) {
-			burnInPhase.add(new BurnInTask(i));
+		final List<Task> tuningPhase = new ArrayList<Task>(getNumberOfChains());
+		final List<ExtendableIterativeTask> simulationPhase = new ArrayList<ExtendableIterativeTask>(getNumberOfChains());
+		for (int i = 0; i < getNumberOfChains(); ++i) {
+			tuningPhase.add(new TuningTask(i));
 			simulationPhase.add(new SimulationTask(i));
 		}
 	
@@ -155,10 +155,11 @@ public abstract class AbstractYadasModel implements MCMCModel {
 			public void run() {
 				// Extend the simulations. This is safe because they won't be started before this task is finished.
 				for(ExtendableIterativeTask t : simulationPhase) {
-					t.extend(d_simulationIter);
+					t.extend(SIMULATION_ITERATIONS_EXTENSION);
 				}
-				d_results.setNumberOfIterations(d_results.getNumberOfIterations() + d_simulationIter);
-				// Finally, reset the decision phase. Must be done last otherwise it becomes a next state.
+				d_results.setNumberOfIterations(getSimulationIterations() + SIMULATION_ITERATIONS_EXTENSION);
+				d_settings.setSimulationIterations(d_results.getNumberOfIterations());
+				// Finally, reset the decision phase. Must be done after the simulations are extended, otherwise it becomes a next state.
 				d_notifyResults.reset();
 				d_extendDecisionPhase.reset();
 			}
@@ -175,9 +176,9 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		
 		// Build transition graph between phases of the MCMC simulation
 		List<Transition> transitions = new ArrayList<Transition>();
-		transitions.add(new ForkTransition(buildModelPhase, burnInPhase));
-		for (int i = 0; i < d_nChains; ++i) {
-			transitions.add(new DirectTransition(burnInPhase.get(i), simulationPhase.get(i)));
+		transitions.add(new ForkTransition(buildModelPhase, tuningPhase));
+		for (int i = 0; i < getNumberOfChains(); ++i) {
+			transitions.add(new DirectTransition(tuningPhase.get(i), simulationPhase.get(i)));
 		}
 		transitions.add(new JoinTransition(simulationPhase, d_notifyResults));
 		transitions.add(new DirectTransition(d_notifyResults, d_extendDecisionPhase));
@@ -200,23 +201,21 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		return d_activityTask;
 	}
 
-	public int getBurnInIterations() {
-		return d_tuningIter;
-	}
-
 	public void setTuningIterations(int it) {
+		if (d_activityTask.isStarted()) {
+			throw new IllegalAccessError("May not call setTuningIterations() once computations have started.");
+		}
 		validIt(it);
-		d_tuningIter = it;
+		d_settings.setTuningIterations(it);
 		buildActivityModel();
 	}
 
-	public int getSimulationIterations() {
-		return d_simulationIter;
-	}
-
 	public void setSimulationIterations(int it) {
+		if (d_activityTask.isStarted()) {
+			throw new IllegalAccessError("May not call setTuningIterations() once computations have started.");
+		}
 		validIt(it);
-		d_simulationIter = it;
+		d_settings.setSimulationIterations(it);
 		buildActivityModel();
 	}
 
@@ -232,12 +231,12 @@ public abstract class AbstractYadasModel implements MCMCModel {
 
 	private void buildModel() {
 		prepareModel();
-		d_results.setNumberOfChains(d_nChains);
+		d_results.setNumberOfChains(getNumberOfChains());
 		d_results.setNumberOfIterations(getSimulationIterations());
 		d_results.setDirectParameters(getParameters());
 		d_results.setDerivedParameters(getDerivedParameters());	
 	
-		for (int i = 0 ; i < d_nChains; ++i) {
+		for (int i = 0 ; i < getNumberOfChains(); ++i) {
 			createChain(i);
 		}
 	}
@@ -273,9 +272,8 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		d_extendSimulation = s;
 	}
 
-	public MCMCSettingsCache getSettings() {
-		return new MCMCSettingsCache(d_simulationIter / (2 * THINNING_INTERVAL), d_simulationIter, 
-				THINNING_INTERVAL, d_tuningIter, VARIANCE_SCALING, d_nChains);
+	public MCMCSettings getSettings() {
+		return d_settings;
 	}
 
 	protected void addWriters(List<ParameterWriter> writers) {
@@ -285,8 +283,20 @@ public abstract class AbstractYadasModel implements MCMCModel {
 	protected void addTuners(List<MCMCParameter> params) {
 		List<MCMCUpdate> tuners = new ArrayList<MCMCUpdate>(params.size());
 		for (MCMCParameter param : params) {
-			tuners.add(new UpdateTuner(param, d_tuningIter / 50, 50, 1, Math.exp(-1)));
+			tuners.add(new UpdateTuner(param, getTuningIterations() / 50, 50, 1, Math.exp(-1)));
 		}
 		d_updateList.add(tuners);
+	}
+
+	private int getTuningIterations() {
+		return getSettings().getTuningIterations();
+	}
+
+	public int getSimulationIterations() {
+		return getSettings().getSimulationIterations();
+	}
+	
+	protected int getNumberOfChains() {
+		return getSettings().getNumberOfChains();
 	}
 }
