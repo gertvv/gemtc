@@ -27,6 +27,8 @@ public interface MCMCModel {
 	public static final String CALCULATING_SUMMARIES_PHASE = "Calculating summaries";
 	public static final String EXTENDING_SIMULATION_PHASE = "Extending simulation";
 	public static final String STARTING_SIMULATION_PHASE = "Building model";
+	public static final String SIMULATION_CHAIN_PREFIX = "Simulation: ";
+	public static final String TUNING_CHAIN_PREFIX = "Tuning: ";
 
 	public enum ExtendSimulation { 
 		WAIT, EXTEND, FINISH
@@ -67,5 +69,8 @@ public interface MCMCModel {
 	 */
 	public void setSimulationIterations(int it);
 	
-	public MCMCSettingsCache getSettings();
+	/** 
+	 * @return a MCMCSettings object which includes various configuration options of the simulation
+	 */
+	public MCMCSettings getSettings();
 }
