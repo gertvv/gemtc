@@ -38,7 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 abstract public class InconsistencyModelTestBase {
-	private static final double FACTOR = 0.05;
+	private static final double FACTOR = 0.10;
 	
 	private Mean d_mean = new Mean();
 	private StandardDeviation d_stdDev = new StandardDeviation();
@@ -73,8 +73,9 @@ abstract public class InconsistencyModelTestBase {
 		d_network = new Network();
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc));
 		d_network.getStudies().addAll(Arrays.asList(d_s1, d_s2, d_s3));
-		
 		d_model = createModel(d_network);
+		d_model.setSimulationIterations(100000);
+
 	}
 
 	abstract protected InconsistencyModel createModel(Network network);

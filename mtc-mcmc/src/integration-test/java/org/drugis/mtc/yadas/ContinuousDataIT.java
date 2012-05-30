@@ -67,6 +67,7 @@ public class ContinuousDataIT {
 	public void testResult() throws InterruptedException {
 		YadasConsistencyModel model = new YadasConsistencyModel(d_network);
 		model.setExtendSimulation(ExtendSimulation.FINISH);
+		model.setSimulationIterations(100000);
 		TaskUtil.run(model.getActivityTask());
 		
 		assertTrue(model.isReady());

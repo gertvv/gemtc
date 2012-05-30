@@ -61,6 +61,7 @@ public class YadasNodeSplitIT {
 	public void testResult() throws InterruptedException {
 		YadasNodeSplitModel model = new YadasNodeSplitModel(d_network, new BasicParameter(d_mpci, d_spci));
 		model.setExtendSimulation(ExtendSimulation.FINISH);
+		model.setSimulationIterations(100000);
 		TaskUtil.run(model.getActivityTask());
 		
 		assertTrue(model.isReady());
