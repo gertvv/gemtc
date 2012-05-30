@@ -83,7 +83,9 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		
 		public void doStep() {
 			update(d_chain);
-			output(d_chain);
+			if(d_iteration % THINNING_INTERVAL == 0) { 
+				output(d_chain);
+			}
 		}
 	}
 
@@ -113,9 +115,9 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		}
 	}
 	
-	protected static final int THINNING_INTERVAL = 1;
+	protected static final int THINNING_INTERVAL = 10;
 	protected static final double VARIANCE_SCALING = 2.5;
-	protected static final int SIMULATION_ITERATIONS_EXTENSION = 60000;
+	protected static final int SIMULATION_ITERATIONS_EXTENSION = 50000;
 
 	protected abstract void createChain(int chain);
 
@@ -123,7 +125,7 @@ public abstract class AbstractYadasModel implements MCMCModel {
 	private List<List<MCMCUpdate>> d_updateList = new ArrayList<List<MCMCUpdate>>();
 	private int d_reportingInterval = 100;
 	protected YadasResults d_results = new YadasResults();
-	private YadasSettings d_settings = new YadasSettings(20000, 60000, 4);
+	private YadasSettings d_settings = new YadasSettings(20000, 50000, 4);
 	private ActivityTask d_activityTask;
 	private SimpleSuspendableTask d_finalPhase;
 	protected ExtendSimulation d_extendSimulation = ExtendSimulation.WAIT;
@@ -157,7 +159,7 @@ public abstract class AbstractYadasModel implements MCMCModel {
 				for(ExtendableIterativeTask t : simulationPhase) {
 					t.extend(SIMULATION_ITERATIONS_EXTENSION);
 				}
-				d_results.setNumberOfIterations(getSimulationIterations() + SIMULATION_ITERATIONS_EXTENSION);
+				d_results.setNumberOfIterations((getSimulationIterations() + SIMULATION_ITERATIONS_EXTENSION) / THINNING_INTERVAL);
 				d_settings.setSimulationIterations(d_results.getNumberOfIterations());
 				// Finally, reset the decision phase. Must be done after the simulations are extended, otherwise it becomes a next state.
 				d_notifyResults.reset();
@@ -232,7 +234,7 @@ public abstract class AbstractYadasModel implements MCMCModel {
 	private void buildModel() {
 		prepareModel();
 		d_results.setNumberOfChains(getNumberOfChains());
-		d_results.setNumberOfIterations(getSimulationIterations());
+		d_results.setNumberOfIterations(getSimulationIterations() / THINNING_INTERVAL);
 		d_results.setDirectParameters(getParameters());
 		d_results.setDerivedParameters(getDerivedParameters());	
 	

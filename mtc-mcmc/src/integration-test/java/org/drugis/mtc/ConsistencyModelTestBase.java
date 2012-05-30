@@ -73,6 +73,8 @@ abstract public class ConsistencyModelTestBase {
 		d_network.getStudies().addAll(Arrays.asList(d_s1, d_s2, d_s3));
 		
 		d_model = createModel(d_network);
+		d_model.setSimulationIterations(100000);
+
 	}
 	
 	abstract protected ConsistencyModel createModel(Network network);
