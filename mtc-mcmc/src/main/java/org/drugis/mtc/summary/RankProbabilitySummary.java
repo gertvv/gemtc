@@ -55,7 +55,6 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 
 	public void resultsEvent(MCMCResultsEvent event) {
 		calculate();
-		d_ready =  d_results.getNumberOfSamples() > 0;
 		firePropertyChange(PROPERTY_DEFINED, null, getDefined());
 		firePropertyChange(PROPERTY_VALUE, null, this);
 	}
@@ -74,30 +73,33 @@ public class RankProbabilitySummary extends AbstractObservable implements MCMCRe
 	}
 
 	private synchronized void calculate() {
-		int[][] rankCount = new int[d_n][d_n];
-		d_rankProbability = new double[d_n][d_n];
-
+		d_ready =  d_results.getNumberOfSamples() > 0;
+		if (!d_ready) {
+			return;
+		}
 		Treatment base = d_treatments.get(0);
-		List<List<Double>> results = new ArrayList<List<Double>>();
-
+		List<List<Double>> samples = new ArrayList<List<Double>>();
 		for (int i = 1; i < d_n; ++i ) {
-			results.add(SummaryUtil.getAllChainsLastHalfSamples(d_results, new BasicParameter(base, d_treatments.get(i))));
+			samples.add(SummaryUtil.getAllChainsLastHalfSamples(d_results, new BasicParameter(base, d_treatments.get(i))));
 		}
 
-		int samples = results.get(0).size();
-		for (int i = 0; i < samples; ++i) {
+		int[][] rankCount = new int[d_n][d_n];
+		final int nSamples = samples.get(0).size();
+		for (int i = 0; i < nSamples; ++i) {
 			double[] data = new double[d_n];
 			for (int j = 1; j < d_n; ++j) {
-				data[j] = results.get(j - 1).get(i);
+				data[j] = samples.get(j - 1).get(i);
 			}
 			int[] ranks = RankCounter.rank(data);
 			for (int j = 0; j < d_n; ++j) {
 				rankCount[j][ranks[j] - 1] += 1;
 			}
 		}
+		
+		d_rankProbability = new double[d_n][d_n];
 		for (int i = 0; i < d_n; ++i) {
 			for (int j = 0; j < d_n; ++j) {
-				d_rankProbability[i][j] = ((double)rankCount[i][j]) / ((double)samples);
+				d_rankProbability[i][j] = ((double)rankCount[i][j]) / ((double)nSamples);
 			}
 		}
 	}
