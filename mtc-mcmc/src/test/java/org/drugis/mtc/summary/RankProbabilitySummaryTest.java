@@ -71,15 +71,15 @@ public class RankProbabilitySummaryTest {
 //			> ranks <- apply(l, 2, rank)
 //			> rankprob <- sapply(c(1, 2, 3), function(opt) { sapply(c(1, 2, 3), function(rank) { sum(ranks[opt, ] == rank)/dim(ranks)[2] }) })
 		d_results.makeSamplesAvailable();
-		assertEquals(0.287, d_summary.getValue(d_ta, 3), 0.001);
-		assertEquals(0.557, d_summary.getValue(d_ta, 2), 0.001);
-		assertEquals(0.156, d_summary.getValue(d_ta, 1), 0.001);
-		assertEquals(0.149, d_summary.getValue(d_tb, 3), 0.001);
-		assertEquals(0.206, d_summary.getValue(d_tb, 2), 0.001);
-		assertEquals(0.645, d_summary.getValue(d_tb, 1), 0.001);
-		assertEquals(0.564, d_summary.getValue(d_tc, 3), 0.001);
-		assertEquals(0.237, d_summary.getValue(d_tc, 2), 0.001);
-		assertEquals(0.199, d_summary.getValue(d_tc, 1), 0.001);
+		assertEquals(0.268, d_summary.getValue(d_ta, 3), 0.001);
+		assertEquals(0.566, d_summary.getValue(d_ta, 2), 0.001);
+		assertEquals(0.166, d_summary.getValue(d_ta, 1), 0.001);
+		assertEquals(0.150, d_summary.getValue(d_tb, 3), 0.001);
+		assertEquals(0.204, d_summary.getValue(d_tb, 2), 0.001);
+		assertEquals(0.646, d_summary.getValue(d_tb, 1), 0.001);
+		assertEquals(0.582, d_summary.getValue(d_tc, 3), 0.001);
+		assertEquals(0.230, d_summary.getValue(d_tc, 2), 0.001);
+		assertEquals(0.188, d_summary.getValue(d_tc, 1), 0.001);
 	}
 	
 	@Test
