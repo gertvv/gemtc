@@ -19,9 +19,6 @@
 
 package org.drugis.mtc;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Arrays;
 
 import org.drugis.mtc.model.Measurement;

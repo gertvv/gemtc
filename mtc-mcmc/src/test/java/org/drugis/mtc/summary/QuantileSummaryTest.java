@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.drugis.mtc.test.ExampleResults;
+import org.drugis.mtc.yadas.YadasResults;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -110,6 +111,12 @@ public class QuantileSummaryTest {
 		assertFalse(x.getDefined());
 		d_results.makeSamplesAvailable();
 		assertTrue(x.getDefined());
+	}
+	
+	@Test
+	public void testWithUninitializedResults() {
+		QuantileSummary x = new QuantileSummary(new YadasResults(), d_results.getParameters()[0]);
+		assertFalse(x.getDefined());
 	}
 	
 	@Test
