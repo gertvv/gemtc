@@ -19,10 +19,10 @@
 
 package org.drugis.mtc.summary;
 
+import static org.drugis.common.JUnitUtil.assertAllAndOnly;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.drugis.common.JUnitUtil.assertAllAndOnly;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.drugis.mtc.test.ExampleResults;
+import org.drugis.mtc.yadas.YadasResults;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -63,6 +64,12 @@ public class NormalSummaryTest {
 		assertFalse(x.getDefined());
 		d_results.makeSamplesAvailable();
 		assertTrue(x.getDefined());
+	}
+	
+	@Test
+	public void testWithUninitializedResults() {
+		Summary x = new NormalSummary(new YadasResults(), d_results.getParameters()[0]);
+		assertFalse(x.getDefined());
 	}
 	
 	@Test

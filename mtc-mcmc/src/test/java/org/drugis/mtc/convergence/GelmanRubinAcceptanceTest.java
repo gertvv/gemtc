@@ -27,11 +27,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
-import org.drugis.mtc.test.FileResults;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.RandomEffectsVariance;
+import org.drugis.mtc.test.FileResults;
 import org.junit.Before;
 import org.junit.Test;
 

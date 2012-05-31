@@ -21,6 +21,7 @@ package org.drugis.mtc.summary;
 
 import static org.drugis.common.JUnitUtil.assertAllAndOnly;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.test.ExampleResults;
+import org.drugis.mtc.yadas.YadasResults;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,6 +52,12 @@ public class NodeSplitPValueSummaryTest {
 	public void testCreation() {
 		NodeSplitPValueSummary cs = new NodeSplitPValueSummary(d_results, d_parameters[0], d_parameters[1]);
 		assertEquals(false, cs.getDefined());
+	}
+	
+	@Test
+	public void testWithUninitializedResults() {
+		NodeSplitPValueSummary x = new NodeSplitPValueSummary(new YadasResults(), d_parameters[0], d_parameters[1]);
+		assertFalse(x.getDefined());
 	}
 	
 	@Test
