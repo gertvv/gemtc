@@ -20,7 +20,9 @@
 package org.drugis.mtc.summary;
 
 import static org.drugis.common.JUnitUtil.assertAllAndOnly;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -31,6 +33,7 @@ import java.util.List;
 
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.test.ExampleResults;
+import org.drugis.mtc.yadas.YadasResults;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,6 +61,12 @@ public class MCMCMultivariateNormalSummaryTest {
 		assertFalse(x.getDefined());
 		d_results.makeSamplesAvailable();
 		assertTrue(x.getDefined());
+	}
+	
+	@Test
+	public void testWithUninitializedResults() {
+		Summary x = new MCMCMultivariateNormalSummary(new YadasResults(), d_results.getParameters());
+		assertFalse(x.getDefined());
 	}
 	
 	@Test

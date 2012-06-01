@@ -28,13 +28,13 @@ import java.util.List;
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
-import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.BasicParameter;
+import org.drugis.mtc.parameterization.RandomEffectsVariance;
 import org.drugis.mtc.summary.SummaryUtil;
 import org.drugis.mtc.test.FileResults;
 import org.drugis.mtc.util.WindowResults;
-import org.drugis.mtc.parameterization.RandomEffectsVariance;
 import org.junit.Before;
 import org.junit.Test;
 
