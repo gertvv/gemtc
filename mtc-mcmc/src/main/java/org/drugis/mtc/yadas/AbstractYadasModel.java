@@ -117,7 +117,6 @@ public abstract class AbstractYadasModel implements MCMCModel {
 	
 	protected static final int THINNING_INTERVAL = 10;
 	protected static final double VARIANCE_SCALING = 2.5;
-	protected static final int SIMULATION_ITERATIONS_EXTENSION = 50000;
 
 	protected abstract void createChain(int chain);
 
@@ -157,10 +156,11 @@ public abstract class AbstractYadasModel implements MCMCModel {
 			public void run() {
 				// Extend the simulations. This is safe because they won't be started before this task is finished.
 				for(ExtendableIterativeTask t : simulationPhase) {
-					t.extend(SIMULATION_ITERATIONS_EXTENSION);
+					t.extend(getSimulationIterations());
 				}
-				d_results.setNumberOfIterations((getSimulationIterations() + SIMULATION_ITERATIONS_EXTENSION) / THINNING_INTERVAL);
-				d_settings.setSimulationIterations(d_results.getNumberOfIterations());
+				d_results.setNumberOfIterations((getSimulationIterations() * 2) / THINNING_INTERVAL);
+				d_settings.setSimulationIterations(getSimulationIterations() * 2);
+
 				// Finally, reset the decision phase. Must be done after the simulations are extended, otherwise it becomes a next state.
 				d_notifyResults.reset();
 				d_extendDecisionPhase.reset();
