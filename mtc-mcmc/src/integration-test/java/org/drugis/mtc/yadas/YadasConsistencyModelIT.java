@@ -21,7 +21,7 @@ package org.drugis.mtc.yadas;
 
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.ConsistencyModelTestBase;
-import org.drugis.mtc.MixedTreatmentComparison.ExtendSimulation;
+import org.drugis.mtc.MCMCModel.ExtendSimulation;
 import org.drugis.mtc.model.Network;
 
 public class YadasConsistencyModelIT extends ConsistencyModelTestBase {

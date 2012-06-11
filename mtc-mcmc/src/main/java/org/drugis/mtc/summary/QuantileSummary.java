@@ -20,7 +20,6 @@
 package org.drugis.mtc.summary;
 
 import java.util.List;
-import java.util.Arrays;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.drugis.common.beans.AbstractObservable;
@@ -37,18 +36,27 @@ import org.drugis.mtc.Parameter;
  */
 public class QuantileSummary extends AbstractObservable implements MCMCResultsListener, Summary {
 	private static final double[] DEFAULT_PROBABILITIES = new double[] {0.025, 0.5, 0.975};
-	private final double[] d_probabilities;
+	private double[] d_probabilities;
 	private Parameter d_parameter;
 	private MCMCResults d_results;
 	private double[] d_quantiles;
 	private boolean d_defined = false;
 
 	public QuantileSummary(MCMCResults results, Parameter parameter, double[] probabilities) {
-		this.d_probabilities = probabilities;
+		d_probabilities = probabilities;
 		d_results = results;
 		d_parameter = parameter;
 		d_results.addResultsListener(this);
 		calculateResults();
+	}
+	
+	public QuantileSummary(double[] probabilities, double[] quantiles) {
+		int length = probabilities.length;
+		d_probabilities = new double[length];
+		d_quantiles = new double[length];
+		System.arraycopy(probabilities, 0, d_probabilities, 0, length);
+		System.arraycopy(quantiles, 0, d_quantiles, 0, length);
+		d_defined = true;
 	}
 	
 	/**
@@ -89,29 +97,30 @@ public class QuantileSummary extends AbstractObservable implements MCMCResultsLi
 		return d_quantiles[idx];
 	}
 	
-	private double calculateQuantile(int i, double[] samples) {
+	public int getSize() {
+		return (d_quantiles == null) ? 0 : d_quantiles.length;
+	}
+	
+	private double calculateQuantile(int i, Percentile q) {
 		double p = getProbability(i);
-		Percentile q = new Percentile(p * 100.0);
-		return q.evaluate(samples);
+		return q.evaluate(p * 100);
 	}
 
-	@Deprecated
-	private double[] getSamples() {
-		// FIXME: we really should not do copying of these arrays, as they have about 200,000 elements.
-		// Worse yet, commons math makes yet another copy.
-		// To fix this, we need to implement our own Quantile.
+	private Percentile getSamples() {
 		List<Double> list = SummaryUtil.getAllChainsLastHalfSamples(d_results, d_parameter);
 		double[] arr = new double[list.size()];
 		for (int i = 0; i < list.size(); ++i) {
 			arr[i] = list.get(i);
 		}
-		Arrays.sort(arr); // sort so the copy/sort done by Percentile has less impact
-		return arr;
+
+		Percentile percentile = new Percentile();
+		percentile.setData(arr);
+		return percentile;
 	}
 
 	private synchronized void calculateResults() {
 		if (!isReady()) return;
-		double[] samples = getSamples();
+		Percentile samples = getSamples();
 		d_quantiles = new double[d_probabilities.length];
 		for(int i = 0; i < d_quantiles.length; i++) {
 			d_quantiles[i] = calculateQuantile(i, samples);

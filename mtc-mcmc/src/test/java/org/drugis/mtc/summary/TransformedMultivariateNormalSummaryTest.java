@@ -20,7 +20,9 @@
 package org.drugis.mtc.summary;
 
 import static org.drugis.common.JUnitUtil.assertAllAndOnly;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

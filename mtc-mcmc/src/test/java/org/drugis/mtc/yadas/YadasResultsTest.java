@@ -19,9 +19,8 @@
 
 package org.drugis.mtc.yadas;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
-
+import static org.junit.Assert.assertEquals;
 import gov.lanl.yadas.MCMCParameter;
 
 import java.util.Arrays;

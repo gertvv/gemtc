@@ -31,10 +31,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.test.FileResults;
+import org.drugis.mtc.yadas.YadasResults;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,6 +45,7 @@ public class RankProbabilitySummaryTest {
 	private Treatment d_tc;
 	private RankProbabilitySummary d_summary;
 	private FileResults d_results;
+	private List<Treatment> d_treatments;
 	
 	@Before
 	public void setUp() throws IOException {
@@ -54,7 +56,8 @@ public class RankProbabilitySummaryTest {
 				RankProbabilitySummaryTest.class.getResourceAsStream("rankProbabilitySamples.txt"),
 				new Parameter[] { new BasicParameter(d_ta, d_tb), new BasicParameter(d_ta, d_tc) },
 				1, 1000);
-		d_summary = new RankProbabilitySummary(d_results, Arrays.asList(new Treatment[] { d_ta, d_tb, d_tc }));
+		d_treatments = Arrays.asList(new Treatment[] { d_ta, d_tb, d_tc });
+		d_summary = new RankProbabilitySummary(d_results, d_treatments);
 	}
 	
 	@Test
@@ -71,15 +74,15 @@ public class RankProbabilitySummaryTest {
 //			> ranks <- apply(l, 2, rank)
 //			> rankprob <- sapply(c(1, 2, 3), function(opt) { sapply(c(1, 2, 3), function(rank) { sum(ranks[opt, ] == rank)/dim(ranks)[2] }) })
 		d_results.makeSamplesAvailable();
-		assertEquals(0.287, d_summary.getValue(d_ta, 3), 0.001);
-		assertEquals(0.557, d_summary.getValue(d_ta, 2), 0.001);
-		assertEquals(0.156, d_summary.getValue(d_ta, 1), 0.001);
-		assertEquals(0.149, d_summary.getValue(d_tb, 3), 0.001);
-		assertEquals(0.206, d_summary.getValue(d_tb, 2), 0.001);
-		assertEquals(0.645, d_summary.getValue(d_tb, 1), 0.001);
-		assertEquals(0.564, d_summary.getValue(d_tc, 3), 0.001);
-		assertEquals(0.237, d_summary.getValue(d_tc, 2), 0.001);
-		assertEquals(0.199, d_summary.getValue(d_tc, 1), 0.001);
+		assertEquals(0.268, d_summary.getValue(d_ta, 3), 0.001);
+		assertEquals(0.566, d_summary.getValue(d_ta, 2), 0.001);
+		assertEquals(0.166, d_summary.getValue(d_ta, 1), 0.001);
+		assertEquals(0.150, d_summary.getValue(d_tb, 3), 0.001);
+		assertEquals(0.204, d_summary.getValue(d_tb, 2), 0.001);
+		assertEquals(0.646, d_summary.getValue(d_tb, 1), 0.001);
+		assertEquals(0.582, d_summary.getValue(d_tc, 3), 0.001);
+		assertEquals(0.230, d_summary.getValue(d_tc, 2), 0.001);
+		assertEquals(0.188, d_summary.getValue(d_tc, 1), 0.001);
 	}
 	
 	@Test
@@ -88,6 +91,12 @@ public class RankProbabilitySummaryTest {
 		assertFalse(x.getDefined());
 		d_results.makeSamplesAvailable();
 		assertTrue(x.getDefined());
+	}
+	
+	@Test
+	public void testWithUninitializedResults() {
+		RankProbabilitySummary x = new RankProbabilitySummary(new YadasResults(), d_treatments);
+		assertFalse(x.getDefined());
 	}
 	
 	@Test

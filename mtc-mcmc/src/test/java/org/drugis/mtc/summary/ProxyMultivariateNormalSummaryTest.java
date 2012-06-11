@@ -19,7 +19,12 @@
 
 package org.drugis.mtc.summary;
 
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createStrictMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -29,7 +34,6 @@ import org.drugis.common.JUnitUtil;
 import org.drugis.mtc.test.ExampleResults;
 import org.junit.Before;
 import org.junit.Test;
-import static org.easymock.EasyMock.*;
 
 public class ProxyMultivariateNormalSummaryTest {
 

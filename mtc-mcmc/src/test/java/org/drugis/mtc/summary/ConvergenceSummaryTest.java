@@ -21,6 +21,7 @@ package org.drugis.mtc.summary;
 
 import static org.drugis.common.JUnitUtil.assertAllAndOnly;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -37,6 +38,7 @@ import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.RandomEffectsVariance;
 import org.drugis.mtc.test.FileResults;
+import org.drugis.mtc.yadas.YadasResults;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -87,6 +89,12 @@ public class ConvergenceSummaryTest {
 		d_results.makeSamplesAvailable();
 		double convergence = GelmanRubinConvergence.diagnose(d_results, d_parameters[0]);
 		assertEquals(convergence, cs.getScaleReduction(), 0.0);
+	}
+	
+	@Test
+	public void testWithUninitializedResults() {
+		ConvergenceSummary x = new ConvergenceSummary(new YadasResults(),  d_parameters[0]);
+		assertFalse(x.getDefined());
 	}
 	
 	@Test

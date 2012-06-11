@@ -25,13 +25,13 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.drugis.mtc.parameterization.BasicParameter;
-import org.drugis.mtc.Parameter;
-import org.drugis.mtc.model.Treatment;
-import org.drugis.mtc.convergence.GelmanRubinAcceptanceTest;
 import org.drugis.mtc.MCMCResults;
-import org.drugis.mtc.test.FileResults;
+import org.drugis.mtc.Parameter;
+import org.drugis.mtc.convergence.GelmanRubinAcceptanceTest;
+import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.RandomEffectsVariance;
+import org.drugis.mtc.test.FileResults;
 import org.junit.Before;
 import org.junit.Test;
 

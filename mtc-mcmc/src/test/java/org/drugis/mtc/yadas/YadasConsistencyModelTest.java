@@ -53,7 +53,7 @@ public class YadasConsistencyModelTest {
 
 	@Test 
 	public void testSimulationIterations() {
-		assertEquals(60000, d_model.getSimulationIterations());
+		assertEquals(50000, d_model.getSimulationIterations());
 		d_model.setSimulationIterations(10000);
 		assertEquals(10000, d_model.getSimulationIterations());
 	}
@@ -70,18 +70,18 @@ public class YadasConsistencyModelTest {
 
 	@Test 
 	public void testBurnInIterations() {
-		assertEquals(20000, d_model.getBurnInIterations());
-		d_model.setBurnInIterations(10000);
-		assertEquals(10000, d_model.getBurnInIterations());
+		assertEquals(20000, d_model.getSettings().getTuningIterations());
+		d_model.setTuningIterations(10000);
+		assertEquals(10000, d_model.getSettings().getTuningIterations());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testBurnInIterationsMultipleOfReportingInterval() {
-		d_model.setBurnInIterations(10001);
+		d_model.setTuningIterations(10001);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testBurnInIterationsPositive() {
-		d_model.setBurnInIterations(0);
+		d_model.setTuningIterations(0);
 	}
 }

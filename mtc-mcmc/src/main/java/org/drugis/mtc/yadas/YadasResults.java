@@ -67,18 +67,22 @@ public class YadasResults implements MCMCResults {
 	}
 	
 	public YadasResults() {
-		clear();
+		initialize();
 	}
 
 	@Override
 	public void clear() {
+		d_availableSamples = 0;
+		d_reservedSamples = 0;
+		initResults();
+	}
+	
+	private void initialize() { 
 		d_directParameters = new Parameter[] {};
 		d_derivedParameters = new Parameter[] {};
 		d_derivations = new Derivation[] {};
 		d_nChains = 0;
-		d_availableSamples = 0;
-		d_reservedSamples = 0;
-		initResults();
+		clear();
 	}
 
 	/**

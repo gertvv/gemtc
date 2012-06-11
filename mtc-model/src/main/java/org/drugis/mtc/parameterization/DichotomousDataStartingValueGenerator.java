@@ -65,8 +65,9 @@ public class DichotomousDataStartingValueGenerator extends AbstractDataStartingV
 	@Override
 	protected EstimateWithPrecision estimateTreatmentEffect(Study study, Treatment treatment) {
 		Measurement m = NetworkModel.findMeasurement(study, treatment);
-		double mean = new DichotomousDescriptives(true).logOdds(m.getResponders(), m.getSampleSize());
-		double se = Math.sqrt(1 / (m.getResponders() + 0.5) + 1 / (m.getSampleSize() - m.getResponders() + 0.5));
+		final DichotomousDescriptives descriptives = new DichotomousDescriptives(true);
+		double mean = descriptives.logOdds(m.getResponders(), m.getSampleSize());
+		double se = descriptives.logOddsError(m.getResponders(), m.getSampleSize());
 		return new EstimateWithPrecision(mean, se);
 	}
 

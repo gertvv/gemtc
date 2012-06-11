@@ -23,6 +23,22 @@ import org.drugis.common.threading.activity.ActivityTask;
 
 
 public interface MCMCModel {
+	public static final String ASSESS_CONVERGENCE_PHASE = "Assess convergence";
+	public static final String CALCULATING_SUMMARIES_PHASE = "Calculating summaries";
+	public static final String EXTENDING_SIMULATION_PHASE = "Extending simulation";
+	public static final String STARTING_SIMULATION_PHASE = "Building model";
+	public static final String SIMULATION_CHAIN_PREFIX = "Simulation: ";
+	public static final String TUNING_CHAIN_PREFIX = "Tuning: ";
+
+	public enum ExtendSimulation { 
+		WAIT, EXTEND, FINISH
+	}
+
+	/**
+	 * @param s Whether to finish or extend the simulation, or to wait for input.
+	 */
+	public void setExtendSimulation(ExtendSimulation s);
+	
 	/**
 	 * Get the ActivityTask that defines how to execute this MCMC model.
 	 */
@@ -38,24 +54,23 @@ public interface MCMCModel {
 	 * getters.
 	 */
 	public boolean isReady();
+	
 	/**
-	 * @return the number of burn-in iterations
-	 */
-	public int getBurnInIterations();
-	/**
-	 * @param it The number of burn-in iterations, a multiple of 100.
+	 * @param it The number of tuning iterations, a multiple of 100.
 	 * @throws IllegalArgumentException if it is not a multiple of 100, or
 	 * if it <= 0.
 	 */
-	public void setBurnInIterations(int it);
-	/**
-	 * @return the number of simulation iterations
-	 */
-	public int getSimulationIterations();
+	public void setTuningIterations(int it);
+
 	/**
 	 * @param it The number of simulation iterations, a multiple of 100.
 	 * @throws IllegalArgumentException if it is not a multiple of 100, or
 	 * if it <= 0.
 	 */
 	public void setSimulationIterations(int it);
+	
+	/** 
+	 * @return a MCMCSettings object which includes various configuration options of the simulation
+	 */
+	public MCMCSettings getSettings();
 }
