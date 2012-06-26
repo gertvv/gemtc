@@ -51,6 +51,8 @@ existing data file (e.g. those provided in the examples directory) or
 Versions
 --------
 
+0.12.2: Bugfixes.
+
 0.12.2: Bugfixes and minor improvements.
 
 0.12.1: Sort studies and treatments alphabetically, fix flaw in prior
