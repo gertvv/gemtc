@@ -6,5 +6,5 @@ Author: Gert van Valkenhoef
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
 Description: An R package for performing mixed treatment comparisons (network meta-analyses).
 Depends: R (>= 2.7.0), rJava (>= 0.8-0), rjags (>= 1.0.2-0)
-SystemRequirements: Java (>= 1.5)
+SystemRequirements: Java (>= 1.6)
 License: GPL-3
