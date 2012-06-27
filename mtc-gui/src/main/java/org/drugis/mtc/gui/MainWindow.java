@@ -103,20 +103,24 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static void main(String[] args) {
-		new MainWindow().setVisible(true);
+		new MainWindow(true).setVisible(true);
 	}
 
 	private JTabbedPane d_mainPane;
 	private ObservableList<DataSetModel> d_models = new ArrayListModel<DataSetModel>();
 
-	public MainWindow() {
+
+	public MainWindow(boolean standAlone) {
 		super(AppInfo.getAppName() + " " + AppInfo.getAppVersion());
-		createMainWindow();
+		createMainWindow(standAlone);
 	}
 	
+	public MainWindow() {
+		this(false);
+	}
 	
 	public MainWindow(final Network network) { 
-		this();
+		this(false);
 		final DataSetModel model = new DataSetModel(network);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -125,8 +129,10 @@ public class MainWindow extends JFrame {
 		});
 	}
 
-	private void createMainWindow() { 
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);			
+
+
+	private void createMainWindow(boolean standAlone) {
+		setDefaultCloseOperation(standAlone ? WindowConstants.EXIT_ON_CLOSE : WindowConstants.DISPOSE_ON_CLOSE);			
 		
 		setAppIcon(this);
 
