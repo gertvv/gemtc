@@ -261,7 +261,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	private JButton createAboutButton() {
-		JButton aboutButton = new JButton("About", MainWindow.IMAGELOADER.getIcon("about.gif"));
+		JButton aboutButton = new JButton("About", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_ABOUT));
 		aboutButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				(new AboutDialog(MainWindow.this)).setVisible(true);
