@@ -115,6 +115,10 @@ public class DataSetView extends JPanel {
 				}
 			}
 		});
+		
+		// The cell renderers do not handle selection appropriately, so disable it.
+		table.setCellSelectionEnabled(false);
+		
 		return new JScrollPane(table);
 	}
 
@@ -125,7 +129,7 @@ public class DataSetView extends JPanel {
 		panel.add(BasicComponentFactory.createComboBox(typeSelect));
 		panel.add(new JLabel(" dataset about "));
 		JTextField descriptionField = BasicComponentFactory.createTextField(d_model.getDescription(), false);
-		descriptionField.setColumns(20);
+		descriptionField.setColumns(15);
 		panel.add(descriptionField);
 		return panel;
 	}

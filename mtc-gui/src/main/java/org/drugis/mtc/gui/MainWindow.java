@@ -47,6 +47,7 @@ import javax.xml.bind.JAXBException;
 import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
+import org.drugis.common.gui.GUIHelper;
 import org.drugis.common.validation.ListMinimumSizeModel;
 import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.graph.GraphUtil;
@@ -103,6 +104,7 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static void main(String[] args) {
+		GUIHelper.initializeLookAndFeel();
 		new MainWindow(true).setVisible(true);
 	}
 
