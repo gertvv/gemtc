@@ -173,6 +173,7 @@ public class CodeGenerationDialog extends JDialog {
 		d_name = name;
 		d_network = network;
 		
+		setLocationByPlatform(true);
 		initComponents();
 		pack();
 	}
@@ -299,7 +300,7 @@ public class CodeGenerationDialog extends JDialog {
 
 	private void generate() {
 		if (d_syntaxType.getValue() == SyntaxType.YADAS) {
-			JDialog jDialog = new JDialog();
+			JDialog jDialog = new JDialog(d_parent);
 			ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(d_network);
 			Map<Treatment, Treatment> map = new HashMap<Treatment, Treatment>();
 			for (Treatment t : d_network.getTreatments()) {
@@ -307,6 +308,7 @@ public class CodeGenerationDialog extends JDialog {
 			}
 			MCMCModelWrapper wrapper = new SimulationConsistencyWrapper<Treatment>(model, d_network.getTreatments(), map);
 			MCMCPresentation presentation = new MCMCPresentation(wrapper, "Consistency model -- WORK IN PROGRESS");
+			jDialog.setLocationByPlatform(true);
 			jDialog.add(SimulationComponentFactory.createSimulationControls(presentation, d_parent, false, null, null));
 			jDialog.pack();
 			jDialog.setVisible(true);

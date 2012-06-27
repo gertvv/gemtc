@@ -147,7 +147,7 @@ public class MainWindow extends JFrame {
 	public static void setAppIcon(JFrame frame) {
 		Image image = null;
 		try {
-			image = ((ImageIcon)MainWindow.IMAGELOADER.getIcon("appicon.png")).getImage();
+			image = ((ImageIcon)MainWindow.IMAGELOADER.getIcon(FileNames.ICON_GEMTC)).getImage();
 		} catch (Exception e) {
 			// suppress
 		}
@@ -179,7 +179,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createNewButton() {
-		JButton newButton = new JButton("New", MainWindow.IMAGELOADER.getIcon("newfile.gif"));
+		JButton newButton = new JButton("New", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_NEW));
 		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addModel(new DataSetModel());
@@ -189,7 +189,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createOpenButton() {
-		JButton openButton = new JButton("Open", MainWindow.IMAGELOADER.getIcon("openfile.gif"));
+		JButton openButton = new JButton("Open", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_OPEN));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				FileLoadDialog dialog = new FileLoadDialog(MainWindow.this, "gemtc", "GeMTC files") {
@@ -211,7 +211,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createSaveButton() {
-		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon("savefile.gif"));
+		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_SAVE));
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
@@ -237,7 +237,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createGenerateButton() {
-		JButton button = new JButton("Generate", MainWindow.IMAGELOADER.getIcon("generate.gif"));
+		JButton button = new JButton("Generate", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_GENERATE));
 		button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
