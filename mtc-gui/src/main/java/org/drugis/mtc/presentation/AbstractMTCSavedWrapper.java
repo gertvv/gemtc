@@ -26,6 +26,7 @@
 
 package org.drugis.mtc.presentation;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.drugis.common.beans.AbstractObservable;
@@ -34,6 +35,7 @@ import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
+import org.drugis.mtc.parameterization.ParameterComparator;
 import org.drugis.mtc.parameterization.RandomEffectsVariance;
 import org.drugis.mtc.summary.ConvergenceSummary;
 import org.drugis.mtc.summary.QuantileSummary;
@@ -90,7 +92,9 @@ public abstract class AbstractMTCSavedWrapper<TreatmentType> extends AbstractObs
 	
 	@Override
 	public Parameter[] getParameters() { 
-		return d_convergenceSummaries.keySet().toArray(new Parameter[] {});
+		Parameter[] parameters = d_convergenceSummaries.keySet().toArray(new Parameter[] {});
+		Arrays.sort(parameters, new ParameterComparator());
+		return parameters;
 	}
 
 	@Override
