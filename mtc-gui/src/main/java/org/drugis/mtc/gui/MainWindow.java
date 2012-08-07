@@ -47,6 +47,7 @@ import javax.xml.bind.JAXBException;
 import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
+import org.drugis.common.gui.GUIHelper;
 import org.drugis.common.validation.ListMinimumSizeModel;
 import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.graph.GraphUtil;
@@ -103,20 +104,25 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static void main(String[] args) {
-		new MainWindow().setVisible(true);
+		GUIHelper.initializeLookAndFeel();
+		new MainWindow(true).setVisible(true);
 	}
 
 	private JTabbedPane d_mainPane;
 	private ObservableList<DataSetModel> d_models = new ArrayListModel<DataSetModel>();
 
-	public MainWindow() {
+
+	public MainWindow(boolean standAlone) {
 		super(AppInfo.getAppName() + " " + AppInfo.getAppVersion());
-		createMainWindow();
+		createMainWindow(standAlone);
 	}
 	
+	public MainWindow() {
+		this(false);
+	}
 	
 	public MainWindow(final Network network) { 
-		this();
+		this(false);
 		final DataSetModel model = new DataSetModel(network);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -125,8 +131,10 @@ public class MainWindow extends JFrame {
 		});
 	}
 
-	private void createMainWindow() { 
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);			
+
+
+	private void createMainWindow(boolean standAlone) {
+		setDefaultCloseOperation(standAlone ? WindowConstants.EXIT_ON_CLOSE : WindowConstants.DISPOSE_ON_CLOSE);			
 		
 		setAppIcon(this);
 
@@ -141,7 +149,7 @@ public class MainWindow extends JFrame {
 	public static void setAppIcon(JFrame frame) {
 		Image image = null;
 		try {
-			image = ((ImageIcon)MainWindow.IMAGELOADER.getIcon("appicon.png")).getImage();
+			image = ((ImageIcon)MainWindow.IMAGELOADER.getIcon(FileNames.ICON_GEMTC)).getImage();
 		} catch (Exception e) {
 			// suppress
 		}
@@ -173,7 +181,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createNewButton() {
-		JButton newButton = new JButton("New", MainWindow.IMAGELOADER.getIcon("newfile.gif"));
+		JButton newButton = new JButton("New", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_NEW));
 		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addModel(new DataSetModel());
@@ -183,7 +191,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createOpenButton() {
-		JButton openButton = new JButton("Open", MainWindow.IMAGELOADER.getIcon("openfile.gif"));
+		JButton openButton = new JButton("Open", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_OPEN));
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				FileLoadDialog dialog = new FileLoadDialog(MainWindow.this, "gemtc", "GeMTC files") {
@@ -205,7 +213,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createSaveButton() {
-		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon("savefile.gif"));
+		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_SAVE));
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
@@ -231,7 +239,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createGenerateButton() {
-		JButton button = new JButton("Generate", MainWindow.IMAGELOADER.getIcon("generate.gif"));
+		JButton button = new JButton("Generate", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_GENERATE));
 		button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
@@ -261,7 +269,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	private JButton createAboutButton() {
-		JButton aboutButton = new JButton("About", MainWindow.IMAGELOADER.getIcon("about.gif"));
+		JButton aboutButton = new JButton("About", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_ABOUT));
 		aboutButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				(new AboutDialog(MainWindow.this)).setVisible(true);

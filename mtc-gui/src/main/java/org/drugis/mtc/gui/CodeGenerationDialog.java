@@ -39,9 +39,17 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import org.apache.commons.collections15.BidiMap;
+import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+import org.drugis.mtc.ConsistencyModel;
+import org.drugis.mtc.DefaultModelFactory;
 import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.NodeSplitParameterization;
+import org.drugis.mtc.presentation.MCMCModelWrapper;
+import org.drugis.mtc.presentation.MCMCPresentation;
+import org.drugis.mtc.presentation.SimulationConsistencyWrapper;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.adapter.Bindings;
@@ -56,7 +64,8 @@ import com.jgoodies.binding.value.ValueModel;
 public class CodeGenerationDialog extends JDialog {
 	public enum SyntaxType {
 		BUGS,
-		JAGS
+		JAGS,
+		YADAS
 	}
 	public enum ModelType {
 		Consistency,
@@ -75,6 +84,8 @@ public class CodeGenerationDialog extends JDialog {
 	private ValueHolder d_scale = new ValueHolder(2.5);
 	private ValueHolder d_tuning = new ValueHolder(20000L);
 	private ValueHolder d_simulation = new ValueHolder(40000L);
+
+	private JFrame d_parent;
 	
 	public static class NodeSplitSelectedModel extends AbstractValueModel {
 		private static final long serialVersionUID = 4356976776557424644L;
@@ -158,9 +169,11 @@ public class CodeGenerationDialog extends JDialog {
 
 	public CodeGenerationDialog(JFrame parent, String name, Network network) {
 		super(parent, "Generate BUGS/JAGS code for " + name, true);
+		d_parent = parent;
 		d_name = name;
 		d_network = network;
 		
+		setLocationByPlatform(true);
 		initComponents();
 		pack();
 	}
@@ -177,8 +190,9 @@ public class CodeGenerationDialog extends JDialog {
 		
 		add(new JLabel("Syntax: "), leftC);
 		JPanel syntaxPanel = new JPanel(new FlowLayout());
-		syntaxPanel.add(createRadioButton(d_syntaxType, SyntaxType.BUGS));
-		syntaxPanel.add(createRadioButton(d_syntaxType, SyntaxType.JAGS));
+		for (SyntaxType type : SyntaxType.values()) {
+			syntaxPanel.add(createRadioButton(d_syntaxType, type));
+		}
 		add(syntaxPanel, rightC);
 		
 		leftC.gridy++;
@@ -285,10 +299,25 @@ public class CodeGenerationDialog extends JDialog {
 	}
 
 	private void generate() {
-		JFrame window = new GeneratedCodeWindow(d_name, d_network, 
-				(SyntaxType)d_syntaxType.getValue(), (ModelType)d_modelType.getValue(), (BasicParameter)d_splitNode.getValue(),
-				getInt(d_chains), getInt(d_tuning), getInt(d_simulation), getDouble(d_scale));
-		window.setVisible(true);
+		if (d_syntaxType.getValue() == SyntaxType.YADAS) {
+			JDialog jDialog = new JDialog(d_parent);
+			ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(d_network);
+			BidiMap<Treatment, Treatment> map = new DualHashBidiMap<Treatment, Treatment>();
+			for (Treatment t : d_network.getTreatments()) {
+				map.put(t, t);
+			}
+			MCMCModelWrapper wrapper = new SimulationConsistencyWrapper<Treatment>(model, d_network.getTreatments(), map);
+			MCMCPresentation presentation = new MCMCPresentation(wrapper, "Consistency model -- WORK IN PROGRESS");
+			jDialog.setLocationByPlatform(true);
+			jDialog.add(SimulationComponentFactory.createSimulationControls(presentation, d_parent, false, null, null));
+			jDialog.pack();
+			jDialog.setVisible(true);
+		} else {
+			JFrame window = new GeneratedCodeWindow(d_name, d_network, 
+					(SyntaxType)d_syntaxType.getValue(), (ModelType)d_modelType.getValue(), (BasicParameter)d_splitNode.getValue(),
+					getInt(d_chains), getInt(d_tuning), getInt(d_simulation), getDouble(d_scale));
+			window.setVisible(true);
+		}
 	}
 
 	private int getInt(ValueModel model) {
