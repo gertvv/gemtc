@@ -2,12 +2,12 @@
  * This file is part of ADDIS (Aggregate Data Drug Information System).
  * ADDIS is distributed from http://drugis.org/.
  * Copyright (C) 2009 Gert van Valkenhoef, Tommi Tervonen.
- * Copyright (C) 2010 Gert van Valkenhoef, Tommi Tervonen, 
- * Tijs Zwinkels, Maarten Jacobs, Hanno Koeslag, Florin Schimbinschi, 
+ * Copyright (C) 2010 Gert van Valkenhoef, Tommi Tervonen,
+ * Tijs Zwinkels, Maarten Jacobs, Hanno Koeslag, Florin Schimbinschi,
  * Ahmad Kamal, Daniel Reid.
- * Copyright (C) 2011 Gert van Valkenhoef, Ahmad Kamal, 
+ * Copyright (C) 2011 Gert van Valkenhoef, Ahmad Kamal,
  * Daniel Reid, Florin Schimbinschi.
- * Copyright (C) 2012 Gert van Valkenhoef, Daniel Reid, 
+ * Copyright (C) 2012 Gert van Valkenhoef, Daniel Reid,
  * Joël Kuiper, Wouter Reckman.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,6 +41,7 @@ import org.drugis.mtc.MCMCModel;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MCMCResultsEvent;
 import org.drugis.mtc.MCMCResultsListener;
+import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.convergence.GelmanRubinConvergence;
 import org.jfree.chart.ChartFactory;
@@ -61,39 +62,40 @@ import com.jgoodies.forms.layout.FormLayout;
 @SuppressWarnings("serial")
 public class ConvergencePlotsDialog extends JDialog {
 	final static int DATA_SCALE = 200;
-	private XYSeries d_rHatSeries;
-	private XYSeries d_vHatSeries;
-	private XYSeries d_wSeries;
-	private SimpleSuspendableTask d_task;
+	private final XYSeries d_rHatSeries;
+	private final XYSeries d_vHatSeries;
+	private final XYSeries d_wSeries;
+	private final SimpleSuspendableTask d_task;
 
-	public ConvergencePlotsDialog(final JFrame main, final MCMCModel mcmcModel, final Parameter p) {
+	public ConvergencePlotsDialog(final JFrame main, final MCMCSettings settings, final MCMCModel mcmcModel, final Parameter p) {
 		super(main, p + " convergence diagnostics", false);
 		d_rHatSeries = new XYSeries("R-Hat");
 		d_vHatSeries = new XYSeries("sqrt(vHat)");
 		d_wSeries = new XYSeries("sqrt(W)");
-		d_task = createTask(mcmcModel.getResults(), p);
-		
+		d_task = createTask(mcmcModel.getResults(), settings, p);
+
 		super.add(new JScrollPane(createPanel()));
 
 		mcmcModel.getResults().addResultsListener(new MCMCResultsListener() {
-			public void resultsEvent(MCMCResultsEvent event) {
+			@Override
+			public void resultsEvent(final MCMCResultsEvent event) {
 				fillDataSets();
 			}
 		});
-		
-		if(mcmcModel.getResults().getNumberOfSamples() > 0) { 
+
+		if(mcmcModel.getResults().getNumberOfSamples() > 0) {
 			fillDataSets();
 		}
 	}
 
 	private JPanel createPanel() {
-		FormLayout layout = new FormLayout(
+		final FormLayout layout = new FormLayout(
 				"pref:grow:fill",
 				"p, 3dlu, p, 3dlu, p");
-		PanelBuilder builder = new PanelBuilder(layout);
+		final PanelBuilder builder = new PanelBuilder(layout);
 		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-		
+		final CellConstraints cc = new CellConstraints();
+
 		final XYSeriesCollection datasetRhat = new XYSeriesCollection();
 		final XYSeriesCollection datasetVhatVsW = new XYSeriesCollection();
 		datasetRhat.addSeries(d_rHatSeries);
@@ -106,8 +108,8 @@ public class ConvergencePlotsDialog extends JDialog {
 		chartPanelRhat.setVisible(true);
 		chartPanelVhatVsW.setVisible(true);
 
-		JProgressBar bar = new TaskProgressBar(d_task);
-		
+		final JProgressBar bar = new TaskProgressBar(d_task);
+
 		builder.add(bar, cc.xy(1, 1));
 		builder.add(chartPanelRhat, cc.xy(1, 3));
 		builder.add(chartPanelVhatVsW, cc.xy(1, 5));
@@ -118,64 +120,65 @@ public class ConvergencePlotsDialog extends JDialog {
 		ThreadHandler.getInstance().scheduleTask(d_task);
 	}
 
-	private SimpleSuspendableTask createTask(final MCMCResults results,	final Parameter p) {
-		Runnable r = new Runnable() {
+	private SimpleSuspendableTask createTask(final MCMCResults results,	final MCMCSettings settings, final Parameter p) {
+		final Runnable r = new Runnable() {
+			@Override
 			public void run() {
 				final int noResults = results.getNumberOfSamples();
-				
 				final int resolution = noResults / DATA_SCALE;
-				
+
 				for (int i = resolution; i <= noResults; i += resolution) {
-					d_rHatSeries.add(i, GelmanRubinConvergence.diagnose(results, p, i));
-					d_vHatSeries.add(i, GelmanRubinConvergence.calculatePooledVariance(results, p, i));
-					d_wSeries.add(i, GelmanRubinConvergence.calculateWithinChainVariance(results, p, i));
+					final int iter = i * settings.getThinningInterval();
+					d_rHatSeries.add(iter, GelmanRubinConvergence.diagnose(results, p, i));
+					d_vHatSeries.add(iter, GelmanRubinConvergence.calculatePooledVariance(results, p, i));
+					d_wSeries.add(iter, GelmanRubinConvergence.calculateWithinChainVariance(results, p, i));
 				}
 			}
 		};
-		SimpleSuspendableTask task = new SimpleSuspendableTask(r, "Computing results");
+		final SimpleSuspendableTask task = new SimpleSuspendableTask(r, "Computing results");
 		return task;
 	}
 
 	private JFreeChart createRhatChart(final XYDataset dataset) {
 		final JFreeChart RhatChart = ChartFactory.createXYLineChart(
-				"Iterative PSRF Plot", 
-				"Iteration No.", "R-Hat(p)", 
-				dataset, PlotOrientation.VERTICAL, 
+				"Iterative PSRF Plot",
+				"Iteration No.", "R-Hat(p)",
+				dataset, PlotOrientation.VERTICAL,
 				false, true, false
 				);
-		
+
 		RhatChart.setBackgroundPaint(Color.white);
 		final XYPlot RhatPlot = RhatChart.getXYPlot();
 		RhatPlot.setDomainGridlinePaint(Color.white);
 		RhatPlot.setRangeGridlinePaint(Color.white);
-		
+
         final NumberAxis rangeAxis = (NumberAxis) RhatPlot.getRangeAxis();
         rangeAxis.setAutoRange(true);
         rangeAxis.setAutoRangeIncludesZero(false);
-        
+
         return RhatChart;
 	}
-	
+
 	private JFreeChart createVhatVsWChart(final XYDataset dataset) {
 		final JFreeChart VhatVsWChart = ChartFactory.createXYLineChart(
-				"Plots of sqrt(vHat) and sqrt(W)", 
-				"Iteration No.", "Variance Estimates", 
-				dataset, PlotOrientation.VERTICAL, 
+				"Plots of sqrt(vHat) and sqrt(W)",
+				"Iteration No.", "Variance Estimates",
+				dataset, PlotOrientation.VERTICAL,
 				true, true, false
 				);
-		
+
 		VhatVsWChart.setBackgroundPaint(Color.white);
 		final XYPlot VhatVsWPlot = VhatVsWChart.getXYPlot();
 		VhatVsWPlot.setDomainGridlinePaint(Color.white);
 		VhatVsWPlot.setRangeGridlinePaint(Color.white);
-		
+
 		final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
 		renderer.setSeriesPaint(0, Color.red);
 		renderer.setSeriesPaint(1, Color.blue);
 		renderer.setSeriesShapesVisible(0, false);
         renderer.setSeriesShapesVisible(1, false);
         VhatVsWPlot.setRenderer(renderer);
-        
+
         return VhatVsWChart;
 	}
 }
