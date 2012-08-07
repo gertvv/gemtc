@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.mtc.MCMCSettingsCache;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
@@ -43,7 +44,7 @@ public class SavedInconsistencyWrapper<TreatmentType> extends AbstractMTCSavedWr
 	private List<Parameter> d_inconsistencyFactors;
 
 	public SavedInconsistencyWrapper(MCMCSettingsCache settings, Map<Parameter, QuantileSummary> quantileSummaries,
-			Map<Parameter, ConvergenceSummary> convergenceSummaries, Map<TreatmentType, Treatment> treatmentMap) {
+			Map<Parameter, ConvergenceSummary> convergenceSummaries, BidiMap<TreatmentType, Treatment> treatmentMap) {
 		super(settings, quantileSummaries, convergenceSummaries, treatmentMap);
 		d_inconsistencyFactors = new ArrayList<Parameter>();
 		for(Parameter p : d_quantileSummaries.keySet()) { 

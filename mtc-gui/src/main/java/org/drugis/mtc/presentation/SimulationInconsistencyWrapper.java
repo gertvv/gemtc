@@ -27,15 +27,15 @@
 package org.drugis.mtc.presentation;
 
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.mtc.InconsistencyModel;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 
 public class SimulationInconsistencyWrapper<TreatmentType> extends AbstractMTCSimulationWrapper<TreatmentType, InconsistencyModel> implements InconsistencyWrapper<TreatmentType> {
 
-	public SimulationInconsistencyWrapper(InconsistencyModel model, Map<TreatmentType, Treatment> treatmentMap) {
+	public SimulationInconsistencyWrapper(InconsistencyModel model, BidiMap<TreatmentType, Treatment> treatmentMap) {
 		super(model, "Inconsistency Model", treatmentMap);
 	}
 

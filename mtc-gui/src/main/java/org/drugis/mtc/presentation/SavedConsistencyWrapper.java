@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.mtc.MCMCSettingsCache;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
@@ -52,7 +53,7 @@ public class SavedConsistencyWrapper<TreatmentType> extends AbstractMTCSavedWrap
 			MultivariateNormalSummary relativeEffectsSummary, 
 			RankProbabilitySummary rankProbabilitySummary, 
 			List<TreatmentType> drugs, 
-			Map<TreatmentType, Treatment> treatmentMap) {
+			BidiMap<TreatmentType, Treatment> treatmentMap) {
 		super(settings, quantileSummaries, convergenceSummaries, treatmentMap);
 		d_relativeEffectsSummary = relativeEffectsSummary;
 		d_rankProbabilitySummary = rankProbabilitySummary;
@@ -78,7 +79,7 @@ public class SavedConsistencyWrapper<TreatmentType> extends AbstractMTCSavedWrap
 
 	@Override
 	public List<Pair<TreatmentType>> getRelativeEffectsList() {
-		List<Pair<TreatmentType>> list = new ArrayList<Pair<TreatmentType>>(d_drugs.size() - 1); // first DrugSet is baseline-> excluded
+		List<Pair<TreatmentType>> list = new ArrayList<Pair<TreatmentType>>(d_drugs.size() - 1); // first TreatmentDefinition is baseline-> excluded
 		for (int i = 0; i < d_drugs.size() - 1; ++i) {
 			Pair<TreatmentType> relEffect = new Pair<TreatmentType>(d_drugs.get(0), d_drugs.get(i + 1));
 			list.add(relEffect);

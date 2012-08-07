@@ -26,8 +26,7 @@
 
 package org.drugis.mtc.presentation;
 
-import java.util.Map;
-
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.mtc.NodeSplitModel;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
@@ -37,7 +36,7 @@ import org.drugis.mtc.summary.NodeSplitPValueSummary;
 public class SimulationNodeSplitWrapper<TreatmentType> extends AbstractMTCSimulationWrapper<TreatmentType, NodeSplitModel> implements NodeSplitWrapper<TreatmentType> {
 	private NodeSplitPValueSummary d_pValueSummary;
 
-	public SimulationNodeSplitWrapper(NodeSplitModel model, Map<TreatmentType, Treatment> treatmentMap) {
+	public SimulationNodeSplitWrapper(NodeSplitModel model, BidiMap<TreatmentType, Treatment> treatmentMap) {
 		super(model, "Node Split on " + model.getSplitNode().getName(), treatmentMap);
 	}
 

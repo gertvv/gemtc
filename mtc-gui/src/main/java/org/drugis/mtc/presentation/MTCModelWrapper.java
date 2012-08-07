@@ -28,6 +28,7 @@ package org.drugis.mtc.presentation;
 
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
+import org.drugis.mtc.model.Treatment;
 
 public interface MTCModelWrapper<TreatmentType> extends MCMCModelWrapper {
 	/**
@@ -46,4 +47,14 @@ public interface MTCModelWrapper<TreatmentType> extends MCMCModelWrapper {
 	 */
 	@Override
 	public MixedTreatmentComparison getModel();
+	
+	/**
+	 * @return The TreatmentType for which the Treatment t was constructed.
+	 */
+	public TreatmentType reverseMap(Treatment t);
+	
+	/**
+	 * @return The Treatment that was constructed for the TreatmentType t.
+	 */
+	public Treatment forwardMap(TreatmentType t);
 }

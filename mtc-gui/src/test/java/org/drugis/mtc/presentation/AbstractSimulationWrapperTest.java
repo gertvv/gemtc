@@ -32,10 +32,10 @@ import static org.junit.Assert.assertSame;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.collections15.BidiMap;
+import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
@@ -49,7 +49,7 @@ public class AbstractSimulationWrapperTest {
 	@Before
 	public void setUp() {
 		d_treatments = Arrays.asList("A", "B", "C");
-		Map<String, Treatment> treatmentMap = new HashMap<String, Treatment>();
+		BidiMap<String, Treatment> treatmentMap = new DualHashBidiMap<String, Treatment>();
 		ArrayList<Treatment> treatmentList = new ArrayList<Treatment>();
 		for(String s : d_treatments) { 
 			final Treatment t = new Treatment(s, "");

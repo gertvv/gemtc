@@ -28,8 +28,8 @@ package org.drugis.mtc.presentation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
@@ -44,7 +44,7 @@ public class SimulationConsistencyWrapper<TreatmentType> extends AbstractMTCSimu
 	private RankProbabilitySummary d_rankProbabilitySummary;
 	private final List<TreatmentType> d_drugs;
 
-	public SimulationConsistencyWrapper(ConsistencyModel model, List<TreatmentType> drugs, Map<TreatmentType, Treatment> treatmentMap) {
+	public SimulationConsistencyWrapper(ConsistencyModel model, List<TreatmentType> drugs, BidiMap<TreatmentType, Treatment> treatmentMap) {
 		super(model, "Consistency Model", treatmentMap);
 		d_drugs = drugs;
 		List<Pair<TreatmentType>> relEffects = getRelativeEffectsList();
@@ -72,7 +72,7 @@ public class SimulationConsistencyWrapper<TreatmentType> extends AbstractMTCSimu
 	
 	@Override
 	public List<Pair<TreatmentType>> getRelativeEffectsList() {
-		List<Pair<TreatmentType>> list = new ArrayList<Pair<TreatmentType>>(d_drugs.size() - 1); // first DrugSet is baseline-> excluded
+		List<Pair<TreatmentType>> list = new ArrayList<Pair<TreatmentType>>(d_drugs.size() - 1); // first TreatmentDefinition is baseline-> excluded
 		for (int i = 0; i < d_drugs.size() - 1; ++i) {
 			Pair<TreatmentType> relEffect = new Pair<TreatmentType>(d_drugs.get(0), d_drugs.get(i + 1));
 			list.add(relEffect);

@@ -83,7 +83,7 @@ public interface MCMCModelWrapper extends Observable {
 	/**
 	 * Get a quantile summary for the given parameter.
 	 * The parameter must occur in the list returned by {@link #getParameters()}, 
-	 * or be a relative effect from {@link #getRelativeEffect(DrugSet, DrugSet)}.
+	 * or be a relative effect from {@link #getRelativeEffect(TreatmentDefinition, TreatmentDefinition)}.
 	 */
 	public abstract QuantileSummary getQuantileSummary(Parameter ip);
 

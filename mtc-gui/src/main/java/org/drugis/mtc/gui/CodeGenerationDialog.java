@@ -29,8 +29,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -41,6 +39,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import org.apache.commons.collections15.BidiMap;
+import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.DefaultModelFactory;
 import org.drugis.mtc.model.Network;
@@ -302,7 +302,7 @@ public class CodeGenerationDialog extends JDialog {
 		if (d_syntaxType.getValue() == SyntaxType.YADAS) {
 			JDialog jDialog = new JDialog(d_parent);
 			ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(d_network);
-			Map<Treatment, Treatment> map = new HashMap<Treatment, Treatment>();
+			BidiMap<Treatment, Treatment> map = new DualHashBidiMap<Treatment, Treatment>();
 			for (Treatment t : d_network.getTreatments()) {
 				map.put(t, t);
 			}

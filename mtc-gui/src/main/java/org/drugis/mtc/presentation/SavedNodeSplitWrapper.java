@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.mtc.MCMCSettingsCache;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
@@ -49,7 +50,7 @@ public class SavedNodeSplitWrapper<TreatmentType> extends AbstractMTCSavedWrappe
 			Map<Parameter, ConvergenceSummary> convergenceSummaries,
 			BasicParameter splitNode,
 			NodeSplitPValueSummary nodeSplitPValueSummary, 
-			Map<TreatmentType, Treatment> treatmentMap) {
+			BidiMap<TreatmentType, Treatment> treatmentMap) {
 		super(settings, quantileSummaries, convergenceSummaries, treatmentMap);
 		d_splitNode = splitNode;
 		d_nodeSplitPValueSummary = nodeSplitPValueSummary;

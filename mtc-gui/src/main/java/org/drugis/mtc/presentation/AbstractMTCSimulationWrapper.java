@@ -28,23 +28,23 @@ package org.drugis.mtc.presentation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 
 public abstract class AbstractMTCSimulationWrapper<TreatmentType, MTCType extends MixedTreatmentComparison> extends MCMCSimulationWrapper<MTCType> implements MTCModelWrapper<TreatmentType> {
-	private final Map<TreatmentType, Treatment> d_treatmentMap;
+	private final BidiMap<TreatmentType, Treatment> d_treatmentMap;
 	
-	protected AbstractMTCSimulationWrapper(MTCType mtc, String description, Map<TreatmentType, Treatment> treatmentMap) {
+	protected AbstractMTCSimulationWrapper(MTCType mtc, String description, BidiMap<TreatmentType, Treatment> treatmentMap) {
 		super(mtc, description);
 		d_treatmentMap = treatmentMap;
 	}
 	
 	@Override
 	public Parameter getRelativeEffect(TreatmentType a, TreatmentType b) {
-		return d_nested.getRelativeEffect(getTreatment(a), getTreatment(b));
+		return d_nested.getRelativeEffect(forwardMap(a), forwardMap(b));
 	}
 
 	@Override
@@ -55,12 +55,18 @@ public abstract class AbstractMTCSimulationWrapper<TreatmentType, MTCType extend
 	protected List<Treatment> getTreatments(List<TreatmentType> drugs) {
 		List<Treatment> treatments = new ArrayList<Treatment>();
 		for (TreatmentType d : drugs) {
-			treatments.add(getTreatment(d));
+			treatments.add(forwardMap(d));
 		}
 		return treatments;
 	}
 
-	protected Treatment getTreatment(TreatmentType d) {
-		return d_treatmentMap.get(d);
+	@Override
+	public TreatmentType reverseMap(Treatment t) {
+		return d_treatmentMap.getKey(t);
+	}
+
+	@Override
+	public Treatment forwardMap(TreatmentType t) {
+		return d_treatmentMap.get(t);
 	}
 }

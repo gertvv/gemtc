@@ -29,6 +29,7 @@ package org.drugis.mtc.presentation;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.collections15.BidiMap;
 import org.drugis.common.beans.AbstractObservable;
 import org.drugis.mtc.MCMCSettingsCache;
 import org.drugis.mtc.MixedTreatmentComparison;
@@ -45,10 +46,10 @@ public abstract class AbstractMTCSavedWrapper<TreatmentType> extends AbstractObs
 	protected final Map<Parameter, QuantileSummary> d_quantileSummaries;
 	protected final Map<Parameter, ConvergenceSummary> d_convergenceSummaries;
 	private boolean d_destroy;
-	private Map<TreatmentType, Treatment> d_treatmentMap;
+	private BidiMap<TreatmentType, Treatment> d_treatmentMap;
 
 	public AbstractMTCSavedWrapper(MCMCSettingsCache settings, Map<Parameter, QuantileSummary> quantileSummaries, 
-			Map<Parameter, ConvergenceSummary> convergenceSummaries, Map<TreatmentType, Treatment> treatmentMap) {
+			Map<Parameter, ConvergenceSummary> convergenceSummaries, BidiMap<TreatmentType, Treatment> treatmentMap) {
 		d_settings = settings;
 		d_quantileSummaries = quantileSummaries;
 		d_convergenceSummaries = convergenceSummaries;
@@ -116,5 +117,15 @@ public abstract class AbstractMTCSavedWrapper<TreatmentType> extends AbstractObs
 	@Override
 	public boolean getDestroyed() { 
 		return d_destroy;
+	}
+
+	@Override
+	public TreatmentType reverseMap(Treatment t) {
+		return d_treatmentMap.getKey(t);
+	}
+
+	@Override
+	public Treatment forwardMap(TreatmentType t) {
+		return d_treatmentMap.get(t);
 	}
 }
