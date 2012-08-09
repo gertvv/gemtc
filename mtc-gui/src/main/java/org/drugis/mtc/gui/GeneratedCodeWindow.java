@@ -39,7 +39,6 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.drugis.mtc.gui.CodeGenerationDialog.ModelType;
 import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.Network;

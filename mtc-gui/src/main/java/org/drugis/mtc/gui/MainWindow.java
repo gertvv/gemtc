@@ -35,8 +35,10 @@ import java.io.OutputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -206,13 +208,14 @@ public class MainWindow extends JFrame {
 		if (d_model == null) {
 			d_model = model;
 			firePropertyChange(PROPERTY_MODEL, null, d_model);
-			//JTabbedPane pane = new JTabbedPane();
+			
 			DataSetView dataView = new DataSetView(MainWindow.this, model);
-			//JComponent analysisView = new JLabel("here comes the analysis!");
-			//pane.addTab("Data", dataView);
-			//pane.addTab("Analysis", analysisView);
-			//add(pane, BorderLayout.CENTER);
-			add(dataView, BorderLayout.CENTER);
+			JComponent analysisView = new AnalysisView(MainWindow.this, model);
+			
+			JTabbedPane pane = new JTabbedPane();
+			pane.addTab("Data", dataView);
+			pane.addTab("Analysis", analysisView);
+			add(pane, BorderLayout.CENTER);
 			pack();
 		} else {
 			MainWindow window = new MainWindow(false);
