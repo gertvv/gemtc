@@ -19,16 +19,14 @@
 
 package org.drugis.mtc.gui;
 
-import java.util.List;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
-import com.jgoodies.binding.list.ObservableList;
-import com.jgoodies.binding.value.ValueModel;
-
-import javax.swing.event.ListDataListener;
 import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import javax.swing.table.AbstractTableModel;
 
 import org.drugis.common.beans.ListPropertyChangeProxy;
 import org.drugis.mtc.data.DataType;
@@ -36,15 +34,15 @@ import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.NetworkModel;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
+import com.jgoodies.binding.list.ObservableList;
+import com.jgoodies.binding.value.ValueModel;
 
 public class MeasurementTableModel extends AbstractTableModel {
 	public static final String COLNAME_STDDEV = "Standard deviation";
 	public static final String COLNAME_MEAN = "Mean";
 	public static final String COLNAME_SAMPLESIZE = "Sample size";
 	public static final String COLNAME_RESPONDERS = "Responders";
-	public static final String COLNAME_ID = "";
+	public static final String COLNAME_ID = "Id";
 
 	private static final long serialVersionUID = -1186064425875064988L;
 
@@ -286,6 +284,8 @@ public class MeasurementTableModel extends AbstractTableModel {
 					return NetworkModel.findMeasurement(s, t).getSampleSize();
 				}
 				break;
+			case NONE:
+				break;
 		}
 		return null;
 	}
@@ -334,6 +334,8 @@ public class MeasurementTableModel extends AbstractTableModel {
 				} else if (col == 3) {
 					NetworkModel.findMeasurement(s, t).setSampleSize(((Integer)val));
 				}
+				break;
+			case NONE:
 				break;
 		}
 	}
