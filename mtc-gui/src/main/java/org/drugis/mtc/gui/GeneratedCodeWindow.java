@@ -84,6 +84,7 @@ public class GeneratedCodeWindow extends JFrame {
 	public GeneratedCodeWindow(String name, Network network, SyntaxType syntaxType, ModelType modelType,
 			BasicParameter splitNode, int nchains, int tuning, int simulation, double scale) {
 		super(syntaxType.toString() + " " + modelType.toString() + " model: " + name);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		d_name = name;
 		d_network = network;
 		d_syntaxType = syntaxType;
