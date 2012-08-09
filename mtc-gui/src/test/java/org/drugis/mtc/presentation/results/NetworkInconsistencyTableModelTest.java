@@ -105,6 +105,7 @@ public class NetworkInconsistencyTableModelTest {
 		TableModelListener mock = createMock(TableModelListener.class);
 		mock.tableChanged((TableModelEvent)JUnitUtil.eqEventObject(new TableModelEvent(d_tableModel)));
 		EasyMock.expectLastCall().anyTimes();
+		EasyMock.makeThreadSafe(mock, true);
 		replay(mock);
 		
 		// Run the model
