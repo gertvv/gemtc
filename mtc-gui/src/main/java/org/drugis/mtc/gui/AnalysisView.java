@@ -18,19 +18,29 @@ import javax.swing.tree.TreePath;
 
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.DefaultModelFactory;
+import org.drugis.mtc.InconsistencyModel;
+import org.drugis.mtc.NodeSplitModel;
+import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.gui.results.ConsistencyView;
 import org.drugis.mtc.gui.results.SimulationComponentFactory;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.presentation.ConsistencyWrapper;
 import org.drugis.mtc.presentation.MCMCModelWrapper;
 import org.drugis.mtc.presentation.MCMCPresentation;
 import org.drugis.mtc.presentation.SimulationConsistencyWrapper;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 public class AnalysisView extends JPanel {
 	private static final long serialVersionUID = -3923180226772918488L;
 	
 	private final JFrame d_parent;
-	private final AnalysesModel d_analyses = new AnalysesModel();
 	private final DataSetModel d_dataset;
+	private final AnalysesModel d_analyses = new AnalysesModel();
+	private Network d_network;
 	private JSplitPane d_mainPane;
 
 	public AnalysisView(JFrame parent, DataSetModel model) {
@@ -47,7 +57,7 @@ public class AnalysisView extends JPanel {
 			public void valueChanged(TreeSelectionEvent e) {
 				TreePath path = e.getPath();
 				if (path.getLastPathComponent() instanceof MCMCPresentation) {
-					d_mainPane.setRightComponent(buildModelPanel((MCMCPresentation)path.getLastPathComponent()));
+					d_mainPane.setRightComponent(new JScrollPane(buildModelPanel((MCMCPresentation)path.getLastPathComponent())));
 				} else if (path.getLastPathComponent() instanceof ModelType) {
 					d_mainPane.setRightComponent(buildTypePanel((ModelType)path.getLastPathComponent()));
 				} else {
@@ -66,12 +76,12 @@ public class AnalysisView extends JPanel {
 	}
 
 	private void generateModels() {
-		Network network = d_dataset.getNetwork();
-		ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(network);
+		d_network = d_dataset.getNetwork(); // Cache for when the view is generated later
+		ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(d_network);
 		MCMCModelWrapper wrapper = new SimulationConsistencyWrapper<Treatment>(
 				model,
-				network.getTreatments(),
-				Util.identityMap(network.getTreatments()));
+				d_network.getTreatments(),
+				Util.identityMap(d_network.getTreatments()));
 		MCMCPresentation presentation = new MCMCPresentation(wrapper, "Consistency model");
 		d_analyses.add(ModelType.Consistency, presentation);
 	}
@@ -95,6 +105,22 @@ public class AnalysisView extends JPanel {
 	}
 
 	private JPanel buildModelPanel(MCMCPresentation presentation) {
-		return SimulationComponentFactory.createSimulationControls(presentation, d_parent, false, null, null);
+		JPanel controls = SimulationComponentFactory.createSimulationControls(presentation, d_parent, true, null, null);
+		JPanel results = new JPanel();
+		if (presentation.getModel() instanceof ConsistencyModel) {
+			results = new ConsistencyView(d_network.getTreatments(), (ConsistencyWrapper<?>)presentation.getWrapper(), d_network.getType().equals(DataType.RATE));
+		} else if (presentation.getModel() instanceof InconsistencyModel) {
+			
+		} else if (presentation.getModel() instanceof NodeSplitModel) {
+			
+		}
+		
+		CellConstraints cc = new CellConstraints();
+		FormLayout layout = new FormLayout("pref:grow:fill", "p, 3dlu, p");
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.setDefaultDialogBorder();
+		builder.add(controls, cc.xy(1, 1));
+		builder.add(results, cc.xy(1, 3));
+		return builder.getPanel();
 	}
 }

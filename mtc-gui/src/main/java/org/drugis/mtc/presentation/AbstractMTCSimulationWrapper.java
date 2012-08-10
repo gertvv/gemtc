@@ -36,8 +36,13 @@ public abstract class AbstractMTCSimulationWrapper<TreatmentType, MTCType extend
 	}
 	
 	@Override
+	public Parameter getRelativeEffect(Treatment a, Treatment b) {
+		return d_nested.getRelativeEffect(a, b);
+	}
+	
+	@Override
 	public Parameter getRelativeEffect(TreatmentType a, TreatmentType b) {
-		return d_nested.getRelativeEffect(forwardMap(a), forwardMap(b));
+		return getRelativeEffect(forwardMap(a), forwardMap(b));
 	}
 
 	@Override
