@@ -25,10 +25,13 @@ import org.drugis.mtc.gui.results.ConsistencyView;
 import org.drugis.mtc.gui.results.SimulationComponentFactory;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.presentation.ConsistencyWrapper;
 import org.drugis.mtc.presentation.MCMCModelWrapper;
 import org.drugis.mtc.presentation.MCMCPresentation;
 import org.drugis.mtc.presentation.SimulationConsistencyWrapper;
+import org.drugis.mtc.presentation.SimulationInconsistencyWrapper;
+import org.drugis.mtc.presentation.SimulationNodeSplitWrapper;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -77,13 +80,39 @@ public class AnalysisView extends JPanel {
 
 	private void generateModels() {
 		d_network = d_dataset.getNetwork(); // Cache for when the view is generated later
+		d_analyses.add(ModelType.Consistency, buildConsistencyModel());
+		d_analyses.add(ModelType.Inconsistency, buildInconsistencyModel());
+		for (BasicParameter node : DefaultModelFactory.instance().getSplittableNodes(d_network)) {
+			d_analyses.add(ModelType.NodeSplit, buildNodeSplitModel(node));
+		}
+	}
+
+	private MCMCPresentation buildConsistencyModel() {
 		ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(d_network);
 		MCMCModelWrapper wrapper = new SimulationConsistencyWrapper<Treatment>(
 				model,
 				d_network.getTreatments(),
 				Util.identityMap(d_network.getTreatments()));
 		MCMCPresentation presentation = new MCMCPresentation(wrapper, "Consistency model");
-		d_analyses.add(ModelType.Consistency, presentation);
+		return presentation;
+	}
+	
+	private MCMCPresentation buildInconsistencyModel() {
+		InconsistencyModel model = DefaultModelFactory.instance().getInconsistencyModel(d_network);
+		MCMCModelWrapper wrapper = new SimulationInconsistencyWrapper<Treatment>(
+				model,
+				Util.identityMap(d_network.getTreatments()));
+		MCMCPresentation presentation = new MCMCPresentation(wrapper, "Inconsistency model");
+		return presentation;
+	}
+	
+	private MCMCPresentation buildNodeSplitModel(BasicParameter split) {
+		NodeSplitModel model = DefaultModelFactory.instance().getNodeSplitModel(d_network, split);
+		MCMCModelWrapper wrapper = new SimulationNodeSplitWrapper<Treatment>(
+				model,
+				Util.identityMap(d_network.getTreatments()));
+		MCMCPresentation presentation = new MCMCPresentation(wrapper, split.getName());
+		return presentation;
 	}
 
 	private JPanel buildRootPanel() {
