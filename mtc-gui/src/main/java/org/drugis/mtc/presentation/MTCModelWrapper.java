@@ -27,6 +27,11 @@ public interface MTCModelWrapper<TreatmentType> extends MCMCModelWrapper {
 	/**
 	 * @see org.drugis.mtc.MixedTreatmentComparison#getRelativeEffect(org.drugis.mtc.model.Treatment, org.drugis.mtc.model.Treatment)
 	 */
+	public Parameter getRelativeEffect(Treatment t1, Treatment t2);
+	
+	/**
+	 * @see org.drugis.mtc.MixedTreatmentComparison#getRelativeEffect(org.drugis.mtc.model.Treatment, org.drugis.mtc.model.Treatment)
+	 */
 	public Parameter getRelativeEffect(TreatmentType a, TreatmentType b);
 	
 	/**

@@ -23,7 +23,6 @@ import org.drugis.common.gui.task.TaskProgressModel;
 import org.drugis.common.threading.NullTask;
 import org.drugis.common.threading.status.TaskTerminatedModel;
 import org.drugis.mtc.MCMCModel;
-import org.drugis.mtc.presentation.MCMCModelWrapper;
 
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
@@ -47,6 +46,10 @@ public class MCMCPresentation {
 		});
 		d_modelConstructionFinished = wrapper.isSaved() ? new ValueHolder(true) : 
 			new TaskTerminatedModel(wrapper.getModel().getActivityTask().getModel().getStartState());
+	}
+	
+	public String getName() {
+		return d_name;
 	}
 
 	public ValueModel isModelConstructed() {
