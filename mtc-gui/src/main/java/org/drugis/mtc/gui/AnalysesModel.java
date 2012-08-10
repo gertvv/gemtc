@@ -149,4 +149,8 @@ public class AnalysesModel implements TreeModel {
 	public void removeTreeModelListener(TreeModelListener l) {
 		d_listeners.remove(l);
 	}
+
+	public SortedSet<MCMCPresentation> getModels(ModelType nodesplit) {
+		return d_nodes.get(nodesplit);
+	}
 }
