@@ -39,7 +39,6 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.drugis.mtc.gui.CodeGenerationDialog.ModelType;
 import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.Network;
@@ -84,6 +83,7 @@ public class GeneratedCodeWindow extends JFrame {
 	public GeneratedCodeWindow(String name, Network network, SyntaxType syntaxType, ModelType modelType,
 			BasicParameter splitNode, int nchains, int tuning, int simulation, double scale) {
 		super(syntaxType.toString() + " " + modelType.toString() + " model: " + name);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		d_name = name;
 		d_network = network;
 		d_syntaxType = syntaxType;

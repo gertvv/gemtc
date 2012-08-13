@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.drugis.mtc.gui;
+package org.drugis.mtc.gui.results;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

@@ -48,10 +48,15 @@ public abstract class AbstractMTCSavedWrapper<TreatmentType> extends AbstractObs
 		d_convergenceSummaries = convergenceSummaries;
 		d_treatmentMap = treatmentMap;
 	}
+	
+	@Override
+	public Parameter getRelativeEffect(Treatment a, Treatment b) {
+		return new BasicParameter(a, b);
+	}
 
 	@Override
 	public Parameter getRelativeEffect(TreatmentType a, TreatmentType b) {
-		return new BasicParameter(d_treatmentMap.get(a), d_treatmentMap.get(b));
+		return getRelativeEffect(forwardMap(a), forwardMap(b));
 	}
 	
 	@Override

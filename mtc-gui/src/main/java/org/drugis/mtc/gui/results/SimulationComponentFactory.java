@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.drugis.mtc.gui;
+package org.drugis.mtc.gui.results;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -45,6 +45,8 @@ import org.drugis.common.validation.BooleanAndModel;
 import org.drugis.common.validation.BooleanNotModel;
 import org.drugis.mtc.MCMCModel;
 import org.drugis.mtc.MCMCModel.ExtendSimulation;
+import org.drugis.mtc.gui.FileNames;
+import org.drugis.mtc.gui.MainWindow;
 import org.drugis.mtc.gui.progressgraph.ProgressGraph;
 import org.drugis.mtc.presentation.MCMCModelWrapper;
 import org.drugis.mtc.presentation.MCMCPresentation;

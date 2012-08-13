@@ -39,6 +39,7 @@ import org.drugis.mtc.DichotomousNetworkBuilder;
 import org.drugis.mtc.MCMCModel.ExtendSimulation;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.presentation.ConsistencyWrapper;
 import org.drugis.mtc.presentation.SimulationConsistencyWrapper;
 import org.easymock.EasyMock;
@@ -46,7 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class NetworkTableModelTest {
-	private NetworkRelativeEffectTableModel<String> d_tableModel;
+	private NetworkRelativeEffectTableModel d_tableModel;
 	private List<String> d_alternatives;
 	private SimulationConsistencyWrapper<String> d_consistencyWrapper;
 
@@ -67,7 +68,7 @@ public class NetworkTableModelTest {
 		
 		final ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(network);
 		d_consistencyWrapper = new SimulationConsistencyWrapper<String>(model, d_alternatives, builder.getTreatmentMap());
-		d_tableModel = new NetworkRelativeEffectTableModel<String>(d_alternatives, d_consistencyWrapper);
+		d_tableModel = new NetworkRelativeEffectTableModel(network.getTreatments(), d_consistencyWrapper);
 	}
 	
 	@Test
@@ -85,13 +86,9 @@ public class NetworkTableModelTest {
 		assertTrue(d_tableModel.getColumnCount() > 0);
 		assertTrue(d_tableModel.getRowCount() > 0);
 
-		assertEquals(null, d_tableModel.getDescriptionAt(0, 0));
-		assertEquals(null, d_tableModel.getDescriptionAt(1, 1));
-		assertEquals(null, d_tableModel.getDescriptionAt(2, 2));
-		assertEquals(d_alternatives.get(0), d_tableModel.getValueAt(0, 0));
-		assertEquals(d_alternatives.get(1), d_tableModel.getValueAt(1, 1));
-		assertEquals(d_alternatives.get(2), d_tableModel.getValueAt(2, 2));
-
+		assertEquals(d_alternatives.get(0), ((Treatment) d_tableModel.getValueAt(0, 0)).getId());
+		assertEquals(d_alternatives.get(1), ((Treatment) d_tableModel.getValueAt(1, 1)).getId());
+		assertEquals(d_alternatives.get(2), ((Treatment) d_tableModel.getValueAt(2, 2)).getId());
 		
 		ConsistencyWrapper<String> consModel = d_consistencyWrapper;
 		Parameter relativeEffect01 = consModel.getRelativeEffect(d_alternatives.get(0), d_alternatives.get(1));
@@ -99,13 +96,9 @@ public class NetworkTableModelTest {
 		Parameter relativeEffect20 = consModel.getRelativeEffect(d_alternatives.get(2), d_alternatives.get(0));
 
 		assertSame(consModel.getQuantileSummary(relativeEffect01), d_tableModel.getValueAt(0, 1));
-		assertEquals("\"Paroxetine\" relative to \"Fluoxetine\"", d_tableModel.getDescriptionAt(0, 1));
 		assertSame(consModel.getQuantileSummary(relativeEffect10), d_tableModel.getValueAt(1, 0));
-		assertEquals("\"Fluoxetine\" relative to \"Paroxetine\"", d_tableModel.getDescriptionAt(1, 0));
 		assertSame(consModel.getQuantileSummary(relativeEffect20), d_tableModel.getValueAt(2, 0));
-		assertEquals("\"Fluoxetine\" relative to \"Sertraline\"", d_tableModel.getDescriptionAt(2, 0));
 	}
-	
 	
 	@Test
 	public void testUpdateFiresTableDataChangedEvent() throws InterruptedException {

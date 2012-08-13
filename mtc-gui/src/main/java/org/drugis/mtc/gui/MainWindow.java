@@ -45,21 +45,19 @@ import javax.swing.WindowConstants;
 import javax.xml.bind.JAXBException;
 
 import org.drugis.common.ImageLoader;
+import org.drugis.common.beans.ValueEqualsModel;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.common.gui.GUIHelper;
-import org.drugis.common.validation.ListMinimumSizeModel;
+import org.drugis.common.validation.BooleanNotModel;
 import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.graph.GraphUtil;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.parameterization.NetworkModel;
 
-import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.beans.PropertyConnector;
-import com.jgoodies.binding.list.ArrayListModel;
-import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueModel;
 
@@ -70,20 +68,33 @@ public class MainWindow extends JFrame {
 		private ValueModel d_file;
 		private String d_value;
 
-		public FileNameModel(DataSetModel dataSet) {
-			d_file = new PropertyAdapter<DataSetModel>(dataSet, DataSetModel.PROPERTY_FILE, true);
-			d_file.addValueChangeListener(new PropertyChangeListener() {
+		public FileNameModel() {
+			final PropertyChangeListener listener = new PropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent arg0) {
 					String oldValue = d_value;
 					d_value = calc();
 					fireValueChange(oldValue, d_value);
 				}
+			};
+			MainWindow.this.addPropertyChangeListener(new PropertyChangeListener() {
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (evt.getPropertyName().equals(MainWindow.PROPERTY_MODEL)) {
+						String oldValue = d_value;
+						attachFileListener(listener);
+						d_value = calc();
+						fireValueChange(oldValue, d_value);
+					}
+				}
 			});
+			attachFileListener(listener);
 			d_value = calc();
 		}
 
 		private String calc() {
-			if (d_file.getValue() == null) {
+			if (d_file == null) {
+				return null;
+			} else if (d_file.getValue() == null) {
 				return "new file";
 			} else {
 				return ((File)d_file.getValue()).getName();
@@ -98,22 +109,41 @@ public class MainWindow extends JFrame {
 			throw new UnsupportedOperationException();
 		}
 
+		private void attachFileListener(final PropertyChangeListener listener) {
+			if (d_file != null) {
+				d_file.removeValueChangeListener(listener);
+			}
+			if (d_model != null) {
+				d_file = new PropertyAdapter<DataSetModel>(d_model, DataSetModel.PROPERTY_FILE, true);
+				d_file.addValueChangeListener(listener);
+			}
+		}
 	}
 
 	public static final ImageLoader IMAGELOADER = new ImageLoader("/org/drugis/mtc/gui/");
 	private static final long serialVersionUID = -5199299195474870618L;
+	
+	public static final String PROPERTY_MODEL = "model";
 
 	public static void main(String[] args) {
 		GUIHelper.initializeLookAndFeel();
 		new MainWindow(true).setVisible(true);
+		
+		// Window disposal debug
+		System.out.println(System.currentTimeMillis() + " Started...");
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println(System.currentTimeMillis() + " Stopped!");
+			}
+		}));
 	}
 
-	private JTabbedPane d_mainPane;
-	private ObservableList<DataSetModel> d_models = new ArrayListModel<DataSetModel>();
-
+	private DataSetModel d_model = null;
+	private FileNameModel d_fileNameModel;
 
 	public MainWindow(boolean standAlone) {
-		super(AppInfo.getAppName() + " " + AppInfo.getAppVersion());
+		super();
 		createMainWindow(standAlone);
 	}
 	
@@ -134,18 +164,34 @@ public class MainWindow extends JFrame {
 
 
 	private void createMainWindow(boolean standAlone) {
-		setDefaultCloseOperation(standAlone ? WindowConstants.EXIT_ON_CLOSE : WindowConstants.DISPOSE_ON_CLOSE);			
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setLocationByPlatform(true);
 		
 		setAppIcon(this);
 
 		setMinimumSize(new Dimension(750, 550));
 		setLayout(new BorderLayout());
 		
-		d_mainPane = new JTabbedPane();
 		add(createToolBar(), BorderLayout.NORTH);
-		add(d_mainPane , BorderLayout.CENTER);
+		
+		d_fileNameModel = new FileNameModel();
+		d_fileNameModel.addValueChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				updateTitle();
+			}
+		});
+		updateTitle();
 	}
 	
+	private void updateTitle() {
+		String title = AppInfo.getAppName() + " " + AppInfo.getAppVersion();
+		if (d_fileNameModel.getValue() != null) {
+			title += " - " + d_fileNameModel.getValue();
+		}
+		setTitle(title);
+	}
+
 	public static void setAppIcon(JFrame frame) {
 		Image image = null;
 		try {
@@ -159,12 +205,23 @@ public class MainWindow extends JFrame {
 	}
 	
 	private void addModel(DataSetModel model) {
-		int index = d_models.size();
-		d_models.add(model);
-		DataSetView view = new DataSetView(MainWindow.this, model);
-		JComponent tabHeader = BasicComponentFactory.createLabel(new FileNameModel(model));
-		d_mainPane.add(view);
-		d_mainPane.setTabComponentAt(index, tabHeader);
+		if (d_model == null) {
+			d_model = model;
+			firePropertyChange(PROPERTY_MODEL, null, d_model);
+			
+			DataSetView dataView = new DataSetView(MainWindow.this, model);
+			JComponent analysisView = new AnalysisView(MainWindow.this, model);
+			
+			JTabbedPane pane = new JTabbedPane();
+			pane.addTab("Data", dataView);
+			pane.addTab("Analysis", analysisView);
+			add(pane, BorderLayout.CENTER);
+			pack();
+		} else {
+			MainWindow window = new MainWindow(false);
+			window.addModel(model);
+			window.setVisible(true);
+		}
 	}
 	
 	private JToolBar createToolBar() {
@@ -217,7 +274,7 @@ public class MainWindow extends JFrame {
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					final DataSetModel model = getActiveModel();
+					final DataSetModel model = getModel();
 					if (model.getFile() == null) {
 						FileSaveDialog dialog = new FileSaveDialog(MainWindow.this, "gemtc", "GeMTC files") {
 							public void doAction(String path, String extension) {
@@ -243,7 +300,7 @@ public class MainWindow extends JFrame {
 		button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				final DataSetModel model = getActiveModel();
+				final DataSetModel model = getModel();
 				if (model.getTreatments().size() < 2 || model.getStudies().size() < 2) {
 					JOptionPane.showMessageDialog(MainWindow.this, "You need to define at least two studies and treatments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
 					return;
@@ -264,7 +321,8 @@ public class MainWindow extends JFrame {
 			}
 			
 		});
-		PropertyConnector.connectAndUpdate(new ListMinimumSizeModel(d_models, 1), button, "enabled");
+		ValueModel enabled = new BooleanNotModel(new ValueEqualsModel(new PropertyAdapter<MainWindow>(this, PROPERTY_MODEL, true), null));
+		PropertyConnector.connectAndUpdate(enabled, button, "enabled");
 		return button;
 	}
 	
@@ -307,12 +365,7 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	private DataSetModel getActiveModel() {
-		int idx = d_mainPane.getSelectedIndex();
-		if (idx >= 0) {
-			return d_models.get(idx);
-		} else {
-			return null;
-		}
+	public DataSetModel getModel() {
+		return d_model;
 	}
 }

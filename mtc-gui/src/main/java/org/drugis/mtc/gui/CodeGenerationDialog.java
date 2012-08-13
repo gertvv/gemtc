@@ -40,9 +40,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import org.apache.commons.collections15.BidiMap;
-import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.DefaultModelFactory;
+import org.drugis.mtc.gui.results.SimulationComponentFactory;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
@@ -55,6 +55,7 @@ import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.adapter.Bindings;
 import com.jgoodies.binding.adapter.RadioButtonAdapter;
 import com.jgoodies.binding.beans.PropertyConnector;
+import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.binding.list.SelectionInList;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ConverterFactory;
@@ -66,11 +67,6 @@ public class CodeGenerationDialog extends JDialog {
 		BUGS,
 		JAGS,
 		YADAS
-	}
-	public enum ModelType {
-		Consistency,
-		Inconsistency,
-		NodeSplit
 	}
 	private static final long serialVersionUID = 7179311466635454391L;
 	
@@ -302,11 +298,9 @@ public class CodeGenerationDialog extends JDialog {
 		if (d_syntaxType.getValue() == SyntaxType.YADAS) {
 			JDialog jDialog = new JDialog(d_parent);
 			ConsistencyModel model = DefaultModelFactory.instance().getConsistencyModel(d_network);
-			BidiMap<Treatment, Treatment> map = new DualHashBidiMap<Treatment, Treatment>();
-			for (Treatment t : d_network.getTreatments()) {
-				map.put(t, t);
-			}
-			MCMCModelWrapper wrapper = new SimulationConsistencyWrapper<Treatment>(model, d_network.getTreatments(), map);
+			final ObservableList<Treatment> list = d_network.getTreatments();
+			BidiMap<Treatment, Treatment> map = Util.identityMap(list);
+			MCMCModelWrapper wrapper = new SimulationConsistencyWrapper<Treatment>(model, list, map);
 			MCMCPresentation presentation = new MCMCPresentation(wrapper, "Consistency model -- WORK IN PROGRESS");
 			jDialog.setLocationByPlatform(true);
 			jDialog.add(SimulationComponentFactory.createSimulationControls(presentation, d_parent, false, null, null));
