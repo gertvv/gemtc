@@ -112,6 +112,7 @@ class TreatmentActions implements ListActions<Treatment> {
 
 	private void showEditDialog(ObservableList<Treatment> list, Treatment model) {
 		final JDialog dialog = new JDialog(d_parent, "Treatment");
+		dialog.setLocationByPlatform(true);
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 

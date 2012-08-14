@@ -152,6 +152,7 @@ class StudyActions implements ListActions<Study> {
 	
 	private void showEditDialog(ObservableList<Study> list, Study model) {
 		final JDialog dialog = new JDialog(d_parent, "Study");
+		dialog.setLocationByPlatform(true);
 		dialog.setModal(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		//dialog.setMinimumSize(new Dimension(300, 200));

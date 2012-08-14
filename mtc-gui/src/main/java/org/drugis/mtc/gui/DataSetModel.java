@@ -56,11 +56,11 @@ public class DataSetModel extends AbstractObservable {
 	}
 	
 	public ValueModel getDescription() {
-		return new PropertyAdapter<Network>(d_network, Network.PROPERTY_DESCRIPTION);
+		return new PropertyAdapter<Network>(d_network, Network.PROPERTY_DESCRIPTION, true);
 	}
 
 	public ValueModel getMeasurementType() {
-		return new PropertyAdapter<Network>(d_network, Network.PROPERTY_TYPE);
+		return new PropertyAdapter<Network>(d_network, Network.PROPERTY_TYPE, true);
 	}
 	
 	public ObservableList<Treatment> getTreatments() {

@@ -105,6 +105,8 @@ To evaluate the P-values for all generated node-split models, use:
 Versions
 --------
 
+0.12.3: Bugfixes.
+
 0.12.2: Bugfixes and minor improvements.
 
 0.12.1: Sort studies and treatments alphabetically, fix flaw in prior
