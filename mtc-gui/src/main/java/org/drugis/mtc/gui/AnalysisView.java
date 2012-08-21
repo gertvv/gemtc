@@ -184,7 +184,8 @@ public class AnalysisView extends JPanel {
 		} else if (presentation.getModel() instanceof InconsistencyModel) {
 			results = new InconsistencyView(d_network.getTreatments(), (InconsistencyWrapper<?>)presentation.getWrapper(), d_network.getType().equals(DataType.RATE));
 		} else if (presentation.getModel() instanceof NodeSplitModel) {
-			results = new NodeSplitView((NodeSplitWrapper<?>)presentation.getWrapper(), (ConsistencyWrapper<?>) d_consistency.getWrapper());
+			NodeSplitModel nodeSplitModel = (NodeSplitModel) presentation.getModel();
+			results = new NodeSplitView(nodeSplitModel.getSplitNode(), (NodeSplitWrapper<?>)presentation.getWrapper(), (ConsistencyWrapper<?>) d_consistency.getWrapper());
 		}
 		
 		CellConstraints cc = new CellConstraints();
