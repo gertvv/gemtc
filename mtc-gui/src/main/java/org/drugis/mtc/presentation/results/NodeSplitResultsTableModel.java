@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import org.drugis.mtc.Parameter;
+import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.presentation.ConsistencyWrapper;
 import org.drugis.mtc.presentation.MTCModelWrapper;
@@ -51,11 +52,18 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 	private PropertyChangeListener d_listener;
 	private final ConsistencyWrapper<?> d_consistencyModel;
 	private final List<NodeSplitWrapper<?>> d_nodeSplitModels;
+	private boolean d_showDescription;
 	
 	public NodeSplitResultsTableModel(ConsistencyWrapper<?> consistencyModel, 
 			List<NodeSplitWrapper<?>> nodeSplitModels) {
+		this(consistencyModel, nodeSplitModels, true);
+	}
+	
+	public NodeSplitResultsTableModel(ConsistencyWrapper<?> consistencyModel, 
+			List<NodeSplitWrapper<?>> nodeSplitModels, boolean showDescription) {
 		d_consistencyModel = consistencyModel;
 		d_nodeSplitModels = nodeSplitModels;
+		d_showDescription = showDescription;
 		
 		d_listener = new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
@@ -128,7 +136,11 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 	}
 
 	private String getDescription(BasicParameter p) { 
-		return p.getBaseline().getDescription() + ", " + p.getSubject().getDescription();
+		return getText(p.getBaseline()) + ", " + getText(p.getSubject());
+	}
+
+	private String getText(final Treatment t) {
+		return d_showDescription ? t.getDescription() : t.getId();
 	}
 	
 	@Override
