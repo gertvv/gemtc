@@ -270,7 +270,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private JButton createSaveButton() {
-		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_SAVE));
+		JButton saveButton = new JButton("Save", MainWindow.IMAGELOADER.getIcon(org.drugis.mtc.gui.FileNames.ICON_SAVEFILE));
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
