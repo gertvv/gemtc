@@ -28,6 +28,7 @@ import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.gui.results.ConsistencyView;
 import org.drugis.mtc.gui.results.InconsistencyView;
 import org.drugis.mtc.gui.results.NodeSplitView;
+import org.drugis.mtc.gui.results.ResultsComponentFactory;
 import org.drugis.mtc.gui.results.SimulationComponentFactory;
 import org.drugis.mtc.gui.results.SummaryCellRenderer;
 import org.drugis.mtc.model.Network;
@@ -37,6 +38,7 @@ import org.drugis.mtc.presentation.ConsistencyWrapper;
 import org.drugis.mtc.presentation.InconsistencyWrapper;
 import org.drugis.mtc.presentation.MCMCModelWrapper;
 import org.drugis.mtc.presentation.MCMCPresentation;
+import org.drugis.mtc.presentation.MTCModelWrapper;
 import org.drugis.mtc.presentation.NodeSplitWrapper;
 import org.drugis.mtc.presentation.SimulationConsistencyWrapper;
 import org.drugis.mtc.presentation.SimulationInconsistencyWrapper;
@@ -177,22 +179,35 @@ public class AnalysisView extends JPanel {
 	}
 
 	private JPanel buildModelPanel(MCMCPresentation presentation) {
-		JPanel controls = SimulationComponentFactory.createSimulationControls(presentation, d_parent, true, null, null);
 		JPanel results = new JPanel();
 		if (presentation.getModel() instanceof ConsistencyModel) {
 			results = new ConsistencyView(d_network.getTreatments(), (ConsistencyWrapper<?>)presentation.getWrapper(), d_network.getType().equals(DataType.RATE));
 		} else if (presentation.getModel() instanceof InconsistencyModel) {
 			results = new InconsistencyView(d_network.getTreatments(), (InconsistencyWrapper<?>)presentation.getWrapper(), d_network.getType().equals(DataType.RATE));
 		} else if (presentation.getModel() instanceof NodeSplitModel) {
-			results = new NodeSplitView((NodeSplitWrapper<?>)presentation.getWrapper(), (ConsistencyWrapper<?>) d_consistency.getWrapper());
+			NodeSplitModel nodeSplitModel = (NodeSplitModel) presentation.getModel();
+			results = new NodeSplitView(nodeSplitModel.getSplitNode(), (NodeSplitWrapper<?>)presentation.getWrapper(), (ConsistencyWrapper<?>) d_consistency.getWrapper());
 		}
 		
 		CellConstraints cc = new CellConstraints();
-		FormLayout layout = new FormLayout("pref:grow:fill", "p, 3dlu, p");
+		FormLayout layout = new FormLayout("pref:grow:fill", "p, 3dlu, p, 3dlu, p");
 		PanelBuilder builder = new PanelBuilder(layout);
 		builder.setDefaultDialogBorder();
-		builder.add(controls, cc.xy(1, 1));
-		builder.add(results, cc.xy(1, 3));
+		builder.add(SimulationComponentFactory.createSimulationControls(presentation, d_parent, true, null, null), cc.xy(1, 1));
+		builder.add(buildMemoryUsagePanel((MTCModelWrapper<?>) presentation.getWrapper(), presentation.getName(), d_parent), cc.xy(1, 3));
+		builder.add(results, cc.xy(1, 5));
+		return builder.getPanel();
+	}
+
+	private Component buildMemoryUsagePanel(MTCModelWrapper<?> model, String name, JFrame mainWindow) {
+		CellConstraints cc = new CellConstraints();
+		FormLayout layout = new FormLayout(
+				"left:0:grow, 3dlu, left:pref, 3dlu, pref, 3dlu, pref, 3dlu, pref",
+				"p, 3dlu, p"
+				);
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.addSeparator("Memory usage", cc.xyw(1, 1, 7));
+		ResultsComponentFactory.buildMemoryUsage(model, name, builder, layout, 3, mainWindow);
 		return builder.getPanel();
 	}
 }

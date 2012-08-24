@@ -35,7 +35,8 @@ public class FileNames {
 	public static final String ICON_EXTEND_CHART = "chart_curve_add.png";
 	public static final String ICON_NEW = "newfile.gif";
 	public static final String ICON_OPEN = "openfile.gif";
-	public static final String ICON_SAVE = "savefile.gif";
+	public static final String ICON_DELETE = "delete.gif";
+	public static final String ICON_SAVEFILE = "savefile.gif";
 	public static final String ICON_GENERATE = "generate.gif";
 
 }
