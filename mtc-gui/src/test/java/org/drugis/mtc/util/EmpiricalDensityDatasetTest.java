@@ -2,12 +2,12 @@
  * This file is part of ADDIS (Aggregate Data Drug Information System).
  * ADDIS is distributed from http://drugis.org/.
  * Copyright (C) 2009 Gert van Valkenhoef, Tommi Tervonen.
- * Copyright (C) 2010 Gert van Valkenhoef, Tommi Tervonen, 
- * Tijs Zwinkels, Maarten Jacobs, Hanno Koeslag, Florin Schimbinschi, 
+ * Copyright (C) 2010 Gert van Valkenhoef, Tommi Tervonen,
+ * Tijs Zwinkels, Maarten Jacobs, Hanno Koeslag, Florin Schimbinschi,
  * Ahmad Kamal, Daniel Reid.
- * Copyright (C) 2011 Gert van Valkenhoef, Ahmad Kamal, 
+ * Copyright (C) 2011 Gert van Valkenhoef, Ahmad Kamal,
  * Daniel Reid, Florin Schimbinschi.
- * Copyright (C) 2012 Gert van Valkenhoef, Daniel Reid, 
+ * Copyright (C) 2012 Gert van Valkenhoef, Daniel Reid,
  * Joël Kuiper, Wouter Reckman.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,7 +43,6 @@ import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.RandomEffectsVariance;
 import org.drugis.mtc.test.FileResults;
-import org.drugis.mtc.util.EmpiricalDensityDataset;
 import org.drugis.mtc.util.EmpiricalDensityDataset.PlotParameter;
 import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.general.DatasetChangeListener;
@@ -66,7 +65,7 @@ public class EmpiricalDensityDatasetTest {
 	/*
 	 * Multiple density test case generated in R using:
 		x <- read.table("conv-samples.txt", sep=",")
-		readParam <- function(j) { 
+		readParam <- function(j) {
 			chains <- sapply(0:2, function(i) { x[(5001 + i * 10000):((i+1)*10000),j] })
 			c(chains)
 		}
@@ -79,12 +78,12 @@ public class EmpiricalDensityDatasetTest {
 		dens <- sapply(1:3, function(j) { hist(readParam(j), plot=F, breaks=breaks)$density[2:51] })
 		write.table(dens, "density-multiple.txt")
 	 */
-	
+
 	private static final int N_BINS = 50;
 	private static final double EPSILON = 0.0000001;
 	private Parameter[] d_parameters;
 	private FileResults d_results;
-	
+
 	private static final int[] s_counts1 = {54, 73, 82, 87,  93, 110, 140, 155, 177, 183, 238, 231, 250,
 			254, 280, 300, 359, 371, 426, 401, 435, 440, 477, 504, 474, 450, 453, 478, 506, 475, 459,
 			462, 411, 412, 382, 336, 328, 318, 359, 272, 270, 224, 200, 180, 126, 149, 161,  93,  83,  69};
@@ -98,11 +97,11 @@ public class EmpiricalDensityDatasetTest {
 		Treatment t2 = new Treatment("mPCI");
 		Treatment t3 = new Treatment("sPCI");
 		d_parameters = new Parameter[] {
-				new BasicParameter(t1, t2), new BasicParameter(t2, t3), new RandomEffectsVariance()	
+				new BasicParameter(t1, t2), new BasicParameter(t2, t3), new RandomEffectsVariance()
 		};
 		d_results = readSamples();
 	}
-	
+
 	@Test
 	public void testReadFiles() throws IOException {
 		assertNotNull(readDensity(FILE_SINGLE_DENS, 0));
@@ -110,21 +109,21 @@ public class EmpiricalDensityDatasetTest {
 		assertNotNull(readDensity(FILE_MULTI_DENS, 1));
 		assertNotNull(readDensity(FILE_MULTI_DENS, 2));
 	}
-	
+
 	@Test
 	public void testInitialize() {
 		EmpiricalDensityDataset sdd = new EmpiricalDensityDataset(N_BINS, d_results, d_parameters[0]);
 		assertEquals(1, sdd.getSeriesCount());
 		assertEquals(N_BINS, sdd.getItemCount(0));
 	}
-	
+
 	@Test
 	public void testCountLength() {
 		d_results.makeSamplesAvailable();
 		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, d_results, d_parameters[0]);
 		assertEquals(N_BINS, edd.getCounts(0).length);
 	}
-	
+
 	@Test
 	public void testCounts() {
 		d_results.makeSamplesAvailable();
@@ -147,21 +146,21 @@ public class EmpiricalDensityDatasetTest {
 		double[] normDensities = readDensity(FILE_SINGLE_DENS, 0);
 		assertArrayEquals(normDensities, edd.getDensities(0), EPSILON);
 	}
-	
+
 	@Test
 	public void testResultsEventShouldTriggerDatasetChanged() {
 		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, d_results, d_parameters[0]);
 		final List<DatasetChangeEvent> list = new ArrayList<DatasetChangeEvent>();
 		edd.addChangeListener(new DatasetChangeListener() {
-			public void datasetChanged(DatasetChangeEvent e) {
+			public void datasetChanged(final DatasetChangeEvent e) {
 				list.add(e);
 			}
 		});
 		d_results.makeSamplesAvailable();
-		
+
 		assertEquals(1, list.size());
 	}
-	
+
 	@Test
 	public void testGetX() throws IOException {
 		d_results.makeSamplesAvailable();
@@ -169,18 +168,18 @@ public class EmpiricalDensityDatasetTest {
 		double bottom = s_quantiles1[0];
 		double top = s_quantiles1[1];
 		double interval = (top - bottom) / N_BINS;
-		
+
 		assertEquals((0.5 + 1) * interval + bottom, edd.getX(0, 1), EPSILON);
 		assertEquals((0.5 + 25) * interval + bottom, edd.getX(0, 25), EPSILON);
 		assertEquals((0.5 + 49) * interval + bottom, edd.getX(0, 49), EPSILON);
 	}
-	
+
 	@Test
 	public void testInitializeWithMultipleDensities() throws IOException {
 		FileResults results = readSamples();
 		results.makeSamplesAvailable();
 		d_results.makeSamplesAvailable();
-		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]), 
+		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]),
 				new PlotParameter(d_results, d_parameters[1]), new PlotParameter(results , d_parameters[2]));
 		assertEquals(3, edd.getSeriesCount());
 		assertEquals(N_BINS, edd.getItemCount(0));
@@ -188,15 +187,15 @@ public class EmpiricalDensityDatasetTest {
 		assertEquals(N_BINS, edd.getItemCount(2));
 		assertEquals(d_parameters[0].getName(), edd.getSeriesKey(0));
 		assertEquals(d_parameters[1].getName(), edd.getSeriesKey(1));
-		
+
 		assertEquals(-1.5985012, edd.getLowerBound(), EPSILON);
 		assertEquals(0.7713364, edd.getUpperBound(), EPSILON);
 	}
-	
+
 	@Test
 	public void testMultiDensityCounts() {
 		d_results.makeSamplesAvailable();
-		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]), 
+		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]),
 				new PlotParameter(d_results, d_parameters[0]));
 		assertArrayEquals(s_counts1, edd.getCounts(0));
 	}
@@ -206,7 +205,7 @@ public class EmpiricalDensityDatasetTest {
 		FileResults results = readSamples();
 		results.makeSamplesAvailable();
 		d_results.makeSamplesAvailable();
-		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]), 
+		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]),
 				new PlotParameter(d_results, d_parameters[1]), new PlotParameter(results , d_parameters[2]));
 		double[] normDensities0 = readDensity(FILE_MULTI_DENS, 0);
 		assertArrayEquals(normDensities0, edd.getDensities(0), EPSILON);
@@ -217,21 +216,21 @@ public class EmpiricalDensityDatasetTest {
 		assertEquals(normDensities0[1], edd.getY(0, 1), EPSILON);
 		assertEquals(normDensities1[6], edd.getY(1, 6), EPSILON);
 	}
-	
+
 	@Test
 	public void testMDNoneInitialized() throws IOException {
 		FileResults results = readSamples();
-		new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]), 
+		new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]),
 				new PlotParameter(d_results, d_parameters[1]), new PlotParameter(results , d_parameters[2]));
 	}
-	
+
 	@Test
 	public void testMDSomeInitialized() throws IOException {
 		FileResults results = readSamples();
 		d_results.makeSamplesAvailable();
-		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]), 
+		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]),
 				new PlotParameter(d_results, d_parameters[1]), new PlotParameter(results , d_parameters[2]));
-		
+
 		// The range of the last parameter is completely within the range of the others.
 		double[] normDensities0 = readDensity(FILE_MULTI_DENS, 0);
 		assertArrayEquals(normDensities0, edd.getDensities(0), EPSILON);
@@ -240,38 +239,39 @@ public class EmpiricalDensityDatasetTest {
 		double[] normDensities2 = new double[N_BINS];
 		assertArrayEquals(normDensities2, edd.getDensities(2), EPSILON);
 	}
-	
+
 	@Test
 	public void testOneResultsOneEvent() {
-		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]), 
+		EmpiricalDensityDataset edd = new EmpiricalDensityDataset(N_BINS, new PlotParameter(d_results, d_parameters[0]),
 				new PlotParameter(d_results, d_parameters[1]), new PlotParameter(d_results , d_parameters[2]));
 		final List<DatasetChangeEvent> list = new ArrayList<DatasetChangeEvent>();
 		edd.addChangeListener(new DatasetChangeListener() {
-			public void datasetChanged(DatasetChangeEvent e) {
+			public void datasetChanged(final DatasetChangeEvent e) {
 				list.add(e);
 			}
 		});
 		d_results.makeSamplesAvailable();
-		
+
 		assertEquals(1, list.size());
 	}
-	
+
 	private FileResults readSamples() throws IOException {
 		InputStream is = EmpiricalDensityDatasetTest.class.getResourceAsStream("conv-samples.txt");
 		FileResults results = new FileResults(is, d_parameters, 3, 10000);
 		is.close();
 		return results;
 	}
-	
-	private double[] readDensity(String file, int param) throws IOException {
+
+	private double[] readDensity(final String file, final int param) throws IOException {
 
 		InputStream is = EmpiricalDensityDatasetTest.class.getResourceAsStream(file);
-		double[] data = new double[N_BINS];		
-		
+		double[] data = new double[N_BINS];
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		reader.readLine(); // skip the first line
 		for (int i = 0; reader.ready(); ++i) {
 			String line = reader.readLine();
+			if (line == null) break;
 			StringTokenizer tok = new StringTokenizer(line, " ");
 			for (int p = -1; p < param; ++p) {
 				tok.nextToken(); // skip the first column (IDs) + every param before the one of interest
