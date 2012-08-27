@@ -2,12 +2,12 @@
  * This file is part of ADDIS (Aggregate Data Drug Information System).
  * ADDIS is distributed from http://drugis.org/.
  * Copyright (C) 2009 Gert van Valkenhoef, Tommi Tervonen.
- * Copyright (C) 2010 Gert van Valkenhoef, Tommi Tervonen, 
- * Tijs Zwinkels, Maarten Jacobs, Hanno Koeslag, Florin Schimbinschi, 
+ * Copyright (C) 2010 Gert van Valkenhoef, Tommi Tervonen,
+ * Tijs Zwinkels, Maarten Jacobs, Hanno Koeslag, Florin Schimbinschi,
  * Ahmad Kamal, Daniel Reid.
- * Copyright (C) 2011 Gert van Valkenhoef, Ahmad Kamal, 
+ * Copyright (C) 2011 Gert van Valkenhoef, Ahmad Kamal,
  * Daniel Reid, Florin Schimbinschi.
- * Copyright (C) 2012 Gert van Valkenhoef, Daniel Reid, 
+ * Copyright (C) 2012 Gert van Valkenhoef, Daniel Reid,
  * Joël Kuiper, Wouter Reckman.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ import org.drugis.mtc.model.Treatment;
 
 public class NetworkRelativeEffectTableCellRenderer extends SummaryCellRenderer implements TableCellRenderer {
 	private boolean d_showDescription;
-	
+
 	public NetworkRelativeEffectTableCellRenderer(boolean applyExpTransform) {
 		this(applyExpTransform, true);
 	}
@@ -52,7 +52,7 @@ public class NetworkRelativeEffectTableCellRenderer extends SummaryCellRenderer 
 		super(applyExpTransform);
 		d_showDescription = showDescription;
 	}
-	
+
 	@Override
 	public Component getTableCellRendererComponent(JTable table,
 			Object cellContents, boolean isSelected, boolean hasFocus,
@@ -66,7 +66,7 @@ public class NetworkRelativeEffectTableCellRenderer extends SummaryCellRenderer 
 					table, getText(treatment), isSelected, hasFocus, row, column);
 			component.setBackground(Color.LIGHT_GRAY);
 		}
-		
+
 		((JComponent) component).setToolTipText(getTooltipAt(table.getModel(), row, column));
 		return component;
 	}
@@ -74,7 +74,7 @@ public class NetworkRelativeEffectTableCellRenderer extends SummaryCellRenderer 
 	public String getText(final Treatment treatment) {
 		return d_showDescription ? treatment.getDescription() : treatment.getId();
 	}
-	
+
 	public String getTooltipAt(TableModel model, int row, int col) {
 		if (row == col) {
 			return getText(getTreatment(model, row));
@@ -85,7 +85,7 @@ public class NetworkRelativeEffectTableCellRenderer extends SummaryCellRenderer 
 		return "\"" + getText(t1)  + "\" relative to \"" + getText(t2) + "\"";
 	}
 
-	private Treatment getTreatment(TableModel model, int idx) {
+	public Treatment getTreatment(TableModel model, int idx) {
 		return (Treatment) model.getValueAt(idx, idx);
 	}
 }
