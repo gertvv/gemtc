@@ -2,6 +2,7 @@ package org.drugis.mtc.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -88,9 +89,9 @@ public class AnalysisView extends JPanel {
 		tree.setEditable(false);
 
 		JScrollPane treePane = new JScrollPane(tree);
+		treePane.setMinimumSize(new Dimension(150, 100));
 		JPanel viewPane = buildRootPanel();
 		JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePane, viewPane);
-		mainPane.setDividerLocation(200);
 		add(mainPane, BorderLayout.CENTER);
 		d_mainPane = mainPane;
 	}
