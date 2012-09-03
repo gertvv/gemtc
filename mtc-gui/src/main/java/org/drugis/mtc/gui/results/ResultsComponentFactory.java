@@ -112,7 +112,7 @@ public class ResultsComponentFactory {
 
         return new ChartPanel(chart);
 	}
-	
+
 	public static int buildMemoryUsage(final MTCModelWrapper<?> model, final String name, final PanelBuilder builder, final FormLayout layout, final int row, JFrame mainWindow) {
 		final CellConstraints cc = new CellConstraints();
 		if(model.isSaved()) {

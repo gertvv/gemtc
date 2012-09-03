@@ -49,6 +49,7 @@ import org.drugis.common.beans.ValueEqualsModel;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.common.gui.GUIHelper;
+import org.drugis.common.gui.LookAndFeel;
 import org.drugis.common.validation.BooleanNotModel;
 import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.graph.GraphUtil;
@@ -122,13 +123,23 @@ public class MainWindow extends JFrame {
 
 	public static final ImageLoader IMAGELOADER = new ImageLoader("/org/drugis/mtc/gui/");
 	private static final long serialVersionUID = -5199299195474870618L;
-	
+
 	public static final String PROPERTY_MODEL = "model";
 
 	public static void main(String[] args) {
 		GUIHelper.initializeLookAndFeel();
-		new MainWindow(true).setVisible(true);
-		
+		LookAndFeel.configureJFreeChartLookAndFeel();
+		MainWindow main = new MainWindow();
+		main.setVisible(true);
+
+		if (args.length > 0) {
+			try {
+				main.addModel(loadModel(args[0]));
+			} catch (Exception e) {
+
+			}
+		}
+
 		// Window disposal debug
 		System.out.println(System.currentTimeMillis() + " Started...");
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -142,17 +153,13 @@ public class MainWindow extends JFrame {
 	private DataSetModel d_model = null;
 	private FileNameModel d_fileNameModel;
 
-	public MainWindow(boolean standAlone) {
-		super();
-		createMainWindow(standAlone);
-	}
-	
 	public MainWindow() {
-		this(false);
+		super();
+		createMainWindow();
 	}
-	
-	public MainWindow(final Network network) { 
-		this(false);
+
+	public MainWindow(final Network network) {
+		this();
 		final DataSetModel model = new DataSetModel(network);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -163,17 +170,17 @@ public class MainWindow extends JFrame {
 
 
 
-	private void createMainWindow(boolean standAlone) {
+	private void createMainWindow() {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setLocationByPlatform(true);
-		
+
 		setAppIcon(this);
 
 		setMinimumSize(new Dimension(750, 550));
 		setLayout(new BorderLayout());
-		
+
 		add(createToolBar(), BorderLayout.NORTH);
-		
+
 		d_fileNameModel = new FileNameModel();
 		d_fileNameModel.addValueChangeListener(new PropertyChangeListener() {
 			@Override
@@ -183,7 +190,7 @@ public class MainWindow extends JFrame {
 		});
 		updateTitle();
 	}
-	
+
 	private void updateTitle() {
 		String title = AppInfo.getAppName() + " " + AppInfo.getAppVersion();
 		if (d_fileNameModel.getValue() != null) {
@@ -203,27 +210,27 @@ public class MainWindow extends JFrame {
 			frame.setIconImage(image);
 		}
 	}
-	
+
 	private void addModel(DataSetModel model) {
 		if (d_model == null) {
 			d_model = model;
 			firePropertyChange(PROPERTY_MODEL, null, d_model);
-			
+
 			DataSetView dataView = new DataSetView(MainWindow.this, model);
 			JComponent analysisView = new AnalysisView(MainWindow.this, model);
-			
+
 			JTabbedPane pane = new JTabbedPane();
 			pane.addTab("Data", dataView);
 			pane.addTab("Analysis", analysisView);
 			add(pane, BorderLayout.CENTER);
 			pack();
 		} else {
-			MainWindow window = new MainWindow(false);
+			MainWindow window = new MainWindow();
 			window.addModel(model);
 			window.setVisible(true);
 		}
 	}
-	
+
 	private JToolBar createToolBar() {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
@@ -252,13 +259,10 @@ public class MainWindow extends JFrame {
 		openButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				FileLoadDialog dialog = new FileLoadDialog(MainWindow.this, "gemtc", "GeMTC files") {
-					public void doAction(String path, String extension) {
-						final File file = new File(path);
-						final DataSetModel model = readFromFile(file);
-						model.setFile(file);
+					public void doAction(final String path, final String extension) {
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								addModel(model);
+								addModel(loadModel(path));
 							}
 						});
 					}
@@ -319,13 +323,13 @@ public class MainWindow extends JFrame {
 				CodeGenerationDialog codeGenerationDialog = new CodeGenerationDialog(MainWindow.this, name, network);
 				codeGenerationDialog.setVisible(true);
 			}
-			
+
 		});
 		ValueModel enabled = new BooleanNotModel(new ValueEqualsModel(new PropertyAdapter<MainWindow>(this, PROPERTY_MODEL, true), null));
 		PropertyConnector.connectAndUpdate(enabled, button, "enabled");
 		return button;
 	}
-	
+
 	private JButton createAboutButton() {
 		JButton aboutButton = new JButton("About", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_ABOUT));
 		aboutButton.addActionListener(new ActionListener() {
@@ -335,8 +339,8 @@ public class MainWindow extends JFrame {
 		});
 		return aboutButton;
 	}
-	
-	private DataSetModel readFromFile(final File file) {
+
+	private static DataSetModel readFromFile(final File file) {
 		try {
 			InputStream is = new FileInputStream(file);
 			return readFromStream(is);
@@ -344,8 +348,8 @@ public class MainWindow extends JFrame {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	private DataSetModel readFromStream(final InputStream is) {
+
+	private static DataSetModel readFromStream(final InputStream is) {
 		try {
 			Network network = JAXBHandler.readNetwork(is);
 			return new DataSetModel(network);
@@ -353,8 +357,8 @@ public class MainWindow extends JFrame {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	private void writeToFile(final DataSetModel model, final File file) {
+
+	private static void writeToFile(final DataSetModel model, final File file) {
 		try {
 			OutputStream os = new FileOutputStream(file);
 			JAXBHandler.writeNetwork(model.getNetwork(), os);
@@ -367,5 +371,12 @@ public class MainWindow extends JFrame {
 
 	public DataSetModel getModel() {
 		return d_model;
+	}
+
+	private static DataSetModel loadModel(String path) {
+		final File file = new File(path);
+		final DataSetModel model = readFromFile(file);
+		model.setFile(file);
+		return model;
 	}
 }
