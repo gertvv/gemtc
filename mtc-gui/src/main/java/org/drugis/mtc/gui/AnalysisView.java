@@ -27,6 +27,7 @@ import org.drugis.mtc.DefaultModelFactory;
 import org.drugis.mtc.InconsistencyModel;
 import org.drugis.mtc.NodeSplitModel;
 import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.gui.results.ConsistencyView;
 import org.drugis.mtc.gui.results.InconsistencyView;
 import org.drugis.mtc.gui.results.NodeSplitView;
@@ -197,20 +198,34 @@ public class AnalysisView extends JPanel {
 		PanelBuilder builder = new PanelBuilder(layout);
 		builder.setDefaultDialogBorder();
 		builder.add(SimulationComponentFactory.createSimulationControls(presentation, d_parent, true, null, null), cc.xy(1, 1));
-		builder.add(buildMemoryUsagePanel((MTCModelWrapper<?>) presentation.getWrapper(), presentation.getName(), d_parent), cc.xy(1, 3));
+		builder.add(buildToolsPanel((MTCModelWrapper<?>) presentation.getWrapper(), d_parent), cc.xy(1, 3));
 		builder.add(results, cc.xy(1, 5));
 		return builder.getPanel();
 	}
 
-	private Component buildMemoryUsagePanel(MTCModelWrapper<?> model, String name, JFrame mainWindow) {
+	private Component buildToolsPanel(MTCModelWrapper<?> model, JFrame parent) {
 		CellConstraints cc = new CellConstraints();
 		FormLayout layout = new FormLayout(
-				"left:0:grow, 3dlu, left:pref, 3dlu, pref, 3dlu, pref, 3dlu, pref",
+				"left:pref, 3dlu, left:pref, 3dlu, pref, 3dlu, pref, fill:0:grow",
 				"p, 3dlu, p"
 				);
 		PanelBuilder builder = new PanelBuilder(layout);
-		builder.addSeparator("Memory usage", cc.xyw(1, 1, 7));
-		ResultsComponentFactory.buildMemoryUsage(model, name, builder, layout, 3, mainWindow);
+		builder.addSeparator("Tools", cc.xyw(1, 1, 8));
+		int row = ResultsComponentFactory.buildMemoryUsage(model, "Memory usage: ", builder, layout, 3, parent);
+
+		builder.add(createGenerateCodeButton(d_network, SyntaxType.BUGS, model), cc.xy(1, row));
+		builder.add(createGenerateCodeButton(d_network, SyntaxType.JAGS, model), cc.xy(3, row));
+
 		return builder.getPanel();
+	}
+
+	private JButton createGenerateCodeButton(final Network network, final SyntaxType type, final MTCModelWrapper<?> model) {
+		JButton button = new JButton("Generate " + type.toString() + " code");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new GeneratedCodeWindow(type, network, model).setVisible(true);
+			}
+		});
+		return button;
 	}
 }
