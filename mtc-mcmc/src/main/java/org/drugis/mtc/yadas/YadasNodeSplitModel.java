@@ -21,6 +21,7 @@ package org.drugis.mtc.yadas;
 
 import java.util.Map;
 
+import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.NodeSplitModel;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.parameterization.BasicParameter;
@@ -32,8 +33,8 @@ import org.drugis.mtc.parameterization.SplitParameter;
 public class YadasNodeSplitModel extends YadasModel implements NodeSplitModel {
 	private final BasicParameter d_split;
 
-	public YadasNodeSplitModel(Network network, BasicParameter split) {
-		super(network);
+	public YadasNodeSplitModel(Network network, BasicParameter split, MCMCSettings settings) {
+		super(network, settings);
 		d_split = split;
 	}
 
@@ -41,7 +42,7 @@ public class YadasNodeSplitModel extends YadasModel implements NodeSplitModel {
 	protected Parameterization buildNetworkModel() {
 		return NodeSplitParameterization.create(d_network, d_split);
 	}
-	
+
 	@Override
 	protected Map<NetworkParameter, Derivation> getDerivedParameters() {
 		final Map<NetworkParameter, Derivation> map = super.getDerivedParameters();

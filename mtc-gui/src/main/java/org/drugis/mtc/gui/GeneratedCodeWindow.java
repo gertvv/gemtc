@@ -43,7 +43,6 @@ import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.InconsistencyModel;
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.NodeSplitModel;
-import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
@@ -68,6 +67,11 @@ public class GeneratedCodeWindow extends JFrame {
 			this.extension = extension;
 			this.text = text;
 		}
+	}
+
+	public enum SyntaxType {
+		BUGS,
+		JAGS
 	}
 
 	private final Network d_network;
@@ -242,3 +246,4 @@ public class GeneratedCodeWindow extends JFrame {
 		return new JagsSyntaxModel(d_network, d_pmtz, d_syntaxType == SyntaxType.JAGS);
 	}
 }
+

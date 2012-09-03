@@ -20,14 +20,15 @@
 package org.drugis.mtc.yadas;
 
 import org.drugis.mtc.ConsistencyModel;
+import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.parameterization.ConsistencyParameterization;
 import org.drugis.mtc.parameterization.Parameterization;
 
 public class YadasConsistencyModel extends YadasModel implements ConsistencyModel {
 
-	public YadasConsistencyModel(Network network) {
-		super(network);
+	public YadasConsistencyModel(Network network, MCMCSettings settings) {
+		super(network, settings);
 	}
 
 	@Override

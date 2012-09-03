@@ -34,6 +34,7 @@ import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.yadas.YadasConsistencyModel;
+import org.drugis.mtc.yadas.YadasModelFactory;
 import org.drugis.mtc.yadas.YadasResults;
 
 public class MockConsistencyModel extends YadasConsistencyModel implements ConsistencyModel {
@@ -41,19 +42,19 @@ public class MockConsistencyModel extends YadasConsistencyModel implements Consi
 	public static ConsistencyModel buildMockSimulationConsistencyModel(List<Treatment> ts) {
 		return new MockConsistencyModel(ts);
 	}
-	
+
 	boolean d_ready = false;
 	private ActivityTask d_task;
 	private YadasResults d_results;
-	
+
 	private static final int BURNIN_ITER = 1000;
 	private static final int SIMULATION_ITER = 10000;
-	
+
 	private MockConsistencyModel(List<Treatment> ts) {
-		super(null);
+		super(null, new YadasModelFactory().getDefaults());
 		Task start = new SimpleSuspendableTask(new Runnable() { public void run() {} });
 		Task end = new SimpleSuspendableTask(new Runnable() { public void run() { finished(); } });
-		d_task = new ActivityTask(new ActivityModel(start, end, 
+		d_task = new ActivityTask(new ActivityModel(start, end,
 				Collections.singleton(new DirectTransition(start, end))));
 		d_results = new YadasResults();
 		d_results.setNumberOfIterations(SIMULATION_ITER);
@@ -106,7 +107,7 @@ public class MockConsistencyModel extends YadasConsistencyModel implements Consi
 	public MCMCResults getResults() {
 		return d_results;
 	}
-	
+
 	protected void finished() {
 		d_results.simulationFinished();
 	}

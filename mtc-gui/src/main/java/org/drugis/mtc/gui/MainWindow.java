@@ -45,20 +45,14 @@ import javax.swing.WindowConstants;
 import javax.xml.bind.JAXBException;
 
 import org.drugis.common.ImageLoader;
-import org.drugis.common.beans.ValueEqualsModel;
 import org.drugis.common.gui.FileLoadDialog;
 import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.common.gui.GUIHelper;
 import org.drugis.common.gui.LookAndFeel;
-import org.drugis.common.validation.BooleanNotModel;
-import org.drugis.mtc.data.DataType;
-import org.drugis.mtc.graph.GraphUtil;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
-import org.drugis.mtc.parameterization.NetworkModel;
 
 import com.jgoodies.binding.beans.PropertyAdapter;
-import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueModel;
 
@@ -238,7 +232,7 @@ public class MainWindow extends JFrame {
 		toolbar.add(createNewButton());
 		toolbar.add(createOpenButton());
 		toolbar.add(createSaveButton());
-		toolbar.add(createGenerateButton());
+		toolbar.addSeparator();
 		toolbar.add(createAboutButton());
 
         return toolbar;
@@ -297,37 +291,6 @@ public class MainWindow extends JFrame {
 			}
 		});
 		return saveButton;
-	}
-
-	private JButton createGenerateButton() {
-		JButton button = new JButton("Generate", MainWindow.IMAGELOADER.getIcon(FileNames.ICON_GENERATE));
-		button.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent arg0) {
-				final DataSetModel model = getModel();
-				if (model.getTreatments().size() < 2 || model.getStudies().size() < 2) {
-					JOptionPane.showMessageDialog(MainWindow.this, "You need to define at least two studies and treatments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				if (model.getMeasurementType().getValue() == DataType.NONE) {
-					JOptionPane.showMessageDialog(MainWindow.this, "Model generation not possible with 'None' measuments.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				Network network = model.getNetwork();
-				if (!GraphUtil.isWeaklyConnected(NetworkModel.createStudyGraph(network))) {
-					JOptionPane.showMessageDialog(MainWindow.this, "The network needs to be connected in order to generate an MTC model.", "Cannot generate model", JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				// FIXME: further validation / checking of data.
-				final String name = model.getFile() == null ? "unnamed" : model.getFile().getName().replaceFirst(".gemtc$", "");
-				CodeGenerationDialog codeGenerationDialog = new CodeGenerationDialog(MainWindow.this, name, network);
-				codeGenerationDialog.setVisible(true);
-			}
-
-		});
-		ValueModel enabled = new BooleanNotModel(new ValueEqualsModel(new PropertyAdapter<MainWindow>(this, PROPERTY_MODEL, true), null));
-		PropertyConnector.connectAndUpdate(enabled, button, "enabled");
-		return button;
 	}
 
 	private JButton createAboutButton() {

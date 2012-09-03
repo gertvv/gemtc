@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.drugis.mtc.InconsistencyModel;
+import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
@@ -30,8 +31,8 @@ import org.drugis.mtc.parameterization.Parameterization;
 
 public class YadasInconsistencyModel extends YadasModel implements InconsistencyModel {
 
-	public YadasInconsistencyModel(Network network) {
-		super(network);
+	public YadasInconsistencyModel(Network network, MCMCSettings settings) {
+		super(network, settings);
 	}
 
 	@Override

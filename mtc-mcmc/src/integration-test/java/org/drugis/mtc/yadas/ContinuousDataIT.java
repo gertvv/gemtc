@@ -65,11 +65,11 @@ public class ContinuousDataIT {
 
 	@Test
 	public void testResult() throws InterruptedException {
-		YadasConsistencyModel model = new YadasConsistencyModel(d_network);
+		YadasConsistencyModel model = new YadasConsistencyModel(d_network, new YadasModelFactory().getDefaults());
 		model.setExtendSimulation(ExtendSimulation.FINISH);
 		model.setSimulationIterations(100000);
 		TaskUtil.run(model.getActivityTask());
-		
+
 		assertTrue(model.isReady());
 		int d = model.getResults().findParameter(model.getRelativeEffect(d_psych, d_usual));
 		assertEquals(-d_m, d_mean.evaluate(ResultsUtil.getSamples(model.getResults(), d, 0)), FACTOR * d_s);
