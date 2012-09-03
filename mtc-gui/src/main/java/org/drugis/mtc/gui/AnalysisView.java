@@ -20,6 +20,7 @@ import javax.swing.tree.TreePath;
 
 import org.drugis.common.gui.LayoutUtil;
 import org.drugis.common.gui.table.EnhancedTable;
+import org.drugis.common.gui.table.TablePanel;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.DefaultModelFactory;
 import org.drugis.mtc.InconsistencyModel;
@@ -53,7 +54,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 public class AnalysisView extends JPanel {
 	private static final long serialVersionUID = -3923180226772918488L;
-	
+
 	private final JFrame d_parent;
 	private final DataSetModel d_dataset;
 	private final AnalysesModel d_analyses = new AnalysesModel();
@@ -85,7 +86,7 @@ public class AnalysisView extends JPanel {
 			}
 		});
 		tree.setEditable(false);
-		
+
 		JScrollPane treePane = new JScrollPane(tree);
 		JPanel viewPane = buildRootPanel();
 		JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePane, viewPane);
@@ -113,7 +114,7 @@ public class AnalysisView extends JPanel {
 		MCMCPresentation presentation = new MCMCPresentation(wrapper, "Consistency model");
 		return presentation;
 	}
-	
+
 	private MCMCPresentation buildInconsistencyModel() {
 		InconsistencyModel model = DefaultModelFactory.instance().getInconsistencyModel(d_network);
 		MCMCModelWrapper wrapper = new SimulationInconsistencyWrapper<Treatment>(
@@ -122,7 +123,7 @@ public class AnalysisView extends JPanel {
 		MCMCPresentation presentation = new MCMCPresentation(wrapper, "Inconsistency model");
 		return presentation;
 	}
-	
+
 	private MCMCPresentation buildNodeSplitModel(BasicParameter split) {
 		NodeSplitModel model = DefaultModelFactory.instance().getNodeSplitModel(d_network, split);
 		MCMCModelWrapper wrapper = new SimulationNodeSplitWrapper<Treatment>(
@@ -169,12 +170,13 @@ public class AnalysisView extends JPanel {
 			EnhancedTable table = EnhancedTable.createBare(model);
 			table.setDefaultRenderer(QuantileSummary.class, new SummaryCellRenderer(false));
 			table.setDefaultRenderer(NodeSplitPValueSummary.class, new SummaryCellRenderer(false));
-			builder.add(new JScrollPane(table), cc.xy(1, 3));
+			table.autoSizeColumns();
+			builder.add(new TablePanel(table), cc.xy(1, 3));
 			break;
 		default:
 			break;
 		}
-		
+
 		return builder.getPanel();
 	}
 
@@ -188,7 +190,7 @@ public class AnalysisView extends JPanel {
 			NodeSplitModel nodeSplitModel = (NodeSplitModel) presentation.getModel();
 			results = new NodeSplitView(nodeSplitModel.getSplitNode(), (NodeSplitWrapper<?>)presentation.getWrapper(), (ConsistencyWrapper<?>) d_consistency.getWrapper());
 		}
-		
+
 		CellConstraints cc = new CellConstraints();
 		FormLayout layout = new FormLayout("pref:grow:fill", "p, 3dlu, p, 3dlu, p");
 		PanelBuilder builder = new PanelBuilder(layout);
