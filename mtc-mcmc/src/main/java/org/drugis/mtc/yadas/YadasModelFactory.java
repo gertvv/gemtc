@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.InconsistencyModel;
+import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.ModelFactory;
 import org.drugis.mtc.NodeSplitModel;
 import org.drugis.mtc.model.Network;
@@ -35,24 +36,44 @@ import org.drugis.mtc.parameterization.NodeSplitParameterization;
 import edu.uci.ics.jung.graph.Hypergraph;
 
 public class YadasModelFactory implements ModelFactory {
+	public static final int DEFAULT_TUNING_ITERATIONS = 20000;
+	public static final int DEFAULT_SIMULATION_ITERATIONS = 50000;
+	public static final int DEFAULT_NUMBER_OF_CHAINS = 4;
+	public static final double DEFAULT_VARIANCE_SCALING = 2.5;
+	public static final int DEFAULT_THINNING_FACTOR = 10;
+
+	private MCMCSettings d_defaults = new YadasSettings(
+			DEFAULT_TUNING_ITERATIONS, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_THINNING_FACTOR,
+			DEFAULT_NUMBER_OF_CHAINS, DEFAULT_VARIANCE_SCALING);
+
 	@Override
 	public ConsistencyModel getConsistencyModel(Network network) {
-		return new YadasConsistencyModel(network);
+		return new YadasConsistencyModel(network, d_defaults);
 	}
 
 	@Override
 	public InconsistencyModel getInconsistencyModel(Network network) {
-		return new YadasInconsistencyModel(network);
+		return new YadasInconsistencyModel(network, d_defaults);
 	}
 
 	@Override
 	public NodeSplitModel getNodeSplitModel(Network network, BasicParameter split) {
-		return new YadasNodeSplitModel(network, split);
+		return new YadasNodeSplitModel(network, split, d_defaults);
 	}
 
 	@Override
 	public List<BasicParameter> getSplittableNodes(Network network) {
 		final Hypergraph<Treatment, Study> studyGraph = NetworkModel.createStudyGraph(network);
 		return NodeSplitParameterization.getSplittableNodes(studyGraph, NetworkModel.createComparisonGraph(studyGraph));
+	}
+
+	@Override
+	public MCMCSettings getDefaults() {
+		return d_defaults;
+	}
+
+	@Override
+	public void setDefaults(MCMCSettings settings) {
+		d_defaults = settings;
 	}
 }

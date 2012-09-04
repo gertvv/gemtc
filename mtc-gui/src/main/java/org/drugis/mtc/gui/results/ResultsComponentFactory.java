@@ -112,12 +112,19 @@ public class ResultsComponentFactory {
 
         return new ChartPanel(chart);
 	}
-	
-	public static int buildMemoryUsage(final MTCModelWrapper<?> model, final String name, final PanelBuilder builder, final FormLayout layout, final int row, JFrame mainWindow) {
+
+	/**
+	 * @param labelText Descriptive label for this memory usage entry
+	 * @param parent Parent for "save samples" dialog
+	 */
+	public static int buildMemoryUsage(
+			final MTCModelWrapper<?> model, final String labelText,
+			final PanelBuilder builder, final FormLayout layout, final int row,
+			final JFrame parent) {
 		final CellConstraints cc = new CellConstraints();
 		if(model.isSaved()) {
 			LayoutUtil.addRow(layout);
-			builder.add(new JLabel(name), cc.xy(1, row));
+			builder.add(new JLabel(labelText), cc.xy(1, row));
 			builder.add(new JLabel("N/A"), cc.xyw(3, row, 7));
 			return row + 2;
 		} else {
@@ -138,7 +145,7 @@ public class ResultsComponentFactory {
 			final JButton saveButton = new JButton(MainWindow.IMAGELOADER.getIcon(FileNames.ICON_SAVEFILE));
 			saveButton.setToolTipText("Save to R-file");
 			Bindings.bind(saveButton, "enabled", modelFinishedAndResults);
-			saveButton.addActionListener(buildRButtonActionListener(mtc, mainWindow));
+			saveButton.addActionListener(buildRButtonActionListener(mtc, parent));
 
 			clearButton.addActionListener(new ActionListener() {
 				@Override
@@ -151,7 +158,7 @@ public class ResultsComponentFactory {
 			});
 
 			LayoutUtil.addRow(layout);
-			builder.add(new JLabel(name), cc.xy(1, row));
+			builder.add(new JLabel(labelText), cc.xy(1, row));
 			builder.add(memory, cc.xy(3, row));
 			builder.add(clearButton, cc.xy(5, row));
 			builder.add(saveButton, cc.xy(7, row));

@@ -39,7 +39,10 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.drugis.mtc.gui.CodeGenerationDialog.SyntaxType;
+import org.drugis.mtc.ConsistencyModel;
+import org.drugis.mtc.InconsistencyModel;
+import org.drugis.mtc.MixedTreatmentComparison;
+import org.drugis.mtc.NodeSplitModel;
 import org.drugis.mtc.jags.JagsSyntaxModel;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
@@ -50,6 +53,7 @@ import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NodeSplitParameterization;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
+import org.drugis.mtc.presentation.MTCModelWrapper;
 
 
 public class GeneratedCodeWindow extends JFrame {
@@ -58,13 +62,18 @@ public class GeneratedCodeWindow extends JFrame {
 	private class GeneratedFile {
 		private final String extension;
 		private final String text;
-		
+
 		public GeneratedFile(String extension, String text) {
 			this.extension = extension;
 			this.text = text;
 		}
 	}
-	
+
+	public enum SyntaxType {
+		BUGS,
+		JAGS
+	}
+
 	private final Network d_network;
 	private final Parameterization d_pmtz;
 	private final JagsSyntaxModel d_syntaxModel;
@@ -97,13 +106,39 @@ public class GeneratedCodeWindow extends JFrame {
 		d_pmtz = buildParameterization();
 		d_syntaxModel = buildSyntaxModel();
 		d_files = buildFiles();
-		
+
 		MainWindow.setAppIcon(this);
-		
+
 		initComponents();
 		pack();
 	}
-	
+
+	public GeneratedCodeWindow(SyntaxType syntaxType, Network network, MTCModelWrapper<?> model) {
+		this(model.getDescription(), network, syntaxType, getType(model.getModel()), getSplitNode(model.getModel()),
+				model.getSettings().getNumberOfChains(), model.getSettings().getTuningIterations(),
+				model.getSettings().getSimulationIterations(), model.getSettings().getVarianceScalingFactor());
+	}
+
+	private static BasicParameter getSplitNode(MixedTreatmentComparison model) {
+		if (getType(model).equals(ModelType.NodeSplit)) {
+			return ((NodeSplitModel)model).getSplitNode();
+		}
+		return null;
+	}
+
+	private static ModelType getType(MixedTreatmentComparison model) {
+		if (model instanceof ConsistencyModel) {
+			return ModelType.Consistency;
+		}
+		if (model instanceof InconsistencyModel) {
+			return ModelType.Inconsistency;
+		}
+		if (model instanceof NodeSplitModel) {
+			return ModelType.NodeSplit;
+		}
+		throw new IllegalStateException("Unknown type " + model.getClass().getSimpleName());
+	}
+
 	private List<GeneratedFile> buildFiles() {
 		List<GeneratedFile> files = new ArrayList<GeneratedFile>();
 		files.add(new GeneratedFile("model", d_syntaxModel.modelText()));
@@ -137,17 +172,17 @@ public class GeneratedCodeWindow extends JFrame {
 
 	private void initComponents() {
 		setLayout(new BorderLayout());
-		
+
 		add(createToolBar(), BorderLayout.NORTH);
-		
+
 		JTabbedPane tabbedPane = new JTabbedPane();
 		for (GeneratedFile file : d_files) {
 			tabbedPane.addTab(file.extension, new JScrollPane(new JTextArea(file.text)));
 		}
 		add(tabbedPane, BorderLayout.CENTER);
 	}
-	
-	
+
+
 	private String getBaseName() {
 		return d_name + "." + d_suffix;
 	}
@@ -160,7 +195,7 @@ public class GeneratedCodeWindow extends JFrame {
 			osw.close();
 		}
 	}
-	
+
 	private JToolBar createToolBar() {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
@@ -177,7 +212,7 @@ public class GeneratedCodeWindow extends JFrame {
 				try {
 					JFileChooser chooser = new JFileChooser();
 					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					
+
 					int returnVal = chooser.showSaveDialog(GeneratedCodeWindow.this);
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
 						File file = chooser.getSelectedFile();
@@ -206,8 +241,9 @@ public class GeneratedCodeWindow extends JFrame {
 		}
 		throw new IllegalStateException("Unhandled model type + " + d_modelType);
 	}
-	
+
 	private JagsSyntaxModel buildSyntaxModel() {
 		return new JagsSyntaxModel(d_network, d_pmtz, d_syntaxType == SyntaxType.JAGS);
 	}
 }
+

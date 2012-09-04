@@ -27,7 +27,7 @@ import org.drugis.mtc.model.Network;
 public class YadasConsistencyModelIT extends ConsistencyModelTestBase {
 	@Override
 	protected ConsistencyModel createModel(Network network) {
-		YadasConsistencyModel yadasConsistencyModel = new YadasConsistencyModel(network);
+		YadasConsistencyModel yadasConsistencyModel = new YadasConsistencyModel(network, new YadasModelFactory().getDefaults());
 		yadasConsistencyModel.setExtendSimulation(ExtendSimulation.FINISH);
 		return yadasConsistencyModel;
 	}

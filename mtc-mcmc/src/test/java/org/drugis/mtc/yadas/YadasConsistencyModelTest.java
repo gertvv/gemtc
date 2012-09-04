@@ -36,7 +36,7 @@ public class YadasConsistencyModelTest {
 	private Study d_s1;
 	private Network d_network;
 	private YadasConsistencyModel d_model;
-	
+
 	@Before
 	public void setUp() {
 		d_ta = new Treatment("A");
@@ -47,17 +47,17 @@ public class YadasConsistencyModelTest {
 		d_network = new Network();
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb));
 		d_network.getStudies().add(d_s1);
-		
-		d_model = new YadasConsistencyModel(d_network);
+
+		d_model = new YadasConsistencyModel(d_network, new YadasModelFactory().getDefaults());
 	}
 
-	@Test 
+	@Test
 	public void testSimulationIterations() {
 		assertEquals(50000, d_model.getSimulationIterations());
 		d_model.setSimulationIterations(10000);
 		assertEquals(10000, d_model.getSimulationIterations());
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void testSimulationIterationsMultipleOfReportingInterval() {
 		d_model.setSimulationIterations(10001);
@@ -68,13 +68,13 @@ public class YadasConsistencyModelTest {
 		d_model.setSimulationIterations(0);
 	}
 
-	@Test 
+	@Test
 	public void testBurnInIterations() {
 		assertEquals(20000, d_model.getSettings().getTuningIterations());
 		d_model.setTuningIterations(10000);
 		assertEquals(10000, d_model.getSettings().getTuningIterations());
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void testBurnInIterationsMultipleOfReportingInterval() {
 		d_model.setTuningIterations(10001);

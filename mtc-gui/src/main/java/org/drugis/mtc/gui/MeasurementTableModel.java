@@ -315,6 +315,7 @@ public class MeasurementTableModel extends AbstractTableModel {
 		Study s = d_studies.get(i);
 		Treatment t = s.getMeasurements().get(j).getTreatment();
 		setValueAt(s, t, col, val);
+		fireTableCellUpdated(row, col);
 	}
 
 	private void setValueAt(Study s, Treatment t, int col, Object val) {

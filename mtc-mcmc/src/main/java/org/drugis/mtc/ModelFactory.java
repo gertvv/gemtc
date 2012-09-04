@@ -45,4 +45,12 @@ public interface ModelFactory {
 	 * Generate a list of nodes that are interesting to split.
 	 */
 	public List<BasicParameter> getSplittableNodes(Network network);
+	/**
+	 * @return The default settings for the MCMC simulations.
+	 */
+	public MCMCSettings getDefaults();
+	/**
+	 * Set the default settings for the MCMC simulations.
+	 */
+	public void setDefaults(MCMCSettings settings);
 }

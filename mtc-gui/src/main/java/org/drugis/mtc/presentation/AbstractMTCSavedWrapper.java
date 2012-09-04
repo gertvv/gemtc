@@ -113,7 +113,7 @@ public abstract class AbstractMTCSavedWrapper<TreatmentType> extends AbstractObs
 	}
 	
 	@Override
-	public boolean getDestroyed() { 
+	public boolean isDestroyed() { 
 		return d_destroy;
 	}
 

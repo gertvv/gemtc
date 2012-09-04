@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Measurement;
@@ -60,20 +61,20 @@ import org.drugis.mtc.parameterization.StartingValueGenerator;
 abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentComparison {
 	protected final Network d_network;
 	protected Parameterization d_pmtz = null;
-	
+
 	PriorGenerator d_priorGen;
 	protected List<StartingValueGenerator> d_startGen = new ArrayList<StartingValueGenerator>();
 	protected Parameter d_randomEffectVar = new RandomEffectsVariance();
 	protected Parameter d_inconsistencyVar = new InconsistencyVariance();
 	private List<Parameter> d_parameters;
-	
-	public YadasModel(Network network) {
-		super();
+
+	public YadasModel(Network network, MCMCSettings settings) {
+		super(settings);
 		d_network = network;
 	}
 
 	abstract protected boolean isInconsistency();
-	
+
 	@Override
 	public BasicParameter getRelativeEffect(Treatment base, Treatment subj) {
 		return new BasicParameter(base, subj);
@@ -83,11 +84,11 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 	public Parameter getRandomEffectsVariance() {
 		return d_randomEffectVar;
 	}
-	
+
 	////
 	//// Below: code to get starting values
 	////
-	
+
 	private double getStartingSigma(StartingValueGenerator startVal) {
 		return 0.00001 + Math.random() * (d_priorGen.getRandomEffectsSigma() - 0.00001); // FIXME: handle lower bound better
 	}
@@ -112,7 +113,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		}
 		throw new IllegalStateException("Unhandled parameter " + p + " of type " + p.getClass());
 	}
-	
+
 	////
 	//// Below: code to initialize the MCMC model
 	////
@@ -121,27 +122,27 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 	protected void prepareModel() {
 		d_pmtz = buildNetworkModel();
 		JDKRandomGenerator rng = new JDKRandomGenerator();
-		double scale = VARIANCE_SCALING;
+		final double scale = getSettings().getVarianceScalingFactor();
 		for (int i = 0; i < getNumberOfChains(); ++i) {
 			d_startGen.add(AbstractDataStartingValueGenerator.create(d_network, NetworkModel.createComparisonGraph(d_network), rng, scale));
 		}
-		
+
 		d_priorGen = new PriorGenerator(d_network);
-		
+
 		d_parameters = new ArrayList<Parameter>(d_pmtz.getParameters());
 		d_parameters.add(d_randomEffectVar);
 		if (isInconsistency()) {
 			d_parameters.add(d_inconsistencyVar);
 		}
 	}
-	
+
 	@Override
 	protected List<Parameter> getParameters() {
 		return d_parameters;
 	}
-	
+
 	protected abstract Parameterization buildNetworkModel();
-	
+
 	protected Map<NetworkParameter, Derivation> getDerivedParameters() {
 		Map<NetworkParameter, Derivation> map = new HashMap<NetworkParameter, Derivation>();
 		for (Treatment t1 : d_network.getTreatments()) {
@@ -154,7 +155,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		}
 		return map;
 	}
-	
+
 	////
 	//// Below: code to create the structure of the MCMC model.
 	////
@@ -198,7 +199,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		MCMCParameter sigma = new MCMCParameter(
 			new double[] {getStartingSigma(startVal)}, new double[] {0.1}, null);
 		// inconsistency variance
-		MCMCParameter sigmaw = isInconsistency() ? 
+		MCMCParameter sigmaw = isInconsistency() ?
 				new MCMCParameter(new double[] {getStartingSigma(startVal)}, new double[] {0.1}, null) : null;
 
 		List<MCMCParameter> params = new ArrayList<MCMCParameter>();
@@ -219,7 +220,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 			dichotomousDataBond(mu, delta);
 			break;
 		default:
-			throw new IllegalArgumentException("Don't know how to handle " + d_network.getType() + " data");					
+			throw new IllegalArgumentException("Don't know how to handle " + d_network.getType() + " data");
 		}
 
 		// random effects bound to basic/incons parameters
@@ -295,7 +296,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 					new Uniform()
 				);
 		}
-		
+
 		addTuners(params);
 
 		List<ParameterWriter> writers = new ArrayList<ParameterWriter>(params.size());
@@ -315,11 +316,11 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		for (nBasic = 0; nBasic < parameters.size() && !(parameters.get(nBasic) instanceof InconsistencyParameter); ++nBasic) {}
 		return nBasic;
 	}
-	
+
 	private void dichotomousDataBond(Map<Study, MCMCParameter> mu, Map<Study, MCMCParameter> delta) {
 		// r_i ~ Binom(p_i, n_i) ; p_i = ilogit(theta_i) ;
 		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
-		
+
 		for (Study study : d_network.getStudies()) {
 			new BasicMCMCBond(
 					new MCMCParameter[] {mu.get(study), delta.get(study)},
@@ -336,7 +337,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 	private void continuousDataBond(Map<Study, MCMCParameter> mu, Map<Study, MCMCParameter> delta) {
 		// m_i ~ N(theta_i, s_i) ;
 		// theta_i = mu_s(i) + delta_s(i)b(i)t(i)
-		
+
 		for (Study study : d_network.getStudies()) {
 			new BasicMCMCBond(
 					new MCMCParameter[] {mu.get(study), delta.get(study)},
@@ -367,7 +368,7 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		}
 		return arr;
 	}
-	
+
 	private double[] obsMeanArray(Study study) {
 		List<Treatment> treatments = NetworkModel.getTreatments(study);
 		double[] arr = new double[treatments.size()];
