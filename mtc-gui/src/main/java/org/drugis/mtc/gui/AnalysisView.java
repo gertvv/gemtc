@@ -26,9 +26,12 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableModel;
 import javax.swing.tree.TreePath;
 
+import org.drugis.common.beans.ValueEqualsModel;
 import org.drugis.common.gui.LayoutUtil;
 import org.drugis.common.gui.table.EnhancedTable;
 import org.drugis.common.gui.table.TablePanel;
+import org.drugis.common.validation.BooleanAndModel;
+import org.drugis.common.validation.BooleanNotModel;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.DefaultModelFactory;
 import org.drugis.mtc.InconsistencyModel;
@@ -63,6 +66,7 @@ import org.drugis.mtc.summary.NodeSplitPValueSummary;
 import org.drugis.mtc.summary.QuantileSummary;
 
 import com.jgoodies.binding.adapter.Bindings;
+import com.jgoodies.binding.beans.PropertyAdapter;
 import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ConverterFactory;
@@ -73,6 +77,8 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 public class AnalysisView extends JPanel {
+	private static final String WARNING_DATASET_CHANGED = "WARNING: the data set has changed since the models were last generated. Regenerate the models to take the new data into account.";
+
 	private static final long serialVersionUID = -3923180226772918488L;
 
 	private final JFrame d_parent;
@@ -90,6 +96,10 @@ public class AnalysisView extends JPanel {
 	private ValueHolder d_thinning = new ValueHolder(d_factory.getDefaults().getThinningInterval());
 
 	private MCMCPresentation d_consistency;
+
+	private ValueEqualsModel d_revisionEqualsModel;
+	private ValueModel d_haveAnalysesModel;
+	private ValueModel d_dataSetChangedModel;
 
 	public class CompleteModel extends AbstractValueModel {
 		private static final long serialVersionUID = 5139716568335240809L;
@@ -138,6 +148,12 @@ public class AnalysisView extends JPanel {
 	public AnalysisView(JFrame parent, DataSetModel model) {
 		d_parent = parent;
 		d_dataset = model;
+		final PropertyAdapter<DataSetModel> revision = new PropertyAdapter<DataSetModel>(d_dataset, DataSetModel.PROPERTY_REVISION, true);
+		d_revisionEqualsModel = new ValueEqualsModel(
+				revision,
+				d_dataset.getRevision());
+		d_haveAnalysesModel = new ValueHolder(false);
+		d_dataSetChangedModel = new BooleanAndModel(new BooleanNotModel(d_revisionEqualsModel), d_haveAnalysesModel);
 		setLayout(new BorderLayout());
 		initComponents();
 	}
@@ -147,28 +163,30 @@ public class AnalysisView extends JPanel {
 		tree.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
-				TreePath path = e.getPath();
-				if (path.getLastPathComponent() instanceof MCMCPresentation) {
-					d_mainPane.setRightComponent(new JScrollPane(buildModelPanel((MCMCPresentation)path.getLastPathComponent())));
-				} else if (path.getLastPathComponent() instanceof ModelType) {
-					d_mainPane.setRightComponent(buildTypePanel((ModelType)path.getLastPathComponent()));
-				} else {
-					d_mainPane.setRightComponent(buildRootPanel());
-				}
+				setViewForPath(e.getPath());
 			}
 		});
 		tree.setEditable(false);
 
 		JScrollPane treePane = new JScrollPane(tree);
 		treePane.setMinimumSize(new Dimension(150, 100));
-		JPanel viewPane = buildRootPanel();
-		JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePane, viewPane);
+		JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePane, new JPanel());
 		add(mainPane, BorderLayout.CENTER);
 		d_mainPane = mainPane;
+		setViewForPath(new TreePath(d_analyses.getRoot()));
+	}
+
+	protected JPanel buildDataChangedWarningPanel() {
+		JPanel panel = AuxComponentFactory.createWarningPanel(WARNING_DATASET_CHANGED);
+		PropertyConnector.connectAndUpdate(d_dataSetChangedModel, panel, "visible");
+		return panel;
 	}
 
 	private void generateModels() {
-		d_network = d_dataset.getNetwork(); // Cache for when the view is generated later
+		d_network = d_dataset.getNetwork(); // FIXME: clone the network
+		d_revisionEqualsModel.setExpected(d_dataset.getRevision());
+		d_haveAnalysesModel.setValue(true);
+
 		d_factory.setDefaults(getSettings());
 		d_consistency = buildConsistencyModel();
 		d_analyses.add(ModelType.Consistency, d_consistency);
@@ -296,7 +314,7 @@ public class AnalysisView extends JPanel {
 		return builder.getPanel();
 	}
 
-	private Component buildTypePanel(ModelType type) {
+	private JPanel buildTypePanel(ModelType type) {
 		CellConstraints cc = new CellConstraints();
 		FormLayout layout = new FormLayout("pref:grow:fill", "p");
 		PanelBuilder builder = new PanelBuilder(layout);
@@ -374,5 +392,20 @@ public class AnalysisView extends JPanel {
 			}
 		});
 		return button;
+	}
+
+	private void setViewForPath(TreePath path) {
+		JPanel view = null;
+		if (path.getLastPathComponent() instanceof MCMCPresentation) {
+			view = buildModelPanel((MCMCPresentation)path.getLastPathComponent());
+		} else if (path.getLastPathComponent() instanceof ModelType) {
+			view = buildTypePanel((ModelType)path.getLastPathComponent());
+		} else {
+			view = buildRootPanel();
+		}
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(buildDataChangedWarningPanel(), BorderLayout.NORTH);
+		panel.add(new JScrollPane(view), BorderLayout.CENTER);
+		d_mainPane.setRightComponent(panel);
 	}
 }

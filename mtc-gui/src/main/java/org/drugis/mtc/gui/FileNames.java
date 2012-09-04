@@ -23,8 +23,8 @@ public class FileNames {
 
 	public static final String ICON_GEMTC = "appicon.png";
 	public static final String ICON_ABOUT = "about.gif";
-	
-	
+
+
 	// Icons for simulation controls
 	public static final String ICON_RUN = "run.gif";
 	public static final String ICON_TICK = "tick.png";
@@ -38,5 +38,5 @@ public class FileNames {
 	public static final String ICON_DELETE = "delete.gif";
 	public static final String ICON_SAVEFILE = "savefile.gif";
 	public static final String ICON_GENERATE = "generate.gif";
-
+	public static final String ICON_WARNING = "warning.png";
 }

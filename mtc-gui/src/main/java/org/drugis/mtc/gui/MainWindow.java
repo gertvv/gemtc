@@ -162,8 +162,6 @@ public class MainWindow extends JFrame {
 		});
 	}
 
-
-
 	private void createMainWindow() {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setLocationByPlatform(true);
