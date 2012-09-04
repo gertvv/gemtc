@@ -21,16 +21,21 @@ package org.drugis.mtc.gui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import javax.xml.bind.JAXBException;
 
 import org.drugis.common.beans.AbstractObservable;
 import org.drugis.common.beans.ContentAwareListModel;
 import org.drugis.common.event.IndifferentListDataListener;
 import org.drugis.mtc.data.DataType;
+import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
@@ -120,6 +125,16 @@ public class DataSetModel extends AbstractObservable {
 
 	public Network getNetwork() {
 		return d_network;
+	}
+
+	public Network cloneNetwork() throws JAXBException, IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		JAXBHandler.writeNetwork(getNetwork(), out);
+		out.close();
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(out.toByteArray());
+		Network clone = JAXBHandler.readNetwork(inputStream);
+		inputStream.close();
+		return clone;
 	}
 
 	public long getRevision() {

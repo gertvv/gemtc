@@ -183,7 +183,11 @@ public class AnalysisView extends JPanel {
 	}
 
 	private void generateModels() {
-		d_network = d_dataset.getNetwork(); // FIXME: clone the network
+		try {
+			d_network = d_dataset.cloneNetwork();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		d_revisionEqualsModel.setExpected(d_dataset.getRevision());
 		d_haveAnalysesModel.setValue(true);
 
