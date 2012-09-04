@@ -30,7 +30,7 @@ public class AnalysesModel implements TreeModel {
 	private RootNode d_root = new RootNode();
 	private SortedMap<ModelType, SortedSet<MCMCPresentation>> d_nodes = new TreeMap<ModelType, SortedSet<MCMCPresentation>>();
 	private Set<TreeModelListener> d_listeners = new HashSet<TreeModelListener>();
-	
+
 	/**
 	 * Add a model of the given type.
 	 * @param type The model type.
@@ -50,7 +50,14 @@ public class AnalysesModel implements TreeModel {
 		set.add(model);
 		fireTreeNodeAdded(type, model);
 	}
-	
+
+
+	public void replace(ModelType type, MCMCPresentation oldPresentation, MCMCPresentation newPresentation) {
+		d_nodes.get(type).remove(oldPresentation);
+		d_nodes.get(type).add(newPresentation);
+		fireNodeReplaced(type, oldPresentation, newPresentation);
+	}
+
 	/**
 	 * Remove all models.
 	 */
@@ -59,11 +66,11 @@ public class AnalysesModel implements TreeModel {
 		d_nodes.clear();
 		fireTreeNodesRemoved(nodes);
 	}
-	
+
 	//
 	// TreeModel methods
 	//
-	
+
 	@Override
 	public Object getRoot() {
 		return d_root;
@@ -109,12 +116,12 @@ public class AnalysesModel implements TreeModel {
 		}
 		return -1;
 	}
-	
+
 	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	private void fireTreeNodesRemoved(ArrayList<ModelType> nodes) {
 		int idx[] = new int[nodes.size()];
 		for (int i = 0; i < idx.length; ++i) {
@@ -126,31 +133,45 @@ public class AnalysesModel implements TreeModel {
 		}
 	}
 
-	
+	private void fireNodeReplaced(ModelType type, MCMCPresentation oldPresentation, MCMCPresentation newPresentation) {
+		int idx = getIndexOfChild(type, newPresentation);
+		TreeModelEvent event = createTreeEvent(type, newPresentation, idx);
+		for (TreeModelListener l : new ArrayList<TreeModelListener>(d_listeners)) {
+			l.treeNodesChanged(event);
+		}
+	}
+
+
 	private void fireTreeNodeAdded(Object parent, Object newObj) {
 		int index = getIndexOfChild(parent, newObj);
+		TreeModelEvent event = createTreeEvent(parent, newObj, index);
+		for (TreeModelListener l : new ArrayList<TreeModelListener>(d_listeners)) {
+			l.treeNodesInserted(event);
+		}
+	}
+
+
+	private TreeModelEvent createTreeEvent(Object parent, Object newObj, int index) {
 		TreeModelEvent event;
 		if (parent == d_root) {
 			event = new TreeModelEvent(this, new Object[] { d_root }, new int[] { index }, new Object[] { newObj });
 		} else {
 			event = new TreeModelEvent(this, new Object[] { d_root, parent }, new int[] { index }, new Object[] { newObj });
 		}
-		for (TreeModelListener l : new ArrayList<TreeModelListener>(d_listeners)) {
-			l.treeNodesInserted(event);
-		}
+		return event;
 	}
 
 	@Override
 	public void addTreeModelListener(TreeModelListener l) {
 		d_listeners.add(l);
 	}
-	
+
 	@Override
 	public void removeTreeModelListener(TreeModelListener l) {
 		d_listeners.remove(l);
 	}
 
-	public SortedSet<MCMCPresentation> getModels(ModelType nodesplit) {
-		return d_nodes.get(nodesplit);
+	public SortedSet<MCMCPresentation> getModels(ModelType type) {
+		return d_nodes.get(type);
 	}
 }

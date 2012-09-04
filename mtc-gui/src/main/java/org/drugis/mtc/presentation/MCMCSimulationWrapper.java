@@ -89,7 +89,7 @@ public class MCMCSimulationWrapper<ModelType extends MCMCModel> extends Abstract
 	}
 
 	@Override
-	public boolean getDestroyed() { 
+	public boolean isDestroyed() { 
 		return d_destroy;
 	}
 

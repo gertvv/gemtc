@@ -55,7 +55,7 @@ public interface MCMCModelWrapper extends Observable {
 	/**
 	 * Returns true if selfDestruct called previously, false otherwise.
 	 */
-	public abstract boolean getDestroyed();
+	public abstract boolean isDestroyed();
 
 	/**
 	 * @see org.drugis.mtc.MCMCResults#getParameters()

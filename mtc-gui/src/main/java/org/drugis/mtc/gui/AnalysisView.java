@@ -351,7 +351,7 @@ public class AnalysisView extends JPanel {
 		return builder.getPanel();
 	}
 
-	private JPanel buildModelPanel(MCMCPresentation presentation) {
+	private JPanel buildModelPanel(final MCMCPresentation presentation) {
 		JPanel results = new JPanel();
 		if (presentation.getModel() instanceof ConsistencyModel) {
 			results = new ConsistencyView(d_network.getTreatments(), (ConsistencyWrapper<?>)presentation.getWrapper(), d_network.getType().equals(DataType.RATE));
@@ -365,8 +365,27 @@ public class AnalysisView extends JPanel {
 		CellConstraints cc = new CellConstraints();
 		FormLayout layout = new FormLayout("pref:grow:fill", "p, 3dlu, p, 3dlu, p");
 		PanelBuilder builder = new PanelBuilder(layout);
+
+		Runnable onReset = new Runnable() {
+			public void run() {
+				MCMCPresentation newPresentation = null;
+				if (presentation.getModel() instanceof ConsistencyModel) {
+					newPresentation = buildConsistencyModel();
+					d_analyses.replace(ModelType.Consistency, presentation, newPresentation);
+				} else if (presentation.getModel() instanceof InconsistencyModel) {
+					newPresentation = buildInconsistencyModel();
+					d_analyses.replace(ModelType.Inconsistency, presentation, newPresentation);
+				} else if (presentation.getModel() instanceof NodeSplitModel) {
+					NodeSplitModel nodeSplitModel = (NodeSplitModel) presentation.getModel();
+					newPresentation = buildNodeSplitModel(nodeSplitModel.getSplitNode());
+					d_analyses.replace(ModelType.NodeSplit, presentation, newPresentation);
+				}
+				setView(buildModelPanel(newPresentation));
+			}
+		};
+
 		builder.setDefaultDialogBorder();
-		builder.add(SimulationComponentFactory.createSimulationControls(presentation, d_parent, true, null, null), cc.xy(1, 1));
+		builder.add(SimulationComponentFactory.createSimulationControls(presentation, d_parent, true, null, onReset), cc.xy(1, 1));
 		builder.add(buildToolsPanel((MTCModelWrapper<?>) presentation.getWrapper(), d_parent), cc.xy(1, 3));
 		builder.add(results, cc.xy(1, 5));
 		return builder.getPanel();
@@ -407,6 +426,10 @@ public class AnalysisView extends JPanel {
 		} else {
 			view = buildRootPanel();
 		}
+		setView(view);
+	}
+
+	private void setView(JPanel view) {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(buildDataChangedWarningPanel(), BorderLayout.NORTH);
 		panel.add(new JScrollPane(view), BorderLayout.CENTER);
