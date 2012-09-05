@@ -35,10 +35,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.drugis.common.gui.LayoutUtil;
+import org.drugis.common.gui.TextComponentFactory;
 import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.presentation.ConvergenceDiagnosticTableModel;
@@ -53,13 +55,13 @@ import com.jgoodies.forms.layout.FormLayout;
 
 public class ConvergenceSummaryDialog extends JDialog  {
 
-	private static final String CONVERGENCE_TEXT = "<p>Convergence is assessed using the Brooks-Gelman-Rubin method. " +
+	private static final String CONVERGENCE_TEXT = "Convergence is assessed using the Brooks-Gelman-Rubin method. " +
 			"This method compares within-chain and between-chain variance to calculate the <em>Potential Scale Reduction Factor</em> " +
 			"(PSRF). A PSRF close to one indicates approximate convergence has been reached. See S.P. Brooks and A. Gelman (1998), " +
 			"<em>General methods for monitoring convergence of iterative simulations</em>, Journal of Computational and Graphical " +
 			"Statistics, 7(4): 434-455. <a href=\"http://www.jstor.org/stable/1390675\">JSTOR 1390675</a>." +
-			"</p><p>Double click a parameter in the table below to see the convergence plots.</p>";
-	
+			"<p>Double click a parameter in the table below to see the convergence plots.</p>";
+
 	private static final long serialVersionUID = -220027860371330394L;
 	private final JFrame d_mainWindow;
 	private final MCMCModelWrapper d_wrapper;
@@ -70,26 +72,26 @@ public class ConvergenceSummaryDialog extends JDialog  {
 	private JPanel d_settingsPanel;
 
 	private Color d_noteColor;
-	
+
 	public ConvergenceSummaryDialog(final JFrame main, final MCMCModelWrapper wrapper, final ValueModel valueModel, String name, Color noteColor) {
 		super(main, name);
 		setLocationByPlatform(true);
-		
+
 		d_mainWindow = main;
 		d_wrapper = wrapper;
 		d_modelConstructed = valueModel;
 		d_settings = d_wrapper.getSettings();
-		
+
 		d_noteColor = noteColor;
 
 		d_tableModel = convergenceTable();
 		final JPanel panel = createPanel();
 		add(new JScrollPane(panel));
-		setMinimumSize(new Dimension(500, 250));
+		setPreferredSize(new Dimension(500, 250));
 		pack();
 	}
-	
-	private JPanel createPanel() { 
+
+	private JPanel createPanel() {
 		final FormLayout layout = new FormLayout(
 				"pref, 3dlu, fill:0:grow",
 				"p, 3dlu, p");
@@ -97,22 +99,23 @@ public class ConvergenceSummaryDialog extends JDialog  {
 		builder.setDefaultDialogBorder();
 		CellConstraints cc = new CellConstraints();
 
-		final JLabel label = new JLabel("<html><div style='margin:0; padding: 10px; width: 450px;'>" + CONVERGENCE_TEXT + "</html>");
-		if (d_noteColor != null) {
-			label.setOpaque(true);
-			label.setBackground(d_noteColor);
-		}
+		final JTextPane label =
+				TextComponentFactory.createTextPaneWithHyperlinks(
+						"<html><div style='margin:0; padding: 10px; width: 450px;'>" + CONVERGENCE_TEXT + "</html>",
+						d_noteColor,
+						d_noteColor != null);
+
 		label.setBorder(BorderFactory.createEtchedBorder());
 		builder.add(label, cc.xyw(1, 1, 3));
-		
+
 		builder.add(buildConvergenceTable(), cc.xy(1, 3));
 		d_settingsPanel = buildMCMCSettingsPanel();
 		builder.add(d_settingsPanel, cc.xy(3, 3));
-		
+
 		final JPanel panel = builder.getPanel();
 
 		d_tableModel.addTableModelListener(new TableModelListener() {
-			
+
 			@Override
 			public void tableChanged(TableModelEvent e) {
 				panel.validate();
@@ -120,7 +123,7 @@ public class ConvergenceSummaryDialog extends JDialog  {
 		});
 		return panel;
 	}
-	
+
 	private JPanel buildMCMCSettingsPanel() {
 		final FormLayout layout = new FormLayout(
 				"pref, 7dlu, fill:0:grow",
@@ -137,10 +140,10 @@ public class ConvergenceSummaryDialog extends JDialog  {
 		rows = buildSettingsRow(layout, rows, builder, cc, "Thinning interval", pm.getModel(MCMCSettings.PROPERTY_THINNING_INTERVAL));
 		rows = buildSettingsRow(layout, rows, builder, cc, "Inference samples", pm.getModel(MCMCSettings.PROPERTY_INFERENCE_SAMPLES));
 		rows = buildSettingsRow(layout, rows, builder, cc, "Variance scaling factor",  pm.getModel(MCMCSettings.PROPERTY_VARIANCE_SCALING_FACTOR));
-		
+
 		return builder.getPanel();
 	}
-	
+
 	private int buildSettingsRow(final FormLayout layout, int rows, final PanelBuilder builder, CellConstraints cc,
 			String label, ValueModel model) {
 		rows = LayoutUtil.addRow(layout, rows);
@@ -169,7 +172,7 @@ public class ConvergenceSummaryDialog extends JDialog  {
 				}
 			}
 		});
-		
+
 		JPanel jPanel = new JPanel(new BorderLayout());
 		jPanel.add(convergenceTable, BorderLayout.CENTER);
 		jPanel.add(convergenceTable.getTableHeader(), BorderLayout.NORTH);
