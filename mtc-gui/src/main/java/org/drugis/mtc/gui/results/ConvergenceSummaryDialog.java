@@ -43,6 +43,7 @@ import org.drugis.common.gui.LayoutUtil;
 import org.drugis.common.gui.TextComponentFactory;
 import org.drugis.mtc.MCMCSettings;
 import org.drugis.mtc.Parameter;
+import org.drugis.mtc.gui.Help;
 import org.drugis.mtc.presentation.ConvergenceDiagnosticTableModel;
 import org.drugis.mtc.presentation.MCMCModelWrapper;
 
@@ -54,14 +55,6 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 public class ConvergenceSummaryDialog extends JDialog  {
-
-	private static final String CONVERGENCE_TEXT = "Convergence is assessed using the Brooks-Gelman-Rubin method. " +
-			"This method compares within-chain and between-chain variance to calculate the <em>Potential Scale Reduction Factor</em> " +
-			"(PSRF). A PSRF close to one indicates approximate convergence has been reached. See S.P. Brooks and A. Gelman (1998), " +
-			"<em>General methods for monitoring convergence of iterative simulations</em>, Journal of Computational and Graphical " +
-			"Statistics, 7(4): 434-455. <a href=\"http://www.jstor.org/stable/1390675\">JSTOR 1390675</a>." +
-			"<p>Double click a parameter in the table below to see the convergence plots.</p>";
-
 	private static final long serialVersionUID = -220027860371330394L;
 	private final JFrame d_mainWindow;
 	private final MCMCModelWrapper d_wrapper;
@@ -87,7 +80,7 @@ public class ConvergenceSummaryDialog extends JDialog  {
 		d_tableModel = convergenceTable();
 		final JPanel panel = createPanel();
 		add(new JScrollPane(panel));
-		setPreferredSize(new Dimension(500, 250));
+		setMinimumSize(new Dimension(500, 250));
 		pack();
 	}
 
@@ -101,7 +94,7 @@ public class ConvergenceSummaryDialog extends JDialog  {
 
 		final JTextPane label =
 				TextComponentFactory.createTextPaneWithHyperlinks(
-						"<html><div style='margin:0; padding: 10px; width: 450px;'>" + CONVERGENCE_TEXT + "</html>",
+						"<html><div style='margin:0; padding: 10px; width: 450px;'>" + Help.getHelpText("convergence") + "</html>",
 						d_noteColor,
 						d_noteColor != null);
 
