@@ -28,6 +28,7 @@ import javax.swing.tree.TreePath;
 
 import org.drugis.common.beans.ValueEqualsModel;
 import org.drugis.common.gui.LayoutUtil;
+import org.drugis.common.gui.TextComponentFactory;
 import org.drugis.common.gui.table.EnhancedTable;
 import org.drugis.common.gui.table.TablePanel;
 import org.drugis.common.validation.BooleanAndModel;
@@ -265,9 +266,13 @@ public class AnalysisView extends JPanel {
 		PanelBuilder builder = new PanelBuilder(layout);
 		builder.setDefaultDialogBorder();
 
+		int row = LayoutUtil.addRow(layout, 1);
+		builder.add(TextComponentFactory.createTextPane(boxHtmlText(Help.getHelpText("networkMetaAnalysis")), false), cc.xyw(1, row, 4));
+
+		row = LayoutUtil.addRow(layout, row);
 		builder.addSeparator("Generate models", cc.xyw(1, 1, layout.getColumnCount()));
 
-		int row = LayoutUtil.addRow(layout, 1);
+		row = LayoutUtil.addRow(layout, row);
 		builder.add(new JLabel("Number of chains: "), cc.xy(1, row));
 		builder.add(createIntegerField(d_chains), cc.xy(3, row));
 
@@ -320,18 +325,21 @@ public class AnalysisView extends JPanel {
 
 	private JPanel buildTypePanel(ModelType type) {
 		CellConstraints cc = new CellConstraints();
-		FormLayout layout = new FormLayout("pref:grow:fill", "p");
+		FormLayout layout = new FormLayout("pref, pref:grow:fill", "p, 3dlu, p, 3dlu, p");
 		PanelBuilder builder = new PanelBuilder(layout);
 		builder.setDefaultDialogBorder();
 		switch (type) {
 		case Consistency:
-			builder.addSeparator("Consistency model", cc.xy(1, 1));
+			builder.addSeparator("Consistency model", cc.xyw(1, 1, 2));
+			builder.add(TextComponentFactory.createTextPane(boxHtmlText(Help.getHelpText("consistency")), false), cc.xy(1, 3));
 			break;
 		case Inconsistency:
 			builder.addSeparator("Inconsistency model", cc.xy(1, 1));
+			builder.add(TextComponentFactory.createTextPane(boxHtmlText(Help.getHelpText("inconsistency")), false), cc.xy(1, 3));
 			break;
 		case NodeSplit:
 			builder.addSeparator("Node splitting models", cc.xy(1, 1));
+			builder.add(TextComponentFactory.createTextPane(boxHtmlText(Help.getHelpText("nodeSplit")), false), cc.xy(1, 3));
 			LayoutUtil.addRow(layout);
 			List<NodeSplitWrapper<?>> wrappers = new ArrayList<NodeSplitWrapper<?>>();
 			for (MCMCPresentation p : d_analyses.getModels(ModelType.NodeSplit)) {
@@ -342,13 +350,17 @@ public class AnalysisView extends JPanel {
 			table.setDefaultRenderer(QuantileSummary.class, new SummaryCellRenderer(false));
 			table.setDefaultRenderer(NodeSplitPValueSummary.class, new SummaryCellRenderer(false));
 			table.autoSizeColumns();
-			builder.add(new TablePanel(table), cc.xy(1, 3));
+			builder.add(new TablePanel(table), cc.xy(1, 5));
 			break;
 		default:
 			break;
 		}
 
 		return builder.getPanel();
+	}
+
+	private String boxHtmlText(String text) {
+		return "<div style='width: 400px; padding: 0px 10px 10px 10px'>" + text + "</div>";
 	}
 
 	private JPanel buildModelPanel(final MCMCPresentation presentation) {

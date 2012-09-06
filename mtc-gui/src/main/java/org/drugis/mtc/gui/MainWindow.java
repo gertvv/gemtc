@@ -119,29 +119,35 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -5199299195474870618L;
 
 	public static final String PROPERTY_MODEL = "model";
+	private static final String BUG_REPORTING_TEXT = "This is probably a bug in GeMTC. Please help us improve GeMTC by reporting this bug to us.";
 
-	public static void main(String[] args) {
-		GUIHelper.initializeLookAndFeel();
-		LookAndFeel.configureJFreeChartLookAndFeel();
-		MainWindow main = new MainWindow();
-		main.setVisible(true);
-
-		if (args.length > 0) {
-			try {
-				main.addModel(loadModel(args[0]));
-			} catch (Exception e) {
-
-			}
-		}
-
-		// Window disposal debug
-		System.out.println(System.currentTimeMillis() + " Started...");
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-			@Override
+	public static void main(final String[] args) {
+		Runnable main = new Runnable() {
 			public void run() {
-				System.out.println(System.currentTimeMillis() + " Stopped!");
+				GUIHelper.initializeLookAndFeel();
+				LookAndFeel.configureJFreeChartLookAndFeel();
+				MainWindow main = new MainWindow();
+				main.setVisible(true);
+
+				if (args.length > 0) {
+					try {
+						main.addModel(loadModel(args[0]));
+					} catch (Exception e) {
+
+					}
+				}
+
+				// Window disposal debug
+				System.out.println(System.currentTimeMillis() + " Started...");
+				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+					@Override
+					public void run() {
+						System.out.println(System.currentTimeMillis() + " Stopped!");
+					}
+				}));
 			}
-		}));
+		};
+		GUIHelper.startApplicationWithErrorHandler(main, BUG_REPORTING_TEXT);
 	}
 
 	private DataSetModel d_model = null;
