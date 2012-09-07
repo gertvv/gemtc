@@ -73,7 +73,7 @@ public class ResultsComponentFactory {
 	}
 
 	public static ChartPanel buildRankProbabilityChart(final ConsistencyWrapper<?> wrapper) {
-		CategoryDataset dataset = new RankProbabilityDataset(wrapper.getRankProbabilities(), wrapper);
+		CategoryDataset dataset = new RankProbabilityDataset(wrapper.getRankProbabilities());
 		JFreeChart rankChart = ChartFactory.createBarChart("Rank Probability", "Treatment", "Probability",
 				dataset, PlotOrientation.VERTICAL, true, true, false);
 		final ChartPanel chartPanel = new ChartPanel(rankChart);
@@ -81,7 +81,7 @@ public class ResultsComponentFactory {
 	}
 
 	public static EnhancedTable buildRankProbabilityTable(final ConsistencyWrapper<?> wrapper) {
-		final EnhancedTable rankTable = EnhancedTable.createBare(new RankProbabilityTableModel(wrapper.getRankProbabilities(), wrapper));
+		final EnhancedTable rankTable = EnhancedTable.createBare(new RankProbabilityTableModel(wrapper.getRankProbabilities()));
 		rankTable.setDefaultRenderer(Object.class, new SummaryCellRenderer());
 		rankTable.autoSizeColumns();
 		return rankTable;
