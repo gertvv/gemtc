@@ -25,21 +25,14 @@ import java.beans.PropertyChangeListener;
 import javax.swing.table.AbstractTableModel;
 
 import org.drugis.mtc.model.Treatment;
-import org.drugis.mtc.presentation.MTCModelWrapper;
 import org.drugis.mtc.summary.RankProbabilitySummary;
 
 public class RankProbabilityTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 6045183840617200792L;
 	private final RankProbabilitySummary d_summary;
-	private final MTCModelWrapper<?> d_model;
 
 	public RankProbabilityTableModel(RankProbabilitySummary summary) { 
-		this(summary, null);
-	}
-	
-	public RankProbabilityTableModel(RankProbabilitySummary summary, MTCModelWrapper<?> model) {
 		d_summary = summary;
-		d_model = model;
 		d_summary.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				fireTableDataChanged();
@@ -76,10 +69,9 @@ public class RankProbabilityTableModel extends AbstractTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Treatment treatment = d_summary.getTreatments().get(rowIndex);
 		if (columnIndex == 0) {
-			if(d_model != null) { 
-				return treatment.getDescription();
-			}
-			return treatment.getId();
+			final String description = treatment.getDescription();
+			final String id = treatment.getId();
+			return (description != null && !description.isEmpty()) ? description : id;
 		} else {
 			return d_summary.getDefined() ? d_summary.getValue(treatment, columnIndex) : "";
 		}
