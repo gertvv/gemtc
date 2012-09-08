@@ -56,6 +56,7 @@ import org.drugis.mtc.presentation.results.NetworkRelativeEffectTableModel;
 import org.drugis.mtc.presentation.results.NetworkVarianceTableModel;
 import org.drugis.mtc.presentation.results.RankProbabilityDataset;
 import org.drugis.mtc.presentation.results.RankProbabilityTableModel;
+import org.drugis.mtc.summary.QuantileSummary;
 import org.drugis.mtc.util.EmpiricalDensityDataset;
 import org.drugis.mtc.util.EmpiricalDensityDataset.PlotParameter;
 import org.drugis.mtc.util.MCMCResultsAvailableModel;
@@ -87,7 +88,7 @@ public class ResultsComponentFactory {
 
 	public static JTable buildVarianceTable(final MTCModelWrapper<?> wrapper) {
 		final JTable varTable = new EnhancedTable(new NetworkVarianceTableModel(wrapper), 150);
-		varTable.setDefaultRenderer(Object.class, new SummaryCellRenderer());
+		varTable.setDefaultRenderer(QuantileSummary.class, new SummaryCellRenderer());
 		return varTable;
 	}
 
@@ -101,7 +102,7 @@ public class ResultsComponentFactory {
 
 	public static EnhancedTable buildRankProbabilityTable(final ConsistencyWrapper<?> wrapper) {
 		final EnhancedTable rankTable = EnhancedTable.createBare(new RankProbabilityTableModel(wrapper.getRankProbabilities()));
-		rankTable.setDefaultRenderer(Object.class, new SummaryCellRenderer());
+		rankTable.setDefaultRenderer(Double.class, new SummaryCellRenderer());
 		rankTable.autoSizeColumns();
 		return rankTable;
 	}
