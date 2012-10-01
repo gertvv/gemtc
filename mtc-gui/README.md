@@ -11,15 +11,14 @@ XML file and processed by the library to generate the correct
 parametrization, whether a consistency, an inconsistency or a node-split
 model.
 
+The MTC models can also be estimated by GeMTC GUI itself, using the
+YADAS implementation of MCMC for Java.
+
 Several flavours of GeMTC are available:
 
   * A graphical user interface (GUI) application with built-in data
     management and model generation capabilities. The generated models
-    can be run using JAGS or BUGS.
-
-  * A command line interface (CLI) program to generate JAGS/BUGS from
-	data files provided on the command line. The generated models can be
-    run using JAGS or BUGS.
+    can be run using JAGS or BUGS, or by GeMTC GUI itself.
 
   * An R package that combines the GeMTC library and JAGS to provide
     full analysis capabilities (EXPERIMENTAL).
@@ -44,14 +43,19 @@ post-processing and analysis.
 Running GeMTC GUI
 -----------------
 
-Double click the mtc-gui-0.10.jar file, and click "Open" to open an
+Double click the mtc-gui-0.14.jar file, and click "Open" to open an
 existing data file (e.g. those provided in the examples directory) or
 "New" to create a new one.
 
 Versions
 --------
 
-0.12.2: Bugfixes.
+0.14: Moved analysis functionality from ADDIS into GeMTC GUI, enabling
+the estimation of MTC models directly within GeMTC GUI.
+
+0.12.4: Library updates for ADDIS 1.14.
+
+0.12.3: Bugfixes.
 
 0.12.2: Bugfixes and minor improvements.
 
@@ -86,7 +90,7 @@ Building from source
 Source code can be obtained from [the GeMTC site][1]. In order to build
 GeMTC you need:
 
- - [Java >= 1.5][3]
+ - [Java >= 1.6][3]
  - [Maven 2][8]
  - Other dependencies are downloaded automatically by Maven
 
