@@ -67,7 +67,7 @@ public class ConvergenceSummaryDialog extends JDialog  {
 	private Color d_noteColor;
 
 	public ConvergenceSummaryDialog(final JFrame main, final MCMCModelWrapper wrapper, final ValueModel valueModel, String name, Color noteColor) {
-		super(main, name);
+		super(main, "Convergence diagnostics: " + name);
 		setLocationByPlatform(true);
 
 		d_mainWindow = main;
