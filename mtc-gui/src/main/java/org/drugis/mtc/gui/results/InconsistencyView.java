@@ -25,6 +25,7 @@ import javax.swing.JTable;
 import org.drugis.common.gui.table.TablePanel;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.presentation.InconsistencyWrapper;
+import org.drugis.mtc.presentation.MCMCPresentation;
 
 import com.jgoodies.binding.list.ObservableList;
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -36,9 +37,14 @@ public class InconsistencyView extends JPanel {
 	private ObservableList<Treatment> d_treatments;
 	private InconsistencyWrapper<?> d_wrapper;
 	private boolean d_isDichotomous;
+	private MCMCPresentation d_presentation;
 
-	public InconsistencyView(ObservableList<Treatment> treatments, InconsistencyWrapper<?> wrapper, boolean isDichotomous) {
+	public InconsistencyView(ObservableList<Treatment> treatments,
+			MCMCPresentation presentation,
+			InconsistencyWrapper<?> wrapper,
+			boolean isDichotomous) {
 		d_treatments = treatments;
+		d_presentation = presentation;
 		d_wrapper = wrapper;
 		d_isDichotomous = isDichotomous;
 		initComponents();
@@ -46,7 +52,7 @@ public class InconsistencyView extends JPanel {
 
 	private void initComponents() {
 		CellConstraints cc = new CellConstraints();
-		FormLayout layout = new FormLayout("pref:grow:fill", "p, 3dlu, p, 3dlu, p, 3dlu, p");
+		FormLayout layout = new FormLayout("pref:grow:fill", "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p");
 		PanelBuilder builder = new PanelBuilder(layout, this);
 		int row = 1;
 
@@ -54,6 +60,12 @@ public class InconsistencyView extends JPanel {
 		row += 2;
 		final JTable reTable = ResultsComponentFactory.buildRelativeEffectsTable(d_treatments, d_wrapper, d_isDichotomous, true);
 		builder.add(new TablePanel(reTable), cc.xy(1, row));
+		row += 2;
+
+		builder.addSeparator("Inconsistency Factors", cc.xy(1, row));
+		row += 2;
+		final JTable inconTable = ResultsComponentFactory.buildInconsistencyFactors(d_wrapper, d_presentation.isModelConstructed());
+		builder.add(new TablePanel(inconTable), cc.xy(1, row));
 		row += 2;
 
 		builder.addSeparator("Variance", cc.xy(1, row));

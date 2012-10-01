@@ -48,15 +48,18 @@ import org.drugis.mtc.gui.MainWindow;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.presentation.ConsistencyWrapper;
+import org.drugis.mtc.presentation.InconsistencyWrapper;
 import org.drugis.mtc.presentation.MTCModelWrapper;
 import org.drugis.mtc.presentation.NodeSplitWrapper;
 import org.drugis.mtc.presentation.SimulationConsistencyWrapper;
 import org.drugis.mtc.presentation.SimulationNodeSplitWrapper;
+import org.drugis.mtc.presentation.results.NetworkInconsistencyFactorsTableModel;
 import org.drugis.mtc.presentation.results.NetworkRelativeEffectTableModel;
 import org.drugis.mtc.presentation.results.NetworkVarianceTableModel;
 import org.drugis.mtc.presentation.results.RankProbabilityDataset;
 import org.drugis.mtc.presentation.results.RankProbabilityTableModel;
 import org.drugis.mtc.summary.QuantileSummary;
+import org.drugis.mtc.summary.Summary;
 import org.drugis.mtc.util.EmpiricalDensityDataset;
 import org.drugis.mtc.util.EmpiricalDensityDataset.PlotParameter;
 import org.drugis.mtc.util.MCMCResultsAvailableModel;
@@ -90,6 +93,13 @@ public class ResultsComponentFactory {
 		final JTable varTable = new EnhancedTable(new NetworkVarianceTableModel(wrapper), 150);
 		varTable.setDefaultRenderer(QuantileSummary.class, new SummaryCellRenderer());
 		return varTable;
+	}
+
+	public static JTable buildInconsistencyFactors(final InconsistencyWrapper<?> wrapper, final ValueModel modelConstructedModel) {
+		final NetworkInconsistencyFactorsTableModel inconsistencyFactorsTableModel = new NetworkInconsistencyFactorsTableModel(wrapper, modelConstructedModel);
+		final EnhancedTable table = new EnhancedTable(inconsistencyFactorsTableModel, 300);
+		table.setDefaultRenderer(Summary.class, new SummaryCellRenderer(false));
+		return table;
 	}
 
 	public static ChartPanel buildRankProbabilityChart(final ConsistencyWrapper<?> wrapper) {
