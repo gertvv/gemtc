@@ -49,12 +49,12 @@ import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
 import org.drugis.mtc.parameterization.InconsistencyStartingValueGenerator;
-import org.drugis.mtc.parameterization.InconsistencyVariance;
+import org.drugis.mtc.parameterization.InconsistencyStandardDeviation;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.PriorGenerator;
-import org.drugis.mtc.parameterization.RandomEffectsVariance;
+import org.drugis.mtc.parameterization.RandomEffectsStandardDeviation;
 import org.drugis.mtc.parameterization.SplitParameter;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
 
@@ -64,8 +64,8 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 
 	PriorGenerator d_priorGen;
 	protected List<StartingValueGenerator> d_startGen = new ArrayList<StartingValueGenerator>();
-	protected Parameter d_randomEffectVar = new RandomEffectsVariance();
-	protected Parameter d_inconsistencyVar = new InconsistencyVariance();
+	protected Parameter d_randomEffectsStdDev = new RandomEffectsStandardDeviation();
+	protected Parameter d_inconsistencyStdDev = new InconsistencyStandardDeviation();
 	private List<Parameter> d_parameters;
 
 	public YadasModel(Network network, MCMCSettings settings) {
@@ -81,8 +81,8 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 	}
 
 	@Override
-	public Parameter getRandomEffectsVariance() {
-		return d_randomEffectVar;
+	public Parameter getRandomEffectsStandardDeviation() {
+		return d_randomEffectsStdDev;
 	}
 
 	////
@@ -130,9 +130,9 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		d_priorGen = new PriorGenerator(d_network);
 
 		d_parameters = new ArrayList<Parameter>(d_pmtz.getParameters());
-		d_parameters.add(d_randomEffectVar);
+		d_parameters.add(getRandomEffectsStandardDeviation());
 		if (isInconsistency()) {
-			d_parameters.add(d_inconsistencyVar);
+			d_parameters.add(d_inconsistencyStdDev);
 		}
 	}
 
@@ -303,9 +303,9 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 		for (int i = 0; i < parameters.size(); ++i) {
 			writers.add(d_results.getParameterWriter(parameters.get(i), chain, basic, i));
 		}
-		writers.add(d_results.getParameterWriter(d_randomEffectVar, chain, sigma, 0));
+		writers.add(d_results.getParameterWriter(getRandomEffectsStandardDeviation(), chain, sigma, 0));
 		if (isInconsistency()) {
-			writers.add(d_results.getParameterWriter(d_inconsistencyVar, chain, sigmaw, 0));
+			writers.add(d_results.getParameterWriter(d_inconsistencyStdDev, chain, sigmaw, 0));
 		}
 		addWriters(writers);
 	}

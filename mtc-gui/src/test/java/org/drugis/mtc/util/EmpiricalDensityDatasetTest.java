@@ -34,7 +34,7 @@ import java.util.StringTokenizer;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
-import org.drugis.mtc.parameterization.RandomEffectsVariance;
+import org.drugis.mtc.parameterization.RandomEffectsStandardDeviation;
 import org.drugis.mtc.test.FileResults;
 import org.drugis.mtc.util.EmpiricalDensityDataset.PlotParameter;
 import org.jfree.data.general.DatasetChangeEvent;
@@ -90,7 +90,7 @@ public class EmpiricalDensityDatasetTest {
 		Treatment t2 = new Treatment("mPCI");
 		Treatment t3 = new Treatment("sPCI");
 		d_parameters = new Parameter[] {
-				new BasicParameter(t1, t2), new BasicParameter(t2, t3), new RandomEffectsVariance()
+				new BasicParameter(t1, t2), new BasicParameter(t2, t3), new RandomEffectsStandardDeviation()
 		};
 		d_results = readSamples();
 	}

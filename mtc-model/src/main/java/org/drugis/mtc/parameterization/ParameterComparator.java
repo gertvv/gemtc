@@ -31,8 +31,8 @@ public class ParameterComparator implements Comparator<Parameter> {
 		BasicParameter.class,
 		SplitParameter.class,
 		InconsistencyParameter.class,
-		RandomEffectsVariance.class,
-		InconsistencyVariance.class
+		RandomEffectsStandardDeviation.class,
+		InconsistencyStandardDeviation.class
 		);
 	
 	@Override

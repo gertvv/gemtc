@@ -39,6 +39,6 @@ public class SimulationInconsistencyWrapper<TreatmentType> extends AbstractMTCSi
 
 	@Override
 	public Parameter getInconsistencyVariance() {
-		return d_nested.getInconsistencyVariance();
+		return d_nested.getInconsistencyStandardDeviation();
 	}
 }

@@ -35,9 +35,9 @@ public interface MTCModelWrapper<TreatmentType> extends MCMCModelWrapper {
 	public Parameter getRelativeEffect(TreatmentType a, TreatmentType b);
 	
 	/**
-	 * @see org.drugis.mtc.MixedTreatmentComparison#getRandomEffectsVariance()
+	 * @see org.drugis.mtc.MixedTreatmentComparison#getRandomEffectsStandardDeviation()
 	 */
-	public Parameter getRandomEffectsVariance();
+	public Parameter getRandomEffectsStandardDeviation();
 	
 	/**
 	 * Get the underlying MCMC model.

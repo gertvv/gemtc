@@ -28,7 +28,7 @@ import org.drugis.mtc.MCMCSettingsCache;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
-import org.drugis.mtc.parameterization.InconsistencyVariance;
+import org.drugis.mtc.parameterization.InconsistencyStandardDeviation;
 import org.drugis.mtc.summary.ConvergenceSummary;
 import org.drugis.mtc.summary.QuantileSummary;
 
@@ -55,7 +55,7 @@ public class SavedInconsistencyWrapper<TreatmentType> extends AbstractMTCSavedWr
 	@Override
 	public Parameter getInconsistencyVariance() {
 		for(Parameter p : d_quantileSummaries.keySet()) { 
-			if(p instanceof InconsistencyVariance) {
+			if(p instanceof InconsistencyStandardDeviation) {
 				return p;
 			}
 		}

@@ -30,7 +30,7 @@ import java.util.StringTokenizer;
 import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
-import org.drugis.mtc.parameterization.RandomEffectsVariance;
+import org.drugis.mtc.parameterization.RandomEffectsStandardDeviation;
 import org.drugis.mtc.test.FileResults;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class GelmanRubinAcceptanceTest {
 		Treatment t2 = new Treatment("mPCI");
 		Treatment t3 = new Treatment("sPCI");
 		d_parameters = new Parameter[] {
-				new BasicParameter(t1, t2), new BasicParameter(t2, t3), new RandomEffectsVariance()	
+				new BasicParameter(t1, t2), new BasicParameter(t2, t3), new RandomEffectsStandardDeviation()	
 		};
 		d_results = new FileResults(is, d_parameters, 3, 10000);
 		d_results.makeSamplesAvailable();

@@ -46,8 +46,8 @@ public abstract class AbstractMTCSimulationWrapper<TreatmentType, MTCType extend
 	}
 
 	@Override
-	public Parameter getRandomEffectsVariance() {
-		return d_nested.getRandomEffectsVariance();
+	public Parameter getRandomEffectsStandardDeviation() {
+		return d_nested.getRandomEffectsStandardDeviation();
 	}
 	
 	protected List<Treatment> getTreatments(List<TreatmentType> drugs) {
