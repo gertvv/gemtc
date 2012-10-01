@@ -30,5 +30,5 @@ public interface InconsistencyModel extends MixedTreatmentComparison {
 	/**
 	 * Get the inconsistency variance parameter.
 	 */
-	public Parameter getInconsistencyVariance();
+	public Parameter getInconsistencyStandardDeviation();
 }

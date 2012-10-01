@@ -37,10 +37,9 @@ public interface MixedTreatmentComparison extends MCMCModel {
 	 * @throws IllegalStateException if the MTC is not ready.
 	 */
 	public Parameter getRelativeEffect(Treatment base, Treatment subj);
-	
+
 	/**
-	 * Get the random effects variance.
-	 * @return The variance parameter.
+	 * @return Get the random effects standard deviation.
 	 */
-	public Parameter getRandomEffectsVariance();	
+	public Parameter getRandomEffectsStandardDeviation();
 }

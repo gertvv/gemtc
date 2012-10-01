@@ -100,7 +100,7 @@ public class MockConsistencyModel extends YadasConsistencyModel implements Consi
 		return d_task;
 	}
 
-	public Parameter getRandomEffectsVariance() {
+	public Parameter getRandomEffectsStandardDeviation() {
 		return null;
 	}
 

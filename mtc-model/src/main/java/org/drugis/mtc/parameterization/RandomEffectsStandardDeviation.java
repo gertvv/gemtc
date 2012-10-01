@@ -21,10 +21,10 @@ package org.drugis.mtc.parameterization;
 
 import org.drugis.mtc.Parameter;
 
-public class RandomEffectsVariance implements Parameter {
+public class RandomEffectsStandardDeviation implements Parameter {
 	@Override
 	public String getName() {
-		return "var.d";
+		return "sd.d";
 	}
 
 	@Override

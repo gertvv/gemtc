@@ -30,7 +30,7 @@ import org.drugis.mtc.Parameter;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.ParameterComparator;
-import org.drugis.mtc.parameterization.RandomEffectsVariance;
+import org.drugis.mtc.parameterization.RandomEffectsStandardDeviation;
 import org.drugis.mtc.summary.ConvergenceSummary;
 import org.drugis.mtc.summary.QuantileSummary;
 
@@ -80,9 +80,9 @@ public abstract class AbstractMTCSavedWrapper<TreatmentType> extends AbstractObs
 	}
 	
 	@Override
-	public Parameter getRandomEffectsVariance() {
+	public Parameter getRandomEffectsStandardDeviation() {
 		for(Parameter p : d_quantileSummaries.keySet()) { 
-			if(p instanceof RandomEffectsVariance) {
+			if(p instanceof RandomEffectsStandardDeviation) {
 				return p;
 			}
 		}

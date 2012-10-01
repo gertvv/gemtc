@@ -48,7 +48,7 @@ public class NetworkVarianceTableModel extends AbstractTableModel {
 		if (isInconsistency()) {
 			attachListener(((InconsistencyWrapper<?>) d_mtc).getInconsistencyVariance());
 		}
-		attachListener(mtc.getRandomEffectsVariance());
+		attachListener(mtc.getRandomEffectsStandardDeviation());
 	}
 
 	private void attachListener(final Parameter p) {
@@ -103,15 +103,15 @@ public class NetworkVarianceTableModel extends AbstractTableModel {
 	}
 
 	private QuantileSummary getRandomEffectsSummary() {
-		final Parameter p = d_mtc.getRandomEffectsVariance();
+		final Parameter p = d_mtc.getRandomEffectsStandardDeviation();
 		return d_mtc.getQuantileSummary(p);
 	}
 
 	private String getRowDescription(final int row) {
 		if (row == RANDOM_EFFECTS) {
-			return "Random Effects Variance";
+			return "Random Effects Standard Deviation";
 		} else {
-			return "Inconsistency Variance";
+			return "Inconsistency Standard Deviation";
 		}
 	}
 

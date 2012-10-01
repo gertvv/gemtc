@@ -52,8 +52,8 @@ public class YadasInconsistencyModel extends YadasModel implements Inconsistency
 	}
 
 	@Override
-	public Parameter getInconsistencyVariance() {
-		return d_inconsistencyVar;
+	public Parameter getInconsistencyStandardDeviation() {
+		return d_inconsistencyStdDev;
 	}
 
 }

@@ -21,10 +21,10 @@ package org.drugis.mtc.parameterization;
 
 import org.drugis.mtc.Parameter;
 
-public class InconsistencyVariance implements Parameter {
+public class InconsistencyStandardDeviation implements Parameter {
 	@Override
 	public String getName() {
-		return "var.w";
+		return "sd.w";
 	}
 
 	@Override
