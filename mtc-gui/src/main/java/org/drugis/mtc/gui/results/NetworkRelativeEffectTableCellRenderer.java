@@ -65,7 +65,8 @@ public class NetworkRelativeEffectTableCellRenderer extends SummaryCellRenderer 
 	}
 
 	public String getText(final Treatment treatment) {
-		return d_showDescription ? treatment.getDescription() : treatment.getId();
+		boolean haveDescription = treatment.getDescription() != null && !treatment.getDescription().isEmpty();
+		return d_showDescription && haveDescription ? treatment.getDescription() : treatment.getId();
 	}
 
 	public String getTooltipAt(TableModel model, int row, int col) {
