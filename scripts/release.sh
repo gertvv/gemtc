@@ -8,6 +8,8 @@ rm version
 GUIDIR=gemtc-gui-$VERSION
 CLIDIR=gemtc-cli-$VERSION
 
+GUIREADME=mtc-gui/README.md
+
 if [ "$VERSION" = '' ]; then
 	echo '!!!! Error: could not get version';
 	exit;
@@ -19,6 +21,14 @@ if [[ "$VERSION" == *-SNAPSHOT ]]; then
 	echo '!!!! Not packaging -SNAPSHOT';
 	exit;
 fi;
+
+if grep -q $VERSION: $GUIREADME
+then
+  echo "---- README up-to-date"
+else 
+  echo "!!!! Could not find version $VERSION in GeMTC-GUI README.md, please update appropriately"
+  exit
+fi
 
 # Add license to all files
 echo '---- Putting license on all sources'
