@@ -21,6 +21,7 @@ package org.drugis.mtc;
 
 import java.util.Arrays;
 
+import org.drugis.mtc.model.ContinuousNetworkBuilder;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;

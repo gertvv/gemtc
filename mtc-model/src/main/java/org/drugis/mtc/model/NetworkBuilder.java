@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.drugis.mtc;
+package org.drugis.mtc.model;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,10 +33,6 @@ import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.commons.collections15.bidimap.UnmodifiableBidiMap;
 import org.drugis.common.EqualsUtil;
 import org.drugis.mtc.data.DataType;
-import org.drugis.mtc.model.Measurement;
-import org.drugis.mtc.model.Network;
-import org.drugis.mtc.model.Study;
-import org.drugis.mtc.model.Treatment;
 
 public class NetworkBuilder<TreatmentType> {
 	private static final Pattern s_treatmentIdPattern = Pattern.compile("^[A-Za-z0-9_]+$");
@@ -46,7 +42,19 @@ public class NetworkBuilder<TreatmentType> {
 			return input.toString();
 		}
 	}
-
+	
+	public static class TreatmentIdTransformer implements Transformer<Treatment, String> {
+		public String transform(Treatment input) {
+			return input.getId();
+		}
+	}
+	
+	public static class TreatmentDescriptionTransformer implements Transformer<Treatment, String> {
+		public String transform(Treatment input) {
+			return input.getDescription();
+		}
+	}
+	
 	private static class MKey {
 		public final String studyId;
 		public final Treatment treatment;

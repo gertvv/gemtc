@@ -28,38 +28,20 @@ import java.util.HashMap;
 
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.lang.StringUtils;
-import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
+import org.drugis.mtc.model.NetworkBuilder;
+import org.drugis.mtc.model.NoneNetworkBuilder;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 import org.junit.Before;
 import org.junit.Test;
 
 public class NetworkBuilderTest {
-	public static class NoneBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
-		private static final class EmptyStringTransformer<TreatmentType> implements Transformer<TreatmentType, String> {
-			public String transform(TreatmentType input) {
-				return "";
-			}
-		}
-
-		public NoneBuilder() {
-			super(new ToStringTransformer<TreatmentType>(), new EmptyStringTransformer<TreatmentType>(), DataType.NONE);
-		}
-		
-		public NoneBuilder(Transformer<TreatmentType, String> idToString) {
-			super(idToString, new EmptyStringTransformer<TreatmentType>(), DataType.NONE);
-		}
-		
-		public NoneBuilder(Transformer<TreatmentType, String> idToString, Transformer<TreatmentType, String> description) {
-			super(idToString, description, DataType.NONE);
-		}
-		
-		
-		public void add(String studyId, TreatmentType treatmentId) {
-			Treatment t = makeTreatment(treatmentId);
-			add(studyId, t, new Measurement(t));
+	
+	private static final class EmptyStringTransformer<TreatmentType> implements Transformer<TreatmentType, String> {
+		public String transform(TreatmentType input) {
+			return "";
 		}
 	}
 	
@@ -69,7 +51,7 @@ public class NetworkBuilderTest {
 		return study;
 	}
 
-	private NoneBuilder<String> d_builder;
+	private NoneNetworkBuilder<String> d_builder;
 	private Treatment d_ta = new Treatment("A");
 	private Treatment d_tb = new Treatment("B");
 	private Treatment d_tc = new Treatment("C");
@@ -78,7 +60,7 @@ public class NetworkBuilderTest {
 
 	@Before 
 	public void setUp() {
-		d_builder = new NoneBuilder<String>();
+		d_builder = new NoneNetworkBuilder<String>(new NetworkBuilder.ToStringTransformer<String>(), new EmptyStringTransformer<String>());
 	}
 
 	@Test 
@@ -116,11 +98,11 @@ public class NetworkBuilderTest {
 	
 	@Test
 	public void testIdTransform() {
-		NoneBuilder<Integer> builder = new NoneBuilder<Integer>(new Transformer<Integer, String>() {
+		NoneNetworkBuilder<Integer> builder = new NoneNetworkBuilder<Integer>(new Transformer<Integer, String>() {
 			public String transform(Integer input) {
 				return StringUtils.repeat("A", input.intValue());
 			}
-		});
+		}, new EmptyStringTransformer<Integer>());
 		
 		builder.add("1", 5);
 		HashMap<Integer, Treatment> expected = new HashMap<Integer, Treatment>();
@@ -130,7 +112,7 @@ public class NetworkBuilderTest {
 	
 	@Test
 	public void testDescriptionTransform() {
-		NoneBuilder<Integer> builder = new NoneBuilder<Integer>(new NetworkBuilder.ToStringTransformer<Integer>(),
+		NoneNetworkBuilder<Integer> builder = new NoneNetworkBuilder<Integer>(new NetworkBuilder.ToStringTransformer<Integer>(),
 				new Transformer<Integer, String>() {
 					public String transform(Integer input) {
 						return StringUtils.repeat("A", input.intValue());

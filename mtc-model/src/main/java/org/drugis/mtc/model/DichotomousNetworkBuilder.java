@@ -17,31 +17,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.drugis.mtc;
+package org.drugis.mtc.model;
 
 import org.apache.commons.collections15.Transformer;
 import org.drugis.mtc.data.DataType;
-import org.drugis.mtc.model.Measurement;
-import org.drugis.mtc.model.Network;
-import org.drugis.mtc.model.Treatment;
 
-public class ContinuousNetworkBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
-	public ContinuousNetworkBuilder() {
-		super(DataType.CONTINUOUS);
+public class DichotomousNetworkBuilder<TreatmentType> extends NetworkBuilder<TreatmentType> {
+	public static DichotomousNetworkBuilder<Treatment> createSimple() {
+		return new DichotomousNetworkBuilder<Treatment>(
+				new NetworkBuilder.TreatmentIdTransformer(),
+				new NetworkBuilder.TreatmentDescriptionTransformer());
 	}
 	
-	public ContinuousNetworkBuilder(Transformer<TreatmentType, String> treatmentToIdString, Transformer<TreatmentType, String> treatmentToDescription) {
-		super(treatmentToIdString, treatmentToDescription, DataType.CONTINUOUS);
+	public DichotomousNetworkBuilder() {
+		super(DataType.RATE);
 	}
 	
-	@Override
-	public Network buildNetwork() {
-		final Network network = super.buildNetwork();
-		return network;
+	public DichotomousNetworkBuilder(Transformer<TreatmentType, String> treatmentToIdString, Transformer<TreatmentType, String> treatmentToDescription) {
+		super(treatmentToIdString, treatmentToDescription, DataType.RATE);
 	}
 	
-	public void add(String studyId, TreatmentType treatmentId, double mean, double stdDev, int sampleSize) {
+	public void add(String studyId, TreatmentType treatmentId, int responders, int sampleSize) {
 		Treatment t = makeTreatment(treatmentId);
-		add(studyId, t, new Measurement(t, mean, stdDev, sampleSize));
+		add(studyId, t, new Measurement(t, responders, sampleSize));
 	}
 }
