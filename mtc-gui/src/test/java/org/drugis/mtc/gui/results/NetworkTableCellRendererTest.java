@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.commons.collections15.Transformer;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.DefaultModelFactory;
-import org.drugis.mtc.DichotomousNetworkBuilder;
+import org.drugis.mtc.model.DichotomousNetworkBuilder;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.presentation.SimulationConsistencyWrapper;
