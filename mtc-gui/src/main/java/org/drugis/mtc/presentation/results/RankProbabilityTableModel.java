@@ -31,7 +31,7 @@ public class RankProbabilityTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 6045183840617200792L;
 	private final RankProbabilitySummary d_summary;
 
-	public RankProbabilityTableModel(RankProbabilitySummary summary) { 
+	public RankProbabilityTableModel(RankProbabilitySummary summary) {
 		d_summary = summary;
 		d_summary.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -47,7 +47,7 @@ public class RankProbabilityTableModel extends AbstractTableModel {
 	public int getRowCount() {
 		return d_summary.getTreatments().size();
 	}
-	
+
 	@Override
 	public String getColumnName(int column) {
 		if (column == 0) {
@@ -56,7 +56,7 @@ public class RankProbabilityTableModel extends AbstractTableModel {
 			return "Rank " + column;
 		}
 	}
-	
+
 	@Override
 	public Class<?> getColumnClass(int column) {
 		if (column == 0) {
@@ -65,13 +65,11 @@ public class RankProbabilityTableModel extends AbstractTableModel {
 			return Double.class;
 		}
 	}
-	
+
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Treatment treatment = d_summary.getTreatments().get(rowIndex);
 		if (columnIndex == 0) {
-			final String description = treatment.getDescription();
-			final String id = treatment.getId();
-			return (description != null && !description.isEmpty()) ? description : id;
+			return treatment.format();
 		} else {
 			return d_summary.getDefined() ? d_summary.getValue(treatment, columnIndex) : "";
 		}

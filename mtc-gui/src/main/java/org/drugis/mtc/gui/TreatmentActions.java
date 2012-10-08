@@ -98,12 +98,9 @@ class TreatmentActions implements ListActions<Treatment> {
 	public String getLabel(Treatment item) {
 		return item.getId();
 	}
+
 	public String getTooltip(Treatment item) {
-		String description = item.getDescription();
-		if(description == null || description.length() == 0) {
-			description = item.getId();
-		} 
-		return description;
+		return item.format();
 	}
 
 	public ListModel listPresentation(ObservableList<Treatment> list) {

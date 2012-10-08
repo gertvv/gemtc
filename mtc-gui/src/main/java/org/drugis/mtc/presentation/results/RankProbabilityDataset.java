@@ -40,7 +40,7 @@ public class RankProbabilityDataset extends DefaultCategoryDataset {
 			}
 		});
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public int getRowIndex(Comparable key) {
@@ -54,7 +54,7 @@ public class RankProbabilityDataset extends DefaultCategoryDataset {
 		}
 		return idx;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public int getColumnIndex(Comparable key) {
@@ -65,25 +65,23 @@ public class RankProbabilityDataset extends DefaultCategoryDataset {
 		int idx = 0;
 		for (Treatment t : d_summary.getTreatments()) {
 			if (t.getId().equals(treatment)) {
-				return idx; 
+				return idx;
 			}
 			++idx;
 		}
 		return -1;
 	}
-	
+
 	@Override
 	public String getRowKey(int row) {
 		return "Rank " + (row + 1);
 	}
-	
+
 	@Override
 	public String getColumnKey(int column) {
-		final String description = d_summary.getTreatments().get(column).getDescription();
-		final String id = d_summary.getTreatments().get(column).getId();
-		return (description != null && !description.isEmpty()) ? description : id;
+		return d_summary.getTreatments().get(column).format();
 	}
-	
+
 	@Override
 	public List<String> getRowKeys() {
 		List<String> keys = new ArrayList<String>();
@@ -92,7 +90,7 @@ public class RankProbabilityDataset extends DefaultCategoryDataset {
 		}
 		return keys;
 	}
-	
+
 	@Override
 	public List<String> getColumnKeys() {
 		List<String> keys = new ArrayList<String>();
@@ -101,7 +99,7 @@ public class RankProbabilityDataset extends DefaultCategoryDataset {
 		}
 		return keys;
 	}
-	
+
 	@Override
 	public int getRowCount() {
 		return d_summary.getTreatments().size();
@@ -111,12 +109,12 @@ public class RankProbabilityDataset extends DefaultCategoryDataset {
 	public int getColumnCount() {
 		return d_summary.getTreatments().size();
 	}
-	
+
 	@Override
 	public Number getValue(int row, int column) {
 		return d_summary.getValue(d_summary.getTreatments().get(column), row + 1);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Number getValue(Comparable rowKey, Comparable columnKey) {
