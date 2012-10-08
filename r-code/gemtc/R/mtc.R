@@ -1,5 +1,22 @@
 library(coda)
 
+## mtc.network class methods
+print.mtc.network <- function(x, ...) {
+	cat("MTC dataset: ", x$description, "\n", sep="")
+}
+
+summary.mtc.network <- function(x, ...) {
+	x
+}
+
+plot.mtc.network <- function(x, ...) {
+	# FIXME: graph of treatments w/ comparisons as edges?
+}
+
+print.mtc.model <- function(x, ...) {
+	cat("MTC ", x$type, " model: ", x$description, "\n", sep="")
+}
+
 # Read CODA output produced by JAGS
 read.mtc <- function(stem) {
 	nChains <- length(list.files(pattern=paste(stem, "chain*", sep="")))

@@ -38,6 +38,11 @@ public class YadasNodeSplitModel extends YadasModel implements NodeSplitModel {
 		d_split = split;
 	}
 
+	public YadasNodeSplitModel(Network network, NodeSplitParameterization pmtz, MCMCSettings settings) {
+		super(network, pmtz, settings);
+		d_split = pmtz.getSplitNode();
+	}
+
 	@Override
 	protected Parameterization buildNetworkModel() {
 		return NodeSplitParameterization.create(d_network, d_split);

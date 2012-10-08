@@ -214,4 +214,8 @@ public class NodeSplitParameterization extends ConsistencyParameterization {
 		params.add(params2);
 		return params;
 	}
+
+	public BasicParameter getSplitNode() {
+		return d_splitNode;
+	}
 }

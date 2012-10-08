@@ -35,6 +35,10 @@ public class YadasInconsistencyModel extends YadasModel implements Inconsistency
 		super(network, settings);
 	}
 
+	public YadasInconsistencyModel(Network network, InconsistencyParameterization pmtz, MCMCSettings settings) {
+		super(network, pmtz, settings);
+	}
+	
 	@Override
 	protected Parameterization buildNetworkModel() {
 		return InconsistencyParameterization.create(d_network);

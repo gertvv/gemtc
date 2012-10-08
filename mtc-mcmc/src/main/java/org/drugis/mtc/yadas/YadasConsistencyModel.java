@@ -30,6 +30,10 @@ public class YadasConsistencyModel extends YadasModel implements ConsistencyMode
 	public YadasConsistencyModel(Network network, MCMCSettings settings) {
 		super(network, settings);
 	}
+	
+	public YadasConsistencyModel(Network network, ConsistencyParameterization pmtz, MCMCSettings settings) {
+		super(network, pmtz, settings);
+	}
 
 	@Override
 	protected Parameterization buildNetworkModel() {

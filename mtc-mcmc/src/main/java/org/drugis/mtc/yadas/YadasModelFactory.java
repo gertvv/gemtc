@@ -24,14 +24,18 @@ import java.util.List;
 import org.drugis.mtc.ConsistencyModel;
 import org.drugis.mtc.InconsistencyModel;
 import org.drugis.mtc.MCMCSettings;
+import org.drugis.mtc.MixedTreatmentComparison;
 import org.drugis.mtc.ModelFactory;
 import org.drugis.mtc.NodeSplitModel;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.BasicParameter;
+import org.drugis.mtc.parameterization.ConsistencyParameterization;
+import org.drugis.mtc.parameterization.InconsistencyParameterization;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NodeSplitParameterization;
+import org.drugis.mtc.parameterization.Parameterization;
 
 import edu.uci.ics.jung.graph.Hypergraph;
 
@@ -41,6 +45,19 @@ public class YadasModelFactory implements ModelFactory {
 	public static final int DEFAULT_NUMBER_OF_CHAINS = 4;
 	public static final double DEFAULT_VARIANCE_SCALING = 2.5;
 	public static final int DEFAULT_THINNING_FACTOR = 10;
+	
+	public static MixedTreatmentComparison buildYadasModel(Network network, Parameterization pmtz, MCMCSettings settings) {
+		if (pmtz instanceof ConsistencyParameterization) {
+			return new YadasConsistencyModel(network, (ConsistencyParameterization) pmtz, settings);
+		}
+		if (pmtz instanceof InconsistencyParameterization) {
+			return new YadasInconsistencyModel(network, (InconsistencyParameterization) pmtz, settings);
+		}
+		if (pmtz instanceof NodeSplitParameterization) {
+			return new YadasNodeSplitModel(network, (NodeSplitParameterization) pmtz, settings);
+		}
+		throw new IllegalArgumentException("Unknown parameterization type: " + pmtz.getClass().getSimpleName());
+	}
 
 	private MCMCSettings d_defaults = new YadasSettings(
 			DEFAULT_TUNING_ITERATIONS, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_THINNING_FACTOR,

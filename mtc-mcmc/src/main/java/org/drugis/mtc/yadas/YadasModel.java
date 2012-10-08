@@ -48,8 +48,8 @@ import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
-import org.drugis.mtc.parameterization.InconsistencyStartingValueGenerator;
 import org.drugis.mtc.parameterization.InconsistencyStandardDeviation;
+import org.drugis.mtc.parameterization.InconsistencyStartingValueGenerator;
 import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NetworkParameter;
 import org.drugis.mtc.parameterization.Parameterization;
@@ -62,15 +62,20 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 	protected final Network d_network;
 	protected Parameterization d_pmtz = null;
 
-	PriorGenerator d_priorGen;
-	protected List<StartingValueGenerator> d_startGen = new ArrayList<StartingValueGenerator>();
-	protected Parameter d_randomEffectsStdDev = new RandomEffectsStandardDeviation();
+	private PriorGenerator d_priorGen;
+	private List<StartingValueGenerator> d_startGen = new ArrayList<StartingValueGenerator>();
+	private Parameter d_randomEffectsStdDev = new RandomEffectsStandardDeviation();
 	protected Parameter d_inconsistencyStdDev = new InconsistencyStandardDeviation();
 	private List<Parameter> d_parameters;
 
 	public YadasModel(Network network, MCMCSettings settings) {
 		super(settings);
 		d_network = network;
+	}
+	
+	protected YadasModel(Network network, Parameterization pmtz, MCMCSettings settings) {
+		this(network, settings);
+		d_pmtz = pmtz;
 	}
 
 	abstract protected boolean isInconsistency();
@@ -120,7 +125,9 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 
 	@Override
 	protected void prepareModel() {
-		d_pmtz = buildNetworkModel();
+		if (d_pmtz == null) {
+			d_pmtz = buildNetworkModel();
+		}
 		JDKRandomGenerator rng = new JDKRandomGenerator();
 		final double scale = getSettings().getVarianceScalingFactor();
 		for (int i = 0; i < getNumberOfChains(); ++i) {
