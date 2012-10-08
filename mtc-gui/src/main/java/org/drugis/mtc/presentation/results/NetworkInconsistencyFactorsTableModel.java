@@ -44,6 +44,12 @@ public class NetworkInconsistencyFactorsTableModel extends AbstractTableModel {
 	private final InconsistencyWrapper<?> d_model;
 	private boolean d_listenersAttached;
 	private ValueModel d_modelConstructed;
+	private boolean d_preferDescription = false;
+
+	public NetworkInconsistencyFactorsTableModel(InconsistencyWrapper<?> networkModel, ValueModel modelConstructed, boolean preferDescription) {
+		this(networkModel, modelConstructed);
+		d_preferDescription = preferDescription;
+	}
 
 	public NetworkInconsistencyFactorsTableModel(InconsistencyWrapper<?> networkModel, ValueModel modelConstructed) {
 		d_model = networkModel;
@@ -53,23 +59,23 @@ public class NetworkInconsistencyFactorsTableModel extends AbstractTableModel {
 				fireTableDataChanged();
 			}
 		};
-		
+
 		if (d_modelConstructed.getValue().equals(true)) {
 			attachListeners();
 		}
 		d_modelConstructed.addValueChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getNewValue().equals(true)) {
-					fireTableStructureChanged();					
+					fireTableStructureChanged();
 					attachListeners();
 				}
 			}
 		});
 	}
-	
+
 	private void attachListeners() {
 		if (d_listenersAttached) return;
-		
+
 		List<Parameter> parameterList = d_model.getInconsistencyFactors();
 		for(Parameter p : parameterList ) {
 			QuantileSummary summary = d_model.getQuantileSummary(p);
@@ -77,13 +83,13 @@ public class NetworkInconsistencyFactorsTableModel extends AbstractTableModel {
 		}
 		d_listenersAttached = true;
 	}
-	
+
 	@Override
 	public Class<?> getColumnClass(int column) {
 		return column == 0 ? String.class : Summary.class;
-		
+
 	}
-	
+
 	@Override
 	public String getColumnName(int column) {
 		return column == 0 ? "Cycle" : "Median (95% CrI)";
@@ -99,16 +105,16 @@ public class NetworkInconsistencyFactorsTableModel extends AbstractTableModel {
 		}
 		return 0;
 	}
-	
+
 	public Object getValueAt(int row, int col) {
 		if (d_modelConstructed.getValue().equals(false)){
 			return NA;
 		}
-		InconsistencyParameter ip = (InconsistencyParameter)d_model.getInconsistencyFactors().get(row);
+		InconsistencyParameter ip = (InconsistencyParameter) d_model.getInconsistencyFactors().get(row);
 		if(col == 0) {
 			Set<String> descriptions = new TreeSet<String>();
-			for(Treatment t : ip.getCycle()) { 
-				descriptions.add(t.getDescription());
+			for(Treatment t : ip.getCycle()) {
+				descriptions.add(t.format(d_preferDescription));
 			}
 			return StringUtils.join(descriptions, ", ");
 		} else {
