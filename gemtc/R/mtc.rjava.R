@@ -1,16 +1,3 @@
-## mtc.network class methods
-print.mtc.network <- function(x, ...) {
-	cat("MTC dataset: ", x$description, "\n", sep="")
-}
-
-summary.mtc.network <- function(x, ...) {
-	x
-}
-
-plot.mtc.network <- function(x, ...) {
-	# FIXME: graph of treatments w/ comparisons as edges?
-}
-
 # Get a list of included treatments from an org.drugis.mtc.model.Network
 mtc.treatments <- function(network) {
 	asTreatment <- function(jobj) { .jcast(jobj, "org/drugis/mtc/model/Treatment") }
@@ -93,8 +80,7 @@ read.mtc.network <- function(file) {
 	network
 }
 
-# Convert the S3 class 'mtc.network' to an org.drugis.mtc.model.Network and write it to file
-write.mtc.network <- function(network, file="") {
+mtc.network.as.java <- function(network) {
 	treatment <- function(row) {
 		treatment <- .jnew("org/drugis/mtc/model/Treatment", row['id'], row['description'])
 		.jcast(treatment, "java/lang/Object")
@@ -133,7 +119,14 @@ write.mtc.network <- function(network, file="") {
 	# create network
 	apply(network$data, 1, function(row) { builder$append(builder$builder, row) })
 	j.network <- .jcall(builder$builder, "Lorg/drugis/mtc/model/Network;", "buildNetwork")
-	#.jcall(j.network, "V", "setDescription", network$description)
+	.jcall(j.network, "V", "setDescription", network$description)
+
+	j.network
+}
+
+# Convert the S3 class 'mtc.network' to an org.drugis.mtc.model.Network and write it to file
+write.mtc.network <- function(network, file="") {
+	j.network <- mtc.network.as.java(network)
 
 	# write to file
 	bos <- .jnew("java/io/ByteArrayOutputStream")
@@ -143,22 +136,94 @@ write.mtc.network <- function(network, file="") {
 	cat(.jcall(bos, "S", "toString"))
 }
 
+# Create the specific model (consistency/inconsistency/nodesplit)
+# FIXME: support nodesplit
+mtc.model <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5, n.chain=4) {
+	typeMap <- c(
+		'Consistency'='Consistency',
+		'consistency'='Consistency',
+		'cons'='Consistency',
+		'NodeSplit'='NodeSplit',
+		'nodeSplit'='NodeSplit',
+		'nodesplit'='NodeSplit',
+		'split'='NodeSplit',
+		'Inconsistency'='Inconsistency',
+		'inconsistency'='Inconsistency',
+		'incons'='Inconsistency')
 
-## mtc.model class methods
+	if (is.na(typeMap[type])) {
+		stop(paste(type, 'is not an MTC model type.'))
+	}
+	type <- typeMap[type]
 
-print.mtc.model <- function(x, ...) {
-	cat(x$type, "model\n")
-	p <- .jcall(x$model, "Lorg/drugis/mtc/Parametrization;", "parametrization")
-	b <- .jcall(p, "Lorg/drugis/mtc/FundamentalGraphBasis;", "basis")
-	cat(.jcall(b, "S", "dotString"))
-	cat("\n")
+	# create java network structure
+	j.network <- mtc.network.as.java(network)
+
+	# create parameterization
+	class <- paste('org/drugis/mtc/parameterization/', type, 'Parameterization', sep='')
+	j.model <- .jcall(class, paste('L', class, ';', sep=''), 'create', j.network)
+
+	# create starting value generator
+	rng <- .jcast(.jnew('org/apache/commons/math3/random/JDKRandomGenerator'), 'org/apache/commons/math3/random/RandomGenerator')
+	j.cgraph <- .jcall('org/drugis/mtc/parameterization/NetworkModel',
+		'Ledu/uci/ics/jung/graph/UndirectedGraph;',
+		'createComparisonGraph', j.network)
+	j.generator <- .jcall('org/drugis/mtc/parameterization/AbstractDataStartingValueGenerator',
+		'Lorg/drugis/mtc/parameterization/StartingValueGenerator;',
+		'create', j.network, j.cgraph, rng, factor)
+
+	# create data structure
+	model <- list(
+		type = type,
+		description = network$description,
+		j.network = j.network,
+		j.model = j.model,
+		j.generator = j.generator,
+		n.chain = n.chain,
+		var.scale = factor)
+	class(model) <- "mtc.model"
+
+	model
 }
 
-# Get a list of studies including t1 and t2
-mtc.network.supportingStudies <- function(network, t1, t2) {
-	comparison <- .newTuple2(.jcast(mtc.network.treatment(network, t1), "java/lang/Object"), .jcast(mtc.network.treatment(network, t2), "java/lang/Object"))
-	set <- .jcall(network$jobj, "Lscala/collection/immutable/Set;", "supportingStudies", comparison)
-	.setToArray(set)
+# If is.na(sampler), a sampler will be chosen based on availability, in this order:
+# JAGS, BUGS, YADAS. When the sampler is BUGS, BRugs or R2WinBUGS will be used.
+mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
+	bugs <- c('BRugs', 'R2WinBUGS')
+	jags <- c('rjags')
+	available <- if (is.na(sampler)) {
+		c(jags, bugs)
+	} else if (sampler == 'BUGS') {
+		bugs
+	} else if (sampler == 'JAGS') {
+		jags	
+	} else {
+		c(sampler)
+	}
+
+	if (is.na(sampler) || (!is.na(sampler) && sampler != 'YADAS')) {
+		found <- NA
+		i <- 1
+		while (is.na(found) && i <= length(available)) {
+			if (do.call(library, list(available[i], logical.return=TRUE, quietly=TRUE))) {
+				found <- available[i]
+			}
+			i <- i + 1
+		}
+		if (is.na(found)) {
+			stop(paste("Could not find a suitable sampler for", sampler))
+		}
+		sampler <- found
+	}
+
+	# Switch on sampler
+	if (sampler == 'YADAS') {
+		mtc.run.yadas(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
+	} else if (sampler %in% bugs) {
+		mtc.run.bugs(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
+	} else if (sampler %in% jags) {
+		mtc.run.jags(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
+	}
 }
 
 # Read JAGS/R input string format to an environment
@@ -169,6 +234,86 @@ jagsFormatToList <- function(str) {
 	sys.source(tmpFile, env)
 	unlink(tmpFile)
 	as.list(env)
+}
+
+mtc.build.syntaxModel <- function(model, is.jags) {
+	j.model <- .jcast(model$j.model, 'org/drugis/mtc/parameterization/Parameterization')
+	j.syntaxModel <- .jnew('org/drugis/mtc/jags/JagsSyntaxModel', model$j.network, j.model, is.jags)
+
+	list(
+		model = .jcall(j.syntaxModel, "S", "modelText"),
+		data = jagsFormatToList(.jcall(j.syntaxModel, "S", "dataText")),
+		inits = lapply(1:model$n.chain, function(i) {jagsFormatToList(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
+		vars = sapply(as.list(.jcall(j.model, 'Ljava/util/List;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
+	)
+}
+
+mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
+	# Build the YADAS model
+	j.model <- .jcast(model$j.model, 'org/drugis/mtc/parameterization/Parameterization')
+	j.settings <- .jnew('org/drugis/mtc/yadas/YadasSettings',
+		as.integer(n.adapt), as.integer(n.iter), as.integer(thin),
+		as.integer(model$n.chain), model$var.scale)
+	j.settings <- .jcast(j.settings, 'org/drugis/mtc/MCMCSettings')
+	j.yadas <- .jcall('org/drugis/mtc/yadas/YadasModelFactory',
+		'Lorg/drugis/mtc/MixedTreatmentComparison;', 'buildYadasModel', model$j.network, j.model, j.settings)
+
+	# Run the YADAS model
+	.jcall('org/drugis/common/threading/TaskUtil', 'V', 'run', 
+		.jcast(
+			.jcall(j.yadas, 'Lorg/drugis/common/threading/activity/ActivityTask;', 'getActivityTask'),
+			'org/drugis/common/threading/Task'
+		)
+	)
+
+	# Generate the results
+	j.results <- .jcall(j.yadas, 'Lorg/drugis/mtc/MCMCResults;', 'getResults')
+	params <- sapply(as.list(.jcall(j.results, '[Lorg/drugis/mtc/Parameter;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
+	get.samples <- function(chain, i) {
+		.jevalArray(.jcall('org/drugis/mtc/ResultsUtil', '[D', 'getSamples', j.results, i, chain))
+	}
+	as.coda.chain <- function(chain) {
+		samples <- sapply(params, function(p) { get.samples(which(params == p)) })
+		as.mcmc(samples, start=n.adapt + 1, end=n.adapt + n.iter, thin=thin)
+	}
+	lapply(1:model$n.chain, as.coda.chain)
+
+	as.mcmc.list(chains)
+}
+
+mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
+	if (is.na(package) || package != "BRugs") {
+		stop(paste("Package", package, "not supported"))
+	}
+
+	# generate BUGS model
+	syntax1 <- mtc.build.syntaxModel(model, is.jags=FALSE)
+	syntax2 <- mtc.build.syntaxModel(model, is.jags=TRUE)
+
+	# compile & run BUGS model
+	file.model <- tempfile()
+	cat(paste(syntax1$model, "\n", collapse=""), file=file.model)
+	data <- BRugsFit(file.model, data=syntax2$data, inits=syntax2$inits, numChains=model$n.chain,
+		parametersToSave=syntax1$vars, coda=TRUE,
+		nBurnin=n.adapt, nIter=n.iter, nThin=thin)
+	unlink(file.model)
+
+	# return
+	data
+}
+
+mtc.run.jags <- function (model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
+	# generate JAGS model
+	syntax <- mtc.build.syntaxModel(model, is.jags=TRUE)
+
+	# compile JAGS model
+	file.model <- tempfile()
+	cat(paste(syntax$model, "\n", collapse=""), file=file.model)
+	jags <- jags.model(file.model, data=syntax$data, inits=syntax$inits, n.chains=model$n.chain, n.adapt=n.adapt)
+	unlink(file.model)
+
+	# run JAGS model
+	coda.samples(jags, variable.names=syntax$vars, n.iter=n.iter, thin=thin)
 }
 
 # Extract monitored vars from JAGS script (HACK)
@@ -187,29 +332,6 @@ generateJags <- function(jagsModel, generator, nchain) {
 	analysis <- jagsFormatToList(.jcall(jagsModel, "S", "analysisText", "baseName"))
 	list(model=modelTxt, data=data, inits=inits, vars=vars, analysis=analysis)
 }
-
-# Create the specific model (consistency/inconsistency/nodesplit)
-# FIXME: support nodesplit
-mtc.model <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5, nchain=4) {
-	class <- paste("org/drugis/mtc/", type, "NetworkModel", sep="")
-	model <- .jcall(class, "Lorg/drugis/mtc/NetworkModel;", "apply", network$jobj)
-	if (is.jnull(model)) {
-		stop("Error: failed to initialize NetworkModel")
-	}
-	rng <- .jnew("org/apache/commons/math/random/JDKRandomGenerator")
-	generator <- .jcall("org/drugis/mtc/RandomizedStartingValueGenerator", "Lorg/drugis/mtc/StartingValueGenerator;", "apply", model, .jcast(rng, "org/apache/commons/math/random/RandomGenerator"), factor)
-	if (is.jnull(generator)) {
-		stop("Error: failed to initialize initial values generator")
-	}
-	jagsModel <- .jnew("org/drugis/mtc/jags/JagsSyntaxModel", model)
-	if (is.jnull(jagsModel)) {
-		stop("Error: failed to initialize JagsSyntaxModel")
-	}
-	rval <- list(model=model, jagsModel=jagsModel, jags=generateJags(jagsModel, generator, nchain), type=type)
-	class(rval) <- "mtc.model"
-	rval
-}
-
 
 # Run the model using JAGS
 mtcJags <- function(mtc.model, nadapt=30000, nsamples=20000) {
