@@ -31,6 +31,13 @@ import org.jfree.data.category.DefaultCategoryDataset;
 @SuppressWarnings("serial")
 public class RankProbabilityDataset extends DefaultCategoryDataset {
 	private RankProbabilitySummary d_summary;
+	private boolean d_preferDescription = false;
+
+	public RankProbabilityDataset(RankProbabilitySummary rankProbabilitySummary, boolean preferDescription) {
+		this(rankProbabilitySummary);
+		d_preferDescription = preferDescription;
+
+	}
 
 	public RankProbabilityDataset(RankProbabilitySummary rankProbabilitySummary) {
 		d_summary = rankProbabilitySummary;
@@ -79,7 +86,7 @@ public class RankProbabilityDataset extends DefaultCategoryDataset {
 
 	@Override
 	public String getColumnKey(int column) {
-		return d_summary.getTreatments().get(column).format();
+		return d_summary.getTreatments().get(column).format(d_preferDescription);
 	}
 
 	@Override

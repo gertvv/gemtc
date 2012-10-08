@@ -30,6 +30,12 @@ import org.drugis.mtc.summary.RankProbabilitySummary;
 public class RankProbabilityTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 6045183840617200792L;
 	private final RankProbabilitySummary d_summary;
+	private boolean d_preferDescription = false;
+
+	public RankProbabilityTableModel(RankProbabilitySummary summary, boolean preferDescription) {
+		this(summary);
+		d_preferDescription = preferDescription;
+	}
 
 	public RankProbabilityTableModel(RankProbabilitySummary summary) {
 		d_summary = summary;
@@ -69,7 +75,7 @@ public class RankProbabilityTableModel extends AbstractTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Treatment treatment = d_summary.getTreatments().get(rowIndex);
 		if (columnIndex == 0) {
-			return treatment.format();
+			return treatment.format(d_preferDescription);
 		} else {
 			return d_summary.getDefined() ? d_summary.getValue(treatment, columnIndex) : "";
 		}

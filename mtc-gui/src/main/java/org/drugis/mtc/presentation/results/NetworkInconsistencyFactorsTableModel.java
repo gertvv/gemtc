@@ -44,6 +44,12 @@ public class NetworkInconsistencyFactorsTableModel extends AbstractTableModel {
 	private final InconsistencyWrapper<?> d_model;
 	private boolean d_listenersAttached;
 	private ValueModel d_modelConstructed;
+	private boolean d_preferDescription = false;
+
+	public NetworkInconsistencyFactorsTableModel(InconsistencyWrapper<?> networkModel, ValueModel modelConstructed, boolean preferDescription) {
+		this(networkModel, modelConstructed);
+		d_preferDescription = preferDescription;
+	}
 
 	public NetworkInconsistencyFactorsTableModel(InconsistencyWrapper<?> networkModel, ValueModel modelConstructed) {
 		d_model = networkModel;
@@ -108,7 +114,7 @@ public class NetworkInconsistencyFactorsTableModel extends AbstractTableModel {
 		if(col == 0) {
 			Set<String> descriptions = new TreeSet<String>();
 			for(Treatment t : ip.getCycle()) {
-				descriptions.add(t.format());
+				descriptions.add(t.format(d_preferDescription));
 			}
 			return StringUtils.join(descriptions, ", ");
 		} else {
