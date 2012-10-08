@@ -53,24 +53,24 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 	private final ConsistencyWrapper<?> d_consistencyModel;
 	private final List<NodeSplitWrapper<?>> d_nodeSplitModels;
 	private boolean d_showDescription;
-	
-	public NodeSplitResultsTableModel(ConsistencyWrapper<?> consistencyModel, 
+
+	public NodeSplitResultsTableModel(ConsistencyWrapper<?> consistencyModel,
 			List<NodeSplitWrapper<?>> nodeSplitModels) {
 		this(consistencyModel, nodeSplitModels, true);
 	}
-	
-	public NodeSplitResultsTableModel(ConsistencyWrapper<?> consistencyModel, 
+
+	public NodeSplitResultsTableModel(ConsistencyWrapper<?> consistencyModel,
 			List<NodeSplitWrapper<?>> nodeSplitModels, boolean showDescription) {
 		d_consistencyModel = consistencyModel;
 		d_nodeSplitModels = nodeSplitModels;
 		d_showDescription = showDescription;
-		
+
 		d_listener = new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				fireTableDataChanged();
 			}
 		};
-		
+
 		if(d_nodeSplitModels.size() > 0) {
 			initializeTable();
 		}
@@ -81,7 +81,7 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 			attachQuantileSummary(d_consistencyModel, m.getSplitNode());
 			attachQuantileSummary(m, m.getDirectEffect());
 			attachQuantileSummary(m, m.getIndirectEffect());
-			
+
 			NodeSplitPValueSummary valuePvalue = m.getNodeSplitPValueSummary();
 			valuePvalue.addPropertyChangeListener(d_listener);
 			d_pValueSummaries.put(m.getSplitNode(), valuePvalue);
@@ -90,16 +90,16 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 
 	private void attachQuantileSummary(MTCModelWrapper<?> model, Parameter param) {
 		QuantileSummary summary = model.getQuantileSummary(param);
-		if(summary != null) { 
-			summary.addPropertyChangeListener(d_listener); 
+		if(summary != null) {
+			summary.addPropertyChangeListener(d_listener);
 		}
 		d_quantileSummaries.put(param, summary);
 	}
-	
+
 	@Override
 	public String getColumnName(int index) {
 		switch(index) {
-			case COL_NAME : return "Name"; 
+			case COL_NAME : return "Name";
 			case COL_DIRECT_EFFECT : return "Direct Effect";
 			case COL_INDIRECT_EFFECT : return "Indirect Effect";
 			case COL_OVERALL : return "Overall";
@@ -107,7 +107,7 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 			default: return null;
 		}
 	}
-	
+
 	public int getColumnCount() {
 		return N_COLS;
 	}
@@ -121,7 +121,7 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 			return getDescription((BasicParameter)d_nodeSplitModels.get(rowIndex).getSplitNode());
 		} else if (columnIndex >= COL_DIRECT_EFFECT && columnIndex <= COL_P_VALUE) {
 			return getSummary(rowIndex, columnIndex);
-		} 
+		}
 		return null;
 	}
 
@@ -130,19 +130,19 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 			case COL_DIRECT_EFFECT : return d_quantileSummaries.get(d_nodeSplitModels.get(rowIndex).getDirectEffect());
 			case COL_INDIRECT_EFFECT : return d_quantileSummaries.get(d_nodeSplitModels.get(rowIndex).getIndirectEffect());
 			case COL_OVERALL : return d_quantileSummaries.get(d_nodeSplitModels.get(rowIndex).getSplitNode());
-			case COL_P_VALUE : return d_pValueSummaries.get(d_nodeSplitModels.get(rowIndex).getSplitNode()); 
+			case COL_P_VALUE : return d_pValueSummaries.get(d_nodeSplitModels.get(rowIndex).getSplitNode());
 			default : return NA;
 		}
 	}
 
-	private String getDescription(BasicParameter p) { 
+	private String getDescription(BasicParameter p) {
 		return getText(p.getBaseline()) + ", " + getText(p.getSubject());
 	}
 
 	private String getText(final Treatment t) {
-		return d_showDescription ? t.getDescription() : t.getId();
+		return t.format(d_showDescription);
 	}
-	
+
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		switch(columnIndex) {
@@ -150,7 +150,7 @@ public class NodeSplitResultsTableModel extends AbstractTableModel {
 			case COL_DIRECT_EFFECT : return QuantileSummary.class;
 			case COL_INDIRECT_EFFECT : return QuantileSummary.class;
 			case COL_OVERALL : return QuantileSummary.class;
-			case COL_P_VALUE : return NodeSplitPValueSummary.class;  
+			case COL_P_VALUE : return NodeSplitPValueSummary.class;
 			default : return Object.class;
 		}
 	}

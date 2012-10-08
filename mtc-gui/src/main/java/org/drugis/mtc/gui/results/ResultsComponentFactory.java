@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -32,11 +33,13 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.table.TableColumn;
 
 import org.drugis.common.gui.FileSaveDialog;
 import org.drugis.common.gui.LayoutUtil;
 import org.drugis.common.gui.ToStringValueModel;
 import org.drugis.common.gui.table.EnhancedTable;
+import org.drugis.common.gui.table.TableCopyHandler;
 import org.drugis.common.threading.status.TaskTerminatedModel;
 import org.drugis.common.validation.BooleanAndModel;
 import org.drugis.mtc.MCMCModel;
@@ -84,9 +87,23 @@ public class ResultsComponentFactory {
 	public static JTable buildRelativeEffectsTable(final List<Treatment> treatments,
 			final MTCModelWrapper<?> wrapper, final boolean isDichotomous,
 			final boolean showDescription) {
-		final JTable reTable = new EnhancedTable(new NetworkRelativeEffectTableModel(treatments, wrapper), 150);
+		final JTable reTable = createTableWithoutHeaders(new NetworkRelativeEffectTableModel(treatments, wrapper));
 		reTable.setDefaultRenderer(Object.class, new NetworkRelativeEffectTableCellRenderer(isDichotomous, showDescription));
+
 		return reTable;
+	}
+
+	private static JTable createTableWithoutHeaders(NetworkRelativeEffectTableModel dm) {
+		final JTable table = new JTable(dm);
+		table.setTableHeader(null);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		for (final TableColumn c : Collections.list(table.getColumnModel().getColumns())) {
+			c.setMinWidth(170);
+			c.setPreferredWidth(170);
+		}
+
+		TableCopyHandler.registerCopyAction(table);
+		return table;
 	}
 
 	public static JTable buildVarianceTable(final MTCModelWrapper<?> wrapper) {
