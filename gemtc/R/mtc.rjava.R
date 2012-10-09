@@ -227,7 +227,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 }
 
 # Read JAGS/R input string format to an environment
-jagsFormatToList <- function(str) {
+jags.as.list <- function(str) {
 	tmpFile <- tempfile()
 	cat(paste(str, "\n", collapse=""), file=tmpFile)
 	env <- new.env()
@@ -242,8 +242,8 @@ mtc.build.syntaxModel <- function(model, is.jags) {
 
 	list(
 		model = .jcall(j.syntaxModel, "S", "modelText"),
-		data = jagsFormatToList(.jcall(j.syntaxModel, "S", "dataText")),
-		inits = lapply(1:model$n.chain, function(i) {jagsFormatToList(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
+		data = jags.as.list(.jcall(j.syntaxModel, "S", "dataText")),
+		inits = lapply(1:model$n.chain, function(i) {jags.as.list(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
 		vars = sapply(as.list(.jcall(j.model, 'Ljava/util/List;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
 	)
 }
@@ -261,13 +261,27 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
   .jcall(j.yadas, "V", 'setExtendSimulation', .jcall('org/drugis/mtc/MCMCModel$ExtendSimulation', 'Lorg/drugis/mtc/MCMCModel$ExtendSimulation;', 'valueOf', 'FINISH'))
 
 	# Run the YADAS model
-	.jcall('org/drugis/common/threading/TaskUtil', 'V', 'run', 
-		.jcast(
-			.jcall(j.yadas, 'Lorg/drugis/common/threading/activity/ActivityTask;', 'getActivityTask'),
-			'org/drugis/common/threading/Task'
-		)
-	)
+	j.activityTask <- .jcall(j.yadas, 'Lorg/drugis/common/threading/activity/ActivityTask;', 'getActivityTask')
+	j.task <- .jcast(j.activityTask, 'org/drugis/common/threading/Task')
+	j.progress <- .jnew('org/drugis/common/threading/status/ActivityTaskProgressModel', j.activityTask)
 
+	pb <- txtProgressBar(style=3)
+	progress <- function() { 
+		val <- .jcall(j.progress, 'Ljava/lang/Double;', 'getProgress')
+		if(!is.null(val)) { 
+			val <- as.numeric(.jcall(val, 'D', 'doubleValue'))
+		} else { 
+			val <- NA
+		}
+		val
+	}
+	
+	.jcall('org/drugis/common/threading/TaskUtil', 'V', 'start', j.task)
+	while (.jcall('org/drugis/common/threading/TaskUtil', 'Z', 'isRunning', j.task)) {
+		Sys.sleep(0.5)
+		setTxtProgressBar(pb, progress())
+	}
+	close(pb)
 	# Generate the results
 	j.results <- .jcall(j.yadas, 'Lorg/drugis/mtc/MCMCResults;', 'getResults')
 	params <- sapply(as.list(.jcall(j.results, '[Lorg/drugis/mtc/Parameter;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
@@ -338,24 +352,24 @@ mtc.run.jags <- function (model, package=sampler, n.adapt=n.adapt, n.iter=n.iter
 }
 
 # Extract monitored vars from JAGS script (HACK)
-extractVars <- function(script) {
+vars.extract <- function(script) {
 	lines <- unlist(strsplit(script, "\n"))
 	monitors <- lines[grepl("^monitor ", lines)]
 	sub("monitor ", "", monitors)
 }
 
 # Create JAGS model, generate required texts
-generateJags <- function(jagsModel, generator, nchain) {
+generate.jags <- function(jagsModel, generator, nchain) {
 	modelTxt <- .jcall(jagsModel, "S", "modelText")
-	data <- jagsFormatToList(.jcall(jagsModel, "S", "dataText"))
-	inits <- lapply(1:nchain, function(i) {jagsFormatToList(.jcall(jagsModel, "S", "initialValuesText", generator))})
-	vars <- extractVars(.jcall(jagsModel, "S", "scriptText", "baseName", integer(1), integer(1), integer(1)))
-	analysis <- jagsFormatToList(.jcall(jagsModel, "S", "analysisText", "baseName"))
+	data <- jags.as.list(.jcall(jagsModel, "S", "dataText"))
+	inits <- lapply(1:nchain, function(i) {jags.as.list(.jcall(jagsModel, "S", "initialValuesText", generator))})
+	vars <- vars.extract(.jcall(jagsModel, "S", "scriptText", "baseName", integer(1), integer(1), integer(1)))
+	analysis <- jags.as.list(.jcall(jagsModel, "S", "analysisText", "baseName"))
 	list(model=modelTxt, data=data, inits=inits, vars=vars, analysis=analysis)
 }
 
 # Run the model using JAGS
-mtcJags <- function(mtc.model, nadapt=30000, nsamples=20000) {
+mtc.jags <- function(mtc.model, nadapt=30000, nsamples=20000) {
 	modelFile <- tempfile()
 	cat(paste(mtc.model$jags$model, "\n", collapse=""), file=modelFile)
 	data <- mtc.model$jags$data
