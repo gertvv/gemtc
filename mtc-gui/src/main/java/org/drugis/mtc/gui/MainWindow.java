@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -42,7 +43,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.xml.bind.JAXBException;
 
 import org.drugis.common.ImageLoader;
 import org.drugis.common.gui.FileLoadDialog;
@@ -319,8 +319,9 @@ public class MainWindow extends JFrame {
 	private static DataSetModel readFromStream(final InputStream is) {
 		try {
 			Network network = JAXBHandler.readNetwork(is);
+			is.close();
 			return new DataSetModel(network);
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -328,10 +329,10 @@ public class MainWindow extends JFrame {
 	private static void writeToFile(final DataSetModel model, final File file) {
 		try {
 			OutputStream os = new FileOutputStream(file);
-			JAXBHandler.writeNetwork(model.getNetwork(), os);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		} catch (JAXBException e) {
+			BufferedOutputStream bos = new BufferedOutputStream(os);
+			JAXBHandler.writeNetwork(model.getNetwork(), bos);
+			bos.close();
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

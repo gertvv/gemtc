@@ -255,8 +255,10 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 		as.integer(n.adapt), as.integer(n.iter), as.integer(thin),
 		as.integer(model$n.chain), model$var.scale)
 	j.settings <- .jcast(j.settings, 'org/drugis/mtc/MCMCSettings')
+
 	j.yadas <- .jcall('org/drugis/mtc/yadas/YadasModelFactory',
 		'Lorg/drugis/mtc/MixedTreatmentComparison;', 'buildYadasModel', model$j.network, j.model, j.settings)
+  .jcall(j.yadas, "V", 'setExtendSimulation', .jcall('org/drugis/mtc/MCMCModel$ExtendSimulation', 'Lorg/drugis/mtc/MCMCModel$ExtendSimulation;', 'valueOf', 'FINISH'))
 
 	# Run the YADAS model
 	.jcall('org/drugis/common/threading/TaskUtil', 'V', 'run', 
@@ -270,15 +272,15 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 	j.results <- .jcall(j.yadas, 'Lorg/drugis/mtc/MCMCResults;', 'getResults')
 	params <- sapply(as.list(.jcall(j.results, '[Lorg/drugis/mtc/Parameter;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
 	get.samples <- function(chain, i) {
-		.jevalArray(.jcall('org/drugis/mtc/ResultsUtil', '[D', 'getSamples', j.results, i, chain))
+    .jcall('org/drugis/mtc/util/ResultsUtil', '[D', 'getSamples', j.results, as.integer(i), as.integer(chain))
 	}
 	as.coda.chain <- function(chain) {
-		samples <- sapply(params, function(p) { get.samples(which(params == p)) })
-		as.mcmc(samples, start=n.adapt + 1, end=n.adapt + n.iter, thin=thin)
+		samples <- sapply(params, function(p) { get.samples(chain - 1, which(params == p) - 1) })
+		mcmc(samples, start=n.adapt + 1, end=n.adapt + n.iter, thin=thin)
 	}
-	lapply(1:model$n.chain, as.coda.chain)
+	
 
-	as.mcmc.list(chains)
+	as.mcmc.list(lapply(1:model$n.chain, as.coda.chain))
 }
 
 mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {

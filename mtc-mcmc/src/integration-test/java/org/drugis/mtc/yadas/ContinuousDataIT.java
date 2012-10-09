@@ -30,10 +30,10 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.drugis.common.threading.TaskUtil;
 import org.drugis.mtc.MCMCModel.ExtendSimulation;
-import org.drugis.mtc.ResultsUtil;
 import org.drugis.mtc.model.JAXBHandler;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Treatment;
+import org.drugis.mtc.util.ResultsUtil;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -34,6 +34,7 @@ import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.parameterization.InconsistencyParameter;
+import org.drugis.mtc.util.ResultsUtil;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -17,7 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.drugis.mtc;
+package org.drugis.mtc.util;
+
+import org.drugis.mtc.MCMCResults;
+import org.drugis.mtc.Parameter;
 
 public class ResultsUtil {
 	public static double[] getSamples(MCMCResults r, int p, int c) {
