@@ -19,8 +19,10 @@
 
 package org.drugis.mtc.presentation;
 
-import org.drugis.common.gui.task.TaskProgressModel;
 import org.drugis.common.threading.NullTask;
+import org.drugis.common.threading.status.AbstractProgressModel;
+import org.drugis.common.threading.status.ActivityTaskProgressModel;
+import org.drugis.common.threading.status.TaskProgressModel;
 import org.drugis.common.threading.status.TaskTerminatedModel;
 import org.drugis.mtc.MCMCModel;
 
@@ -30,13 +32,13 @@ import com.jgoodies.binding.value.ValueModel;
 public class MCMCPresentation {
 	protected final MCMCModelWrapper d_wrapper;
 	protected final String d_name;
-	protected final TaskProgressModel d_taskProgressModel;
+	protected final AbstractProgressModel d_taskProgressModel;
 	protected final ValueModel d_modelConstructionFinished;
 
 	public MCMCPresentation(final MCMCModelWrapper wrapper, final String name) {
 		d_wrapper = wrapper;
 		d_name = name;
-		d_taskProgressModel = !wrapper.isSaved() ? new TaskProgressModel(wrapper.getModel().getActivityTask()) : new TaskProgressModel(new NullTask() {
+		d_taskProgressModel = !wrapper.isSaved() ? new ActivityTaskProgressModel(wrapper.getModel().getActivityTask()) : new TaskProgressModel(new NullTask() {
 			public boolean isFinished() {
 				return true;
 			}
@@ -44,10 +46,10 @@ public class MCMCPresentation {
 				return true;
 			}
 		});
-		d_modelConstructionFinished = wrapper.isSaved() ? new ValueHolder(true) : 
+		d_modelConstructionFinished = wrapper.isSaved() ? new ValueHolder(true) :
 			new TaskTerminatedModel(wrapper.getModel().getActivityTask().getModel().getStartState());
 	}
-	
+
 	public String getName() {
 		return d_name;
 	}
@@ -60,7 +62,7 @@ public class MCMCPresentation {
 		return d_wrapper.isSaved();
 	}
 
-	public TaskProgressModel getProgressModel() {
+	public AbstractProgressModel getProgressModel() {
 		return d_taskProgressModel;
 	}
 
@@ -73,7 +75,7 @@ public class MCMCPresentation {
 	}
 
 	@Override
-	public String toString() { 
+	public String toString() {
 		return d_name;
 	}
 }
