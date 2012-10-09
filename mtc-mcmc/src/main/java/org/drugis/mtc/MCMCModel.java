@@ -30,7 +30,7 @@ public interface MCMCModel {
 	public static final String SIMULATION_CHAIN_PREFIX = "Simulation: ";
 	public static final String TUNING_CHAIN_PREFIX = "Tuning: ";
 
-	public enum ExtendSimulation { 
+	public enum ExtendSimulation {
 		WAIT, EXTEND, FINISH
 	}
 
@@ -38,23 +38,23 @@ public interface MCMCModel {
 	 * @param s Whether to finish or extend the simulation, or to wait for input.
 	 */
 	public void setExtendSimulation(ExtendSimulation s);
-	
+
 	/**
 	 * Get the ActivityTask that defines how to execute this MCMC model.
 	 */
 	public ActivityTask getActivityTask();
-	
+
 	/**
 	 * Get the simulation results. The results are always available, however they may not be filled.
 	 */
 	public MCMCResults getResults();
-	
+
 	/**
 	 * @return false if it's necessary to run() this model before calling any
 	 * getters.
 	 */
 	public boolean isReady();
-	
+
 	/**
 	 * @param it The number of tuning iterations, a multiple of 100.
 	 * @throws IllegalArgumentException if it is not a multiple of 100, or
@@ -68,8 +68,8 @@ public interface MCMCModel {
 	 * if it <= 0.
 	 */
 	public void setSimulationIterations(int it);
-	
-	/** 
+
+	/**
 	 * @return a MCMCSettings object which includes various configuration options of the simulation
 	 */
 	public MCMCSettings getSettings();
