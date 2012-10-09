@@ -256,7 +256,6 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 		as.integer(model$n.chain), model$var.scale)
 	j.settings <- .jcast(j.settings, 'org/drugis/mtc/MCMCSettings')
 
-  yadas.class <- 'org/drugis/mtc/yadas/YadasModelFactory'
 	j.yadas <- .jcall(yadas.class,
 		'Lorg/drugis/mtc/MixedTreatmentComparison;', 'buildYadasModel', model$j.network, j.model, j.settings)
   .jcall(j.yadas, "V", 'setExtendSimulation', .jcall('org/drugis/mtc/MCMCModel$ExtendSimulation', 'Lorg/drugis/mtc/MCMCModel$ExtendSimulation;', 'valueOf', 'FINISH'))
