@@ -330,10 +330,8 @@ public class MainWindow extends JFrame {
 		try {
 			OutputStream os = new FileOutputStream(file);
 			BufferedOutputStream bos = new BufferedOutputStream(os);
-
 			JAXBHandler.writeNetwork(model.getNetwork(), bos);
-			bos.flush();
-			os.close();
+			bos.close();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
