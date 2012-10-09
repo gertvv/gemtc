@@ -58,9 +58,9 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 public class SimulationComponentFactory {
-	
+
 	public static JPanel createSimulationControls(
-			final MCMCPresentation model, 
+			final MCMCPresentation model,
 			final JFrame parent,
 			final boolean withSeparator,
 			final Color noteColor,
@@ -78,19 +78,19 @@ public class SimulationComponentFactory {
 			panelRow += 2;
 		}
 		createProgressBarRow(model, parent, cc, panelBuilder, panelRow, buttons, noteColor, onReset);
-		
+
 		panelRow += 2;
 		JPanel progressGraph = null;
-		if(!model.hasSavedResults()) { 
+		if(!model.hasSavedResults()) {
 			progressGraph = new ProgressGraph(model, parent).createPanel();
-			panelBuilder.add(progressGraph, cc.xyw(1, panelRow, 5));	
+			panelBuilder.add(progressGraph, cc.xyw(1, panelRow, 5));
 		}
 		panelBuilder.add(createShowProgressGraph(model, progressGraph), cc.xy(7, panelRow - 2));
 
 		panelRow += 2;
-		if(!model.hasSavedResults()) { 
+		if(!model.hasSavedResults()) {
 			panelBuilder.add(questionPanel(model), cc.xyw(1, panelRow, 3));
-		}	
+		}
 
 		return panelBuilder.getPanel();
 	}
@@ -100,39 +100,39 @@ public class SimulationComponentFactory {
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		final JButton extendSimulationButton = createExtendSimulationButton(model);
 		final JButton stopButton = createStopButton(model.getModel().getActivityTask(), model);
-		
+
 		ValueModel inAssessConvergence = new ActivityTaskInPhase(model.getModel().getActivityTask(), MCMCModel.ASSESS_CONVERGENCE_PHASE);
 		ValueModel notTaskFinished = new BooleanNotModel(new TaskTerminatedModel(model.getModel().getActivityTask()));
-		
+
 		ValueModel shouldAssessConvergence = new BooleanAndModel(inAssessConvergence, notTaskFinished);
-		
+
 		Bindings.bind(extendSimulationButton, "enabled", shouldAssessConvergence);
 		Bindings.bind(stopButton, "enabled", shouldAssessConvergence);
 
-		
+
 		JPanel questionPanel = new JPanel(flowLayout);
 		questionPanel.add(new JLabel("Has the simulation converged?"));
 		questionPanel.add(stopButton);
 		questionPanel.add(extendSimulationButton);
-		
+
 		return questionPanel;
 	}
-	
+
 	private static void createProgressBarRow(final MCMCPresentation model,
-			final JFrame main, 
+			final JFrame main,
 			final CellConstraints cc,
-			final PanelBuilder panelBuilder, 
-			final int panelRow, 
+			final PanelBuilder panelBuilder,
+			final int panelRow,
 			final JButton[] buttons,
 			final Color noteColor,
 			final Runnable onReset) {
 		List<JButton> buttonList = new ArrayList<JButton>(Arrays.asList(buttons));
-		
+
 		buttonList.add(createStartButton(model));
 		buttonList.add(createRestartButton(model, onReset));
 
 		JPanel bb = new JPanel();
-		for(JButton b : buttonList) { 
+		for(JButton b : buttonList) {
 			bb.add(b);
 		}
 		panelBuilder.add(bb, cc.xy(1, panelRow));
@@ -156,16 +156,16 @@ public class SimulationComponentFactory {
 		return button;
 	}
 
-	
+
 	private static JButton createStartButton(final MCMCPresentation model) {
 		final JButton button = new JButton(MainWindow.IMAGELOADER.getIcon(FileNames.ICON_RUN));
 		button.setToolTipText("Run simulation");
-		
+
 		if (model.getWrapper().isSaved()) {
 			button.setEnabled(false);
 			return button;
 		}
-		
+
 		ValueModel buttonEnabledModel = new TaskStartableModel(model.getModel().getActivityTask());
 		Bindings.bind(button, "enabled", buttonEnabledModel);
 
@@ -175,15 +175,15 @@ public class SimulationComponentFactory {
 				ThreadHandler.getInstance().scheduleTask(task);
 			}
 		});
-		
+
 		return button;
 	}
-	
-	
+
+
 	private static JToggleButton createShowProgressGraph(final MCMCPresentation model, final JPanel progressGraph) {
 		final JToggleButton button = new JToggleButton(MainWindow.IMAGELOADER.getIcon(FileNames.ICON_CURVE_ORGANIZATION));
 		button.setToolTipText("Show simulation model");
-		
+
 		if (model.getWrapper().isSaved() || progressGraph == null) {
 			button.setEnabled(false);
 			return button;
@@ -195,31 +195,31 @@ public class SimulationComponentFactory {
 				progressGraph.setVisible(button.isSelected());
 			}
 		});
-		
+
 		return button;
 	}
-	
+
 	private static JButton createStopButton(final Task task, final MCMCPresentation presentation) {
 		final JButton button = new JButton(MainWindow.IMAGELOADER.getIcon(FileNames.ICON_TICK));
 		button.setText("Yes, finish");
 		button.setToolTipText("Finish the simulation");
-		
+
 		final MCMCModelWrapper wrapper = presentation.getWrapper();
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(task.isStarted()) { 
+				if(task.isStarted()) {
 					wrapper.getModel().setExtendSimulation(ExtendSimulation.FINISH);
 				}
 			}
 		});
 		return button;
-	}	
+	}
 
 	private static JButton createExtendSimulationButton(final MCMCPresentation presentation) {
 		JButton button = new JButton(MainWindow.IMAGELOADER.getIcon(FileNames.ICON_RESTART));
 		button.setText("No, extend");
 		button.setToolTipText("Extend the simulation");
-		
+
 		final MCMCModelWrapper wrapper = presentation.getWrapper();
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -32,11 +32,11 @@ import java.awt.geom.RoundRectangle2D;
 import javax.swing.SwingConstants;
 
 import org.drugis.common.gui.task.TaskProgressBar;
-import org.drugis.common.gui.task.TaskProgressModel;
 import org.drugis.common.threading.Task;
 import org.drugis.common.threading.TaskListener;
 import org.drugis.common.threading.event.TaskEvent;
 import org.drugis.common.threading.event.TaskEvent.EventType;
+import org.drugis.common.threading.status.TaskProgressModel;
 
 public class GraphProgressNode extends GraphComponent implements SwingConstants {
 	private static final Color DARK_RED = Color.decode("#C4000D");
