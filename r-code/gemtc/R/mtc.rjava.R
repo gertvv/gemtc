@@ -284,7 +284,7 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 }
 
 mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
-	if (is.na(package) || package != "BRugs") {
+	if (is.na(package) || !(package %in% c("BRugs", "R2WinBUGS"))) {
 		stop(paste("Package", package, "not supported"))
 	}
 
@@ -295,9 +295,28 @@ mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter,
 	# compile & run BUGS model
 	file.model <- tempfile()
 	cat(paste(syntax1$model, "\n", collapse=""), file=file.model)
-	data <- BRugsFit(file.model, data=syntax2$data, inits=syntax2$inits, numChains=model$n.chain,
-		parametersToSave=syntax1$vars, coda=TRUE,
-		nBurnin=n.adapt, nIter=n.iter, nThin=thin)
+	data <- if (package == 'BRugs') {
+		# Note: n.iter must be specified *excluding* the burn-in
+		BRugsFit(file.model, data=syntax2$data,
+			inits=syntax2$inits, numChains=model$n.chain,
+			parametersToSave=syntax1$vars, coda=TRUE,
+			nBurnin=n.adapt, nIter=n.iter, nThin=thin)
+	} else if (package == 'R2WinBUGS') {
+		# Note: codaPkg=TRUE does *not* return CODA objects, but rather
+		# the names of written CODA output files.
+		# Note: n.iter must be specified *including* the burn-in
+		as.mcmc.list(bugs(model.file=file.model, data=syntax2$data,
+			inits=syntax2$inits, n.chains=model$n.chain,
+			parameters.to.save=syntax1$vars, codaPkg=FALSE,
+			n.burnin=n.adapt, n.iter=n.adapt+n.iter, n.thin=thin))
+		# Note: does not always work on Unix systems due to a problem
+		# with Wine not being able to access the R temporary path.
+		# Can be fixed by creating a temporary directory in the Wine
+		# C: drive:
+		#   mkdir ~/.wine/drive_c/bugstmp
+		# And then adding these arguments to the BUGS call:
+		#   working.directory='~/.wine/drive_c/bugstmp', clearWD=TRUE
+	}
 	unlink(file.model)
 
 	# return
