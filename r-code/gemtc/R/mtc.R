@@ -35,7 +35,7 @@ relative.effect <- function(g, t1, t2) {
   p <- get.shortest.paths(as.undirected(g), t1, t2)[[1]]
   p <- matrix(c(p[1:length(p)-1], p[-1]), ncol=2)
   edgeFn <- apply(p, 1, function(row) {
-    f <- g[row[1], row[2]]
+    f <- are.connected(g, row[1], row[2])
     v1 <- if (f) row[1] else row[2]
     v2 <- if (f) row[2] else row[1]
     f <- f * 2 - 1
@@ -61,6 +61,6 @@ rank.probability <- function(data, model) {
   d <- lapply(d, function(x) { do.call(c, x) }) # bind chains together
   d <- do.call(cbind, d) # create one big matrix (treatments as columns)
   colnames(d) <- treatments
-  ranks <- apply(d, 1, rank) # rank treatments in each row
+  ranks <- apply(d, 1, rank, ties='first') # rank treatments in each row
   apply(ranks, 1, table) / (dim(ranks)[2])
 }
