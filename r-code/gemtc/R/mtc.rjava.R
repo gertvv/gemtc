@@ -55,14 +55,14 @@ mtc.data <- function(network) {
 		convertNone
 	}
 
-	getStudyMeasurements <- function(study) {
+	study.measurements <- function(study) {
 		lst <- as.list(.jcall(study, "Lcom/jgoodies/binding/list/ObservableList;", "getMeasurements"))
 		lst <- lapply(lst, function(x) { convert(list(study=study, measurement=as("Measurement", x))) })
 		do.call(function(...) { mapply(c, ..., SIMPLIFY=FALSE) }, lst)
 	}
 
 	lst <- as.list(.jcall(network, "Lcom/jgoodies/binding/list/ObservableList;", "getStudies"))
-	lst <- lapply(lst, function(x) { getStudyMeasurements(as("Study", x)) })
+	lst <- lapply(lst, function(x) { study.measurements(as("Study", x)) })
 	as.data.frame(do.call(function(...) { mapply(c, ..., SIMPLIFY=FALSE) }, lst))
 }
 
@@ -244,8 +244,12 @@ mtc.build.syntaxModel <- function(model, is.jags) {
 		model = .jcall(j.syntaxModel, "S", "modelText"),
 		data = jags.as.list(.jcall(j.syntaxModel, "S", "dataText")),
 		inits = lapply(1:model$n.chain, function(i) {jags.as.list(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
-		vars = sapply(as.list(.jcall(j.model, 'Ljava/util/List;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
+    vars = mtc.parameters(model)
 	)
+}
+
+mtc.parameters <- function(model) { 
+		sapply(as.list(.jcall(model, 'Ljava/util/List;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
 }
 
 mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
