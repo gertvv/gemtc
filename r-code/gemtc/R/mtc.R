@@ -53,14 +53,23 @@ mtc.relative.effect <- function(data, g, t1, t2) {
 }
 
 rank.probability <- function(data, model) { 
-  treatments <- as.vector(mtc.treatments(model$j.network)$id)
-  mtcGraph <- mtc.graph(model)
-  nchain <- nchain(data)
+	treatments <- as.vector(mtc.treatments(model$j.network)$id)
+	mtcGraph <- mtc.graph(model)
+	nchain <- nchain(data)
 
-  d <- lapply(treatments, function(x) { mtc.relative.effect(data, mtcGraph, x, treatments[1]) })
-  d <- lapply(d, function(x) { do.call(c, x) }) # bind chains together
-  d <- do.call(cbind, d) # create one big matrix (treatments as columns)
-  colnames(d) <- treatments
-  ranks <- apply(d, 1, rank, ties='first') # rank treatments in each row
-  apply(ranks, 1, table) / (dim(ranks)[2])
+	d <- lapply(treatments, function(x) { mtc.relative.effect(data, mtcGraph, treatments[1], x) })
+	d <- lapply(d, function(x) { do.call(c, x) }) # bind chains together
+	d <- do.call(cbind, d) # create one big matrix (treatments as columns)
+	colnames(d) <- treatments
+
+	n.iter <- dim(d)[1]
+	n.alt <- dim(d)[2]
+
+	ranks <- .C("rank_count",
+		as.double(t(d)), as.integer(n.iter), as.integer(n.alt),
+		counts=matrix(0.0, nrow=n.alt, ncol=n.alt),
+		NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
+	colnames(ranks) <- treatments
+	
+	ranks / n.iter
 }
