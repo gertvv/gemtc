@@ -1,12 +1,15 @@
+j.getId <- function(jobj) {
+	.jcall(jobj, "S", "getId")
+}
+
 # Get a list of included treatments from an org.drugis.mtc.model.Network
 mtc.treatments <- function(network) {
 	asTreatment <- function(jobj) { .jcast(jobj, "org/drugis/mtc/model/Treatment") }
-	getId <- function(treatment) { .jcall(treatment, "S", "getId") }
 	getDesc <- function(treatment) { .jcall(treatment, "S", "getDescription") }
 
 	lst <- as.list(.jcall(network, "Lcom/jgoodies/binding/list/ObservableList;", "getTreatments"))
 	lst <- lapply(lst, asTreatment)
-	ids <- sapply(lst, getId)
+	ids <- sapply(lst, j.getId)
 	as.data.frame(list(
 		id = ids,
 		description = sapply(lst, getDesc)
@@ -19,7 +22,6 @@ mtc.data <- function(network) {
 		class <- paste("org/drugis/mtc/model", type, sep="/")
 		.jcast(jobj, class)
 	}
-	getId <- function(jobj) { .jcall(jobj, "S", "getId") }
 	getBoxedInt <- function(jobj, method) {
 		.jcall(.jcall(jobj, "Ljava/lang/Integer;", method), "I", "intValue")
 	}
@@ -30,7 +32,7 @@ mtc.data <- function(network) {
 	convertNone <- function(m) {
 		t <- .jcall(m$measurement, "Lorg/drugis/mtc/model/Treatment;", "getTreatment")
 		s <- m$study
-		list(study=getId(as("Study", s)), treatment=getId(as("Treatment", t)))
+		list(study=j.getId(as("Study", s)), treatment=j.getId(as("Treatment", t)))
 	}
 	convertDichotomous <- function(m) {
 		measurement <- convertNone(m)
@@ -186,6 +188,27 @@ mtc.model <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5,
 	model
 }
 
+comparisons <- function(j.network) {
+	j.cgraph <- .jcall('org/drugis/mtc/parameterization/NetworkModel',
+		'Ledu/uci/ics/jung/graph/UndirectedGraph;',
+		'createComparisonGraph', j.network)
+
+	edges <- as.list(.jcall(j.cgraph, 'Ljava/util/Collection;', 'getEdges'))
+
+	sapply(edges, function(e) {
+		v <- as.list(.jcall(j.cgraph, 'Ljava/util/Collection;', 'getIncidentVertices', e))
+		c(j.getId(v[[1]]), j.getId(v[[2]]))
+	})
+}
+
+mtc.network.comparisons <- function(network) {
+	comparisons(mtc.network.as.java(network))
+}
+
+mtc.model.comparisons <- function(model) {
+	comparisons(model$j.network)
+}
+
 # If is.na(sampler), a sampler will be chosen based on availability, in this order:
 # JAGS, BUGS, YADAS. When the sampler is BUGS, BRugs or R2WinBUGS will be used.
 mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
@@ -217,13 +240,20 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 	}
 
 	# Switch on sampler
-	if (sampler == 'YADAS') {
+	samples <- if (sampler == 'YADAS') {
 		mtc.run.yadas(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 	} else if (sampler %in% bugs) {
 		mtc.run.bugs(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 	} else if (sampler %in% jags) {
 		mtc.run.jags(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 	}
+
+	result <- list(
+		samples=samples,
+		model=model,
+		sampler=sampler)
+	class(result) <- "mtc.result"
+	result
 }
 
 # Read JAGS/R input string format to an environment
