@@ -49,6 +49,7 @@ existing data file (e.g. those provided in the examples directory) or
 
 Versions
 --------
+0.14.1: Bugfixes and minor improvements.
 
 0.14: Moved analysis functionality from ADDIS into GeMTC GUI, enabling
 the estimation of MTC models directly within GeMTC GUI.

@@ -38,6 +38,7 @@ post-processing and analysis.
 
 Versions
 --------
+0.14.1: Bugfix and minor improvements.
 
 0.14: Moved analysis functionality from ADDIS into GeMTC GUI, enabling
 the estimation of MTC models directly within GeMTC GUI.
