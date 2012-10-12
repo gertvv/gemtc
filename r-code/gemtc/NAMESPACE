@@ -1,4 +1,11 @@
-import("rJava")
-import("rjags")
-export("mtc.model")
-export("append.derived")
+useDynLib(gemtc)
+
+import(rJava)
+import(coda)
+
+export(
+	read.mtc.network, write.mtc.network,
+	mtc.model,
+	mtc.run,
+	rank.probability)
+
