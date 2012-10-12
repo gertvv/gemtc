@@ -6,7 +6,6 @@ mvn validate || exit
 VERSION=`cat version`
 rm version
 GUIDIR=gemtc-gui-$VERSION
-CLIDIR=gemtc-cli-$VERSION
 
 GUIREADME=mtc-gui/README.md
 
@@ -57,20 +56,6 @@ mkdir $GUIDIR/example
 cp example/*.gemtc $GUIDIR/example/
 cp r-code/gemtc/R/mtc.R $GUIDIR/
 zip -r gemtc-gui-$VERSION.zip $GUIDIR
-
-# Package the CLI
-rm -Rf $CLIDIR
-mkdir $CLIDIR
-ARTIFACT=$CLIDIR/gemtc-cli-$VERSION.jar
-cp mtc-cli/target/mtc-cli-$VERSION-jar-with-dependencies.jar $ARTIFACT
-chmod a+x $ARTIFACT 
-cp LICENSE.txt $CLIDIR
-generate-readme mtc-cli/README.md $CLIDIR/README.html
-cp mtc-cli/README.md $CLIDIR/README.txt
-mkdir $CLIDIR/example
-cp example/*.gemtc $CLIDIR/example/
-cp r-code/gemtc/R/mtc.R $CLIDIR/
-zip -r gemtc-cli-$VERSION.zip $CLIDIR
 
 # Package the R package
 #cd r-code
