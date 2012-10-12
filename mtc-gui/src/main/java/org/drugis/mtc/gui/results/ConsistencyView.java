@@ -54,7 +54,7 @@ public class ConsistencyView extends JPanel {
 
 		builder.addSeparator("Relative effects", cc.xy(1, row));
 		row += 2;
-		final JTable reTable = ResultsComponentFactory.buildRelativeEffectsTable(d_treatments, d_wrapper, d_isDichotomous, true);
+		final JTable reTable = ResultsComponentFactory.buildRelativeEffectsTable(d_treatments, d_wrapper, d_isDichotomous, false);
 		builder.add(new TablePanel(reTable), cc.xy(1, row));
 		row += 2;
 
