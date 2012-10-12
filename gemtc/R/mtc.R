@@ -2,74 +2,125 @@ library('coda')
 library('igraph')
 
 ## mtc.network class methods
-print.mtc.network <- function(x, ...) {
-  cat("MTC dataset: ", x$description, "\n", sep="")
+print.mtc.network <- function(network, ...) {
+	cat("MTC dataset: ", network$description, "\n", sep="")
+}
+
+summary.mtc.network <- function(network, ...) {
+	network
+}
+
+plot.mtc.network <- function(network, ...) {
+	plot(mtc.network.graph(network), ...)
+}
+
+## mtc.model class methods
+
+print.mtc.model <- function(model, ...) {
+	cat("MTC ", model$type, " model: ", model$description, "\n", sep="")
 }
 
 summary.mtc.model <- function(model, ...) {
-  #FIXME
-  model
+	model
 }
 
 plot.mtc.model <- function(model, ...) {
-  plot(mtc.graph(model))
+	plot(mtc.model.graph(model), ...)
 }
 
-mtc.graph <- function(model) { 
-  connections <- sapply(mtc.parameters(model$j.model), function(x) { unlist(strsplit(x, '\\.')) } )[-1,]
-  treatments <-  unique(as.vector(connections))
+## mtc.result class methods
 
-  g <- graph.empty()
-  g <- g + vertex(treatments, label=treatments)
-  g <- g + edges(as.vector(connections))
-  g
+print.mtc.result <- function(result, ...) {
+	cat("MTC ", result$model$type, " results: ", result$model$description, "\n", sep="")
+}
+
+summary.mtc.result <- function(result, ...) {
+	summary(result$samples)
+}
+
+plot.mtc.result <- function(result, ...) {
+	plot(result$samples)
+}
+
+####
+
+mtc.network.graph <- function(network) {
+	comparisons <- mtc.network.comparisons(network)
+	treatments <- as.character(network$treatments$id)
+
+	g <- graph.empty()
+	g <- g + vertex(treatments, label=treatments)
+	g <- g + edges(as.vector(comparisons), arrow.mode=0)
+	g
+}
+
+mtc.model.graph <- function(model) { 
+	comparisons <- mtc.model.comparisons(model)
+	parameters <- sapply(mtc.parameters(model$j.model), function(x) { unlist(strsplit(x, '\\.')) } )[-1,]
+	treatments <- unique(as.vector(comparisons))
+
+	g <- graph.empty()
+	g <- g + vertex(treatments, label=treatments)
+	g <- g + edges(as.vector(comparisons), arrow.mode=0, color=2)
+	for (col in 1:dim(parameters)[2]) {
+		p <- parameters[,col]
+		if (are.connected(g, p[1], p[2])) {
+			g[p[1], p[2]] <- FALSE
+		} else {
+			g[p[2], p[1]] <- FALSE
+		}
+	}
+	g <- g + edges(as.vector(parameters), arrow.mode=2, color=1)
 }
 
 relative.effect <- function(g, t1, t2) { 
-  if (t1 == t2) {
-    return(function(m) {
-      mcmc(rep(0, times=(end(m) - start(m) + 1)/thin(m)),
-          start=start(m), end=end(m), thin=thin(m))
-    })
-  }
-  p <- get.shortest.paths(as.undirected(g), t1, t2)[[1]]
-  p <- matrix(c(p[1:length(p)-1], p[-1]), ncol=2)
-  edgeFn <- apply(p, 1, function(row) {
-    f <- are.connected(g, row[1], row[2])
-    v1 <- if (f) row[1] else row[2]
-    v2 <- if (f) row[2] else row[1]
-    f <- f * 2 - 1
-    edgeLabel <- paste('d', V(g)[v1]$label, V(g)[v2]$label, sep='.')
-    function(m) { f * m[,edgeLabel] }
-  })
-  function(m) {
-    data <- apply(sapply(edgeFn, function(fn) { fn(m) }), 1, sum)
-    mcmc(data, start=start(m) , end=end(m) , thin=thin(m))
-  }
+	if (t1 == t2) {
+		return(function(m) {
+			mcmc(rep(0, times=(end(m) - start(m) + 1)/thin(m)),
+					start=start(m), end=end(m), thin=thin(m))
+		})
+	}
+	p <- get.shortest.paths(as.undirected(g), t1, t2)[[1]]
+	p <- matrix(c(p[1:length(p)-1], p[-1]), ncol=2)
+	edgeFn <- apply(p, 1, function(row) {
+		f <- are.connected(g, row[1], row[2])
+		v1 <- if (f) row[1] else row[2]
+		v2 <- if (f) row[2] else row[1]
+		f <- f * 2 - 1
+		edgeLabel <- paste('d', V(g)[v1]$label, V(g)[v2]$label, sep='.')
+		function(m) { f * m[,edgeLabel] }
+	})
+	function(m) {
+		data <- apply(sapply(edgeFn, function(fn) { fn(m) }), 1, sum)
+		mcmc(data, start=start(m) , end=end(m) , thin=thin(m))
+	}
 }
 
 mtc.relative.effect <- function(data, g, t1, t2) { 
-  as.mcmc.list(lapply(data, relative.effect(g, t1, t2)))
+	as.mcmc.list(lapply(data, relative.effect(g, t1, t2)))
 }
 
 rank.probability <- function(data, model) { 
 	treatments <- as.vector(mtc.treatments(model$j.network)$id)
 	mtcGraph <- mtc.graph(model)
-	nchain <- nchain(data)
+
+	n.alt <- length(treatments)
+
+	# count ranks given a matrix d of relative effects (treatments as rows)
+	rank.count <- function(d) {
+		n.iter <- dim(d)[2]
+		.C("rank_count",
+			as.double(d), as.integer(n.iter), as.integer(n.alt),
+			counts=matrix(0.0, nrow=n.alt, ncol=n.alt),
+			NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
+	}
 
 	d <- lapply(treatments, function(x) { mtc.relative.effect(data, mtcGraph, treatments[1], x) })
-	d <- lapply(d, function(x) { do.call(c, x) }) # bind chains together
-	d <- do.call(cbind, d) # create one big matrix (treatments as columns)
-	colnames(d) <- treatments
-
-	n.iter <- dim(d)[1]
-	n.alt <- dim(d)[2]
-
-	ranks <- .C("rank_count",
-		as.double(t(d)), as.integer(n.iter), as.integer(n.alt),
-		counts=matrix(0.0, nrow=n.alt, ncol=n.alt),
-		NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
+	counts <- lapply(1:nchain(data), function(chain) { rank.count(do.call(rbind, lapply(d, function(x) { x[[chain]] }))) })
+	ranks <- Reduce(function(a, b) { a + b}, counts)
 	colnames(ranks) <- treatments
-	
+
+	n.iter <- nchain(data) * (end(data) - start(data) + 1) / thin(data)
+
 	ranks / n.iter
 }
