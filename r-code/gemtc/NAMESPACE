@@ -5,7 +5,10 @@ import(coda)
 
 export(
 	read.mtc.network, write.mtc.network,
+	print.mtc.network, plot.mtc.network, summary.mtc.network,
 	mtc.model,
+	print.mtc.model, plot.mtc.model, summary.mtc.model,
 	mtc.run,
+	print.mtc.result, plot.mtc.result, summary.mtc.result,
 	rank.probability)
 
