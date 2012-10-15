@@ -133,8 +133,9 @@ public class MainWindow extends JFrame {
 					try {
 						main.addModel(loadModel(args[0]));
 					} catch (Exception e) {
-
 					}
+				} else {
+					main.addModel(new DataSetModel());
 				}
 
 				// Window disposal debug
