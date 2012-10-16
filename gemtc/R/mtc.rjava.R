@@ -274,7 +274,7 @@ mtc.build.syntaxModel <- function(model, is.jags) {
 		model = .jcall(j.syntaxModel, "S", "modelText"),
 		data = jags.as.list(.jcall(j.syntaxModel, "S", "dataText")),
 		inits = lapply(1:model$n.chain, function(i) {jags.as.list(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
-    vars = mtc.parameters(model)
+    vars = mtc.parameters(model$j.model)
 	)
 }
 
