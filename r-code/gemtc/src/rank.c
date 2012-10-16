@@ -41,10 +41,10 @@ void rank_count(
 		double *cData) {
 	Matrix c = { cData, *nAlt, *nAlt };
 
-	double const *t; // alternative values
+	double const *t = sData; // alternative values
 	int r[*nAlt]; // alternative ranks
 	for (int k = 0; k < *nIter; ++k) {
-		t = sData + k * *nAlt;
+		t += *nAlt;
 
 		rank(t, r, *nAlt); // rank the alternatives
 
