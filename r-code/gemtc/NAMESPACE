@@ -10,5 +10,5 @@ export(
 	print.mtc.model, plot.mtc.model, summary.mtc.model,
 	mtc.run,
 	print.mtc.result, plot.mtc.result, summary.mtc.result,
-	rank.probability)
+	mtc.relative.effect, rank.probability)
 
