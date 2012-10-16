@@ -274,7 +274,7 @@ mtc.build.syntaxModel <- function(model, is.jags) {
 		model = .jcall(j.syntaxModel, "S", "modelText"),
 		data = jags.as.list(.jcall(j.syntaxModel, "S", "dataText")),
 		inits = lapply(1:model$n.chain, function(i) {jags.as.list(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
-    vars = mtc.parameters(model$j.model)
+    vars = c(mtc.parameters(model$j.model), c("sd.d", if (model$type == 'Inconsistency') "sd.w"))
 	)
 }
 
@@ -385,34 +385,3 @@ mtc.run.jags <- function (model, package=sampler, n.adapt=n.adapt, n.iter=n.iter
 	coda.samples(jags, variable.names=syntax$vars, n.iter=n.iter, thin=thin)
 }
 
-# Extract monitored vars from JAGS script (HACK)
-vars.extract <- function(script) {
-	lines <- unlist(strsplit(script, "\n"))
-	monitors <- lines[grepl("^monitor ", lines)]
-	sub("monitor ", "", monitors)
-}
-
-# Create JAGS model, generate required texts
-generate.jags <- function(jagsModel, generator, nchain) {
-	modelTxt <- .jcall(jagsModel, "S", "modelText")
-	data <- jags.as.list(.jcall(jagsModel, "S", "dataText"))
-	inits <- lapply(1:nchain, function(i) {jags.as.list(.jcall(jagsModel, "S", "initialValuesText", generator))})
-	vars <- vars.extract(.jcall(jagsModel, "S", "scriptText", "baseName", integer(1), integer(1), integer(1)))
-	analysis <- jags.as.list(.jcall(jagsModel, "S", "analysisText", "baseName"))
-	list(model=modelTxt, data=data, inits=inits, vars=vars, analysis=analysis)
-}
-
-# Run the model using JAGS
-mtc.jags <- function(mtc.model, nadapt=30000, nsamples=20000) {
-	modelFile <- tempfile()
-	cat(paste(mtc.model$jags$model, "\n", collapse=""), file=modelFile)
-	data <- mtc.model$jags$data
-	inits <- mtc.model$jags$inits
-	jags <- jags.model(modelFile, data=data, inits=inits, nchain=length(inits), n.adapt=nadapt)
-	unlink(modelFile)
-	data <- coda.samples(jags, variable.names=mtc.model$jags$vars, n.iter=nsamples)
-	for(i in 1:length(data)) { 
-		colnames(data[[i]]) <- mtc.model$jags$vars
-	}
-	data
-}
