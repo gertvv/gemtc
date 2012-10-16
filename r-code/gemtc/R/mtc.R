@@ -54,23 +54,23 @@ mtc.network.graph <- function(network) {
 	g
 }
 
-mtc.model.graph <- function(model) { 
-	comparisons <- mtc.model.comparisons(model)
+mtc.spanning.tree <- function(model) {
 	parameters <- sapply(mtc.parameters(model$j.model), function(x) { unlist(strsplit(x, '\\.')) } )[-1,]
-	treatments <- unique(as.vector(comparisons))
+	treatments <- unique(as.vector(parameters))
 
 	g <- graph.empty()
 	g <- g + vertex(treatments, label=treatments)
-	g <- g + edges(as.vector(comparisons), arrow.mode=0, color=2)
-	for (col in 1:dim(parameters)[2]) {
-		p <- parameters[,col]
-		if (are.connected(g, p[1], p[2])) {
-			g[p[1], p[2]] <- FALSE
-		} else {
-			g[p[2], p[1]] <- FALSE
-		}
-	}
 	g <- g + edges(as.vector(parameters), arrow.mode=2, color=1)
+	g
+}
+
+mtc.model.graph <- function(model) { 
+	comparisons <- mtc.model.comparisons(model)
+	g <- mtc.spanning.tree(model)
+	comparisons <- unlist(
+		apply(comparisons, 2,
+			function(x) { if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x }))
+	g <- g + edges(as.vector(comparisons), arrow.mode=0, color=2)
 }
 
 relative.effect <- function(g, t1, t2) { 
@@ -102,7 +102,7 @@ mtc.relative.effect <- function(data, g, t1, t2) {
 
 rank.probability <- function(data, model) { 
 	treatments <- as.vector(mtc.treatments(model$j.network)$id)
-	mtcGraph <- mtc.graph(model)
+	mtcGraph <- mtc.spanning.tree(model)
 
 	n.alt <- length(treatments)
 
