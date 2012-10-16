@@ -72,8 +72,8 @@ mtc.model.graph <- function(model) {
 	g <- g + edges(as.vector(comparisons), arrow.mode=0, color=2)
 }
 
-relative.effect <- function(g, t1, t2=c()) {
-	if((is.na(t2) || length(t2) == 0) && length(t1) == 1) {
+relative.effect <- function(g, t1, t2) {
+	if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
 		t2 <- V(g)[V(g)$name != t1]$name
 	} else { 
 		if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
@@ -96,8 +96,9 @@ relative.effect <- function(g, t1, t2=c()) {
 	paths
 }
 
-mtc.relative.effect <- function(result, t1, t2) {
-	g <- mtc.spanning.tree(mtc.parameters(model$j.model))
+mtc.relative.effect <- function(result, t1, t2 = c()) {
+	if(agrep("consistency", tolower(result$model$type)) == 0) stop("Cannot apply relative.effect to this model")
+	g <- mtc.spanning.tree(mtc.parameters(result$model$j.model))
 	effects <- relative.effect(g, t1, t2)
 	effects <- rbind(effects, rep(0, times=ncol(effects))) # sd.d column
 	as.mcmc.list(lapply(result$samples, function(chain) { 
