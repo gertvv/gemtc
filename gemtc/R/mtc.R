@@ -96,11 +96,23 @@ relative.effect <- function(g, t1, t2) {
 	paths
 }
 
-mtc.relative.effect <- function(result, t1, t2 = c()) {
-	if(agrep("consistency", tolower(result$model$type)) == 0) stop("Cannot apply relative.effect to this model")
+mtc.relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
+	if(result$model$type != "Consistency") stop("Cannot apply relative.effect to this model")
 	g <- mtc.spanning.tree(mtc.parameters(result$model$j.model))
 	effects <- relative.effect(g, t1, t2)
-	effects <- rbind(effects, rep(0, times=ncol(effects))) # sd.d column
+	#effects <- rbind(effects, rep(0, times=ncol(effects))) # sd.d column
+	nOut <- ncol(effects)
+	nIn <- nrow(effects)
+	nExtra <- ncol(result$samples[[1]]) - nIn
+
+	effects <- rbind(effects, matrix(0, nrow=nExtra, ncol=nOut))
+	if (preserve.extra) {
+		allNames <- c(colnames(effects), colnames(result$samples[[1]])[nIn+(1:nExtra)])
+		effects <- cbind(effects, 
+			rbind(matrix(0, nrow=nIn, ncol=nExtra), diag(nExtra)))
+		colnames(effects) <- allNames
+	}
+
 	as.mcmc.list(lapply(result$samples, function(chain) { 
 		mcmc(chain %*% effects, start=start(chain), end=end(chain), thin=thin(chain))
 	}))
@@ -124,12 +136,12 @@ rank.probability <- function(result) {
 			NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
 	}
 
-	d <- lapply(treatments, function(x) { mtc.relative.effect(data, mtcGraph, treatments[1], x) })
-	counts <- lapply(1:nchain(data), function(chain) { rank.count(do.call(rbind, lapply(d, function(x) { x[[chain]] }))) })
-	ranks <- Reduce(function(a, b) { a + b}, counts)
+	d <- mtc.relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)
+	counts <- lapply(d, function(chain) { rank.count(t(chain)) })
+	ranks <- Reduce(function(a, b) { a + b }, counts)
 	colnames(ranks) <- treatments
 
 	n.iter <- nchain(data) * (end(data) - start(data) + 1) / thin(data)
 
-	ranks / n.iter
+	t(ranks / n.iter)
 }
