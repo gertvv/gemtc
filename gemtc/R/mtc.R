@@ -27,7 +27,6 @@ summary.mtc.model <- function(model, ...) {
 plot.mtc.model <- function(model, ...) {
 	plot(mtc.model.graph(model), ...)
 }
-
 ## mtc.result class methods
 
 print.mtc.result <- function(result, ...) {
@@ -40,6 +39,10 @@ summary.mtc.result <- function(result, ...) {
 
 plot.mtc.result <- function(result, ...) {
 	plot(result$samples)
+}
+
+as.mcmc.list.mtc.result <- function(result, ...) {
+	result$samples
 }
 
 ####
@@ -72,7 +75,7 @@ mtc.model.graph <- function(model) {
 	g <- g + edges(as.vector(comparisons), arrow.mode=0, color=2)
 }
 
-relative.effect <- function(g, t1, t2) {
+tree.relative.effect <- function(g, t1, t2) {
 	if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
 		t2 <- V(g)[V(g)$name != t1]$name
 	} else { 
@@ -96,15 +99,17 @@ relative.effect <- function(g, t1, t2) {
 	paths
 }
 
-mtc.relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
+relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 	if(result$model$type != "Consistency") stop("Cannot apply relative.effect to this model")
+
+	# Build relative effect transformation matrix
 	g <- mtc.spanning.tree(mtc.parameters(result$model$j.model))
-	effects <- relative.effect(g, t1, t2)
-	#effects <- rbind(effects, rep(0, times=ncol(effects))) # sd.d column
+	effects <- tree.relative.effect(g, t1, t2)
+
+	# Add rows/columns for parameters that are not relative effects
 	nOut <- ncol(effects)
 	nIn <- nrow(effects)
 	nExtra <- ncol(result$samples[[1]]) - nIn
-
 	effects <- rbind(effects, matrix(0, nrow=nExtra, ncol=nOut))
 	if (preserve.extra) {
 		allNames <- c(colnames(effects), colnames(result$samples[[1]])[nIn+(1:nExtra)])
@@ -113,6 +118,7 @@ mtc.relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 		colnames(effects) <- allNames
 	}
 
+	# Apply tranformation to each chain
 	as.mcmc.list(lapply(result$samples, function(chain) { 
 		mcmc(chain %*% effects, start=start(chain), end=end(chain), thin=thin(chain))
 	}))
@@ -136,7 +142,7 @@ rank.probability <- function(result) {
 			NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
 	}
 
-	d <- mtc.relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)
+	d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)
 	counts <- lapply(d, function(chain) { rank.count(t(chain)) })
 	ranks <- Reduce(function(a, b) { a + b }, counts)
 	colnames(ranks) <- treatments
