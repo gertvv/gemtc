@@ -47,62 +47,83 @@ plot.mtc.result <- function(result, ...) {
 mtc.network.graph <- function(network) {
 	comparisons <- mtc.network.comparisons(network)
 	treatments <- as.character(network$treatments$id)
+	graph.create(treatments, comparisons, arrow.mode=0)
+}
 
+mtc.spanning.tree <- function(parameters) {
+	parameters <- sapply(parameters, function(x) { unlist(strsplit(x, '\\.')) } )[-1,]
+	treatments <- unique(as.vector(parameters))
+	graph.create(treatments, parameters, arrow.mode=2, color=1)
+}
+
+graph.create <- function(v, e, ...) {
 	g <- graph.empty()
-	g <- g + vertex(treatments, label=treatments)
-	g <- g + edges(as.vector(comparisons), arrow.mode=0)
+	g <- g + vertex(v, label=v)
+	g <- g + edges(as.vector(e), ...)
 	g
 }
 
 mtc.model.graph <- function(model) { 
 	comparisons <- mtc.model.comparisons(model)
-	parameters <- sapply(mtc.parameters(model$j.model), function(x) { unlist(strsplit(x, '\\.')) } )[-1,]
-	treatments <- unique(as.vector(comparisons))
-
-	g <- graph.empty()
-	g <- g + vertex(treatments, label=treatments)
+	g <- mtc.spanning.tree(mtc.parameters(model$j.model))
+	comparisons <- unlist(
+		apply(comparisons, 2,
+			function(x) { if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x }))
 	g <- g + edges(as.vector(comparisons), arrow.mode=0, color=2)
-	for (col in 1:dim(parameters)[2]) {
-		p <- parameters[,col]
-		if (are.connected(g, p[1], p[2])) {
-			g[p[1], p[2]] <- FALSE
-		} else {
-			g[p[2], p[1]] <- FALSE
-		}
-	}
-	g <- g + edges(as.vector(parameters), arrow.mode=2, color=1)
 }
 
-relative.effect <- function(g, t1, t2) { 
-	if (t1 == t2) {
-		return(function(m) {
-			mcmc(rep(0, times=(end(m) - start(m) + 1)/thin(m)),
-					start=start(m), end=end(m), thin=thin(m))
+relative.effect <- function(g, t1, t2) {
+	if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
+		t2 <- V(g)[V(g)$name != t1]$name
+	} else { 
+		if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
+		if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
+	}
+	pairs <- matrix(c(t1, t2), ncol=2)
+	paths <- apply(pairs, 1, function(rel) {
+		p <- unlist(get.shortest.paths(g, rel[1], rel[2], mode='all'))
+		p <- matrix(c(p[1:length(p)-1], p[-1]), ncol=2)
+		edges <- sapply(E(g), function(e) {
+			v <- get.edge(g, e)
+			if (sum(p[,1] == v[1] & p[,2] == v[2])) 1
+			else if (sum(p[,1] == v[2] & p[,2] == v[1])) -1
+			else 0
 		})
-	}
-	p <- get.shortest.paths(as.undirected(g), t1, t2)[[1]]
-	p <- matrix(c(p[1:length(p)-1], p[-1]), ncol=2)
-	edgeFn <- apply(p, 1, function(row) {
-		f <- are.connected(g, row[1], row[2])
-		v1 <- if (f) row[1] else row[2]
-		v2 <- if (f) row[2] else row[1]
-		f <- f * 2 - 1
-		edgeLabel <- paste('d', V(g)[v1]$label, V(g)[v2]$label, sep='.')
-		function(m) { f * m[,edgeLabel] }
 	})
-	function(m) {
-		data <- apply(sapply(edgeFn, function(fn) { fn(m) }), 1, sum)
-		mcmc(data, start=start(m) , end=end(m) , thin=thin(m))
+	colnames(paths) <-  apply(pairs, 1, function(pair) { 
+		paste('d', pair[1], pair[2], sep='.')
+	})
+	paths
+}
+
+mtc.relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
+	if(result$model$type != "Consistency") stop("Cannot apply relative.effect to this model")
+	g <- mtc.spanning.tree(mtc.parameters(result$model$j.model))
+	effects <- relative.effect(g, t1, t2)
+	#effects <- rbind(effects, rep(0, times=ncol(effects))) # sd.d column
+	nOut <- ncol(effects)
+	nIn <- nrow(effects)
+	nExtra <- ncol(result$samples[[1]]) - nIn
+
+	effects <- rbind(effects, matrix(0, nrow=nExtra, ncol=nOut))
+	if (preserve.extra) {
+		allNames <- c(colnames(effects), colnames(result$samples[[1]])[nIn+(1:nExtra)])
+		effects <- cbind(effects, 
+			rbind(matrix(0, nrow=nIn, ncol=nExtra), diag(nExtra)))
+		colnames(effects) <- allNames
 	}
+
+	as.mcmc.list(lapply(result$samples, function(chain) { 
+		mcmc(chain %*% effects, start=start(chain), end=end(chain), thin=thin(chain))
+	}))
 }
 
-mtc.relative.effect <- function(data, g, t1, t2) { 
-	as.mcmc.list(lapply(data, relative.effect(g, t1, t2)))
-}
+rank.probability <- function(result) {
+	model <- result$model
+	data <- result$samples
 
-rank.probability <- function(data, model) { 
 	treatments <- as.vector(mtc.treatments(model$j.network)$id)
-	mtcGraph <- mtc.graph(model)
+	mtcGraph <- mtc.spanning.tree(mtc.parameters(model$j.model))
 
 	n.alt <- length(treatments)
 
@@ -115,12 +136,12 @@ rank.probability <- function(data, model) {
 			NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
 	}
 
-	d <- lapply(treatments, function(x) { mtc.relative.effect(data, mtcGraph, treatments[1], x) })
-	counts <- lapply(1:nchain(data), function(chain) { rank.count(do.call(rbind, lapply(d, function(x) { x[[chain]] }))) })
-	ranks <- Reduce(function(a, b) { a + b}, counts)
+	d <- mtc.relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)
+	counts <- lapply(d, function(chain) { rank.count(t(chain)) })
+	ranks <- Reduce(function(a, b) { a + b }, counts)
 	colnames(ranks) <- treatments
 
 	n.iter <- nchain(data) * (end(data) - start(data) + 1) / thin(data)
 
-	ranks / n.iter
+	t(ranks / n.iter)
 }
