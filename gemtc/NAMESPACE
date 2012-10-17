@@ -1,7 +1,7 @@
 useDynLib(gemtc)
 
-import(rJava)
 import(coda)
+import(meta)
 
 export(
 	read.mtc.network, write.mtc.network,
