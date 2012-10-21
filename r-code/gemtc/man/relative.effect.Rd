@@ -15,14 +15,8 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
   \item{t2}{A list of treatments to calculate the relative effect against a baseline from. If none supplied or an empty list all relevant treatments will be calculated}
   \item{preserve.extra}{Indicates whether to preserve the extra fields such as the sd.w and sd.d}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 	Returns a 'mcmc.list' containing objects of type 'mcmc' for each of chains for the relative effects.
-}
-\references{
-%% ~put references to the literature/web site here ~
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
