@@ -53,8 +53,18 @@ mtc.network.graph <- function(network) {
 	graph.create(treatments, comparisons, arrow.mode=0)
 }
 
+filter.parameters <- function(parameters, criterion) { 
+	parameters <- sapply(parameters, function(x) { 
+	path <- unlist(strsplit(x, '\\.')) 
+	if(criterion(path)) { 
+		path[-1]
+	}})
+	parameters <- parameters[!sapply(parameters, is.null)]
+	unlist(parameters)
+}
+
 mtc.spanning.tree <- function(parameters) {
-	parameters <- sapply(parameters, function(x) { unlist(strsplit(x, '\\.')) } )[-1,]
+	parameters <- filter.parameters(parameters, function(x) { x[1] == 'd' })
 	treatments <- unique(as.vector(parameters))
 	graph.create(treatments, parameters, arrow.mode=2, color=1)
 }
