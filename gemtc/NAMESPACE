@@ -4,7 +4,7 @@ import(coda)
 import(meta)
 
 export(
-	read.mtc.network, write.mtc.network,
+	read.mtc.network, write.mtc.network, mtc.network,
 	print.mtc.network, plot.mtc.network, summary.mtc.network,
 	mtc.model,
 	print.mtc.model, plot.mtc.model, summary.mtc.model,
