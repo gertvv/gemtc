@@ -82,6 +82,15 @@ read.mtc.network <- function(file) {
 	network
 }
 
+mtc.network <- function(description, treatments, data) { 
+  network <- list(
+    description=description,
+    treatments=treatments,
+    data=data)
+  class(network) <- "mtc.network"
+  network
+}
+
 mtc.network.as.java <- function(network) {
 	treatment <- function(row) {
 		treatment <- .jnew("org/drugis/mtc/model/Treatment", row['id'], row['description'])
