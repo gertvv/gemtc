@@ -1,0 +1,41 @@
+\encoding{utf8}
+\name{read.mtc.network}
+\alias{mtc.network}
+\alias{read.mtc.network}
+\alias{summary.mtc.network}
+\alias{plot.mtc.network}
+\alias{print.mtc.network}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{Reading GeMTC Network files}
+\description{
+The function mtc.read.network can be used to read existing GeMTC files. See http://drugis.org/gemtc for creating such files using a GUI. 
+}
+
+\usage{
+read.mtc.network(file)
+}
+
+\arguments{
+	\item{file}{Path to a valid GeMTC file}
+}
+\value{
+	Reading a network will return an object of class 'mtc.network'. This is a list with the following elements:
+	\item{description}{A short description of the model} 
+	\item{treatments}{A list of included treatments in the network}
+	\item{data}{A list of dataframes containing a study, treatment combination with an amount of responders and sample size for dichotomous networks and a mean, std.dev. and sample size for continuous networks}
+}
+\author{Gert van Valkenhoef, Joël Kuiper}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+\examples{
+	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
+	network <- read.mtc.network(file)
+	print(network$treatments)
+	## 		id           description
+	## 	A  A            No Contact
+	## 	B  B             Self-help
+	## 	C  C Individual Counseling
+	## 	D  D      Group Counseling
+	plot(network)
+	print(network)
+}
