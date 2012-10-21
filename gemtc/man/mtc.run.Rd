@@ -30,10 +30,6 @@ An object of class 'mtc.result'. This is a list with the following elements:
 
 
 \author{Gert van Valkenhoef, Joël Kuiper}
-\note{
-%%	~~further notes~~
-}
-
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{\code{\link{mtc.model}}}
@@ -65,5 +61,5 @@ An object of class 'mtc.result'. This is a list with the following elements:
 	## d.A.C  0.3804 0.6762 0.8280 0.9936 1.338
 	## d.A.D  0.2591 0.8082 1.0880 1.3882 2.027
 	## sd.d   0.5523 0.7154 0.8280 0.9547 1.282
-	plot{results}
+	plot(results)
 }

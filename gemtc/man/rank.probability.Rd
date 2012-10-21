@@ -12,9 +12,6 @@ rank.probability(result)
 \arguments{
   \item{result}{Object of S3 class 'mtc.result' to create the rank probability table for}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{A matrix with the treatments as rows and the ranks as columns}
 
 \author{Gert van Valkenhoef, Joël Kuiper}

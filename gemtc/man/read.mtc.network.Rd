@@ -1,6 +1,5 @@
 \encoding{utf8}
 \name{read.mtc.network}
-\alias{mtc.network}
 \alias{read.mtc.network}
 \alias{summary.mtc.network}
 \alias{plot.mtc.network}
@@ -25,6 +24,7 @@ read.mtc.network(file)
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
+\seealso{\code{\link{mtc.network}}}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 \examples{
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
