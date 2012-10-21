@@ -3,9 +3,9 @@
 \alias{write.mtc.network}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Writing GeMTC Network files}
-\description{
-The function mtc.write.network can be used to write a network to a GeMTC file. See http://drugis.org/gemtc for interacting with such files using a GUI. 
-}
+\description{The function mtc.write.network can be used to write a network to
+a GeMTC file. See http://drugis.org/gemtc for interacting with such files using
+a GUI.}
 
 \usage{
 write.mtc.network(network, file = "")

@@ -7,9 +7,9 @@
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Running an MTC Model}
-\description{
-The function 'mtc.run' is used to generate samples from a object of type 'mtc.model' using a MCMC sampler. The resulting 'mtc.results' object can be used for further analysis of the dataset.
-}
+\description{ The function 'mtc.run' is used to generate samples from a object
+of type 'mtc.model' using a MCMC sampler. The resulting 'mtc.results' object can
+be used for further analysis of the dataset.  }
 \usage{
 mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
 }

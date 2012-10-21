@@ -10,7 +10,7 @@
 Comparison model based upon a S3 mtc.network object.
 
 A mtc.model object may be visualized by the generic plot function or summarized
-bythe generic summary function.  }
+by the generic summary function.}
 \usage{
 mtc.model(network, type = "Consistency", factor = 2.5, n.chain = 4)
 }

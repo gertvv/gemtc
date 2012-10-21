@@ -3,8 +3,7 @@
 \alias{relative.effect}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculating relative effects}
-\description{
-Calculates the relative effect of a treatment against a baseline. 
+\description{Calculates the relative effect of a treatment against a baseline. 
 }
 \usage{
 relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
