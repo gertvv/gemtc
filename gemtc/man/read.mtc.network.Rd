@@ -7,9 +7,8 @@
 \alias{print.mtc.network}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Reading GeMTC Network files}
-\description{
-The function mtc.read.network can be used to read existing GeMTC files. See http://drugis.org/gemtc for creating such files using a GUI. 
-}
+\description{ The function mtc.read.network can be used to read existing GeMTC
+files. See http://drugis.org/gemtc for creating such files using a GUI.  }
 
 \usage{
 read.mtc.network(file)
@@ -22,7 +21,7 @@ read.mtc.network(file)
 	Reading a network will return an object of class 'mtc.network'. This is a list with the following elements:
 	\item{description}{A short description of the model} 
 	\item{treatments}{A list of included treatments in the network}
-	\item{data}{A list of dataframes containing a study, treatment combination with an amount of responders and sample size for dichotomous networks and a mean, std.dev. and sample size for continuous networks}
+	\item{data}{A data frame of lists containing a study, treatment combination with an amount of responders and sample size for dichotomous networks and a mean, std.dev. and sample size for continuous networks}
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 

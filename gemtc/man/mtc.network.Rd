@@ -1,67 +1,42 @@
+\encoding{utf8}
 \name{mtc.network}
 \alias{mtc.network}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-%%  ~~function to do ... ~~
-}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\title{Constructing an MTC network}
+\description{Creates an network of class 'mtc.network' based upon treatments and
+data.}
 \usage{
 mtc.network(description, treatments, data)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{description}{
-%%     ~~Describe \code{description} here~~
-}
-  \item{treatments}{
-%%     ~~Describe \code{treatments} here~~
-}
-  \item{data}{
-%%     ~~Describe \code{data} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
+	\item{description}{Short description describing the subject of the network}
+	\item{treatments}{A list of treatments consisting of a vector of ids and descriptions}
+	\item{data}{A data frame of lists containing a study, treatment combination with an amount of responders and sample size for dichotomous networks and a mean, std.dev. and sample size for continuous networks}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
+A object of the class 'mtc.network'
+%%	~Describe the value returned
+%%	If it is a LIST, use
+%%	\item{comp1 }{Description of 'comp1'}
+%%	\item{comp2 }{Description of 'comp2'}
 %% ...
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+\author{Gert van Valkenhoef, Joël Kuiper}
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{read.mtc.network}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (description, treatments, data) 
-{
-    network <- list(description = description, treatments = treatments, 
-        data = data)
-    class(network) <- "mtc.network"
-    network
-  }
+treatments <- list( c('id' = 'A', 'description' = 'tA'),
+										c('id' = 'B', 'description' = 'tB'),
+										c('id' = 'C', 'description' = 'tC'))
+data <- list( c('study' = '01', 'treatment' = 'A', 'responders'=2, 'sampleSize'=100),
+							c('study' = '01', 'treatment' = 'B', 'responders'=5, 'sampleSize'=100),
+							c('study' = '02', 'treatment' = 'B', 'responders'=6, 'sampleSize'=110),
+							c('study' = '02', 'treatment' = 'C', 'responders'=1, 'sampleSize'=110),
+							c('study' = '03', 'treatment' = 'A', 'responders'=3, 'sampleSize'=60),
+							c('study' = '03', 'treatment' = 'C', 'responders'=4, 'sampleSize'=80),
+							c('study' = '03', 'treatment' = 'B', 'responders'=7, 'sampleSize'=80))
+network <- mtc.network("Example", treatments, data)
+plot(network)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
