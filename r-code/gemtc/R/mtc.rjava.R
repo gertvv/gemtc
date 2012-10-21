@@ -135,12 +135,12 @@ write.mtc.network <- function(network, file="") {
 	os <- .jcast(bos, "java/io/OutputStream")
 	.jcall("org/drugis/mtc/model/JAXBHandler", "V",
 		"writeNetwork", j.network, os)
-	cat(.jcall(bos, "S", "toString"))
+	write(.jcall(bos, "S", "toString"), file=file)
 }
 
 # Create the specific model (consistency/inconsistency/nodesplit)
 # FIXME: support nodesplit
-mtc.model <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5, n.chain=4) {
+mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 	typeMap <- c(
 		'Consistency'='Consistency',
 		'consistency'='Consistency',
