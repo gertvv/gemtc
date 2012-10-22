@@ -347,7 +347,7 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 	as.mcmc.list(lapply(1:model$n.chain, as.coda.chain))
 }
 
-mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
+mtc.run.bugs <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
 	if (is.na(package) || !(package %in% c("BRugs", "R2WinBUGS"))) {
 		stop(paste("Package", package, "not supported"))
 	}
@@ -387,7 +387,7 @@ mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter,
 	data
 }
 
-mtc.run.jags <- function (model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
+mtc.run.jags <- function (model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
 	# generate JAGS model
 	syntax <- mtc.build.syntaxModel(model, is.jags=TRUE)
 
