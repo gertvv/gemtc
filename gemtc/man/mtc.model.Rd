@@ -33,10 +33,10 @@ mtc.model(network, type = "Consistency", factor = 2.5, n.chain = 4)
   \item{var.scale}{The previously suplied scaling factor}
 }
 
-\section{Visualization}{Calling the generic plot method on an mtc.model object
+\section{Visualization}{Calling the generic plot method on an S3 'mtc.model' object
 will show a graph with the treatments as vertices and the comparisons as edges.
 The comparisons between basic parameters are shown as a directed acyclic graph
-(DAG) in an alternate style.}
+(DAG) in green, for inconsistency models the added w.factors are shown in red.}
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 %% ~Make other sections like Warning with \section{Warning }{....} ~

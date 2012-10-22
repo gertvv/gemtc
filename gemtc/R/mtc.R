@@ -59,12 +59,11 @@ filter.parameters <- function(parameters, criterion) {
 	if(criterion(path)) { 
 		path[-1]
 	}})
-	parameters <- parameters[!sapply(parameters, is.null)]
-	unlist(parameters)
+	parameters[!sapply(parameters, is.null)]
 }
 
 mtc.spanning.tree <- function(parameters) {
-	parameters <- filter.parameters(parameters, function(x) { x[1] == 'd' })
+	parameters <- unlist(filter.parameters(parameters, function(x) { x[1] == 'd' }))
 	treatments <- unique(as.vector(parameters))
 	graph.create(treatments, parameters, arrow.mode=2, color=1)
 }
@@ -76,13 +75,26 @@ graph.create <- function(v, e, ...) {
 	g
 }
 
+w.factors <- function(parameters) {
+	lapply(filter.parameters(parameters, function(x) { x[1] == 'w' }),
+	function(x) {
+		c(x[length(x)], x[1])
+	})
+}
+
 mtc.model.graph <- function(model) { 
 	comparisons <- mtc.model.comparisons(model)
-	g <- mtc.spanning.tree(mtc.parameters(model$j.model))
-	comparisons <- unlist(
-		apply(comparisons, 2,
-			function(x) { if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x }))
-	g <- g + edges(as.vector(comparisons), arrow.mode=0, color=2)
+	parameters <- mtc.parameters(model$j.model)
+	g <- mtc.spanning.tree(parameters)
+	g <- g + edges(w.factors(parameters), arrow.mode=2, color=2)
+	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, color=3)
+	g
+}
+
+# filters list of comparison by edges that are not yet present in graph g 
+non.edges <- function(g, comparisons) { 
+	apply(comparisons, 2,
+		function(x) { if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x })
 }
 
 tree.relative.effect <- function(g, t1, t2) {
@@ -103,7 +115,7 @@ tree.relative.effect <- function(g, t1, t2) {
 			else 0
 		})
 	})
-	colnames(paths) <-  apply(pairs, 1, function(pair) { 
+	colnames(paths) <-	apply(pairs, 1, function(pair) { 
 		paste('d', pair[1], pair[2], sep='.')
 	})
 	paths
