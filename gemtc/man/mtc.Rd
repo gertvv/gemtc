@@ -30,28 +30,26 @@ meta-analysis, and then only when there are closed loops in the evidence
 structure. 
 
 For more information about assessing inconsistency, see G. Lu and A.
-E. Ades (2006).
+E. Ades (2006).}
 
-\section{Consistency models}{ 
-If there is no relevant inconsistency in the
-evidence, a consistency model can be used to draw conclusions about the relative
-effect of the included treatments. 
+\section{Consistency models}{ If there is no relevant inconsistency in the
+  evidence, a consistency model can be used to draw conclusions about the
+  relative effect of the included treatments. 
 
-Using normal meta-analysis, we could only get
-a subset of the confidence intervals for relative effects we derive using
-network meta-analysis. Network meta-analysis gives a consistent, integrated
-picture of the relative effects. However, given such a consistent set of
-relative effect estimates, it may still be difficult to draw conclusions on
-a potentially large set of treatments. 
+Using normal meta-analysis, we could only get a subset of the confidence
+intervals for relative effects we derive using network meta-analysis. Network
+meta-analysis gives a consistent, integrated picture of the relative effects.
+However, given such a consistent set of relative effect estimates, it may still
+be difficult to draw conclusions on a potentially large set of treatments. 
 
-Luckily, the Bayesian approach allows us
-to do even more with the data, and can be used to estimate the probability that,
-given the priors and the data, each of the treatments is the best, the second
-best, etc. This can be given by a rank probability plot. Rank probabilities
-sum to one, both within a rank over treatments and within a treatment over
-ranks.
-}
+Luckily, the Bayesian approach allows us to do even more with the data, and can
+be used to estimate the probability that, given the priors and the data, each of
+the treatments is the best, the second best, etc. This can be given by a rank
+probability plot. Rank probabilities sum to one, both within a rank over
+treatments and within a treatment over ranks.  }
+
 \author{Gert van Valkenhoef}
+
 \examples{
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 	network <- read.mtc.network(file) 
@@ -62,8 +60,9 @@ ranks.
 \references{
 van Valkenhoef, G., et.al. (2012) \emph{Automating network meta-analysis} [\url{http://dx.doi.org/10.1002/jrsm.1054}]
 
+
 Lu, G. and Ades A.E. (2006), \emph{Assessing evidence inconsistency in mixed treatment comparisons},
 Journal of the American Statistical Association, 101(474): 447-459.
- [\url{http://dx.doi.org/10.1198/016214505000001302}]}
+ [\url{http://dx.doi.org/10.1198/016214505000001302}]
 }
 \seealso{\code{\link{mtc.model}}, \code{\link{mtc.run}}}
