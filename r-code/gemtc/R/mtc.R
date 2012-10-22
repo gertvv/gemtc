@@ -111,10 +111,9 @@ non.edges <- function(g, comparisons) {
 tree.relative.effect <- function(g, t1, t2) {
 	if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
 		t2 <- V(g)[V(g)$name != t1]$name
-	} else { 
-		if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
-		if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
 	}
+	if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
+	if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
 	pairs <- matrix(c(t1, t2), ncol=2)
 	paths <- apply(pairs, 1, function(rel) {
 		p <- unlist(get.shortest.paths(g, rel[1], rel[2], mode='all'))
