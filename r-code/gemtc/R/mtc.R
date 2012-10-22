@@ -4,10 +4,22 @@ library('igraph')
 ## mtc.network class methods
 print.mtc.network <- function(x, ...) {
 	cat("MTC dataset: ", x$description, "\n", sep="")
+  print(x$data)
 }
 
 summary.mtc.network <- function(object, ...) {
-	object
+	studies <- levels(object$data[,1])
+  m <- sapply(object$treatments[,1], function(treatment) {
+    sapply(studies, function(study) { 
+      any(object$data[,1] == study & object$data[,2] == treatment)
+    })
+  })
+  colnames(m) <- object$treatments[,1]
+  x <- as.factor(apply(s, 1, sum))
+  levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
+  list("Description"=paste("MTC dataset: ", object$description, sep=""),
+       "Studies per treatment"=apply(m, 2, sum), 
+       "Number of n-arm studies"=summary(x)) 
 }
 
 plot.mtc.network <- function(x, ...) {
@@ -21,14 +33,15 @@ print.mtc.model <- function(x, ...) {
 }
 
 summary.mtc.model <- function(object, ...) {
-	object
+	list("Description"=paste("MTC ", object$type, " model: ", object$description, sep=""), 
+       "Parameters"=mtc.parameters(object$j.model))
 }
 
 plot.mtc.model <- function(x, ...) {
 	plot(mtc.model.graph(x), ...)
 }
-## mtc.result class methods
 
+## mtc.result class methods
 print.mtc.result <- function(x, ...) {
 	cat("MTC ", x$model$type, " results: ", x$model$description, "\n", sep="")
 }
