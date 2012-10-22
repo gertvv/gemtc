@@ -1,8 +1,8 @@
 \encoding{utf8}
 \name{mtc.network}
 \alias{mtc.network}
-\title{Constructing an MTC network}
-\description{Creates an network of class 'mtc.network' based upon treatments and
+\title{Constructing an MTC Network}
+\description{Creates an network of class \code{mtc.network} based upon treatments and
 data.}
 \usage{
 mtc.network(description, treatments, data)
@@ -14,7 +14,7 @@ mtc.network(description, treatments, data)
 	\item{data}{A data frame of lists containing a study, treatment combination with an amount of responders and sample size for dichotomous networks and a mean, std.dev. and sample size for continuous networks}
 }
 \value{
-A object of the class 'mtc.network'
+A object of the class \code{mtc.network}
 %%	~Describe the value returned
 %%	If it is a LIST, use
 %%	\item{comp1 }{Description of 'comp1'}
