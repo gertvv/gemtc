@@ -31,8 +31,18 @@ An object of class 'mtc.result'. This is a list with the following elements:
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
+\section{Model convergence}{Convergence of the model can be assessed using the
+Brooks-Gelman-Rubin method. This method compares within-chain and between-chain
+variance to calculate the Potential Scale Reduction Factor (PSRF).  This method
+is available through calling the 'gelman.diag' or 'gelman.plot' function from
+the coda package on the 'mtc.result' object.  A PSRF close to one indicates
+approximate convergence has been reached}
 
 \seealso{\code{\link{mtc.model}}}
+
+\references{
+Brooks, S.P. and Gelman, A. (1998), \emph{General methods for monitoring convergence of iterative simulations}, Journal of Computational and Graphical Statistics, 7(4): 434-455. \href{http://www.jstor.org/stable/1390675}{JSTOR 1390675}.
+}
 \examples{
 	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 	network <- read.mtc.network(file)

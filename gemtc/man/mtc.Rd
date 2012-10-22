@@ -63,6 +63,5 @@ ranks.
 }
 \references{
 van Valkenhoef, G., et.al. (2012) \emph{Automating network meta-analysis} [\href{doi}{http://dx.doi.org/10.1002/jrsm.1054}]
-
 }
 \seealso{\code{\link{mtc.model}}, \code{\link{mtc.run}}}
