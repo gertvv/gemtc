@@ -10,7 +10,7 @@ rank.probability(result)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{result}{Object of S3 class 'mtc.result' to create the rank probability table for}
+  \item{result}{Object of S3 class \code{mtc.result} to create the rank probability table for}
 }
 \value{A matrix with the treatments as rows and the ranks as columns}
 

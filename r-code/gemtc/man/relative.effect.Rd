@@ -12,18 +12,18 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{result}{An object of class S3 'mtc.result' to derive the relative effect from}
+  \item{result}{An object of class S3 \code{mtc.result} to derive the relative effect from}
   \item{t1}{A list of baselines to calculate a relative effect from}
   \item{t2}{A list of treatments to calculate the relative effect against a baseline from. If none supplied or an empty list all relevant treatments will be calculated}
   \item{preserve.extra}{Indicates whether to preserve the extra fields such as the sd.w and sd.d}
 }
 \value{
-	Returns a 'mtc.results' object containing objects of type 'mcmc' for each of chains for the relative effects in its samples.
+	Returns a \code{mtc.results} object containing objects of type \code{mcmc} for each of the relative effects.
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
-\section{Warning}{Plotting the relative effects with the generic forest() function assumes normal sampling distributions. Visual inspection of a plot on 'mtc.results' should indicate whether or not the assumption is valid}  
+\note{Plotting the relative effects with the generic \code{forest()} function assumes normal sampling distributions. Visual inspection of a plot on \code{mtc.results} should indicate whether or not the assumption is valid.}  
 
 \seealso{
 	\code{\link{rank.probability}}

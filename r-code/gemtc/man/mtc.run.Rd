@@ -8,22 +8,22 @@
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Running an MTC Model and obtaining results}
-\description{ The function 'mtc.run' is used to generate samples from a object
-of type 'mtc.model' using a MCMC sampler. The resulting 'mtc.results' object can
+\description{ The function \code{mtc.run} is used to generate samples from a object
+of type \code{mtc.model} using a MCMC sampler. The resulting \code{mtc.results} object can
 be used for further analysis of the dataset.	}
 \usage{
 mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{model}{A object of S3 class 'mtc.model' describing a consistency or inconsistency model}
+	\item{model}{A object of S3 class \code{mtc.model} describing a consistency or inconsistency model}
 	\item{sampler}{A string literal indicating which sampler to use, can be 'BUGS' using either 'BRugs' or 'R2WinBUGS', 'JAGS' using 'rjags' or 'YADAS'. When none supplied it will try BUGS, JAGS and YADAS, in that order}
 	\item{n.adapt}{Amount of adapt or tuning iterations}
 	\item{n.iter}{Amount of MCMC simulation iterations}
 	\item{thin}{Thinning factor}
 }
 \value{
-An object of class 'mtc.result'. This is a list with the following elements: 
+An object of class \code{mtc.result}. This is a list with the following elements: 
 \item{samples}{The samples resulting from running the MCMC model} 
 \item{model}{A reference to the model used to produce the samples}
 \item{sampler}{The sampler used to produce the samples}
@@ -35,8 +35,8 @@ An object of class 'mtc.result'. This is a list with the following elements:
 \section{Model convergence}{Convergence of the model can be assessed using the
 Brooks-Gelman-Rubin method. This method compares within-chain and between-chain
 variance to calculate the Potential Scale Reduction Factor (PSRF).	This method
-is available through calling the 'gelman.diag' or 'gelman.plot' function from
-the coda package on the 'mtc.result' object.	A PSRF close to one indicates
+is available through calling the \code{gelman.diag} or \code{gelman.plot} function from
+the \code{coda} package on the \code{mtc.result} object.	A PSRF close to one indicates
 approximate convergence has been reached}
 
 \seealso{\code{\link{mtc.model}}}
