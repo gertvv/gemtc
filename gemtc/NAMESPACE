@@ -1,6 +1,7 @@
 useDynLib(gemtc)
 
 import(coda)
+import(rJava)
 import(meta)
 
 export(
