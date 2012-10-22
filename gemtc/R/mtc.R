@@ -43,7 +43,8 @@ plot.mtc.model <- function(x, ...) {
 
 ## mtc.result class methods
 print.mtc.result <- function(x, ...) {
-	cat("MTC ", x$model$type, " results: ", x$model$description, "\n", sep="")
+	cat("MTC ", x$model$type, " results: ", x$model$description, sep="")
+	print(x$samples)
 }
 
 summary.mtc.result <- function(object, ...) {
