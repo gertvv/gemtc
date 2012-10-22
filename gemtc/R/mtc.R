@@ -181,7 +181,7 @@ rank.probability <- function(result) {
 			NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
 	}
 
-	d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)
+	d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)$samples
 	counts <- lapply(d, function(chain) { rank.count(t(chain)) })
 	ranks <- Reduce(function(a, b) { a + b }, counts)
 	colnames(ranks) <- treatments

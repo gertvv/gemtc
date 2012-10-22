@@ -2,7 +2,7 @@
 \name{rank.probability}
 \alias{rank.probability}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Calculating Rank probabilities}
+\title{Calculating rank-probabilities}
 \description{
 }
 \usage{
