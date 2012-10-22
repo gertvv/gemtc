@@ -23,7 +23,9 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
 \author{Gert van Valkenhoef, Joël Kuiper}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
-\note{Plotting the relative effects with the generic \code{forest()} function assumes normal sampling distributions. Visual inspection of a plot on \code{mtc.results} should indicate whether or not this assumption is valid.}  
+\note{Plotting the relative effects with the generic \code{forest()} function
+  assumes normal sampling distributions. Visual inspection of a plot on
+  \code{mtc.results} should indicate whether or not this assumption is valid.}  
 
 \seealso{
 	\code{\link{rank.probability}}
