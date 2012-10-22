@@ -82,6 +82,22 @@ read.mtc.network <- function(file) {
 	network
 }
 
+mtc.network <- function(description, treatments, data) {
+	ids <- unlist(lapply(treatments, function(t) { t['id'] }))
+	treatments <- as.data.frame(list(
+		id = ids,
+		description = unlist(lapply(treatments, function(t) { t['description'] }))
+	), row.names = ids)
+	data <- t(as.data.frame(lapply(data, data.frame)))
+	row.names(data) <- seq(1:dim(data)[1])
+	network <- list(
+		description=description,
+		treatments=treatments,
+		data=data)
+	class(network) <- "mtc.network"
+	network
+}
+
 mtc.network.as.java <- function(network) {
 	treatment <- function(row) {
 		treatment <- .jnew("org/drugis/mtc/model/Treatment", row['id'], row['description'])
@@ -135,12 +151,12 @@ write.mtc.network <- function(network, file="") {
 	os <- .jcast(bos, "java/io/OutputStream")
 	.jcall("org/drugis/mtc/model/JAXBHandler", "V",
 		"writeNetwork", j.network, os)
-	cat(.jcall(bos, "S", "toString"))
+	write(.jcall(bos, "S", "toString"), file=file)
 }
 
 # Create the specific model (consistency/inconsistency/nodesplit)
 # FIXME: support nodesplit
-mtc.model <- function(network, type="Consistency", t1=NULL, t2=NULL, factor=2.5, n.chain=4) {
+mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 	typeMap <- c(
 		'Consistency'='Consistency',
 		'consistency'='Consistency',
@@ -274,7 +290,7 @@ mtc.build.syntaxModel <- function(model, is.jags) {
 		model = .jcall(j.syntaxModel, "S", "modelText"),
 		data = jags.as.list(.jcall(j.syntaxModel, "S", "dataText")),
 		inits = lapply(1:model$n.chain, function(i) {jags.as.list(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
-    vars = c(mtc.parameters(model$j.model), c("sd.d", if (model$type == 'Inconsistency') "sd.w"))
+		vars = c(mtc.parameters(model$j.model), c("sd.d", if (model$type == 'Inconsistency') "sd.w"))
 	)
 }
 
@@ -292,7 +308,7 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 
 	j.yadas <- .jcall('org/drugis/mtc/yadas/YadasModelFactory',
 		'Lorg/drugis/mtc/MixedTreatmentComparison;', 'buildYadasModel', model$j.network, j.model, j.settings)
-  .jcall(j.yadas, "V", 'setExtendSimulation', .jcall('org/drugis/mtc/MCMCModel$ExtendSimulation', 'Lorg/drugis/mtc/MCMCModel$ExtendSimulation;', 'valueOf', 'FINISH'))
+	.jcall(j.yadas, "V", 'setExtendSimulation', .jcall('org/drugis/mtc/MCMCModel$ExtendSimulation', 'Lorg/drugis/mtc/MCMCModel$ExtendSimulation;', 'valueOf', 'FINISH'))
 
 	# Run the YADAS model
 	j.activityTask <- .jcall(j.yadas, 'Lorg/drugis/common/threading/activity/ActivityTask;', 'getActivityTask')
@@ -320,7 +336,7 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 	j.results <- .jcall(j.yadas, 'Lorg/drugis/mtc/MCMCResults;', 'getResults')
 	params <- sapply(as.list(.jcall(j.results, '[Lorg/drugis/mtc/Parameter;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
 	get.samples <- function(chain, i) {
-    .jcall('org/drugis/mtc/util/ResultsUtil', '[D', 'getSamples', j.results, as.integer(i), as.integer(chain))
+		.jcall('org/drugis/mtc/util/ResultsUtil', '[D', 'getSamples', j.results, as.integer(i), as.integer(chain))
 	}
 	as.coda.chain <- function(chain) {
 		samples <- sapply(params, function(p) { get.samples(chain - 1, which(params == p) - 1) })
@@ -361,9 +377,9 @@ mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter,
 		# with Wine not being able to access the R temporary path.
 		# Can be fixed by creating a temporary directory in the Wine
 		# C: drive:
-		#   mkdir ~/.wine/drive_c/bugstmp
+		#		mkdir ~/.wine/drive_c/bugstmp
 		# And then adding these arguments to the BUGS call:
-		#   working.directory='~/.wine/drive_c/bugstmp', clearWD=TRUE
+		#		working.directory='~/.wine/drive_c/bugstmp', clearWD=TRUE
 	}
 	unlink(file.model)
 

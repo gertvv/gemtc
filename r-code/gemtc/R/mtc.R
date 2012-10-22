@@ -2,47 +2,47 @@ library('coda')
 library('igraph')
 
 ## mtc.network class methods
-print.mtc.network <- function(network, ...) {
-	cat("MTC dataset: ", network$description, "\n", sep="")
+print.mtc.network <- function(x, ...) {
+	cat("MTC dataset: ", x$description, "\n", sep="")
 }
 
-summary.mtc.network <- function(network, ...) {
-	network
+summary.mtc.network <- function(object, ...) {
+	object
 }
 
-plot.mtc.network <- function(network, ...) {
-	plot(mtc.network.graph(network), ...)
+plot.mtc.network <- function(x, ...) {
+	plot(mtc.network.graph(x), ...)
 }
 
 ## mtc.model class methods
 
-print.mtc.model <- function(model, ...) {
-	cat("MTC ", model$type, " model: ", model$description, "\n", sep="")
+print.mtc.model <- function(x, ...) {
+	cat("MTC ", x$type, " model: ", x$description, "\n", sep="")
 }
 
-summary.mtc.model <- function(model, ...) {
-	model
+summary.mtc.model <- function(object, ...) {
+	object
 }
 
-plot.mtc.model <- function(model, ...) {
-	plot(mtc.model.graph(model), ...)
+plot.mtc.model <- function(x, ...) {
+	plot(mtc.model.graph(x), ...)
 }
 ## mtc.result class methods
 
-print.mtc.result <- function(result, ...) {
-	cat("MTC ", result$model$type, " results: ", result$model$description, "\n", sep="")
+print.mtc.result <- function(x, ...) {
+	cat("MTC ", x$model$type, " results: ", x$model$description, "\n", sep="")
 }
 
-summary.mtc.result <- function(result, ...) {
-	summary(result$samples)
+summary.mtc.result <- function(object, ...) {
+	summary(object$samples)
 }
 
-plot.mtc.result <- function(result, ...) {
-	plot(result$samples)
+plot.mtc.result <- function(x, ...) {
+	plot(x$samples)
 }
 
-as.mcmc.list.mtc.result <- function(result, ...) {
-	result$samples
+as.mcmc.list.mtc.result <- function(x, ...) {
+	x$samples
 }
 
 ####
@@ -53,8 +53,18 @@ mtc.network.graph <- function(network) {
 	graph.create(treatments, comparisons, arrow.mode=0)
 }
 
+filter.parameters <- function(parameters, criterion) { 
+	parameters <- sapply(parameters, function(x) { 
+	path <- unlist(strsplit(x, '\\.')) 
+	if(criterion(path)) { 
+		path[-1]
+	}})
+	parameters <- parameters[!sapply(parameters, is.null)]
+	unlist(parameters)
+}
+
 mtc.spanning.tree <- function(parameters) {
-	parameters <- sapply(parameters, function(x) { unlist(strsplit(x, '\\.')) } )[-1,]
+	parameters <- filter.parameters(parameters, function(x) { x[1] == 'd' })
 	treatments <- unique(as.vector(parameters))
 	graph.create(treatments, parameters, arrow.mode=2, color=1)
 }
