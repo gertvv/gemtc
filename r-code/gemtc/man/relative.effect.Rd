@@ -1,6 +1,8 @@
 \encoding{utf8}
 \name{relative.effect}
+\alias{forest.mtc.results}
 \alias{relative.effect}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculating relative effects}
 \description{Calculates the relative effect of a treatment against a baseline. 
@@ -16,11 +18,12 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
   \item{preserve.extra}{Indicates whether to preserve the extra fields such as the sd.w and sd.d}
 }
 \value{
-	Returns a 'mcmc.list' containing objects of type 'mcmc' for each of chains for the relative effects.
+	Returns a 'mtc.results' object containing objects of type 'mcmc' for each of chains for the relative effects in its samples.
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
+\section{Warning}{Plotting the relative effects with the generic forest() function assumes normal sampling distributions. Visual inspection of a plot on 'mtc.results' should indicate whether or not the assumption is valid}  
 
 \seealso{
 	\code{\link{rank.probability}}
@@ -31,6 +34,9 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
 	model <- mtc.model(network)
 	results <- mtc.run(model, "YADAS")
 	summary(relative.effect(results, "B", c("A", "C", "D")))
+
+	# Creates a forest plot of the relative effects
+	forest(relative.effect(results, "A"))
 	
 	## Iterations = 5001:25000
 	## Thinning interval = 1 

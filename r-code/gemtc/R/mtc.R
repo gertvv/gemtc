@@ -41,6 +41,17 @@ plot.mtc.result <- function(x, ...) {
 	plot(x$samples)
 }
 
+forest.mtc.result <- function(x, ...) { 
+	stats <- summary(x)$statistics
+	stats <- stats[-dim(stats)[1],]
+	forest(metagen(stats[,1], stats[,2]), 
+				 comb.fixed=FALSE, 
+				 comb.random=FALSE,
+				 overall=FALSE, 
+				 leftcols=c("studlab"), 
+				 leftlab=c("Comparison"))
+}
+
 as.mcmc.list.mtc.result <- function(x, ...) {
 	x$samples
 }
@@ -141,9 +152,16 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 	}
 
 	# Apply tranformation to each chain
-	as.mcmc.list(lapply(result$samples, function(chain) { 
+	samples <- as.mcmc.list(lapply(result$samples, function(chain) { 
 		mcmc(chain %*% effects, start=start(chain), end=end(chain), thin=thin(chain))
 	}))
+	effects <- list(
+		samples=samples,
+		model=result$model,
+		sampler=result$model$sampler)
+
+	class(effects) <- "mtc.result"
+	effects
 }
 
 rank.probability <- function(result) {
