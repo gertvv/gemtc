@@ -54,7 +54,7 @@ treatments and within a treatment over ranks.  }
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 	network <- read.mtc.network(file) 
 	model <- mtc.model(network) # when no argument supplied mtc.model generates a consistency model
-	results <- mtc.run(model, sampler="YADAS") 
+	results <- mtc.run(model) 
 	summary(results)
 }
 \references{

@@ -25,7 +25,7 @@ rank.probability(result)
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
 	model <- mtc.model(network)
-	results <- mtc.run(model, "YADAS")
+	results <- mtc.run(model)
 
 	ranks <- rank.probability(results)
 	print(ranks)
