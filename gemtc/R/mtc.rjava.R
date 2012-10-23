@@ -241,7 +241,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 	bugs <- c('BRugs', 'R2WinBUGS')
 	jags <- c('rjags')
 	available <- if (is.na(sampler)) {
-		c(jags, bugs)
+		c(jags, bugs, 'YADAS')
 	} else if (sampler == 'BUGS') {
 		bugs
 	} else if (sampler == 'JAGS') {
