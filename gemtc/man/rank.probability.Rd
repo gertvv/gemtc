@@ -4,6 +4,8 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculating rank-probabilities}
 \description{
+Rank probability ranks the treatments by binning the samples based upon the their relative effect. 
+The result of the ranking is divided by the total amount of samples, making he columns and rows of the resulting matrix sum to 1.
 }
 \usage{
 rank.probability(result)
@@ -27,10 +29,10 @@ rank.probability(result)
 
 	ranks <- rank.probability(results)
 	print(ranks)
-	#       [,1]      [,2]     [,3]     [,4]
-	# A 0.0000500 0.0024250 0.104000 0.893525
-	# B 0.0571125 0.1802375 0.661125 0.101525
-	# C 0.2409625 0.5893875 0.169375 0.000275
-	# D 0.7020250 0.2279000 0.065450 0.004625
+	##       [,1]      [,2]     [,3]     [,4]
+	## A 0.0000500 0.0024250 0.104000 0.893525
+	## B 0.0571125 0.1802375 0.661125 0.101525
+	## C 0.2409625 0.5893875 0.169375 0.000275
+	## D 0.7020250 0.2279000 0.065450 0.004625
 	barplot(t(ranks), beside=TRUE)
 }

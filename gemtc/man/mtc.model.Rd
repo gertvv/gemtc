@@ -42,6 +42,8 @@ The example code will generate the following graph:
 
 \if{html}{\figure{parkisonInconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}}
 \if{latex}{\figure{parkisonInconsistency.pdf}{options: width=3in}}
+
+Note that the layout algorithm used in visualization is non-deterministic and might produce different results on each run.
 }
 
 
