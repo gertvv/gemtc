@@ -4,10 +4,22 @@ library('igraph')
 ## mtc.network class methods
 print.mtc.network <- function(x, ...) {
 	cat("MTC dataset: ", x$description, "\n", sep="")
+	print(x$data)
 }
 
 summary.mtc.network <- function(object, ...) {
-	object
+	studies <- levels(object$data[,1])
+	m <- sapply(object$treatments[,1], function(treatment) {
+		sapply(studies, function(study) { 
+			any(object$data[,1] == study & object$data[,2] == treatment)
+		})
+	})
+	colnames(m) <- object$treatments[,1]
+	x <- as.factor(apply(m, 1, sum))
+	levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
+	list("Description"=paste("MTC dataset: ", object$description, sep=""),
+			 "Studies per treatment"=apply(m, 2, sum), 
+			 "Number of n-arm studies"=summary(x)) 
 }
 
 plot.mtc.network <- function(x, ...) {
@@ -21,16 +33,18 @@ print.mtc.model <- function(x, ...) {
 }
 
 summary.mtc.model <- function(object, ...) {
-	object
+	list("Description"=paste("MTC ", object$type, " model: ", object$description, sep=""), 
+			 "Parameters"=mtc.parameters(object$j.model))
 }
 
 plot.mtc.model <- function(x, ...) {
 	plot(mtc.model.graph(x), ...)
 }
-## mtc.result class methods
 
+## mtc.result class methods
 print.mtc.result <- function(x, ...) {
-	cat("MTC ", x$model$type, " results: ", x$model$description, "\n", sep="")
+	cat("MTC ", x$model$type, " results: ", x$model$description, sep="")
+	print(x$samples)
 }
 
 summary.mtc.result <- function(object, ...) {
@@ -76,7 +90,7 @@ filter.parameters <- function(parameters, criterion) {
 mtc.spanning.tree <- function(parameters) {
 	parameters <- unlist(filter.parameters(parameters, function(x) { x[1] == 'd' }))
 	treatments <- unique(as.vector(parameters))
-	graph.create(treatments, parameters, arrow.mode=2, color=1)
+	graph.create(treatments, parameters, arrow.mode=2, color="black", lty=1)
 }
 
 graph.create <- function(v, e, ...) {
@@ -97,8 +111,8 @@ mtc.model.graph <- function(model) {
 	comparisons <- mtc.model.comparisons(model)
 	parameters <- mtc.parameters(model$j.model)
 	g <- mtc.spanning.tree(parameters)
-	g <- g + edges(w.factors(parameters), arrow.mode=2, color=2)
-	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, color=3)
+	g <- g + edges(w.factors(parameters), arrow.mode=2, color="black", lty=2)
+	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
 	g
 }
 
@@ -169,7 +183,6 @@ rank.probability <- function(result) {
 
 	treatments <- as.vector(mtc.treatments(model$j.network)$id)
 	mtcGraph <- mtc.spanning.tree(mtc.parameters(model$j.model))
-
 	n.alt <- length(treatments)
 
 	# count ranks given a matrix d of relative effects (treatments as rows)
@@ -181,7 +194,7 @@ rank.probability <- function(result) {
 			NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
 	}
 
-	d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)
+	d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)$samples
 	counts <- lapply(d, function(chain) { rank.count(t(chain)) })
 	ranks <- Reduce(function(a, b) { a + b }, counts)
 	colnames(ranks) <- treatments

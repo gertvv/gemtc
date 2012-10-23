@@ -9,7 +9,7 @@ mtc.treatments <- function(network) {
 
 	lst <- as.list(.jcall(network, "Lcom/jgoodies/binding/list/ObservableList;", "getTreatments"))
 	lst <- lapply(lst, asTreatment)
-	ids <- sapply(lst, j.getId)
+	ids <- unlist(sapply(lst, j.getId))
 	as.data.frame(list(
 		id = ids,
 		description = sapply(lst, getDesc)
@@ -94,11 +94,22 @@ mtc.network <- function(description, treatments, data) {
 		description=description,
 		treatments=treatments,
 		data=data)
+
+	mtc.network.validate(network)
+
 	class(network) <- "mtc.network"
 	network
 }
 
+mtc.network.validate <- function(network) { 
+	stopifnot(nrow(network$treatments) > 0)  
+	stopifnot(nrow(network$data) > 0)
+	stopifnot(all(network$data[,'treatment'] %in% network$treatment$id))
+}
+
 mtc.network.as.java <- function(network) {
+	mtc.network.validate(network)
+
 	treatment <- function(row) {
 		treatment <- .jnew("org/drugis/mtc/model/Treatment", row['id'], row['description'])
 		.jcast(treatment, "java/lang/Object")
@@ -133,11 +144,10 @@ mtc.network.as.java <- function(network) {
 	} else {
 		list(append=appendNone, builder=createBuilder("None"))
 	}
-
 	# create network
 	apply(network$data, 1, function(row) { builder$append(builder$builder, row) })
 	j.network <- .jcall(builder$builder, "Lorg/drugis/mtc/model/Network;", "buildNetwork")
-	.jcall(j.network, "V", "setDescription", network$description)
+	.jcall(j.network, "V", "setDescription", .jnew("java/lang/String", network$description))
 
 	j.network
 }
@@ -231,7 +241,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 	bugs <- c('BRugs', 'R2WinBUGS')
 	jags <- c('rjags')
 	available <- if (is.na(sampler)) {
-		c(jags, bugs)
+		c(jags, bugs, 'YADAS')
 	} else if (sampler == 'BUGS') {
 		bugs
 	} else if (sampler == 'JAGS') {
@@ -347,7 +357,7 @@ mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
 	as.mcmc.list(lapply(1:model$n.chain, as.coda.chain))
 }
 
-mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
+mtc.run.bugs <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
 	if (is.na(package) || !(package %in% c("BRugs", "R2WinBUGS"))) {
 		stop(paste("Package", package, "not supported"))
 	}
@@ -387,7 +397,7 @@ mtc.run.bugs <- function(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter,
 	data
 }
 
-mtc.run.jags <- function (model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
+mtc.run.jags <- function (model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
 	# generate JAGS model
 	syntax <- mtc.build.syntaxModel(model, is.jags=TRUE)
 
