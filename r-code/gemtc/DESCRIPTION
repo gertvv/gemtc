@@ -2,7 +2,7 @@ Package: gemtc
 Version: 0.15
 Date: 2012-10-12
 Title: GeMTC Mixed Treatment Comparisons
-Author: Gert van Valkenhoef, Joël Kuiper 
+Author: Gert van Valkenhoef, Joel Kuiper 
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
 Description: An R package for performing mixed treatment comparisons (network meta-analyses).
 Depends: R (>= 2.7.0), rJava (>= 0.8-0), coda (>= 0.13), igraph (>= 0.6), meta (>= 2.1)
