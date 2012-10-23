@@ -411,3 +411,14 @@ mtc.run.jags <- function (model, package, n.adapt=n.adapt, n.iter=n.iter, thin=t
 	coda.samples(jags, variable.names=syntax$vars, n.iter=n.iter, thin=thin)
 }
 
+# Semi-internal utility for loading samples from previous simulations
+# Samples that can be loaded were saved using dput
+read.mtc.result.samples <- function(file, model, sampler=NULL) {
+	samples <- dget(file)
+	result <- list(
+		samples=samples, 
+		model=model, 
+		sampler=sampler)
+	class(result) <- "mtc.result"
+	result
+}
