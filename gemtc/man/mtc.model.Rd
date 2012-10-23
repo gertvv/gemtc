@@ -16,19 +16,19 @@ mtc.model(network, type = "Consistency", factor = 2.5, n.chain = 4)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{network}{A object of S3 class \code{mtc.network}}
+  \item{network}{A object of S3 class \code{mtc.network}}
   \item{type}{A string literal indicating whether the model should be
   consistency or inconsistency. Node-split is not yet supported}
-	\item{factor}{Variance scaling factor for the starting values}
-	\item{n.chain}{Number of chains in the model}
+  \item{factor}{Variance scaling factor for the starting values}
+  \item{n.chain}{Number of chains in the model}
 }
 \value{
   An object of class \code{mtc.model}. This is a list with the following elements:
   \item{type}{The type of model, if none supplied default is 'Consistency'} 
   \item{description}{A short description of the model} 
-  \item{j.network}{Reference to the internal Java network object}
-  \item{j.model}{Reference to the internal Java model object}
-  \item{j.generator}{Reference to the internal Java starting value generator object}
+  \item{j.network}{Reference to the internal Java network object \code{jobjRef}}
+  \item{j.model}{Reference to the internal Java model object \code{jobjRef}}
+  \item{j.generator}{Reference to the internal Java starting value generator object \code{jobjRef}}
   \item{n.chain}{Number of chains}
   \item{var.scale}{The previously supplied scaling factor}
 }
@@ -54,10 +54,9 @@ Note that the layout algorithm used in visualization is non-deterministic and mi
 \code{\link{mtc.network}}, \code{\link{mtc.run}}
 }
 \examples{
-	file <- system.file("extdata/parkinson.gemtc", package="gemtc")
-	network <- read.mtc.network(file)
-	model <- mtc.model(network, "incons")
-	plot(model)
-	print(model)
-
+file <- system.file("extdata/parkinson.gemtc", package="gemtc")
+network <- read.mtc.network(file)
+model <- mtc.model(network, "incons")
+plot(model)
+print(model)
 }

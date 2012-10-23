@@ -5,7 +5,7 @@
 
 \title{Mixed Treatment Comparisons in R}
 \description{
-	Mixed Treatment Comparisons R package based on the Java MTC library from \url{http://drugis.org/gemtc}.
+  Mixed Treatment Comparisons R package based on the Java MTC library from \url{http://drugis.org/gemtc}.
 }
 \details{Network Meta-Analysis, or Mixed Treatment Comparison (MTC) is
 a technique to meta-analyze more than two drugs at the same time. Using a full
@@ -16,11 +16,11 @@ treatments based on all included studies.
 This package allows the automated generation of MTC consistency and
 inconsistency models that can be run using JAGS, OpenBUGS, WinBUGS or YADAS.
 Furthermore it allows interoperability with GeMTC files that were created by the
-GeMTC GUI or exported through \href{http://drugis.org/addis}{ADDIS}.  See
-\url{http://drugis.org/gemtc} for more information. 
+GeMTC GUI or exported through \href{http://drugis.org/addis}{ADDIS}.
+The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/mtc}{Github}}
 
-The source for GeMTC is available under GPL3 on
-\href{https://github.com/gertvv/mtc}{Github}}
+See \url{http://drugis.org/gemtc} for more information. 
+
 
 \section{Inconsistency models}{ 
 In network meta-analysis, because of the more
@@ -56,15 +56,16 @@ treatments and within a treatment over ranks.  }
 \author{Gert van Valkenhoef}
 
 \examples{
-	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
-	network <- read.mtc.network(file) 
-	model <- mtc.model(network) # when no argument supplied mtc.model generates a consistency model
-	# To save computation time we load the samples instead of running the model
-	\dontrun{results <- mtc.run(model)}
-	file.samples <- system.file("extdata/luades-thrombolytic.samples.gz", package="gemtc")
-	results <- read.mtc.result.samples(file.samples, model, "rjags")
-	summary(results)
+file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
+network <- read.mtc.network(file) 
+model <- mtc.model(network) # when no argument supplied mtc.model generates a consistency model
+# To save computation time we load the samples instead of running the model
+\dontrun{results <- mtc.run(model)}
+file.samples <- system.file("extdata/luades-thrombolytic.samples.gz", package="gemtc")
+results <- read.mtc.result.samples(file.samples, model, "rjags")
+summary(results)
 }
+
 \references{
 van Valkenhoef, G., et.al. (2012) \emph{Automating network meta-analysis} [\href{http://dx.doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
 
