@@ -104,7 +104,7 @@ mtc.network <- function(description, treatments, data) {
 mtc.network.validate <- function(network) { 
 	stopifnot(nrow(network$treatments) > 0)  
 	stopifnot(nrow(network$data) > 0)
-	stopifnot(all(network$data$treatment %in% network$treatment$id))
+	stopifnot(all(network$data[,'treatment'] %in% network$treatment$id))
 }
 
 mtc.network.as.java <- function(network) {

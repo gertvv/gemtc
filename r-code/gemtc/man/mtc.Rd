@@ -5,7 +5,7 @@
 
 \title{Mixed Treatment Comparisons in R}
 \description{
-	Mixed Treatment Comparisons R package based on the Java MTC library from \url{http://drugis.org/mtc} and JAGS.
+	Mixed Treatment Comparisons R package based on the Java MTC library from \url{http://drugis.org/mtc}.
 }
 \details{ Mixed Treatment Comparison (MTC), or Network Meta-Analysis is
 a technique to meta-analyze more than two drugs at the same time. Using a full
@@ -58,11 +58,11 @@ treatments and within a treatment over ranks.  }
 	summary(results)
 }
 \references{
-van Valkenhoef, G., et.al. (2012) \emph{Automating network meta-analysis} [\url{http://dx.doi.org/10.1002/jrsm.1054}]
+van Valkenhoef, G., et.al. (2012) \emph{Automating network meta-analysis} [\href{http://dx.doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
 
 
 Lu, G. and Ades A.E. (2006), \emph{Assessing evidence inconsistency in mixed treatment comparisons},
 Journal of the American Statistical Association, 101(474): 447-459.
- [\url{http://dx.doi.org/10.1198/016214505000001302}]
+ [\href{http://dx.doi.org/10.1198/016214505000001302}{doi:10.1198/016214505000001302}]
 }
 \seealso{\code{\link{mtc.model}}, \code{\link{mtc.run}}}
