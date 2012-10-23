@@ -51,10 +51,16 @@ treatments and within a treatment over ranks.  }
 \author{Gert van Valkenhoef}
 
 \examples{
-	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
+	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 	network <- read.mtc.network(file) 
 	model <- mtc.model(network) # when no argument supplied mtc.model generates a consistency model
-	results <- mtc.run(model) 
+	\dontrun{results <- mtc.run(model)}
+	\dontshow{
+		# To save computation time we load the samples instead of running the model
+		samples <- dget(system.file("extdata/thrombolyticSamples.txt.gz", package="gemtc"))
+		results <- list(samples=samples, model=model, sampler=NULL)
+		class(results) <- "mtc.result"
+	}
 	summary(results)
 }
 \references{
