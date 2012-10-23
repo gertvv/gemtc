@@ -24,7 +24,7 @@ read.mtc.network(file)
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
-\seealso{\code{\link{mtc.network}}}
+\seealso{\code{\link{mtc.network}}, \code{\link{write.mtc.network}}}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 \examples{
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
@@ -36,5 +36,15 @@ read.mtc.network(file)
 	## 	C  C Individual Counseling
 	## 	D  D      Group Counseling
 	plot(network)
-	print(network)
+	summary(network)
+	## $Description
+	## [1] "MTC dataset: Smoking cessation rates"
+	## 
+	## $`Studies per treatment`
+	##  A  B  C  D 
+	## 19  6 19  6 
+	## 
+	## $`Number of n-arm studies`
+	## 2-arm 3-arm 
+	##    22     2 
 }
