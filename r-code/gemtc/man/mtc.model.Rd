@@ -30,18 +30,17 @@ mtc.model(network, type = "Consistency", factor = 2.5, n.chain = 4)
   \item{j.model}{Reference to the internal Java model object}
   \item{j.generator}{Reference to the internal Java starting value generator object}
   \item{n.chain}{Number of chains}
-  \item{var.scale}{The previously suplied scaling factor}
+  \item{var.scale}{The previously supplied scaling factor}
 }
 
 \section{Visualization}{Calling the generic plot method on an S3 \code{mtc.model} object
 will show a graph with the treatments as vertices and the comparisons as edges.
-The comparisons between basic parameters are shown as a Directed Acyclic Graph
-(DAG), for inconsistency models the added w.factors are shown as dotted lines.
+The solid arrows represent basic parameters, the dotted arrows represent inconsistency factors and solid lines represent comparisons that are not associated with any parameter but do have direct evidence from trials.
 
 The example code will generate the following graph:
 
-\if{html}{\figure{parkisonInconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}}
-\if{latex}{\figure{parkisonInconsistency.pdf}{options: width=3in}}
+\if{html}{\figure{parkison-inconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}}
+\if{latex}{\figure{parkison-inconsistency.pdf}{options: width=3in}}
 
 Note that the layout algorithm used in visualization is non-deterministic and might produce different results on each run.
 }

@@ -5,9 +5,9 @@
 
 \title{Mixed Treatment Comparisons in R}
 \description{
-	Mixed Treatment Comparisons R package based on the Java MTC library from \url{http://drugis.org/mtc}.
+	Mixed Treatment Comparisons R package based on the Java MTC library from \url{http://drugis.org/gemtc}.
 }
-\details{ Mixed Treatment Comparison (MTC), or Network Meta-Analysis is
+\details{Network Meta-Analysis, or Mixed Treatment Comparison (MTC) is
 a technique to meta-analyze more than two drugs at the same time. Using a full
 Bayesian evidence network, all indirect comparisons are taken into account to
 arrive at a single, integrated, estimate of the effect of all included
@@ -15,7 +15,7 @@ treatments based on all included studies.
 
 This package allows the automated generation of MTC consistency and
 inconsistency models that can be run using JAGS, OpenBUGS, WinBUGS or YADAS. see
-\url{http://drugis.org/mtc} for more information.  }
+\url{http://drugis.org/gemtc} for more information.  }
 
 \section{Inconsistency models}{ 
 In network meta-analysis, because of the more
@@ -33,8 +33,8 @@ For more information about assessing inconsistency, see G. Lu and A.
 E. Ades (2006).}
 
 \section{Consistency models}{ If there is no relevant inconsistency in the
-  evidence, a consistency model can be used to draw conclusions about the
-  relative effect of the included treatments. 
+evidence, a consistency model can be used to draw conclusions about the
+relative effect of the included treatments. 
 
 Using normal meta-analysis, we could only get a subset of the confidence
 intervals for relative effects we derive using network meta-analysis. Network
@@ -54,13 +54,10 @@ treatments and within a treatment over ranks.  }
 	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 	network <- read.mtc.network(file) 
 	model <- mtc.model(network) # when no argument supplied mtc.model generates a consistency model
+	# To save computation time we load the samples instead of running the model
 	\dontrun{results <- mtc.run(model)}
-	\dontshow{
-		# To save computation time we load the samples instead of running the model
-		samples <- dget(system.file("extdata/thrombolyticSamples.txt.gz", package="gemtc"))
-		results <- list(samples=samples, model=model, sampler=NULL)
-		class(results) <- "mtc.result"
-	}
+	file.samples <- system.file("extdata/luades-thrombolytic.samples.gz", package="gemtc")
+	results <- read.mtc.result.samples(file.samples, model, "rjags")
 	summary(results)
 }
 \references{
@@ -71,4 +68,4 @@ Lu, G. and Ades A.E. (2006), \emph{Assessing evidence inconsistency in mixed tre
 Journal of the American Statistical Association, 101(474): 447-459.
  [\href{http://dx.doi.org/10.1198/016214505000001302}{doi:10.1198/016214505000001302}]
 }
-\seealso{\code{\link{mtc.model}}, \code{\link{mtc.run}}}
+\seealso{\code{\link{mtc.model}}, \code{\link{mtc.run}}, \code{\link{mtc.network}}}

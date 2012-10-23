@@ -10,7 +10,6 @@ The result of the ranking is divided by the total amount of samples, making he c
 \usage{
 rank.probability(result)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{result}{Object of S3 class \code{mtc.result} to be used in creation of the rank probability table}
 }
@@ -25,13 +24,10 @@ rank.probability(result)
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
 	model <- mtc.model(network)
+	# To save computation time we load the samples instead of running the model
 	\dontrun{results <- mtc.run(model)}
-	\dontshow{
-		# To save computation time we load the samples instead of running the model
-		samples <- dget(system.file("extdata/smokingSamples.txt.gz", package="gemtc"))
-		results <- list(samples=samples, model=model, sampler=NULL)
-		class(results) <- "mtc.result"
-	}
+	file.samples <- system.file("extdata/luades-smoking.samples.gz", package="gemtc")
+	results <- read.mtc.result.samples(file.samples, model, "rjags")
 
 	ranks <- rank.probability(results)
 	print(ranks)

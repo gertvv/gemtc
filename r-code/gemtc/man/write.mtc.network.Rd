@@ -17,10 +17,10 @@ write.mtc.network(network, file = "")
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
+\seealso{\code{\link{mtc.network}}, \code{\link{read.mtc.network}}}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 \examples{
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
-	print(network$treatments)
-	write.mtc.network(network)
+	write.mtc.network(network, file=tempfile())
 }

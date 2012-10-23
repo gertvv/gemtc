@@ -33,7 +33,6 @@ An object of class \code{mtc.result}. This is a list with the following elements
 \item{model}{A reference to the model used to produce the samples}
 \item{sampler}{The sampler used to produce the samples}
 
-
 The object can be coerced to an \code{mcmc.list} from the \code{coda} package by the generic S3 method 
 \code{as.mcmc} which is used internally to generate the summaries.
 }
@@ -57,7 +56,7 @@ Brooks, S.P. and Gelman, A. (1998), \emph{General methods for monitoring converg
 	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
 	model <- mtc.model(network)
-	results <- mtc.run(model, "YADAS", n.iter=10000, n.adapt=5000, thin=10)
+	results <- mtc.run(model, "YADAS", n.iter=5000, n.adapt=2500, thin=10)
 	summary(results)
 	## Iterations = 5001:25000
 	## Thinning interval = 1 

@@ -11,5 +11,5 @@ export(
 	print.mtc.model, plot.mtc.model, summary.mtc.model,
 	mtc.run,
 	print.mtc.result, plot.mtc.result, summary.mtc.result, forest.mtc.result,
-	as.mcmc.list.mtc.result,
+	as.mcmc.list.mtc.result, read.mtc.result.samples,
 	relative.effect, rank.probability)
