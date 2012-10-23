@@ -4,8 +4,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Writing GeMTC Network files}
 \description{The function mtc.write.network can be used to write a network to
-a GeMTC file. See \url{http://drugis.org/gemtc} for interacting with such files using
-a GUI.}
+	a GeMTC file.}
 
 \usage{
 write.mtc.network(network, file = "")
