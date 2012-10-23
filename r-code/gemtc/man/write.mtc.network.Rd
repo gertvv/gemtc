@@ -4,23 +4,22 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Writing GeMTC Network files}
 \description{The function mtc.write.network can be used to write a network to
-a GeMTC file. See \url{http://drugis.org/gemtc} for interacting with such files using
-a GUI.}
+  a GeMTC file.}
 
 \usage{
 write.mtc.network(network, file = "")
 }
 
 \arguments{
-	\item{network}{The network object of S3 class \code{mtc.network} to write}
-	\item{file}{Path to write the file to, if none supplied output will be redirected to the REPL}
+  \item{network}{The network object of S3 class \code{mtc.network} to write}
+  \item{file}{Path to write the file to, if none supplied output will be redirected to the REPL}
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+\seealso{\code{\link{mtc.network}}, \code{\link{read.mtc.network}}}
+
 \examples{
-	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
-	network <- read.mtc.network(file)
-	print(network$treatments)
-	write.mtc.network(network)
+file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
+network <- read.mtc.network(file)
+write.mtc.network(network, file=tempfile())
 }

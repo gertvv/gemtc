@@ -4,13 +4,14 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculating rank-probabilities}
 \description{
+Rank probability ranks the treatments by binning the samples based upon the their relative effect. 
+The result of the ranking is divided by the total amount of samples, making he columns and rows of the resulting matrix sum to 1.
 }
 \usage{
 rank.probability(result)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{result}{Object of S3 class \code{mtc.result} to create the rank probability table for}
+  \item{result}{Object of S3 class \code{mtc.result} to be used in creation of the rank probability table}
 }
 \value{A matrix with the treatments as rows and the ranks as columns}
 
@@ -20,12 +21,20 @@ rank.probability(result)
 \code{\link{relative.effect}}
 }
 \examples{
-	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
-	network <- read.mtc.network(file)
-	model <- mtc.model(network)
-	results <- mtc.run(model, "YADAS")
+file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
+network <- read.mtc.network(file)
+model <- mtc.model(network)
+# To save computation time we load the samples instead of running the model
+\dontrun{results <- mtc.run(model)}
+file.samples <- system.file("extdata/luades-smoking.samples.gz", package="gemtc")
+results <- read.mtc.result.samples(file.samples, model, "rjags")
 
-	ranks <- rank.probability(results)
-	summary(ranks)
-	barplot(t(ranks), beside=TRUE)
+ranks <- rank.probability(results)
+print(ranks)
+##       [,1]      [,2]     [,3]     [,4]
+## A 0.0000500 0.0024250 0.104000 0.893525
+## B 0.0571125 0.1802375 0.661125 0.101525
+## C 0.2409625 0.5893875 0.169375 0.000275
+## D 0.7020250 0.2279000 0.065450 0.004625
+barplot(t(ranks), beside=TRUE)
 }

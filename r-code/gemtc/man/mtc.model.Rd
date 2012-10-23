@@ -16,27 +16,35 @@ mtc.model(network, type = "Consistency", factor = 2.5, n.chain = 4)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{network}{A object of S3 class \code{mtc.network}}
+  \item{network}{A object of S3 class \code{mtc.network}}
   \item{type}{A string literal indicating whether the model should be
   consistency or inconsistency. Node-split is not yet supported}
-	\item{factor}{Variance scaling factor for the starting values}
-	\item{n.chain}{Number of chains in the model}
+  \item{factor}{Variance scaling factor for the starting values}
+  \item{n.chain}{Number of chains in the model}
 }
 \value{
   An object of class \code{mtc.model}. This is a list with the following elements:
   \item{type}{The type of model, if none supplied default is 'Consistency'} 
   \item{description}{A short description of the model} 
-  \item{j.network}{Reference to the internal Java network object}
-  \item{j.model}{Reference to the internal Java model object}
-  \item{j.generator}{Reference to the internal Java starting value generator object}
+  \item{j.network}{Reference to the internal Java network object \code{jobjRef}}
+  \item{j.model}{Reference to the internal Java model object \code{jobjRef}}
+  \item{j.generator}{Reference to the internal Java starting value generator object \code{jobjRef}}
   \item{n.chain}{Number of chains}
-  \item{var.scale}{The previously suplied scaling factor}
+  \item{var.scale}{The previously supplied scaling factor}
 }
 
 \section{Visualization}{Calling the generic plot method on an S3 \code{mtc.model} object
 will show a graph with the treatments as vertices and the comparisons as edges.
-The comparisons between basic parameters are shown as a directed acyclic graph
-(DAG) in green, for inconsistency models the added w.factors are shown in red.}
+The solid arrows represent basic parameters, the dotted arrows represent inconsistency factors and solid lines represent comparisons that are not associated with any parameter but do have direct evidence from trials.
+
+The example code will generate the following graph:
+
+\if{html}{\figure{parkison-inconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}}
+\if{latex}{\figure{parkison-inconsistency.pdf}{options: width=3in}}
+
+Note that the layout algorithm used in visualization is non-deterministic and might produce different results on each run.
+}
+
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -46,10 +54,9 @@ The comparisons between basic parameters are shown as a directed acyclic graph
 \code{\link{mtc.network}}, \code{\link{mtc.run}}
 }
 \examples{
-	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
-	network <- read.mtc.network(file)
-	model <- mtc.model(network)
-	plot(model)
-	print(model)
-
+file <- system.file("extdata/parkinson.gemtc", package="gemtc")
+network <- read.mtc.network(file)
+model <- mtc.model(network, "incons")
+plot(model)
+print(model)
 }
