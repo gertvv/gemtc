@@ -55,30 +55,42 @@ Brooks, S.P. and Gelman, A. (1998), \emph{General methods for monitoring converg
 \examples{
 	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
-	model <- mtc.model(network)
-	results <- mtc.run(model, "YADAS", n.iter=5000, n.adapt=2500, thin=10)
+	model <- mtc.model(network, n.chain=2)
+	
+	# Using BUGS or JAGS is preferred over YADAS, 
+	# however YADAS does not require additional dependencies.
+	results <- mtc.run(model, "YADAS", n.iter=10000, n.adapt=2500, thin=10)
 	summary(results)
-	## Iterations = 5001:25000
-	## Thinning interval = 1 
-	## Number of chains = 4 
-	## Sample size per chain = 20000 
-	##
+	
+	## Iterations = 2501:12491
+	## Thinning interval = 10 
+	## Number of chains = 2 
+	## Sample size per chain = 1000 
+	## 
 	## 1. Empirical mean and standard deviation for each variable,
-	##	 plus standard error of the mean:
-	##
-	##				Mean		 SD  Naive SE Time-series SE
-	## d.A.B 0.4937 0.4073 0.0014399			 0.005377
-	## d.A.C 0.8381 0.2439 0.0008623			 0.004275
-	## d.A.D 1.1038 0.4467 0.0015793			 0.007219
-	## sd.d  0.8490 0.1877 0.0006637			 0.004570
-	##
+	##    plus standard error of the mean:
+	## 
+	##                   Mean      SD Naive SE Time-series SE
+	## d.ASPAC.AtPA -0.304820 0.18735 0.004189       0.016522
+	## d.ASPAC.SK   -0.052619 0.12632 0.002825       0.009398
+	## d.ASPAC.tPA  -0.082183 0.14001 0.003131       0.009953
+	## d.AtPA.Ret    0.056672 0.13778 0.003081       0.006673
+	## d.AtPA.SKtPA  0.182576 0.17255 0.003858       0.008097
+	## d.AtPA.Ten    0.003885 0.18986 0.004245       0.005752
+	## d.AtPA.UK    -0.010540 0.25126 0.005618       0.020747
+	## sd.d          0.144836 0.09832 0.002198       0.009121
+	## 
 	## 2. Quantiles for each variable:
-	##
-	##				 2.5%		 25%		50%		 75% 97.5%
-	## d.A.B -0.3015 0.2290 0.4887 0.7539 1.319
-	## d.A.C	0.3804 0.6762 0.8280 0.9936 1.338
-	## d.A.D	0.2591 0.8082 1.0880 1.3882 2.027
-	## sd.d		0.5523 0.7154 0.8280 0.9547 1.282
+	## 
+	##                  2.5%      25%        50%       75%    97.5%
+	## d.ASPAC.AtPA -0.80131 -0.37424 -0.2633908 -0.194203 -0.02693
+	## d.ASPAC.SK   -0.36079 -0.10434 -0.0446136  0.021031  0.18066
+	## d.ASPAC.tPA  -0.41917 -0.14239 -0.0607428  0.002906  0.13709
+	## d.AtPA.Ret   -0.22937 -0.01136  0.0543854  0.132491  0.34123
+	## d.AtPA.SKtPA -0.12126  0.08231  0.1607389  0.257809  0.59299
+	## d.AtPA.Ten   -0.36726 -0.08907  0.0006722  0.096692  0.38692
+	## d.AtPA.UK    -0.50267 -0.17332 -0.0040873  0.165143  0.48285
+	## sd.d          0.02821  0.07322  0.1186668  0.192236  0.40152
 	
 	forest(results) # Shows a forest plot
 	plot(results) # Shows density plot of the samples
