@@ -57,7 +57,7 @@ Brooks, S.P. and Gelman, A. (1998), \emph{General methods for monitoring converg
 	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
 	model <- mtc.model(network)
-	results <- mtc.run(model)
+	results <- mtc.run(model, "YADAS", n.iter=10000, n.adapt=5000, thin=10)
 	summary(results)
 	## Iterations = 5001:25000
 	## Thinning interval = 1 

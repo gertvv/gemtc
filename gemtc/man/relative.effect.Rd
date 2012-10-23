@@ -34,7 +34,13 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
 	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
 	model <- mtc.model(network)
-	results <- mtc.run(model)
+	\dontrun{results <- mtc.run(model)}
+	\dontshow{
+		# To save computation time we load the samples instead of running the model
+		samples <- dget(system.file("extdata/smokingSamples.txt.gz", package="gemtc"))
+		results <- list(samples=samples, model=model, sampler=NULL)
+		class(results) <- "mtc.result"
+	}
 	summary(relative.effect(results, "B", c("A", "C", "D")))
 
 	# Creates a forest plot of the relative effects
