@@ -36,7 +36,14 @@ mtc.model(network, type = "Consistency", factor = 2.5, n.chain = 4)
 \section{Visualization}{Calling the generic plot method on an S3 \code{mtc.model} object
 will show a graph with the treatments as vertices and the comparisons as edges.
 The comparisons between basic parameters are shown as a directed acyclic graph
-(DAG) in green, for inconsistency models the added w.factors are shown in red.}
+(DAG), for inconsistency models the added w.factors are shown as dotted lines.
+
+The example code will generate the following graph:
+
+\if{html}{\figure{parkisonInconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}}
+\if{latex}{\figure{parkisonInconsistency.pdf}{options: width=3in}}
+}
+
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -46,9 +53,9 @@ The comparisons between basic parameters are shown as a directed acyclic graph
 \code{\link{mtc.network}}, \code{\link{mtc.run}}
 }
 \examples{
-	file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
+	file <- system.file("extdata/parkison.gemtc", package="gemtc")
 	network <- read.mtc.network(file)
-	model <- mtc.model(network)
+	model <- mtc.model(network, "incons")
 	plot(model)
 	print(model)
 
