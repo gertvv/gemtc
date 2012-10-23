@@ -28,9 +28,9 @@ An object of class \code{mtc.result}. This is a list with the following elements
 }
 \examples{
 ## The function is currently defined as
-	function (file, model, sampler = NULL) {
-			samples <- dget(file)
-			results <- list(samples = samples, model = model, sampler = sampler)
-			class(results) <- "mtc.result"
-	}
+function (file, model, sampler = NULL) {
+    samples <- dget(file)
+    results <- list(samples = samples, model = model, sampler = sampler)
+    class(results) <- "mtc.result"
+}
 }

@@ -21,20 +21,20 @@ rank.probability(result)
 \code{\link{relative.effect}}
 }
 \examples{
-	file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
-	network <- read.mtc.network(file)
-	model <- mtc.model(network)
-	# To save computation time we load the samples instead of running the model
-	\dontrun{results <- mtc.run(model)}
-	file.samples <- system.file("extdata/luades-smoking.samples.gz", package="gemtc")
-	results <- read.mtc.result.samples(file.samples, model, "rjags")
+file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
+network <- read.mtc.network(file)
+model <- mtc.model(network)
+# To save computation time we load the samples instead of running the model
+\dontrun{results <- mtc.run(model)}
+file.samples <- system.file("extdata/luades-smoking.samples.gz", package="gemtc")
+results <- read.mtc.result.samples(file.samples, model, "rjags")
 
-	ranks <- rank.probability(results)
-	print(ranks)
-	##       [,1]      [,2]     [,3]     [,4]
-	## A 0.0000500 0.0024250 0.104000 0.893525
-	## B 0.0571125 0.1802375 0.661125 0.101525
-	## C 0.2409625 0.5893875 0.169375 0.000275
-	## D 0.7020250 0.2279000 0.065450 0.004625
-	barplot(t(ranks), beside=TRUE)
+ranks <- rank.probability(results)
+print(ranks)
+##       [,1]      [,2]     [,3]     [,4]
+## A 0.0000500 0.0024250 0.104000 0.893525
+## B 0.0571125 0.1802375 0.661125 0.101525
+## C 0.2409625 0.5893875 0.169375 0.000275
+## D 0.7020250 0.2279000 0.065450 0.004625
+barplot(t(ranks), beside=TRUE)
 }
