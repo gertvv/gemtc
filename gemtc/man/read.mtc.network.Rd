@@ -19,7 +19,7 @@ read.mtc.network(file)
 \value{
 	Reading a network will return an object of class \code{mtc.network}. This is a list with the following elements:
 	\item{description}{A short description of the model} 
-	\item{treatments}{A list of included treatments in the network}
+	\item{treatments}{A list of included treatments in the network. Treatments have an \code{id} and \code{description}.}
 	\item{data}{A data frame of lists containing a study, treatment combination with an amount of responders and sample size for dichotomous networks and a mean, std.dev. and sample size for continuous networks}
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
