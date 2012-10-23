@@ -15,7 +15,9 @@ treatments based on all included studies.
 
 This package allows the automated generation of MTC consistency and
 inconsistency models that can be run using JAGS, OpenBUGS, WinBUGS or YADAS. see
-\url{http://drugis.org/gemtc} for more information.  }
+\url{http://drugis.org/gemtc} for more information. 
+
+The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/mtc}{Github}}
 
 \section{Inconsistency models}{ 
 In network meta-analysis, because of the more
