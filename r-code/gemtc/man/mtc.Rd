@@ -17,9 +17,9 @@ This package allows the automated generation of MTC consistency and
 inconsistency models that can be run using JAGS, OpenBUGS, WinBUGS or YADAS.
 Furthermore it allows interoperability with GeMTC files that were created by the
 GeMTC GUI or exported through \href{http://drugis.org/addis}{ADDIS}.
-The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/mtc}{Github}}
+The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/mtc}{Github}
 
-See \url{http://drugis.org/gemtc} for more information. 
+See \url{http://drugis.org/gemtc} for more information.}
 
 
 \section{Inconsistency models}{ 
