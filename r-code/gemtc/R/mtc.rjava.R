@@ -82,14 +82,21 @@ read.mtc.network <- function(file) {
 	network
 }
 
-mtc.network <- function(description, treatments, data) {
-	ids <- unlist(lapply(treatments, function(t) { t['id'] }))
-	treatments <- as.data.frame(list(
-		id = ids,
-		description = unlist(lapply(treatments, function(t) { t['description'] }))
-	), row.names = ids)
-	data <- t(as.data.frame(lapply(data, data.frame)))
-	row.names(data) <- seq(1:dim(data)[1])
+mtc.network <- function(description, treatments=NULL, data) {
+  if(!is.data.frame(treatments)) { 
+	  ids <- unlist(lapply(treatments, function(t) { t['id'] }))
+	  treatments <- as.data.frame(list(
+		  id = ids,
+	  	description = unlist(lapply(treatments, function(t) { t['description'] }))
+	  ), row.names = ids)
+  }
+  if(!is.data.frame(data)) { 
+	  data <- t(as.data.frame(lapply(data, data.frame)))
+	  row.names(data) <- seq(1:dim(data)[1])
+  }
+  if(is.null(treatments)) { 
+    treatments = unique(data$treatment)
+  }
 	network <- list(
 		description=description,
 		treatments=treatments,
