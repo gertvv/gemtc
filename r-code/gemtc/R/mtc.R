@@ -77,7 +77,7 @@ mtc.network.graph <- function(network) {
 }
 
 filter.parameters <- function(parameters, criterion) { 
-	parameters <- sapply(parameters, function(x) { 
+	parameters <- lapply(parameters, function(x) { 
 	path <- unlist(strsplit(x, '\\.')) 
 	if(criterion(path)) { 
 		path[-1]
