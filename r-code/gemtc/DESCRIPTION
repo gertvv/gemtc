@@ -8,4 +8,4 @@ Description: An R package for performing network meta-analyses (mixed treatment 
 Depends: R (>= 2.7.0), gemtc.jar (>= 0.14.1), rJava (>= 0.8-0), coda (>= 0.13), igraph (>= 0.6), meta (>= 2.1)
 Suggests: rjags (>= 3-0), BRugs (>= 0.8), R2WinBUGS (>= 2.1)
 SystemRequirements: Java (>= 1.6)
-License: GPL-2
+License: GPL-3
