@@ -6,6 +6,5 @@ Author: Gert van Valkenhoef, Joel Kuiper
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
 Description: An R package providing the Java binary dependency for the gemtc package
 Depends: R (>= 2.7.0), rJava (>= 0.8-0)
-Suggests: gemtc (>= 0.1)
 SystemRequirements: Java (>= 1.6)
-License: GPL-2
+License: GPL-3

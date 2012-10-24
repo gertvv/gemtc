@@ -12,7 +12,7 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{result}{An object of class S3 \code{mtc.result} to derive the relative effects from}
-  \item{t1}{A list of baselines to calculate a relative effects against. Will be extened to match the length of t2.}
+  \item{t1}{A list of baselines to calculate a relative effects against. Will be extended to match the length of t2.}
   \item{t2}{A list of treatments to calculate the relative effects for. Will be extended to match the length of t1.
 If left empty and t1 is a single treatment, relative effects of all treatments except t1 will be calculated.}
   \item{preserve.extra}{Indicates whether to preserve extra parameters such as the sd.w and sd.d}
