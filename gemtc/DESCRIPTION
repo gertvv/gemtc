@@ -1,7 +1,7 @@
 Package: gemtc
-Version: 0.15
-Date: 2012-10-12
-Title: GeMTC Mixed Treatment Comparisons
+Version: 0.1
+Date: 2012-10-24
+Title: GeMTC network meta-analysis
 Author: Gert van Valkenhoef, Joel Kuiper 
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
 Description: An R package for performing network meta-analyses (mixed treatment comparisons).
