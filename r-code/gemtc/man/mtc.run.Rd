@@ -38,15 +38,14 @@ The object can be coerced to an \code{mcmc.list} from the \code{coda} package by
 }
 
 
-\author{Gert van Valkenhoef, Joël Kuiper}
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 \section{Model convergence}{Convergence of the model can be assessed using the
 Brooks-Gelman-Rubin method (Brooks & Gelman, 1998) This method compares within-chain and between-chain
 variance to calculate the Potential Scale Reduction Factor (PSRF).  This method
-is available through calling the \code{\gelman.diag} or \code{gelman.plot} function from
+is available through calling the \code{gelman.diag} or \code{gelman.plot} function from
 the \code{coda} package on the \code{mtc.result} object.  A PSRF close to one indicates
 approximate convergence has been reached.}
 
+\author{Gert van Valkenhoef, Joël Kuiper}
 \seealso{\code{\link{mtc.model}}}
 
 \references{
