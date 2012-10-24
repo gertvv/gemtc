@@ -8,10 +8,11 @@
 \alias{as.mcmc.list.mtc.result}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Running an MTC Model and obtaining results}
-\description{ The function \code{mtc.run} is used to generate samples from a object
-of type \code{mtc.model} using a MCMC sampler. The resulting \code{mtc.results} object can
-be used for further analysis of the dataset.  }
+\title{Running an \code{mtc.model} using an MCMC sampler}
+\description{
+The function \code{mtc.run} is used to generate samples from a object of type \code{mtc.model} using a MCMC sampler.
+The resulting \code{mtc.results} object can be coerced to an \code{mcmc.list} for further analysis of the dataset using the \code{coda} package.
+}
 \usage{
 mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
 }
@@ -19,39 +20,42 @@ mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
 \arguments{
   \item{model}{A object of S3 class \code{mtc.model} describing a consistency or inconsistency model}
   \item{sampler}{
-    A string literal indicating which sampler to use.
-    Allowed values are \code{'BUGS'} using either \code{'BRugs'} or \code{'R2WinBUGS'}, 
-    \code{'JAGS'} using \code{'rjags'} or \code{'YADAS'}. 
-    When none supplied it will try BUGS, JAGS and YADAS, in that order}
-  \item{n.adapt}{Amount of adapt or tuning iterations}
-  \item{n.iter}{Amount of MCMC simulation iterations}
+A string literal indicating which sampler to use.
+Allowed values are \code{'JAGS'}, \code{'BUGS'} or \code{'YADAS'}. 
+Alternatively, the specific package to be used can be specified: \code{'rjags'}, \code{'BRugs'} or \code{'R2WinBUGS'}.
+When unspecified it will try JAGS, BUGS and YADAS, in that order.}
+  \item{n.adapt}{Amount of adaptation (or tuning) iterations}
+  \item{n.iter}{Amount of simulation iterations}
   \item{thin}{Thinning factor}
 }
 \value{
 An object of class \code{mtc.result}. This is a list with the following elements: 
 \item{samples}{The samples resulting from running the MCMC model} 
-\item{model}{A reference to the model used to produce the samples}
+\item{model}{The \code{mtc.model} used to produce the samples}
 \item{sampler}{The sampler used to produce the samples}
 
-The object can be coerced to an \code{mcmc.list} from the \code{coda} package by the generic S3 method 
-\code{as.mcmc} which is used internally to generate the summaries.
+The object can be coerced to an \code{mcmc.list} from the \code{coda} package by the generic S3 method \code{as.mcmc.list}.
 }
 
+\section{Analysis of the results}{
+Convergence of the model can be assessed using methods from the \code{coda} package.
+For example the Brooks-Gelman-Rubin method (\code{gelman.diag}, \code{gelman.plot}).
+The \code{summary} also provides useful information, such as the MCMC error and the time series and densities given by \code{plot} should also be inspected.
+
+The \code{\link{forest}} function from the \code{meta} package has been overridden for \code{mtc.result} objects.
+This is especially useful in combination with the \code{\link{relative.effect}} function that can be used to calculate relative effects compared to any baseline for consistency models.
+The \code{\link{rank.probability}} function calculated rank probabilities for consistency models.
+}
 
 \author{Gert van Valkenhoef, Joël Kuiper}
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-\section{Model convergence}{Convergence of the model can be assessed using the
-Brooks-Gelman-Rubin method (Brooks & Gelman, 1998) This method compares within-chain and between-chain
-variance to calculate the Potential Scale Reduction Factor (PSRF).  This method
-is available through calling the \code{\gelman.diag} or \code{gelman.plot} function from
-the \code{coda} package on the \code{mtc.result} object.  A PSRF close to one indicates
-approximate convergence has been reached.}
-
-\seealso{\code{\link{mtc.model}}}
-
-\references{
-Brooks, S.P. and Gelman, A. (1998), \emph{General methods for monitoring convergence of iterative simulations}, Journal of Computational and Graphical Statistics, 7(4): 434-455. [\href{http://www.jstor.org/stable/1390675}{JSTOR 1390675}]
+\seealso{
+\code{\link{mtc.model}},
+\code{\link{relative.effect}},
+\code{\link{rank.probability}},
+\code{gelman.diag},
+\code{gelman.plot}
 }
+
 \examples{
 file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 network <- read.mtc.network(file)
@@ -92,6 +96,6 @@ summary(results)
 ## d.AtPA.UK    -0.50267 -0.17332 -0.0040873  0.165143  0.48285
 ## sd.d          0.02821  0.07322  0.1186668  0.192236  0.40152
 
+plot(results) # Shows time-series and density plots of the samples
 forest(results) # Shows a forest plot
-plot(results) # Shows density plot of the samples
 }

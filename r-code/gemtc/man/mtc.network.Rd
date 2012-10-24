@@ -1,17 +1,22 @@
 \encoding{utf8}
 \name{mtc.network}
 \alias{mtc.network}
-\title{Constructing an MTC Network}
-\description{Creates an network of class \code{mtc.network} based upon treatments and
-data.}
+\title{Create an mtc.network}
+\description{Creates an object of class \code{mtc.network}}
 \usage{
 mtc.network(description, treatments, data)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{description}{Short description describing the subject of the network}
-  \item{treatments}{A list of treatments consisting of a vector of ids and descriptions}
-  \item{data}{A data frame of lists containing a study, treatment combination with an amount of responders and sample size for dichotomous networks and a mean, std.dev. and sample size for continuous networks}
+  \item{description}{Optional. Short description of the network.}
+  \item{treatments}{Optional.
+A data frame with columns `id' and `description' defining the treatments.
+Alternatively, a list where each element is a labeled vector defining a single treatment.}
+  \item{data}{
+A data frame defining the arms of each study, containing the columns `study' and `treatment', where `treatment' must refer to an existing treatment ID if treatments were specified.
+To specify a network with dichotomous data, the number of responders should be given in a column `responders' and the sample size in a column `sampleSize'.
+To specify a network with continuous data, the mean should be given in a column `mean', the standard deviation in a column `std.dev' and the sample size in a column `sampleSize'.
+Alternatively, a list where each element is a labeled vector defining a single arm of a study.}
 }
 \value{
 A object of the class \code{mtc.network}
@@ -27,16 +32,17 @@ A object of the class \code{mtc.network}
 \code{\link{read.mtc.network}}
 }
 \examples{
-treatments <- list( c('id' = 'A', 'description' = 'tA'),
-                    c('id' = 'B', 'description' = 'tB'),
-                    c('id' = 'C', 'description' = 'tC'))
-data <- list( c('study' = '01', 'treatment' = 'A', 'responders'=2, 'sampleSize'=100),
-              c('study' = '01', 'treatment' = 'B', 'responders'=5, 'sampleSize'=100),
-              c('study' = '02', 'treatment' = 'B', 'responders'=6, 'sampleSize'=110),
-              c('study' = '02', 'treatment' = 'C', 'responders'=1, 'sampleSize'=110),
-              c('study' = '03', 'treatment' = 'A', 'responders'=3, 'sampleSize'=60),
-              c('study' = '03', 'treatment' = 'C', 'responders'=4, 'sampleSize'=80),
-              c('study' = '03', 'treatment' = 'B', 'responders'=7, 'sampleSize'=80))
+treatments <- list(c('id' = 'A', 'description' = 'Treatment A'),
+                   c('id' = 'B', 'description' = 'Treatment B'),
+                   c('id' = 'C', 'description' = 'Treatment C'))
+data <- list(
+   c('study' = '01', 'treatment' = 'A', 'responders' = 2, 'sampleSize' = 100),
+   c('study' = '01', 'treatment' = 'B', 'responders' = 5, 'sampleSize' = 100),
+   c('study' = '02', 'treatment' = 'B', 'responders' = 6, 'sampleSize' = 110),
+   c('study' = '02', 'treatment' = 'C', 'responders' = 1, 'sampleSize' = 110),
+   c('study' = '03', 'treatment' = 'A', 'responders' = 3, 'sampleSize' = 60),
+   c('study' = '03', 'treatment' = 'C', 'responders' = 4, 'sampleSize' = 80),
+   c('study' = '03', 'treatment' = 'B', 'responders' = 7, 'sampleSize' = 80))
 network <- mtc.network("Example", treatments, data)
 plot(network)
 }

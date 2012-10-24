@@ -4,8 +4,11 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculating rank-probabilities}
 \description{
-Rank probability ranks the treatments by binning the samples based upon the their relative effect. 
-The result of the ranking is divided by the total amount of samples, making he columns and rows of the resulting matrix sum to 1.
+Rank probabilities indicate the probability for each treatment to be best, second best, etc.
+}
+\details{
+For each MCMC iteration, the treatments are ranked by their effect relative to an arbitrary baseline.
+A frequency table is constructed from these rankings and normalized by the number of iterations to give the rank probabilities.
 }
 \usage{
 rank.probability(result)
