@@ -27,7 +27,6 @@ plot.mtc.network <- function(x, ...) {
 }
 
 ## mtc.model class methods
-
 print.mtc.model <- function(x, ...) {
 	cat("MTC ", x$type, " model: ", x$description, "\n", sep="")
 }
@@ -71,7 +70,6 @@ as.mcmc.list.mtc.result <- function(x, ...) {
 }
 
 ####
-
 mtc.network.graph <- function(network) {
 	comparisons <- mtc.network.comparisons(network)
 	treatments <- as.character(network$treatments$id)
@@ -79,7 +77,7 @@ mtc.network.graph <- function(network) {
 }
 
 filter.parameters <- function(parameters, criterion) { 
-	parameters <- sapply(parameters, function(x) { 
+	parameters <- lapply(parameters, function(x) { 
 	path <- unlist(strsplit(x, '\\.')) 
 	if(criterion(path)) { 
 		path[-1]
@@ -101,10 +99,21 @@ graph.create <- function(v, e, ...) {
 }
 
 w.factors <- function(parameters) {
-	lapply(filter.parameters(parameters, function(x) { x[1] == 'w' }),
-	function(x) {
-		c(x[length(x)], x[1])
-	})
+  basic <- do.call(rbind, filter.parameters(parameters, function(x) { x[1] == 'd' }))
+  extract.unique <- function(f, basic) {
+		f <- c(f, f[1])
+    factors <- lapply(1:length(f), function(x, pars) { c(pars[x - 1], pars[x]) }, f)[-1]
+    factors <- do.call(rbind, factors)
+    apply(factors, 1, function(fac) {
+      if(!any(basic[,1]==fac[1] & basic[,2] == fac[2]) &&
+         !any(basic[,2]==fac[1] & basic[,1] == fac[2])) {
+        fac
+      } else NULL
+    })
+  }
+  w.factors <- filter.parameters(parameters, function(x) { x[1] == 'w' })
+  w.factors <- unlist(lapply(w.factors, extract.unique, basic), recursive=FALSE)
+	w.factors[!sapply(w.factors, is.null)]
 }
 
 mtc.model.graph <- function(model) { 

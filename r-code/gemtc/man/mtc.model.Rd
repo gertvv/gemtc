@@ -46,12 +46,12 @@ The solid arrows represent basic parameters, the dotted arrows represent inconsi
 \if{html}{
 The example code will generate the following graph:
 
-\figure{parkison-inconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}
+\figure{parkinson-inconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}
 }
 \if{latex}{
 The example code will generate the following graph:
 
-\figure{parkison-inconsistency.pdf}{options: width=3in}
+\figure{parkinson-inconsistency.pdf}{options: width=3in}
 }
 
 Note that the layout algorithm used in visualization is non-deterministic and might produce different results on each run.
