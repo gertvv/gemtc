@@ -12,7 +12,8 @@ write.mtc.network(network, file = "")
 
 \arguments{
   \item{network}{The network object of S3 class \code{mtc.network} to write}
-	\item{file}{Path to write the file to,  If \code{""}, print to the standard output connection.  If it is \code{"|cmd"}, the output is piped to the command given by \code{cmd}} 
+	\item{file}{Path to write the file to,  If \code{""}, print to the standard output connection.  If it is \code{"|cmd"}, the output is piped to the command given by \code{cmd}}
+}
 
 \seealso{\code{\link{mtc.network}}, \code{\link{read.mtc.network}}, \code{\link{write}}}
 
