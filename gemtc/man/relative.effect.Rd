@@ -5,20 +5,20 @@
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculating relative effects}
-\description{Calculates the relative effect of a treatment against a baseline. 
-}
+\description{Calculates the relative effects of pairs of treatments.}
 \usage{
 relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{result}{An object of class S3 \code{mtc.result} to derive the relative effect from}
-  \item{t1}{A list of baselines to calculate a relative effect from}
-  \item{t2}{A list of treatments to calculate the relative effect against a baseline from. If none supplied or an empty list all relevant treatments will be calculated}
-  \item{preserve.extra}{Indicates whether to preserve the extra fields such as the sd.w and sd.d}
+  \item{result}{An object of class S3 \code{mtc.result} to derive the relative effects from}
+  \item{t1}{A list of baselines to calculate a relative effects against. Will be extened to match the length of t2.}
+  \item{t2}{A list of treatments to calculate the relative effects for. Will be extended to match the length of t1.
+If left empty and t1 is a single treatment, relative effects of all treatments except t1 will be calculated.}
+  \item{preserve.extra}{Indicates whether to preserve extra parameters such as the sd.w and sd.d}
 }
 \value{
-  Returns a \code{mtc.results} object containing objects of type \code{mcmc} for each of the relative effects.
+  Returns an \code{mtc.results} object containing the calculated relative effects.
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
