@@ -15,6 +15,7 @@ $(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/man/*.Rd $(PKG_NAM
 	mkdir -p $(PKG_NAME)/inst/extdata
 	cp ../example/*.gemtc $(PKG_NAME)/inst/extdata
 	cp samples/*.gz $(PKG_NAME)/inst/extdata
+	rm $(PKG_NAME)/src/*.o $(PKG_NAME)/src/*.so
 	R CMD build $(PKG_NAME)
 
 $(JAR_PACKAGE): $(JAR) $(JAR_PKG_NAME)/DESCRIPTION
