@@ -1,6 +1,7 @@
-\name{mtc}
+\name{gemtc-package}
 \alias{mtc}
-\alias{mtc-package}
+\alias{gemtc}
+\alias{gemtc-package}
 \docType{package} 
 
 \title{GeMTC: Network meta-analysis in R}
