@@ -14,19 +14,6 @@ model.
 The MTC models can also be estimated by GeMTC GUI itself, using the
 YADAS implementation of MCMC for Java.
 
-Several flavours of GeMTC are available:
-
-  * A graphical user interface (GUI) application with built-in data
-    management and model generation capabilities. The generated models
-    can be run using JAGS or BUGS, or by GeMTC GUI itself.
-
-  * An R package that combines the GeMTC library and JAGS to provide
-    full analysis capabilities (EXPERIMENTAL).
-
-  * A Java library  that can also run the MTC models using the YADAS
-    pure Java MCMC package. This option is used by [ADDIS][2] to perform
-    network meta-analysis.
-
 Several example XML files are provided with the GeMTC distribution to
 demonstrate the capabilities of the library. All examples were taken
 from published network meta-analyses, and the references to the original
@@ -35,20 +22,18 @@ papers are in the respective XML files.
 Requirements
 ------------
 
-GeMTC is built in [Java][3], and requires Java 6 (JRE 1.6) or newer. To
-run the generated models, you need [JAGS][4] 3.0 or newer, or
-[OpenBUGS][5], or [WinBUGS][6]. You may want to use [R][7] to perform
-post-processing and analysis.
+GeMTC is built in [Java][2], and requires Java 6 (JRE 1.6) or newer.
 
 Running GeMTC GUI
 -----------------
 
-Double click the mtc-gui-0.14.jar file, and click "Open" to open an
+Double click the mtc-gui-0.14.1.jar file, and click "Open" to open an
 existing data file (e.g. those provided in the examples directory) or
 "New" to create a new one.
 
 Versions
 --------
+
 0.14.1: Bugfixes and minor improvements.
 
 0.14: Moved analysis functionality from ADDIS into GeMTC GUI, enabling
@@ -69,21 +54,7 @@ generation.
 
 0.10.1: Bugfixes, generate R code for JAGS models.
 
-0.10: Addition of GUI module, improved consistency model generation,
-support for BUGS. Renamed to GeMTC CLI and GeMTC GUI.
-
-0.8: Starting value generation for JAGS models, JAGS node-split models,
-provide R code for analysis.
-
-0.6: Node-splitting models, assessment of convergence, starting value
-generation, allow access to samples (all for YADAS only, JAGS models
-have not advanced). Modularized into 4 libraries.
-
-0.4: Improved parametrization algorithm. Allow output of Network as XML.
-Check connectedness of network. Some issues fixed.
-
-0.2: Initial release. JAGS and YADAS model generation. Java API for
-running MTC models.
+0.10: First GeMTC GUI version.
 
 Building from source
 --------------------
@@ -91,8 +62,8 @@ Building from source
 Source code can be obtained from [the GeMTC site][1]. In order to build
 GeMTC you need:
 
- - [Java >= 1.6][3]
- - [Maven 2][8]
+ - [Java >= 1.6][2]
+ - [Maven 2][3]
  - Other dependencies are downloaded automatically by Maven
 
 To build, use "mvn package". Due to downloading dependencies, the first
@@ -112,10 +83,5 @@ for more information.
 
 
 [1]: http://drugis.org/gemtc
-[2]: http://drugis.org/addis
-[3]: http://www.java.com/getjava/
-[4]: http://sourceforge.net/projects/mcmc-jags/
-[5]: http://www.openbugs.info/
-[6]: http://www.mrc-bsu.cam.ac.uk/bugs/
-[7]: http://r-project.org/
-[8]: http://maven.apache.org/
+[2]: http://www.java.com/getjava/
+[3]: http://maven.apache.org/
