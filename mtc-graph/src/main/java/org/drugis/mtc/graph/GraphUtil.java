@@ -49,7 +49,7 @@ public class GraphUtil {
 		target.addVertex(source.getRoot());
 		LinkedList<E> toAdd = new LinkedList<E>(source.getChildEdges(source.getRoot()));
 		while (!toAdd.isEmpty()) {
-			E e = toAdd.pop();
+			E e = toAdd.removeFirst();
 			target.addEdge(e, source.getSource(e), source.getDest(e));
 			toAdd.addAll(source.getChildEdges(source.getDest(e)));
 		}
@@ -85,7 +85,7 @@ public class GraphUtil {
 			LinkedList<V> fringe = new LinkedList<V>(); // directly reachable vertices
 			fringe.add(graph.getVertices().iterator().next()); // start at an arbitrary vertex
 			while (!fringe.isEmpty()) {
-				V v = fringe.pop();
+				V v = fringe.removeFirst();
 				if (!visited.contains(v)) {
 					visited.add(v);
 					fringe.addAll(graph.getNeighbors(v));
@@ -109,7 +109,7 @@ public class GraphUtil {
 		LinkedList<V> fringe = new LinkedList<V>();
 		fringe.add(first);
 		while (!fringe.isEmpty()) {
-			V v = fringe.pop();
+			V v = fringe.removeFirst();
 			if (v.equals(second)) {
 				return true;
 			}

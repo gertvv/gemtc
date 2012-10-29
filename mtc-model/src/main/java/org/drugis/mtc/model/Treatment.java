@@ -93,7 +93,7 @@ public class Treatment extends TreatmentData implements Observable, Comparable<T
 	}
 
 	public String format() {
-		if(getDescription() == null || getDescription().isEmpty()) {
+		if(getDescription() == null || getDescription().length() == 0) {
 			return getId();
 		}
 		return getDescription();

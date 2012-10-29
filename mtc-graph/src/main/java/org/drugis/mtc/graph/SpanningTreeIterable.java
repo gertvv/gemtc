@@ -91,7 +91,7 @@ public class SpanningTreeIterable<V, E> implements Iterable<Tree<V, E>> {
 		 */
 		private Tree<V, E> findNext() {
 			while (!d_queue.isEmpty()) {
-				ProblemState<V, E> head = d_queue.pop();
+				ProblemState<V, E> head = d_queue.removeFirst();
 				d_queue.addAll(0, successors(head));
 				if (isGoal(head)) {
 					return head.tree;

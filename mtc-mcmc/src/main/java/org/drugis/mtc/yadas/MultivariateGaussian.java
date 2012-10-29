@@ -35,7 +35,9 @@ import org.apache.commons.math3.util.Precision;
 public class MultivariateGaussian implements Likelihood {
 	@Override
 	public double compute(double[][] data) {
-		return compute(data[0], data[1], Arrays.copyOfRange(data, 2, data.length));
+		double[][] other = new double[data.length - 2][];
+		System.arraycopy(data, 2, other, 0, data.length - 2);
+		return compute(data[0], data[1], other);
 	}
 
 	public double compute(double[] x, double[] mu, double[][] sigma) {
