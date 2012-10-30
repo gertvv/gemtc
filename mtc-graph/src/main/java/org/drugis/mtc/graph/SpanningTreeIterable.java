@@ -62,7 +62,6 @@ public class SpanningTreeIterable<V, E> implements Iterable<Tree<V, E>> {
 			d_queue.add(new ProblemState<V, E>(d_graph, initialTree, getOutEdges(d_graph, d_root), false));
 		}
 
-		@Override
 		public boolean hasNext() {
 			if (d_current == null) {
 				d_current = findNext();
@@ -70,7 +69,6 @@ public class SpanningTreeIterable<V, E> implements Iterable<Tree<V, E>> {
 			return d_current != null;
 		}
 
-		@Override
 		public Tree<V, E> next() {
 			if (hasNext()) {
 				d_last = d_current;
@@ -81,7 +79,6 @@ public class SpanningTreeIterable<V, E> implements Iterable<Tree<V, E>> {
 			}
 		}
 
-		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}

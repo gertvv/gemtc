@@ -70,7 +70,6 @@ public class YadasResults implements MCMCResults {
 		initialize();
 	}
 
-	@Override
 	public void clear() {
 		d_availableSamples = 0;
 		d_reservedSamples = 0;
@@ -114,12 +113,10 @@ public class YadasResults implements MCMCResults {
 	 * Get the direct parameters.
 	 * @see MCMCResults
 	 */
-	@Override
 	public Parameter[] getParameters() {
 		return d_directParameters;
 	}
 
-	@Override
 	public int findParameter(Parameter p) {
 		int idx = ArrayUtils.indexOf(d_directParameters, p);
 		if (idx >= 0) {
@@ -144,7 +141,6 @@ public class YadasResults implements MCMCResults {
 		return new YadasParameterWriter(findParameter(p), cIdx, mp, i);
 	}
 
-	@Override
 	public double getSample(int p, int c, int i) {
 		if (c < 0 || c >= d_nChains) {
 			throw new IndexOutOfBoundsException("Chain " + c + " out of bounds: " +
@@ -180,7 +176,6 @@ public class YadasResults implements MCMCResults {
 		}
 	}
 
-	@Override
 	public int getNumberOfChains() {
 		return d_nChains;
 	}
@@ -200,7 +195,6 @@ public class YadasResults implements MCMCResults {
 		return d_reservedSamples;
 	}
 
-	@Override
 	public int getNumberOfSamples() {
 		return d_availableSamples;
 	}
@@ -216,12 +210,10 @@ public class YadasResults implements MCMCResults {
 	
 
 	
-	@Override
 	public void addResultsListener(MCMCResultsListener l) {
 		d_listeners.add(l);
 	}
 	
-	@Override
 	public void removeResultsListener(MCMCResultsListener l) {
 		d_listeners.remove(l);
 	}

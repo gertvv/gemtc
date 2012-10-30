@@ -60,17 +60,14 @@ public class YadasNodeSplitModel extends YadasModel implements NodeSplitModel {
 		return false;
 	}
 
-	@Override
 	public NetworkParameter getDirectEffect() {
 		return new SplitParameter(d_split.getBaseline(), d_split.getSubject(), true);
 	}
 
-	@Override
 	public NetworkParameter getIndirectEffect() {
 		return new SplitParameter(d_split.getBaseline(), d_split.getSubject(), false);
 	}
 
-	@Override
 	public BasicParameter getSplitNode() {
 		return d_split;
 	}

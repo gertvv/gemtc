@@ -63,33 +63,27 @@ public class YadasModelFactory implements ModelFactory {
 			DEFAULT_TUNING_ITERATIONS, DEFAULT_SIMULATION_ITERATIONS, DEFAULT_THINNING_FACTOR,
 			DEFAULT_NUMBER_OF_CHAINS, DEFAULT_VARIANCE_SCALING);
 
-	@Override
 	public ConsistencyModel getConsistencyModel(Network network) {
 		return new YadasConsistencyModel(network, d_defaults);
 	}
 
-	@Override
 	public InconsistencyModel getInconsistencyModel(Network network) {
 		return new YadasInconsistencyModel(network, d_defaults);
 	}
 
-	@Override
 	public NodeSplitModel getNodeSplitModel(Network network, BasicParameter split) {
 		return new YadasNodeSplitModel(network, split, d_defaults);
 	}
 
-	@Override
 	public List<BasicParameter> getSplittableNodes(Network network) {
 		final Hypergraph<Treatment, Study> studyGraph = NetworkModel.createStudyGraph(network);
 		return NodeSplitParameterization.getSplittableNodes(studyGraph, NetworkModel.createComparisonGraph(studyGraph));
 	}
 
-	@Override
 	public MCMCSettings getDefaults() {
 		return d_defaults;
 	}
 
-	@Override
 	public void setDefaults(MCMCSettings settings) {
 		d_defaults = settings;
 	}

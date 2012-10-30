@@ -42,12 +42,10 @@ public final class YadasSettings extends AbstractObservable implements MCMCSetti
 				settings.getNumberOfChains(), settings.getVarianceScalingFactor());
 	}
 
-	@Override
 	public double getVarianceScalingFactor() {
 		return d_varianceScalingFactor;
 	}
 
-	@Override
 	public int getTuningIterations() {
 		return d_tuningIterations;
 	}
@@ -58,12 +56,10 @@ public final class YadasSettings extends AbstractObservable implements MCMCSetti
 		firePropertyChange(PROPERTY_TUNING_ITERATIONS, oldValue, newValue);
 	}
 
-	@Override
 	public int getThinningInterval() {
 		return d_thinning;
 	}
 
-	@Override
 	public int getSimulationIterations() {
 		return d_simulationIterations;
 	}
@@ -76,12 +72,10 @@ public final class YadasSettings extends AbstractObservable implements MCMCSetti
 		firePropertyChange(PROPERTY_INFERENCE_SAMPLES, oldInferenceSamples, getInferenceSamples());
 	}
 
-	@Override
 	public int getNumberOfChains() {
 		return d_numberOfChains;
 	}
 
-	@Override
 	public int getInferenceSamples() {
 		return d_simulationIterations / (2 * d_thinning) * d_numberOfChains;
 	}

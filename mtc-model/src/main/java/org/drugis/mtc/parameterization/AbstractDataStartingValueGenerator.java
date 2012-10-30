@@ -66,22 +66,18 @@ abstract public class AbstractDataStartingValueGenerator implements StartingValu
 
 	protected abstract EstimateWithPrecision estimateTreatmentEffect(Study study, Treatment treatment);
 
-	@Override
 	public double getTreatmentEffect(Study study, Treatment treatment) {
 		return generate(estimateTreatmentEffect(study, treatment));
 	}
 
-	@Override
 	public double getRelativeEffect(Study study, BasicParameter p) {
 		return generate(estimateRelativeEffect(study, p));
 	}
 
-	@Override
 	public double getRelativeEffect(BasicParameter p) {
 		return generate(getPooledEffect(p));
 	}
 	
-	@Override
 	public double getStandardDeviation() {
 		double[] errors = new double[d_cGraph.getEdgeCount()];
 		int i = 0;

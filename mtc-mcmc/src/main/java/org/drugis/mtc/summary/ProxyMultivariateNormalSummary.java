@@ -28,23 +28,19 @@ public class ProxyMultivariateNormalSummary extends AbstractObservable implement
 
 	private MultivariateNormalSummary d_nested;
 	private PropertyChangeListener d_listener = new PropertyChangeListener() {
-		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
 		}
 	};
 
-	@Override
 	public boolean getDefined() {
 		return d_nested != null && d_nested.getDefined();
 	}
 
-	@Override
 	public double[] getMeanVector() {
 		return d_nested == null ? null : d_nested.getMeanVector();
 	}
 
-	@Override
 	public double[][] getCovarianceMatrix() {
 		return d_nested == null ? null : d_nested.getCovarianceMatrix();
 	}

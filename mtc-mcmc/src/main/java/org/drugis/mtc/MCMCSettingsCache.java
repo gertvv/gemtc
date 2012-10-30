@@ -40,32 +40,26 @@ public final class MCMCSettingsCache extends AbstractObservable implements MCMCS
 		d_numberOfChains = numberOfChains;
 	}
 
-	@Override
 	public double getVarianceScalingFactor() {
 		return d_varianceScalingFactor;
 	}
 
-	@Override
 	public int getTuningIterations() {
 		return d_tuningIterations;
 	}
 
-	@Override
 	public int getThinningInterval() {
 		return d_thinningInterval;
 	}
 
-	@Override
 	public int getSimulationIterations() {
 		return d_simulationIterations;
 	}
 
-	@Override
 	public int getInferenceSamples() {
 		return d_inferenceIterations;
 	}
 
-	@Override
 	public int getNumberOfChains() {
 		return d_numberOfChains;
 	}

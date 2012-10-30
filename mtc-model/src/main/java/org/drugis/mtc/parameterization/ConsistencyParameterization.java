@@ -170,7 +170,6 @@ public class ConsistencyParameterization implements Parameterization {
 		return new BasicParameter(first, second);
 	}
 
-	@Override
 	public List<List<Pair<Treatment>>> parameterizeStudy(Study s) {
 		Treatment b = getStudyBaseline(s);
 		List<Treatment> treatments = new ArrayList<Treatment>(s.getTreatments());
@@ -185,7 +184,6 @@ public class ConsistencyParameterization implements Parameterization {
 		return Collections.singletonList(list);
 	}
 
-	@Override
 	public Graph<Treatment, FoldedEdge<Treatment, Study>> getBasicParameterTree() {
 		return d_tree;
 	}

@@ -87,7 +87,6 @@ public class Treatment extends TreatmentData implements Observable, Comparable<T
 		return "Treatment[" + getId() + "]";
 	}
 
-	@Override
 	public int compareTo(Treatment t) {
 		return getId().compareTo(t.getId());
 	}

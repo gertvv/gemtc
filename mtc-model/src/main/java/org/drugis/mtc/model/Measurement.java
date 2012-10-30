@@ -105,12 +105,10 @@ public class Measurement extends MeasurementData implements Observable {
 		d_obsManager.firePropertyChange(PROPERTY_RESPONDERS, oldValue, newValue);
 	}
 	
-	@Override
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.addPropertyChangeListener(listener);
 	}
 
-	@Override
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.removePropertyChangeListener(listener);
 	}

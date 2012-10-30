@@ -49,7 +49,6 @@ import edu.uci.ics.jung.graph.util.Pair;
  */
 public class AbsoluteOneCenter<V, E> {
 	public static class UnitLength<E> implements Transformer<E, Number> {
-		@Override
 		public Number transform(E input) {
 			return 1.0;
 		}
@@ -173,7 +172,6 @@ public class AbsoluteOneCenter<V, E> {
 		final Map<V, Number> map = distance.getDistanceMap(v);
 		List<V> list = new ArrayList<V>(map.keySet());
 		Collections.sort(list, new Comparator<V>() {
-			@Override
 			public int compare(V a, V b) {
 				if (map.get(a).equals(map.get(b))) {
 					return comparator == null ? 0 : comparator.compare(a, b);
@@ -291,7 +289,6 @@ public class AbsoluteOneCenter<V, E> {
 		 * @param edge The edge to calculate the local center of.
 		 * @return The local center (point on the given edge).
 		 */
-		@Override
 		public Center<V, E> transform(final E edge) {
 //			System.out.println("Edge " + edge + " start");
 			

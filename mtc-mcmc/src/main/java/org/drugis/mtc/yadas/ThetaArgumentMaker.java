@@ -82,7 +82,6 @@ public class ThetaArgumentMaker implements ArgumentMaker {
 	 * data[muIdx] should contain a single study baseline mean
 	 * data[deltaIdx] should contain relative effects, in the order of occurrence in studyPmtz
 	 */
-	@Override
 	public double[] getArgument(double[][] data) {
 		double[] rval = new double[d_treatments.size()];
 		for (int i = 0; i < rval.length; ++i) {

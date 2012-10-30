@@ -19,15 +19,14 @@
 
 package org.drugis.mtc.yadas;
 
+import edu.uci.ics.jung.graph.util.Pair;
+import gov.lanl.yadas.ArgumentMaker;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.drugis.mtc.model.Treatment;
-
-import edu.uci.ics.jung.graph.util.Pair;
-
-import gov.lanl.yadas.ArgumentMaker;
 
 /**
  * ArgumentMaker for (a row of the) variance-covariance matrix of relative effects Gaussian.
@@ -80,7 +79,6 @@ public class SigmaRowArgumentMaker implements ArgumentMaker {
 	 * data[sigmaIdx][0] should contain the standard deviation
 	 * @return row rowIdx of the var/covar matrix.
 	 */
-	@Override
 	public double[] getArgument(double[][] data) {
 		double sd = data[d_sigmaIdx][0];
 		double var = sd * sd;

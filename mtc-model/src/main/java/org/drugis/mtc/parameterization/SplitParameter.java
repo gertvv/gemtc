@@ -33,7 +33,6 @@ public class SplitParameter implements NetworkParameter, Comparable<SplitParamet
 		d_direct = direct;
 	}
 
-	@Override
 	public String getName() {
 		return "d." + d_base.getId() + "." + d_subj.getId() + "." + (d_direct ? "dir" : "ind");
 	}
@@ -57,7 +56,6 @@ public class SplitParameter implements NetworkParameter, Comparable<SplitParamet
 		return 31 * d_base.hashCode() + d_subj.hashCode() + (d_direct ? 1 : 0);
 	}
 
-	@Override
 	public int compareTo(SplitParameter other) {
 		TreatmentComparator tc = TreatmentComparator.INSTANCE;
 		if (tc.compare(d_base, other.d_base) != 0) {

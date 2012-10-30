@@ -22,8 +22,8 @@ package org.drugis.mtc.summary;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.correlation.StorelessCovariance;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.drugis.common.beans.AbstractObservable;
 import org.drugis.mtc.MCMCResults;
 import org.drugis.mtc.MCMCResultsEvent;
@@ -55,11 +55,10 @@ public class MCMCMultivariateNormalSummary extends AbstractObservable implements
 	/* (non-Javadoc)
 	 * @see org.drugis.mtc.summary.iMultivariateNormalSummaryPod#getDefined()
 	 */
-	@Override
 	public boolean getDefined() {
 		return d_isDefined;
 	}
-	@Override
+	
 	public void resultsEvent(MCMCResultsEvent event) {
 		calculateResults();
 	}

@@ -85,7 +85,6 @@ public class RelativeEffectArgumentMaker implements ArgumentMaker {
 	 * data[bIdx] should contain values of the basic parameters 
 	 * data[wIdx] should contain values of the inconsistency factors
 	 */
-	@Override
 	public double[] getArgument(double[][] data) {
 		double[] x = data[d_bIdx];
 		if (d_wIdx >= 0) {

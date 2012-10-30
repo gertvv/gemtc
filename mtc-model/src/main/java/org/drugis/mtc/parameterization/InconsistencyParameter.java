@@ -47,7 +47,6 @@ public class InconsistencyParameter implements NetworkParameter, Comparable<Inco
 		d_cycle = cycle;		
 	}
 
-	@Override
 	public String getName() {
 		return "w." + StringUtils.join(CollectionHelper.transform(d_cycle.subList(0, d_cycle.size() - 1), s_idTransformer), ".");
 	}
@@ -75,7 +74,6 @@ public class InconsistencyParameter implements NetworkParameter, Comparable<Inco
 		return d_cycle.hashCode();
 	}
 
-	@Override
 	public int compareTo(InconsistencyParameter other) {
 		return compare(d_cycle, other.d_cycle, TreatmentComparator.INSTANCE);
 	}

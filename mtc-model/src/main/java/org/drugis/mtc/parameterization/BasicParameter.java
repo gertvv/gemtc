@@ -38,7 +38,6 @@ public class BasicParameter implements NetworkParameter, Comparable<BasicParamet
 		d_subj = subj;	
 	}
 
-	@Override
 	public String getName() {
 		return "d." + d_base.getId() + "." + d_subj.getId();
 	}
@@ -70,7 +69,6 @@ public class BasicParameter implements NetworkParameter, Comparable<BasicParamet
 		return 31 * d_base.hashCode() + d_subj.hashCode();
 	}
 
-	@Override
 	public int compareTo(BasicParameter other) {
 		int c1 = TreatmentComparator.INSTANCE.compare(d_base, other.d_base);
 		return c1 == 0 ? TreatmentComparator.INSTANCE.compare(d_subj, other.d_subj) : c1;

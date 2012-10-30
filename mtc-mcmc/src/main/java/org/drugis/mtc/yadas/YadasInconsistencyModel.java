@@ -49,13 +49,11 @@ public class YadasInconsistencyModel extends YadasModel implements Inconsistency
 		return true;
 	}
 
-	@Override
 	public List<Parameter> getInconsistencyFactors() {
 		final List<? extends Parameter> parameters = d_pmtz.getParameters();
 		return new ArrayList<Parameter>(parameters.subList(getNumberOfBasicParameters(), parameters.size()));
 	}
 
-	@Override
 	public Parameter getInconsistencyStandardDeviation() {
 		return d_inconsistencyStdDev;
 	}

@@ -31,17 +31,14 @@ public class SimpleMultivariateNormalSummary extends AbstractObservable implemen
 		d_sigma = sigma;
 	}
 
-	@Override
 	public double[][] getCovarianceMatrix() {
 		return d_sigma;
 	}
 
-	@Override
 	public boolean getDefined() {
 		return true;
 	}
 
-	@Override
 	public double[] getMeanVector() {
 		return d_mu;
 	}

@@ -94,12 +94,10 @@ public class Network extends NetworkData implements Observable {
 		return (ObservableList<Study>) (ObservableList) super.getStudyList().getStudy();
 	}
 	
-	@Override
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.addPropertyChangeListener(listener);
 	}
 
-	@Override
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.removePropertyChangeListener(listener);
 	}

@@ -187,7 +187,6 @@ public abstract class AbstractYadasModel implements MCMCModel {
 		d_finalPhase = new NullTask();
 
 		d_notifyResults = new SimpleRestartableSuspendableTask(new Runnable() {
-			@Override
 			public void run() {
 				d_results.simulationFinished();
 			}

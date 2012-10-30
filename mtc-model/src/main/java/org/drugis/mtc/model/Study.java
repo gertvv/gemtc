@@ -61,12 +61,10 @@ public class Study extends StudyData implements Observable, Comparable<Study> {
 		return (ObservableList) super.getMeasurementList();
 	}
 	
-	@Override
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.addPropertyChangeListener(listener);
 	}
 
-	@Override
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		d_obsManager.addPropertyChangeListener(listener);
 	}
@@ -104,7 +102,6 @@ public class Study extends StudyData implements Observable, Comparable<Study> {
 		return treatments;
 	}
 
-	@Override
 	public int compareTo(Study s) {
 		return getId().compareTo(s.getId());
 	}

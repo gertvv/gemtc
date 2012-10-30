@@ -35,7 +35,6 @@ public class ParameterComparator implements Comparator<Parameter> {
 		InconsistencyStandardDeviation.class
 		);
 	
-	@Override
 	public int compare(Parameter o1, Parameter o2) {
 		int par1Type = classes.indexOf(o1.getClass());
 		int par2Type = classes.indexOf(o2.getClass());

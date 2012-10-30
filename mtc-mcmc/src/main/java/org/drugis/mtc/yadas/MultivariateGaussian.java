@@ -21,8 +21,6 @@ package org.drugis.mtc.yadas;
 
 import gov.lanl.yadas.Likelihood;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -33,7 +31,6 @@ import org.apache.commons.math3.util.Precision;
  * The double-arrays of sigma are the rows of the covariance matrix.
  */
 public class MultivariateGaussian implements Likelihood {
-	@Override
 	public double compute(double[][] data) {
 		double[][] other = new double[data.length - 2][];
 		System.arraycopy(data, 2, other, 0, data.length - 2);

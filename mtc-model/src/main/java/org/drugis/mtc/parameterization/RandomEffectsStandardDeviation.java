@@ -22,7 +22,6 @@ package org.drugis.mtc.parameterization;
 import org.drugis.mtc.Parameter;
 
 public class RandomEffectsStandardDeviation implements Parameter {
-	@Override
 	public String getName() {
 		return "sd.d";
 	}

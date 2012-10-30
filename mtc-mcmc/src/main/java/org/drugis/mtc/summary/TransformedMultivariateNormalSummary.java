@@ -45,7 +45,6 @@ public class TransformedMultivariateNormalSummary extends AbstractObservable imp
 		transform();
 	}
 
-	@Override
 	public boolean getDefined() {
 		return d_isDefined;
 	}

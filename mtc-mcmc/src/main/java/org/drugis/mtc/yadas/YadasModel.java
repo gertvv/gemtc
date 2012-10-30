@@ -80,12 +80,10 @@ abstract class YadasModel extends AbstractYadasModel implements MixedTreatmentCo
 
 	abstract protected boolean isInconsistency();
 
-	@Override
 	public BasicParameter getRelativeEffect(Treatment base, Treatment subj) {
 		return new BasicParameter(base, subj);
 	}
 
-	@Override
 	public Parameter getRandomEffectsStandardDeviation() {
 		return d_randomEffectsStdDev;
 	}
