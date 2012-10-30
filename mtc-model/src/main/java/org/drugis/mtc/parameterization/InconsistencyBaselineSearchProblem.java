@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.collections15.Predicate;
@@ -85,7 +86,8 @@ public class InconsistencyBaselineSearchProblem implements SearchProblem<Map<Stu
 		}
 		
 		// Each treatment generates a successor
-		Set<Treatment> treatments = study.getTreatments();
+		Set<Treatment> treatments = new TreeSet<Treatment>(new TreatmentComparator());
+		treatments.addAll(study.getTreatments());
 		List<Map<Study, Treatment>> succ = new ArrayList<Map<Study,Treatment>>(treatments.size());
 		for (Treatment treatment : treatments) {
 			Map<Study, Treatment> map = new HashMap<Study, Treatment>(state);

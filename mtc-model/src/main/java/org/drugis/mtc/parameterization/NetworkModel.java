@@ -59,7 +59,20 @@ public class NetworkModel {
 	}
 
 	public static UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> createComparisonGraph(Hypergraph<Treatment, Study> studyGraph) {
-		return FoldingTransformerFixed.foldHypergraphEdges(studyGraph, UndirectedSparseGraph.<Treatment, FoldedEdge<Treatment, Study>>getFactory());
+		final UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> graph = FoldingTransformerFixed.foldHypergraphEdges(studyGraph, UndirectedSparseGraph.<Treatment, FoldedEdge<Treatment, Study>>getFactory());
+		standardizeEdgeVertexOrder(graph);
+		return graph;
+	}
+
+	private static void standardizeEdgeVertexOrder(final UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> graph) {
+		for (FoldedEdge<Treatment, Study> edge : new ArrayList<FoldedEdge<Treatment, Study>>(graph.getEdges())) {
+			final List<Treatment> vertices = new ArrayList<Treatment>(graph.getIncidentVertices(edge));
+			Collections.sort(vertices, new TreatmentComparator());
+			graph.removeEdge(edge);
+			final FoldedEdge<Treatment, Study> edge2 = new FoldedEdge<Treatment, Study>(vertices.get(0), vertices.get(1));
+			edge2.getFolded().addAll(edge.getFolded());
+			graph.addEdge(edge2, vertices);
+		}
 	}
 
 	/**
