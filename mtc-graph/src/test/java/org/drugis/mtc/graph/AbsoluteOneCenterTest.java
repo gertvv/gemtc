@@ -21,6 +21,7 @@ package org.drugis.mtc.graph;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -41,7 +42,6 @@ public class AbsoluteOneCenterTest {
 			d_l = l;
 		}
 
-		@Override
 		public Number transform(final Integer e) {
 			return d_l[e];
 		}
@@ -94,7 +94,6 @@ public class AbsoluteOneCenterTest {
 
 	private Comparator<Integer> intComparator() {
 		final Comparator<Integer> comparator = new Comparator<Integer>() {
-			@Override
 			public int compare(final Integer o1, final Integer o2) {
 				return o1.compareTo(o2);
 			}
@@ -138,10 +137,13 @@ public class AbsoluteOneCenterTest {
 
 		final AbsoluteOneCenter<String, Integer> absoluteOneCenter = new AbsoluteOneCenter<String, Integer>(g);
 		final PointOnEdge<String, Integer> center = absoluteOneCenter.getCenter();
-		assertEquals(1, center.getEdge().intValue());
-		assertEquals("A", center.getVertex0());
-		assertEquals("B", center.getVertex1());
-		assertEquals(1.0, center.getDistance(), EPSILON);
+		
+		assertTrue(center.getVertex0().equals("B") || center.getVertex1().equals("B"));
+		if (center.getVertex0().equals("B")) {
+			assertEquals(0.0, center.getDistance(), EPSILON);
+		} else {
+			assertEquals(1.0, center.getDistance(), EPSILON);
+		}
 	}
 
 	@Test
@@ -182,10 +184,13 @@ public class AbsoluteOneCenterTest {
 
 		final AbsoluteOneCenter<String, Integer> absoluteOneCenter = new AbsoluteOneCenter<String, Integer>(g);
 		final PointOnEdge<String, Integer> center = absoluteOneCenter.getCenter();
-		assertEquals(1, center.getEdge().intValue());
-		assertEquals("A", center.getVertex0());
-		assertEquals("B", center.getVertex1());
-		assertEquals(0.0, center.getDistance(), EPSILON);
+		
+		assertTrue(center.getVertex0().equals("A") || center.getVertex1().equals("A"));
+		if (center.getVertex0().equals("A")) {
+			assertEquals(0.0, center.getDistance(), EPSILON);
+		} else {
+			assertEquals(1.0, center.getDistance(), EPSILON);
+		}		
 	}
 
 	// FIXME: add more tests for non-unit edge weights (lengths)
