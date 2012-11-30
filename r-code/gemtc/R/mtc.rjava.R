@@ -311,8 +311,20 @@ mtc.build.syntaxModel <- function(model, is.jags) {
 	)
 }
 
-mtc.parameters <- function(model) { 
-		sapply(as.list(.jcall(model, 'Ljava/util/List;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
+mtc.parameters <- function(object) { 
+	UseMethod('mtc.parameters', object)
+}
+
+mtc.parameters.jobjRef <- function(j.model) {
+	sapply(as.list(.jcall(j.model, 'Ljava/util/List;', 'getParameters')), function(p) { .jcall(p, 'S', 'getName') })
+}
+
+mtc.parameters.mtc.model <- function(model) {
+	mtc.parameters(model$j.model)
+}
+
+mtc.parameters.mtc.result <- function(result) {
+	colnames(result$samples[[1]])
 }
 
 mtc.run.yadas <- function(model, n.adapt, n.iter, thin) {
