@@ -1,3 +1,6 @@
+# To check withouth BRugs/R2WinBUGS installed:
+# export _R_CHECK_FORCE_SUGGESTS_=false
+
 read_version = $(shell grep 'Version:' $1/DESCRIPTION | sed 's/Version: //')
 
 PKG_NAME := gemtc
