@@ -33,7 +33,7 @@ print.mtc.model <- function(x, ...) {
 
 summary.mtc.model <- function(object, ...) {
 	list("Description"=paste("MTC ", object$type, " model: ", object$description, sep=""), 
-			 "Parameters"=mtc.parameters(object$j.model))
+			 "Parameters"=mtc.parameters(object))
 }
 
 plot.mtc.model <- function(x, ...) {
@@ -118,7 +118,7 @@ w.factors <- function(parameters) {
 
 mtc.model.graph <- function(model) { 
 	comparisons <- mtc.model.comparisons(model)
-	parameters <- mtc.parameters(model$j.model)
+	parameters <- mtc.parameters(model)
 	g <- mtc.spanning.tree(parameters)
 	g <- g + edges(w.factors(parameters), arrow.mode=2, color="black", lty=2)
 	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
@@ -158,7 +158,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 	if(result$model$type != "Consistency") stop("Cannot apply relative.effect to this model")
 
 	# Build relative effect transformation matrix
-	g <- mtc.spanning.tree(mtc.parameters(result$model$j.model))
+	g <- mtc.spanning.tree(mtc.parameters(result))
 	effects <- tree.relative.effect(g, t1, t2)
 
 	# Add rows/columns for parameters that are not relative effects
@@ -191,7 +191,7 @@ rank.probability <- function(result) {
 	data <- result$samples
 
 	treatments <- as.vector(mtc.treatments(model$j.network)$id)
-	mtcGraph <- mtc.spanning.tree(mtc.parameters(model$j.model))
+	mtcGraph <- mtc.spanning.tree(mtc.parameters(result))
 	n.alt <- length(treatments)
 
 	# count ranks given a matrix d of relative effects (treatments as rows)
