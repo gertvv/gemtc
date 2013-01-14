@@ -46,11 +46,16 @@ data <- list(
 network <- mtc.network("Example", treatments, data)
 plot(network)
 
-data <- list(
-   c('study' = '01', 'treatment' = 'A', 'mean' = -1.12, 'std.dev' = 0.6, 'sampleSize' = 15),
-   c('study' = '01', 'treatment' = 'B', 'mean' = -1.55, 'std.dev' = 0.5, 'sampleSize' = 16),
-   c('study' = '02', 'treatment' = 'A', 'mean' = -0.8,  'std.dev' = 0.7, 'sampleSize' = 33),
-   c('study' = '02', 'treatment' = 'B', 'mean' = -1.1,  'std.dev' = 0.5, 'sampleSize' = 31))
+treatments <- read.table(textConnection('
+	id  description
+	A   "Treatment A"
+	B   "Treatment B"'), header=TRUE)
+data <- read.table(textConnection('
+	study  treatment  mean   std.dev  sampleSize
+	01     A          -1.12  0.6      15
+	01     B          -1.55  0.5      16
+	02     A          -0.8   0.7      33
+	02     B          -1.1   0.5      31'), header=TRUE)
 network <- mtc.network("Example", treatments, data)
 print(network)
 }
