@@ -257,20 +257,22 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 		c(sampler)
 	}
 
-	if (is.na(sampler) || (!is.na(sampler) && sampler != 'YADAS')) {
-		found <- NA
-		i <- 1
-		while (is.na(found) && i <= length(available)) {
-			if (do.call(library, list(available[i], logical.return=TRUE, quietly=TRUE))) {
-				found <- available[i]
-			}
-			i <- i + 1
-		}
-		if (is.na(found)) {
-			stop(paste("Could not find a suitable sampler for", sampler))
-		}
-		sampler <- found
+	have.package <- function(name) {
+		suppressWarnings(do.call(library, list(name, logical.return=TRUE, quietly=TRUE)))
 	}
+
+	found <- NA
+	i <- 1
+	while (is.na(found) && i <= length(available)) {
+		if (available[i] == 'YADAS' || have.package(available[i])) {
+			found <- available[i]
+		}
+		i <- i + 1
+	}
+	if (is.na(found)) {
+		stop(paste("Could not find a suitable sampler for", sampler))
+	}
+	sampler <- found
 
 	# Switch on sampler
 	samples <- if (sampler == 'YADAS') {
