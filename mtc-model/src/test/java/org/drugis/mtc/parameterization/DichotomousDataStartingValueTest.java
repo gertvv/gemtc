@@ -38,9 +38,6 @@ import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
-import edu.uci.ics.jung.graph.UndirectedGraph;
-
 public class DichotomousDataStartingValueTest {
 	private static final double EPSILON = 0.0000001;
 	private Treatment d_ta;
@@ -55,7 +52,7 @@ public class DichotomousDataStartingValueTest {
 	private Study d_s6;
 	private Study d_s7;
 	private Network d_network;
-	private UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> d_cGraph;
+	private PriorGenerator d_priorGen;
 	
 	@Before
 	public void setUp() {
@@ -90,12 +87,12 @@ public class DichotomousDataStartingValueTest {
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc, d_td));
 		d_network.getStudies().addAll(Arrays.asList(d_s1, d_s2, d_s3, d_s4, d_s5, d_s6, d_s7));
 		
-		d_cGraph = NetworkModel.createComparisonGraph(d_network);
+		d_priorGen = new PriorGenerator(d_network);
 	}
 	
 	@Test
 	public void testGenerateTreatmentEffect() {
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network);
 
 		Measurement m0 = d_s1.getMeasurements().get(0);
 		assertEquals(d_ta, m0.getTreatment()); // Check assumption
@@ -118,7 +115,7 @@ public class DichotomousDataStartingValueTest {
 	@Test 
 	public void testRandomizedTreatmentEffect1() {
 		RandomGenerator rng = mockRandom(1.0);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.0);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 1.0);
 
 		Measurement m0 = d_s1.getMeasurements().get(0);
 
@@ -131,7 +128,7 @@ public class DichotomousDataStartingValueTest {
 	@Test 
 	public void testRandomizedTreatmentEffect2() {
 		RandomGenerator rng = mockRandom(0.23);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 2.0);
 
 		Measurement m0 = d_s2.getMeasurements().get(0);
 
@@ -143,7 +140,7 @@ public class DichotomousDataStartingValueTest {
 	
 	@Test
 	public void testGenerateStudyRelativeEffect() {
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network);
 
 		assertEquals(getLOR(d_s4, d_ta, d_td).getPointEstimate(),
 				generator.getRelativeEffect(d_s4, new BasicParameter(d_ta, d_td)), EPSILON);
@@ -152,7 +149,7 @@ public class DichotomousDataStartingValueTest {
 	@Test
 	public void testRandomizedStudyRelativeEffect() {
 		RandomGenerator rng = mockRandom(-0.34);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 2.0);
 
 		EstimateWithPrecision lor = getLOR(d_s4, d_ta, d_td);
 		assertEquals(lor.getPointEstimate() - 2.0 * 0.34 * lor.getStandardError(),
@@ -162,7 +159,7 @@ public class DichotomousDataStartingValueTest {
 
 	@Test
 	public void testGenerateRelativeEffect() {
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network);
 
 		List<EstimateWithPrecision> lors = getLORs(Arrays.asList(d_s1, d_s4), d_ta, d_td);
 		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(lors);
@@ -174,7 +171,7 @@ public class DichotomousDataStartingValueTest {
 	@Test
 	public void testRandomizedRelativeEffect() {
 		RandomGenerator rng = mockRandom(0.12);
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.5);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 1.5);
 
 		List<EstimateWithPrecision> lors = getLORs(Arrays.asList(d_s1, d_s4), d_ta, d_td);
 		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(lors);
@@ -186,22 +183,19 @@ public class DichotomousDataStartingValueTest {
 
 	@Test
 	public void testStandardDeviation() {
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph);
-		assertEquals(0.5730384546975756, generator.getStandardDeviation(), EPSILON);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network);
+		assertEquals(0.5 * d_priorGen.getRandomEffectsSigma(), generator.getStandardDeviation(), EPSILON);
 	}
 	
 	@Test
 	public void testRandomizedStandardDeviation() {
 		RandomGenerator rng = EasyMock.createMock(RandomGenerator.class);
-		EasyMock.expect(rng.nextInt(d_cGraph.getEdgeCount())).andReturn(4);
+		double random = 0.156666;
+		EasyMock.expect(rng.nextDouble()).andReturn(random);
 		EasyMock.replay(rng);
 		
-		List<FoldedEdge<Treatment, Study>> edges = new ArrayList<FoldedEdge<Treatment,Study>>(d_cGraph.getEdges());
-		List<EstimateWithPrecision> lors = getLORs(edges.get(4).getFolded(), edges.get(4).getVertices().getFirst(), edges.get(4).getVertices().getSecond());
-		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(lors);
-		
-		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.5);
-		assertEquals(pooling.getPooled().getStandardError(), generator.getStandardDeviation(), EPSILON);
+		StartingValueGenerator generator = new DichotomousDataStartingValueGenerator(d_network, rng, 1.5);
+		assertEquals(random * d_priorGen.getRandomEffectsSigma(), generator.getStandardDeviation(), EPSILON);
 	}
 	
 	public static EstimateWithPrecision getLOR(Study s, Treatment t0, Treatment t1) {

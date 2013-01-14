@@ -27,16 +27,14 @@ import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 
-import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
-import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class ContinuousDataStartingValueGenerator extends AbstractDataStartingValueGenerator {
 	/**
 	 * Create a deterministic starting value generator.
 	 * @param network Network to generate starting values for.
 	 */
-	public ContinuousDataStartingValueGenerator(Network network, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph) {
-		super(network, cGraph, null, 0.0);
+	public ContinuousDataStartingValueGenerator(Network network) {
+		super(network, null, 0.0);
 	}
 	
 	/**
@@ -45,8 +43,8 @@ public class ContinuousDataStartingValueGenerator extends AbstractDataStartingVa
 	 * @param rng The random generator to use.
 	 * @param scale Scaling factor for the second moment of the error distribution.
 	 */
-	public ContinuousDataStartingValueGenerator(Network network, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph, RandomGenerator rng, double scale) {
-		super(network, cGraph, rng, scale);
+	public ContinuousDataStartingValueGenerator(Network network, RandomGenerator rng, double scale) {
+		super(network, rng, scale);
 	}
 
 	@Override

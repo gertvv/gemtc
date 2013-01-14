@@ -27,39 +27,36 @@ import java.util.Set;
 import org.apache.commons.collections15.CollectionUtils;
 import org.apache.commons.collections15.Predicate;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.drugis.common.stat.EstimateWithPrecision;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
 import org.drugis.mtc.model.Treatment;
 import org.drugis.mtc.util.DerSimonianLairdPooling;
 
-import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
-import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
 abstract public class AbstractDataStartingValueGenerator implements StartingValueGenerator {
 	protected final Network d_network;
+	private final PriorGenerator d_priorGen;
 	private final RandomGenerator d_rng;
 	private final double d_scale;
-	private final UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> d_cGraph;
 	
-	public static StartingValueGenerator create(Network network, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph, RandomGenerator rng, double scale) {
+	public static StartingValueGenerator create(Network network, RandomGenerator rng, double scale) {
 		switch (network.getType()) {
 		case CONTINUOUS:
-			return new ContinuousDataStartingValueGenerator(network, cGraph, rng, scale);
+			return new ContinuousDataStartingValueGenerator(network, rng, scale);
 		case RATE:
-			return new DichotomousDataStartingValueGenerator(network, cGraph, rng, scale);
+			return new DichotomousDataStartingValueGenerator(network, rng, scale);
 		default:
 			throw new IllegalArgumentException("Don't know how to generate starting values for " + network.getType() + " data");					
 		}
 	}
 	
-	public AbstractDataStartingValueGenerator(Network network, UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> cGraph, RandomGenerator rng, double scale) {
+	public AbstractDataStartingValueGenerator(Network network, RandomGenerator rng, double scale) {
 		d_network = network;
+		d_priorGen = new PriorGenerator(network);
 		d_rng = rng;
 		d_scale = scale;
-		d_cGraph = cGraph;
 	}
 
 	protected abstract EstimateWithPrecision estimateRelativeEffect(Study study, BasicParameter p);
@@ -79,18 +76,10 @@ abstract public class AbstractDataStartingValueGenerator implements StartingValu
 	}
 	
 	public double getStandardDeviation() {
-		double[] errors = new double[d_cGraph.getEdgeCount()];
-		int i = 0;
-		for (FoldedEdge<Treatment, Study> edge : d_cGraph.getEdges()) {
-			final Pair<Treatment> v = edge.getVertices();
-			errors[i++] = getPooledEffect(new BasicParameter(v.getFirst(), v.getSecond())).getStandardError();
-		}
-
 		if (d_rng == null) {
-			return new Mean().evaluate(errors);
-		} else {
-			return errors[d_rng.nextInt(errors.length)];
+			return 0.5 * d_priorGen.getRandomEffectsSigma();
 		}
+		return d_rng.nextDouble() * d_priorGen.getRandomEffectsSigma();
 	}
 
 	private EstimateWithPrecision getPooledEffect(BasicParameter p) {

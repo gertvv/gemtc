@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.drugis.common.stat.EstimateWithPrecision;
 import org.drugis.common.stat.Statistics;
+import org.drugis.mtc.data.DataType;
 import org.drugis.mtc.model.Measurement;
 import org.drugis.mtc.model.Network;
 import org.drugis.mtc.model.Study;
@@ -36,9 +37,6 @@ import org.drugis.mtc.util.DerSimonianLairdPooling;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
-
-import edu.uci.ics.jung.algorithms.transformation.FoldingTransformerFixed.FoldedEdge;
-import edu.uci.ics.jung.graph.UndirectedGraph;
 
 public class ContinuousDataStartingValueGeneratorTest {
 	private static final double EPSILON = 0.0000001;
@@ -50,7 +48,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	Study d_s3;
 	Study d_s4;
 	Network d_network;
-	private UndirectedGraph<Treatment, FoldedEdge<Treatment, Study>> d_cGraph;
+	PriorGenerator d_priorGen;
 	
 	@Before
 	public void setUp() {
@@ -71,10 +69,11 @@ public class ContinuousDataStartingValueGeneratorTest {
 		d_s4.getMeasurements().add(new Measurement(d_tc, -1.52, 0.96, 46));
 
 		d_network = new Network();
+		d_network.setType(DataType.CONTINUOUS);
 		d_network.getTreatments().addAll(Arrays.asList(d_ta, d_tb, d_tc));
 		d_network.getStudies().addAll(Arrays.asList(d_s1, d_s2, d_s3, d_s4));
 		
-		d_cGraph = NetworkModel.createComparisonGraph(d_network);
+		d_priorGen = new PriorGenerator(d_network);
 	}
 		
 	private RandomGenerator mockRandom(double value) {
@@ -86,7 +85,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 
 	@Test
 	public void testGenerateTreatmentEffect() {
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network);
 		
 		Measurement m0 = NetworkModel.findMeasurement(d_s1, d_tb);
 		assertEquals(m0.getMean(), generator.getTreatmentEffect(d_s1, d_tb), EPSILON);
@@ -99,7 +98,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	@Test 
 	public void testRandomizedTreatmentEffect1() {
 		RandomGenerator rng = mockRandom(1.0);
-		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 1.0);
+		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, rng, 1.0);
 
 		Measurement m0 = NetworkModel.findMeasurement(d_s1, d_tb);
 
@@ -110,7 +109,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	@Test 
 	public void testRandomizedTreatmentEffect2() {
 		RandomGenerator rng = mockRandom(0.23);
-		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
+		StartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, rng, 2.0);
 
 		Measurement m0 = NetworkModel.findMeasurement(d_s2, d_tb);
 
@@ -120,7 +119,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	
 	@Test
 	public void testGenerateStudyRelativeEffect() {
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network);
 
 		Measurement m0 = NetworkModel.findMeasurement(d_s2, d_ta);
 		Measurement m1 = NetworkModel.findMeasurement(d_s2, d_tb);
@@ -130,7 +129,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	@Test
 	public void testRandomizedStudyRelativeEffect() {
 		RandomGenerator rng = mockRandom(0.23);
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 2.0);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, rng, 2.0);
 
 		Measurement m0 = NetworkModel.findMeasurement(d_s2, d_ta);
 		Measurement m1 = NetworkModel.findMeasurement(d_s2, d_tb);
@@ -141,7 +140,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	
 	@Test
 	public void testGenerateRelativeEffect() {
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network);
 
 		List<EstimateWithPrecision> mds = getMDs(Arrays.asList(d_s2, d_s3), d_ta, d_tb);
 		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(mds);
@@ -153,7 +152,7 @@ public class ContinuousDataStartingValueGeneratorTest {
 	@Test
 	public void testRandomizedRelativeEffect() {
 		RandomGenerator rng = mockRandom(0.08);
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph, rng, 3.0);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, rng, 3.0);
 
 		List<EstimateWithPrecision> mds = getMDs(Arrays.asList(d_s2, d_s3), d_ta, d_tb);
 		DerSimonianLairdPooling pooling = new DerSimonianLairdPooling(mds);
@@ -164,8 +163,8 @@ public class ContinuousDataStartingValueGeneratorTest {
 	
 	@Test
 	public void testStandardDeviation() {
-		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network, d_cGraph);
-		assertEquals(0.2069597561228883, generator.getStandardDeviation(), EPSILON);
+		ContinuousDataStartingValueGenerator generator = new ContinuousDataStartingValueGenerator(d_network);
+		assertEquals(0.5 * d_priorGen.getRandomEffectsSigma(), generator.getStandardDeviation(), EPSILON);
 	}
 	
 	public static EstimateWithPrecision getMD(Study s, Treatment t0, Treatment t1) {

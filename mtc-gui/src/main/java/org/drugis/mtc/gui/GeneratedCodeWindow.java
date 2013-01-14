@@ -49,7 +49,6 @@ import org.drugis.mtc.parameterization.AbstractDataStartingValueGenerator;
 import org.drugis.mtc.parameterization.BasicParameter;
 import org.drugis.mtc.parameterization.ConsistencyParameterization;
 import org.drugis.mtc.parameterization.InconsistencyParameterization;
-import org.drugis.mtc.parameterization.NetworkModel;
 import org.drugis.mtc.parameterization.NodeSplitParameterization;
 import org.drugis.mtc.parameterization.Parameterization;
 import org.drugis.mtc.parameterization.StartingValueGenerator;
@@ -155,7 +154,7 @@ public class GeneratedCodeWindow extends JFrame {
 	}
 
 	private StartingValueGenerator buildStartingValueGenerator() {
-		return AbstractDataStartingValueGenerator.create(d_network, NetworkModel.createComparisonGraph(d_network), new JDKRandomGenerator(), d_scale);
+		return AbstractDataStartingValueGenerator.create(d_network, new JDKRandomGenerator(), d_scale);
 	}
 
 	private String buildSuffix() {
