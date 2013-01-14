@@ -83,20 +83,20 @@ read.mtc.network <- function(file) {
 }
 
 mtc.network <- function(description, treatments=NULL, data) {
-  if(!is.data.frame(treatments)) { 
-	  ids <- unlist(lapply(treatments, function(t) { t['id'] }))
-	  treatments <- as.data.frame(list(
-		  id = ids,
-	  	description = unlist(lapply(treatments, function(t) { t['description'] }))
-	  ), row.names = ids)
-  }
-  if(!is.data.frame(data)) { 
-	  data <- t(as.data.frame(lapply(data, data.frame)))
-	  row.names(data) <- seq(1:dim(data)[1])
-  }
-  if(is.null(treatments)) { 
-    treatments = unique(data$treatment)
-  }
+	if(!is.data.frame(treatments)) { 
+		ids <- unlist(lapply(treatments, function(t) { t['id'] }))
+		treatments <- as.data.frame(list(
+			id = ids,
+		description = unlist(lapply(treatments, function(t) { t['description'] }))
+		), row.names = ids)
+	}
+	if(!is.data.frame(data)) { 
+		data <- as.data.frame(do.call(rbind, data))
+		row.names(data) <- seq(1:dim(data)[1])
+	}
+	if(is.null(treatments)) { 
+		treatments = unique(data$treatment)
+	}
 	network <- list(
 		description=description,
 		treatments=treatments,
@@ -109,9 +109,36 @@ mtc.network <- function(description, treatments=NULL, data) {
 }
 
 mtc.network.validate <- function(network) { 
+	# Check that there is some data
 	stopifnot(nrow(network$treatments) > 0)  
 	stopifnot(nrow(network$data) > 0)
-	stopifnot(all(network$data[,'treatment'] %in% network$treatment$id))
+
+	# Check that the treatments are correctly cross-referenced and have valid names
+	stopifnot(all(network$data$treatment %in% network$treatments$id))
+	stopifnot(all(network$treatments$id %in% network$data$treatment))
+	idok <- regexpr("^[A-Za-z0-9_]+$", network$treatment$id) != -1
+	if(!all(idok)) {
+		stop(paste('Treatment name "',
+			network$treatment$id[which(!idok)], '" invalid.\n',
+			' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
+	}
+
+	# Check that the data frame has a sensible combination of columns
+	columns <- colnames(network$data)
+	contColumns <- c('mean', 'std.dev', 'sampleSize')
+	dichColumns <- c('responders', 'sampleSize')
+
+	if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
+		stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
+	}
+
+	if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
+		stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
+	}
+
+	if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
+		stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
+	}
 }
 
 mtc.network.as.java <- function(network) {
