@@ -205,7 +205,7 @@ mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 		'createComparisonGraph', j.network)
 	j.generator <- .jcall('org/drugis/mtc/parameterization/AbstractDataStartingValueGenerator',
 		'Lorg/drugis/mtc/parameterization/StartingValueGenerator;',
-		'create', j.network, j.cgraph, rng, factor)
+		'create', j.network, rng, factor)
 
 	# create data structure
 	model <- list(
