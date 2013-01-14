@@ -70,7 +70,7 @@ mtc.data <- function(network) {
 
 # Read an org.drugis.mtc.model.Network from file and convert it to the S3 class 'mtc.network'
 read.mtc.network <- function(file) {
-	is <- .jcast(.jnew("java/io/FileInputStream", file), "java/io/InputStream")
+	is <- .jcast(.jnew("java/io/FileInputStream", normalizePath(file)), "java/io/InputStream")
 	j.network <- .jcall("org/drugis/mtc/model/JAXBHandler", "Lorg/drugis/mtc/model/Network;", "readNetwork", is)
 
 	network <- list(
