@@ -43,7 +43,7 @@ mtc.data <- function(network) {
 	convertContinuous <- function(m) {
 		measurement <- convertNone(m)
 		measurement$mean <- getBoxedDouble(m$measurement, "getMean")
-		measurement$sd <- getBoxedDouble(m$measurement, "getStdDev")
+		measurement$std.dev <- getBoxedDouble(m$measurement, "getStdDev")
 		measurement$sampleSize <- getBoxedInt(m$measurement, "getSampleSize")
 		measurement
 	}
@@ -135,7 +135,7 @@ mtc.network.as.java <- function(network) {
 	appendContinuous <- function(builder, measurement) {
 		.jcall(builder, "V", "add",
 			measurement['study'], treatments[[measurement['treatment']]],
-			as.numeric(measurement['mean']), as.numeric(measurement['sd']), as.integer(measurement['sampleSize']))
+			as.numeric(measurement['mean']), as.numeric(measurement['std.dev']), as.integer(measurement['sampleSize']))
 	}
 
 	createBuilder <- function(type) {
