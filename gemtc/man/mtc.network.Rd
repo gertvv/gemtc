@@ -45,4 +45,12 @@ data <- list(
    c('study' = '03', 'treatment' = 'B', 'responders' = 7, 'sampleSize' = 80))
 network <- mtc.network("Example", treatments, data)
 plot(network)
+
+data <- list(
+   c('study' = '01', 'treatment' = 'A', 'mean' = -1.12, 'std.dev' = 0.6, 'sampleSize' = 15),
+   c('study' = '01', 'treatment' = 'B', 'mean' = -1.55, 'std.dev' = 0.5, 'sampleSize' = 16),
+   c('study' = '02', 'treatment' = 'A', 'mean' = -0.8,  'std.dev' = 0.7, 'sampleSize' = 33),
+   c('study' = '02', 'treatment' = 'B', 'mean' = -1.1,  'std.dev' = 0.5, 'sampleSize' = 31))
+network <- mtc.network("Example", treatments, data)
+print(network)
 }
