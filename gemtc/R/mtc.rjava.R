@@ -82,21 +82,26 @@ read.mtc.network <- function(file) {
 	network
 }
 
-mtc.network <- function(description, treatments=NULL, data) {
-	if(!is.data.frame(treatments)) { 
-		ids <- unlist(lapply(treatments, function(t) { t['id'] }))
-		treatments <- as.data.frame(list(
-			id = ids,
-		description = unlist(lapply(treatments, function(t) { t['description'] }))
-		), row.names = ids)
-	}
-	if(!is.data.frame(data)) { 
+mtc.network <- function(data, description="Network", treatments=NULL) {
+	# standardize the data
+	if (!is.data.frame(data)) { 
 		data <- as.data.frame(do.call(rbind, data))
-		row.names(data) <- seq(1:dim(data)[1])
 	}
-	if(is.null(treatments)) { 
-		treatments = unique(data$treatment)
+	rownames(data) <- seq(1:dim(data)[1])
+
+	# standardize the treatments
+	if (is.null(treatments)) {
+		treatments <- unique(data$treatment)
 	}
+	if (is.list(treatments)) { 
+		treatments <- as.data.frame(do.call(rbind, treatments))
+	}
+	if (is.character(treatments) || is.factor(treatments)) {
+		treatments <- data.frame(id=treatments, description=treatments)
+	}
+	rownames(treatments) <- treatments$id
+
+
 	network <- list(
 		description=description,
 		treatments=treatments,
@@ -149,6 +154,7 @@ mtc.network.as.java <- function(network) {
 		.jcast(treatment, "java/lang/Object")
 	}
 	treatments <- apply(network$treatments, 1, treatment)
+	names(treatments) <- network$treatments$id
 
 	appendNone <- function(builder, measurement) {
 		.jcall(builder, "V", "add",
