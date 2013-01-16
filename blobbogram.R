@@ -33,6 +33,9 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	labeltext <- rbind(column.labels, as.matrix(data[,columns]))
 	rownames(labeltext) <- NULL
 	labels <- apply(labeltext, c(1,2), function(x) { if (!is.na(x)) textGrob(x) })
+	if (grouped) {
+		group.labels <- lapply(column.group.labels, function(x) { if (!is.na(x)) textGrob(x) })
+	}
 
 	# Create CI labels
 	ci.labels <- lapply(1:nrow(data), function(i) {
@@ -46,6 +49,22 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 		col <- col[!sapply(col, is.null)]
 		unit.c(max(unit(rep(1, length(col)), "grobwidth", col)), colgap)
 	}))
+
+	# Adjust column widths so group labels fit
+	if (grouped) {
+		groups <- names(column.group.labels)
+		if (is.null(groups)) {
+			groups <- 1:length(column.group.labels)
+		}
+		for (group in groups) {
+			gl <- group.labels[group]
+			select <- column.groups == group
+			for (i in which(select)) {
+				colwidth[[2 * i + 1]] = max(unit(1.0 / sum(select), "grobwidth", gl), colwidth[2 * i + 1])
+			}
+		}
+	}
+
 	graphwidth <- unit(5, "cm")
 	ci.colwidth <- max(unit(rep(1, length(ci.labels)), "grobwidth", ci.labels))
 	colwidth <- unit.c(colwidth, graphwidth, colgap, ci.colwidth)
@@ -55,14 +74,23 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
 	# Initialize plot and layout
 	plot.new()
-	layout <- grid.layout(nr + 2, nc * 2 + 3, widths=colwidth, heights=unit(c(rep(1, nr), 0.5, 1), "lines"))
+	row.offset <- if (grouped) 2 else 1
+	layout <- grid.layout(nr + row.offset + 1, nc * 2 + 3, widths=colwidth, heights=unit(c(rep(1, nr + row.offset - 1), 0.5, 1), "lines"))
 	pushViewport(viewport(layout=layout))
 
 	# Draw labels (left-hand side)
+	if (grouped) {
+		for (group in groups) {
+			label <- textGrob(column.group.labels[group])
+			pushViewport(viewport(layout.pos.row=1, layout.pos.col=which(column.groups == group) * 2 + 1))
+			grid.draw(label)
+			popViewport()
+		}
+	}
 	for(row in 1:nr){
 		for(col in 1:nc){
 			if (!is.null(labels[row, col][[1]])){
-				pushViewport(viewport(layout.pos.row=row, layout.pos.col=2 * col - 1))
+				pushViewport(viewport(layout.pos.row=row.offset + row - 1, layout.pos.col=2 * col - 1))
 				grid.draw(labels[row, col][[1]])
 				popViewport()
 			}
@@ -70,7 +98,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}
 
 	# CI column label
-	pushViewport(viewport(layout.pos.row=1, layout.pos.col=2 * nc + 1))
+	pushViewport(viewport(layout.pos.row=row.offset, layout.pos.col=2 * nc + 1))
 	grid.draw(textGrob(ci.label))
 	popViewport()
 
@@ -90,34 +118,44 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
 	# Plot CIs
 	for (i in 1:nrow(data)) {
-		pushViewport(viewport(layout.pos.row=i + 1, layout.pos.col=2*nc+1, xscale=xrange))
+		pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+1, xscale=xrange))
 		grid.lines(x=unit(c(data$ci.l[i], data$ci.u[i]), "native"), y=0.5) #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
 		grid.rect(x=unit(data$pe[i], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
 		popViewport()
-		pushViewport(viewport(layout.pos.row=i + 1, layout.pos.col=2*nc+3, xscale=xrange))
+		pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+3, xscale=xrange))
 		grid.draw(ci.labels[i][[1]])
 		popViewport()
 	}
 
 	# No-effect line
-	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=1+(1:nr), xscale=xrange))
+	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=row.offset+(1:nr), xscale=xrange))
 	grid.lines(x=unit(c(0, 0), "native"), y=unit(c(0, 1), "npc"))
 	popViewport()
 
 	# Axis and ticks
-	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+1, xscale=xrange))
+	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+row.offset, xscale=xrange))
 	grid.lines(x=unit(c(0, 1), "npc"), y=unit(1, "npc"))
 	grid.lines(x=unit(0, "npc"), y=unit(c(0, 1), "npc"))
 	grid.lines(x=unit(1, "npc"), y=unit(c(0, 1), "npc"))
 	popViewport()
 
 	# Tick labels
-	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+2, xscale=xrange))
+	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+row.offset+1, xscale=xrange))
 	grid.draw(textGrob(scale.trf(0), just="center", x=unit(0, "native")))
 	grid.draw(textGrob(scale.trf(xrange[1]), just="center", x=unit(0, "npc")))
 	grid.draw(textGrob(scale.trf(xrange[2]), just="center", x=unit(1, "npc")))
 	popViewport()
 }
 
-blobbogram(data, columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
+blobbogram(data,
+	columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
+	column.groups=c(1, 2), column.group.labels=c('Intervention', 'Control'),
+	id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
+
+data[['group']] <- NULL
+
+stop()
+
+blobbogram(data,
+	columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
 	id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
