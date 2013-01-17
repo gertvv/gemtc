@@ -14,12 +14,53 @@ data$ci.u <- log(data$ci.u)
 
 library(grid)
 
+insert.row.groups <- function(data, group.labels) {
+	data.new <- data[1,]
+	data.new[1, ] <- NA
+	levels(data.new$id) <- c(levels(data.new$id), group.labels)
+	levels(data.new$style) <- c(levels(data.new$style), "group")
+	row.old <- 1
+	row.new <- 1
+	groups <- rle(data$group)
+	for (i in 1:length(groups$lengths)) {
+		v <- groups$values[i]
+		l <- groups$lengths[i]
+		data.new[row.new, "id"] <- group.labels[v]
+		data.new[row.new, "style"] <- "group"
+
+		# Copy data to new frame, overriding the rownames to prevent duplicates
+		data.old <- data[(row.old):(row.old + l - 1),]
+		rownames(data.old) <- (row.new + 1):(row.new + l)
+		data.new[(row.new + 1):(row.new + l),] <- data.old
+
+		row.old <- row.old + l
+		row.new <- row.new + l + 1
+	}
+	data.new
+}
+
 blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	left.label=NULL, right.label=NULL,
 	log.scale=FALSE, xlim=NULL, styles=NULL,
 	grouped=('group' %in% colnames(data)), group.labels=NULL,
 	columns=NULL, column.labels=NULL,
-	column.groups, column.group.labels=NULL) {
+	column.groups=NULL, column.group.labels=NULL) {
+
+	if (is.null(styles)) {
+		styles <- data.frame(
+			style=c('normal', 'pooled', 'group'),
+			font.weight=c('plain', 'plain', 'bold'),
+			row.height=c(1, 1, 1.5),
+			pe.style=c('circle', 'square', NA),
+			pe.scale=c(FALSE, FALSE, NA))
+	}
+
+	# Rewrite input: add group headers
+	if (grouped) {
+		data <- insert.row.groups(data, group.labels)
+	}
+
+	columns.grouped <- !is.null(column.groups)
 
 	# Add default ('id') column
 	columns <- c('id', columns)
@@ -32,8 +73,8 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	# Create labels
 	labeltext <- rbind(column.labels, as.matrix(data[,columns]))
 	rownames(labeltext) <- NULL
-	labels <- apply(labeltext, c(1,2), function(x) { if (!is.na(x)) textGrob(x) })
-	if (grouped) {
+	labels <- apply(labeltext, c(1,2), function(x) { if (!is.na(x)) textGrob(x, x=unit(0, "npc"), just="left") })
+	if (columns.grouped) {
 		group.labels <- lapply(column.group.labels, function(x) { if (!is.na(x)) textGrob(x) })
 	}
 
@@ -51,7 +92,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}))
 
 	# Adjust column widths so group labels fit
-	if (grouped) {
+	if (columns.grouped) {
 		groups <- names(column.group.labels)
 		if (is.null(groups)) {
 			groups <- 1:length(column.group.labels)
@@ -74,12 +115,13 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
 	# Initialize plot and layout
 	plot.new()
-	row.offset <- if (grouped) 2 else 1
-	layout <- grid.layout(nr + row.offset + 1, nc * 2 + 3, widths=colwidth, heights=unit(c(rep(1, nr + row.offset - 1), 0.5, 1), "lines"))
+	row.offset <- if (columns.grouped) 2 else 1
+	rowheight <- unit(c(rep(1, row.offset), styles[data$style, 'row.height'], 0.5, 1), "lines")
+	layout <- grid.layout(nr + row.offset + 1, nc * 2 + 3, widths=colwidth, heights=rowheight)
 	pushViewport(viewport(layout=layout))
 
 	# Draw labels (left-hand side)
-	if (grouped) {
+	if (columns.grouped) {
 		for (group in groups) {
 			label <- textGrob(column.group.labels[group])
 			pushViewport(viewport(layout.pos.row=1, layout.pos.col=which(column.groups == group) * 2 + 1))
@@ -118,13 +160,15 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
 	# Plot CIs
 	for (i in 1:nrow(data)) {
-		pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+1, xscale=xrange))
-		grid.lines(x=unit(c(data$ci.l[i], data$ci.u[i]), "native"), y=0.5) #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
-		grid.rect(x=unit(data$pe[i], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
-		popViewport()
-		pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+3, xscale=xrange))
-		grid.draw(ci.labels[i][[1]])
-		popViewport()
+		if (!is.na(data$pe[i])) {
+			pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+1, xscale=xrange))
+			grid.lines(x=unit(c(data$ci.l[i], data$ci.u[i]), "native"), y=0.5) #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
+			grid.rect(x=unit(data$pe[i], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
+			popViewport()
+			pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+3, xscale=xrange))
+			grid.draw(ci.labels[i][[1]])
+			popViewport()
+		}
 	}
 
 	# No-effect line
@@ -147,15 +191,14 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	popViewport()
 }
 
-blobbogram(data,
+blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
 	columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
 	column.groups=c(1, 2), column.group.labels=c('Intervention', 'Control'),
 	id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
 
-data[['group']] <- NULL
 
-stop()
-
-blobbogram(data,
-	columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-	id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
+if (FALSE) {
+	blobbogram(data,
+		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
+		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
+}
