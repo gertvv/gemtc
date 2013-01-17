@@ -35,11 +35,16 @@ add.group <- function(columns, data, labels, ci.labels, layout.row, xrange) {
 		}
 
 		if (!is.na(data$pe[row])) {
-			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+1, xscale=xrange))
-			grid.lines(x=unit(c(data$ci.l[row], data$ci.u[row]), "native"), y=0.5) #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
-			grid.rect(x=unit(data$pe[row], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
+			ciGrob <- gTree(children=gList(
+				linesGrob(x=unit(c(data$ci.l[row], data$ci.u[row]), "native"), y=0.5), #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
+				rectGrob(x=unit(data$pe[row], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
+				
+			))
+			ciGrob$vp <- viewport(xscale=xrange)
+			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+1))
+			grid.draw(ciGrob)
 			popViewport()
-			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+3, xscale=xrange))
+			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+3))
 			grid.draw(ci.labels[[row]])
 			popViewport()
 		}
@@ -241,7 +246,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}
 }
 
-if (FALSE) {
+if (TRUE) {
 	data <- read.table(textConnection('
 	id         group pe   ci.l ci.u style    value.A  value.B 
 	"Study 1"  1     0.35 0.08 0.92 "normal" "2/46"   "7/46" 
@@ -261,8 +266,9 @@ if (FALSE) {
 		column.groups=c(1, 2), column.group.labels=c('Intervention', 'Control'),
 		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
 
-	blobbogram(data,
-		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
-		grouped=FALSE)
+#	grid.newpage()
+#	blobbogram(data,
+#		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
+#		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
+#		grouped=FALSE)
 }
