@@ -1,50 +1,124 @@
-data <- read.table(textConnection('
-id         group pe   ci.l ci.u style    value.A  value.B 
-"Study 1"  1     0.35 0.08 0.92 "normal" "2/46"   "7/46" 
-"Study 2"  1     0.43 0.15 1.14 "normal" "4/50"   "8/49" 
-"Study 3"  2     0.31 0.07 0.74 "normal" "2/97"   "10/100"
-"Study 4"  2     0.86 0.34 2.90 "normal" "9/104"  "6/105" 
-"Study 5"  2     0.33 0.10 0.72 "normal" "4/74"   "14/74" 
-"Study 6"  2     0.47 0.23 0.91 "normal" "11/120" "22/129"
-"Pooled"   NA    0.42 0.15 1.04 "pooled" NA       NA 
-'), header=TRUE)
-data$pe <- log(data$pe)
-data$ci.l <- log(data$ci.l)
-data$ci.u <- log(data$ci.u)
-
 library(grid)
 
-insert.row.groups <- function(data, group.labels) {
-	data.new <- data[1,]
-	data.new[1, ] <- NA
-	levels(data.new$id) <- c(levels(data.new$id), group.labels)
-	levels(data.new$style) <- c(levels(data.new$style), "group")
+get.row.groups <- function(data, group.labels) {
 	row.old <- 1
-	row.new <- 1
+	if (is.factor(data$group)) {
+		data$group <- as.character(data$group)
+	}
 	groups <- rle(data$group)
-	for (i in 1:length(groups$lengths)) {
+	lapply(1:length(groups$lengths), function(i) {
 		v <- groups$values[i]
 		l <- groups$lengths[i]
-		data.new[row.new, "id"] <- group.labels[v]
-		data.new[row.new, "style"] <- "group"
+		i0 <- if (i == 1) 1 else sum(groups$lengths[1:max(1, (i - 1))]) + 1
+		list(label=group.labels[v], data=data[i0:(i0 + l - 1),])
+	})
+}
 
-		# Copy data to new frame, overriding the rownames to prevent duplicates
-		data.old <- data[(row.old):(row.old + l - 1),]
-		rownames(data.old) <- (row.new + 1):(row.new + l)
-		data.new[(row.new + 1):(row.new + l),] <- data.old
-
-		row.old <- row.old + l
-		row.new <- row.new + l + 1
+add.group.label <- function(label, layout.row) {
+	pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=1))
+	if (!is.null(label)) {
+		grid.draw(label)
 	}
-	data.new
+	popViewport()
+	layout.row + 1
+}
+
+add.group <- function(columns, data, labels, ci.labels, layout.row, xrange) {
+	nc <- length(columns)
+	for (row in 1:nrow(data)) {
+		for (col in columns) {
+			if (!is.null(labels[[row]][[col]])){
+				pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2 * which(columns == col) - 1))
+				grid.draw(labels[[row]][[col]])
+				popViewport()
+			}
+		}
+
+		if (!is.na(data$pe[row])) {
+			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+1, xscale=xrange))
+			grid.lines(x=unit(c(data$ci.l[row], data$ci.u[row]), "native"), y=0.5) #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
+			grid.rect(x=unit(data$pe[row], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
+			popViewport()
+			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+3, xscale=xrange))
+			grid.draw(ci.labels[[row]])
+			popViewport()
+		}
+
+		layout.row <- layout.row + 1
+	}
+	layout.row
+}
+
+draw.page <- function(data, colwidth, data.labels, ci.label, ci.labels, grouped, groupHeight, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv) {
+	columns.grouped <- !is.null(column.groups)
+	row.offset <- if (columns.grouped) 2 else 1
+
+	# Initialize plot and layout
+	dataheight <- do.call(unit.c, lapply(data, groupHeight))
+	rowheight <- unit.c(unit(rep(1, row.offset), "lines"), dataheight, unit(c(0.5, 1), "lines"))
+	layout <- grid.layout(length(rowheight), length(colwidth), widths=colwidth, heights=rowheight)
+	pushViewport(viewport(layout=layout))
+
+	# Draw column labels (left-hand side)
+	if (columns.grouped) {
+		groups <- names(column.group.labels)
+		for (group in groups) {
+			label <- textGrob(column.group.labels[group])
+			pushViewport(viewport(layout.pos.row=1, layout.pos.col=which(column.groups == group) * 2 + 1))
+			grid.draw(label)
+			popViewport()
+		}
+	}
+	for (i in 1:length(header.labels)) {
+		pushViewport(viewport(layout.pos.row=row.offset, layout.pos.col=2 * i - 1))
+		grid.draw(header.labels[[i]])
+		popViewport()
+	}
+
+	# CI column label
+	pushViewport(viewport(layout.pos.row=row.offset, layout.pos.col=length(colwidth)))
+	grid.draw(textGrob(ci.label))
+	popViewport()
+
+	# Main content
+	nc <- length(columns)
+	layout.row <- row.offset + 1
+	for (grp in 1:length(data)) {
+		if (grouped) {
+			layout.row <- add.group.label(if (!is.na(data[[grp]]$label)) textGrob(data[[grp]]$label), layout.row)
+		}
+		layout.row <- add.group(columns, data[[grp]]$data, data.labels[[grp]], ci.labels[[grp]], layout.row, xrange)
+	}
+	nr <- layout.row
+
+	# No-effect line
+	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=(row.offset+1):(nr), xscale=xrange))
+	grid.lines(x=unit(c(0, 0), "native"), y=unit(c(0, 1), "npc"))
+	popViewport()
+
+	# Axis and ticks
+	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr, xscale=xrange))
+	grid.lines(x=unit(c(0, 1), "npc"), y=unit(1, "npc"))
+	grid.lines(x=unit(0, "npc"), y=unit(c(0, 1), "npc"))
+	grid.lines(x=unit(1, "npc"), y=unit(c(0, 1), "npc"))
+	popViewport()
+
+	# Tick labels
+	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+1, xscale=xrange))
+	grid.draw(textGrob(scale.trf(0), just="center", x=unit(0, "native")))
+	grid.draw(textGrob(scale.trf(xrange[1]), just="center", x=unit(0, "npc")))
+	grid.draw(textGrob(scale.trf(xrange[2]), just="center", x=unit(1, "npc")))
+	popViewport()
 }
 
 blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	left.label=NULL, right.label=NULL,
 	log.scale=FALSE, xlim=NULL, styles=NULL,
-	grouped=('group' %in% colnames(data)), group.labels=NULL,
+	grouped=NULL, group.labels=NULL,
 	columns=NULL, column.labels=NULL,
 	column.groups=NULL, column.group.labels=NULL) {
+
+	grouped <- ('group' %in% colnames(data))
 
 	if (is.null(styles)) {
 		styles <- data.frame(
@@ -53,12 +127,11 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 			row.height=c(1, 1, 1.5),
 			pe.style=c('circle', 'square', NA),
 			pe.scale=c(FALSE, FALSE, NA))
+		rownames(styles) <- styles$style
 	}
 
-	# Rewrite input: add group headers
-	if (grouped) {
-		data <- insert.row.groups(data, group.labels)
-	}
+	# Rewrite input: split into groups
+	data <- get.row.groups(data, group.labels)
 
 	columns.grouped <- !is.null(column.groups)
 
@@ -70,23 +143,31 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	scale.trf <- if (log.scale) exp else identity
 	scale.inv <- if (log.scale) log else identity
 
+	# FIXME: alignment, etc.
+	rowToGrobs <- function(row) {
+		lapply(row, function(x) { if (!is.na(x)) textGrob(x, x=unit(0, "npc"), just="left") })
+	}
+
 	# Create labels
-	labeltext <- rbind(column.labels, as.matrix(data[,columns]))
-	rownames(labeltext) <- NULL
-	labels <- apply(labeltext, c(1,2), function(x) { if (!is.na(x)) textGrob(x, x=unit(0, "npc"), just="left") })
+	header.labels <- rowToGrobs(column.labels)
+	data.labels <- lapply(data, function(datagrp) { apply(datagrp$data, 1, rowToGrobs) })
 	if (columns.grouped) {
-		group.labels <- lapply(column.group.labels, function(x) { if (!is.na(x)) textGrob(x) })
+		group.labels <- rowToGrobs(column.group.labels)
 	}
 
 	# Create CI labels
-	ci.labels <- lapply(1:nrow(data), function(i) {
-		text <- paste(scale.trf(data$pe[i]), " (", scale.trf(data$ci.l[i]), ", ", scale.trf(data$ci.u[i]), ")", sep="")
-		textGrob(text)
+	ci.labels <- lapply(data, function(datagrp) {
+		lapply(1:nrow(datagrp$data), function(i) {
+			fmt <- lapply(datagrp$data[i, c('pe', 'ci.l', 'ci.u')], function(x) { formatC(scale.trf(x), format='f') })
+			text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
+			textGrob(text)
+		})
 	})
 
 	# Calculate column widths
 	colgap <- unit(3, "mm")
-	colwidth <- do.call(unit.c, apply(labels, 2, function(col) {
+	colwidth <- do.call(unit.c, lapply(columns, function(col) {
+		col <- c(header.labels[col], do.call(c, sapply(data.labels, function(grp) { sapply(grp, function(row) { row[col] }) })))
 		col <- col[!sapply(col, is.null)]
 		unit.c(max(unit(rep(1, length(col)), "grobwidth", col)), colgap)
 	}))
@@ -107,42 +188,9 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}
 
 	graphwidth <- unit(5, "cm")
-	ci.colwidth <- max(unit(rep(1, length(ci.labels)), "grobwidth", ci.labels))
+	all.ci.labels <- do.call(c, ci.labels)
+	ci.colwidth <- max(unit(rep(1, length(all.ci.labels)), "grobwidth", all.ci.labels))
 	colwidth <- unit.c(colwidth, graphwidth, colgap, ci.colwidth)
-
-	nc <- ncol(labels)
-	nr <- nrow(labels)
-
-	# Initialize plot and layout
-	plot.new()
-	row.offset <- if (columns.grouped) 2 else 1
-	rowheight <- unit(c(rep(1, row.offset), styles[data$style, 'row.height'], 0.5, 1), "lines")
-	layout <- grid.layout(nr + row.offset + 1, nc * 2 + 3, widths=colwidth, heights=rowheight)
-	pushViewport(viewport(layout=layout))
-
-	# Draw labels (left-hand side)
-	if (columns.grouped) {
-		for (group in groups) {
-			label <- textGrob(column.group.labels[group])
-			pushViewport(viewport(layout.pos.row=1, layout.pos.col=which(column.groups == group) * 2 + 1))
-			grid.draw(label)
-			popViewport()
-		}
-	}
-	for(row in 1:nr){
-		for(col in 1:nc){
-			if (!is.null(labels[row, col][[1]])){
-				pushViewport(viewport(layout.pos.row=row.offset + row - 1, layout.pos.col=2 * col - 1))
-				grid.draw(labels[row, col][[1]])
-				popViewport()
-			}
-		}
-	}
-
-	# CI column label
-	pushViewport(viewport(layout.pos.row=row.offset, layout.pos.col=2 * nc + 1))
-	grid.draw(textGrob(ci.label))
-	popViewport()
 
 	# Round to a single significant digit, according to round.fun
 	nice <- function(x, round.fun) {
@@ -153,52 +201,68 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
 	# Calculate plot range
 	xrange <- if (is.null(xlim)) {
-		c(nice(min(data$ci.l,na.rm=TRUE), floor), nice(max(data$ci.u,na.rm=TRUE), ceiling))
+		ci.l <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.l']}))
+		ci.u <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.u']}))
+		c(nice(min(ci.l,na.rm=TRUE), floor), nice(max(ci.u,na.rm=TRUE), ceiling))
 	} else {
 		xlim
 	}
 
-	# Plot CIs
-	for (i in 1:nrow(data)) {
-		if (!is.na(data$pe[i])) {
-			pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+1, xscale=xrange))
-			grid.lines(x=unit(c(data$ci.l[i], data$ci.u[i]), "native"), y=0.5) #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
-			grid.rect(x=unit(data$pe[i], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
-			popViewport()
-			pushViewport(viewport(layout.pos.row=i + row.offset, layout.pos.col=2*nc+3, xscale=xrange))
-			grid.draw(ci.labels[i][[1]])
-			popViewport()
+	groupHeight <- function(grp) {
+		if (grouped) unit(c(styles['group', 'row.height'], styles[grp$data$style, 'row.height']), "lines")
+		else unit(styles[grp$data$style, 'row.height'], "lines")
+	}
+
+	# divide data into pages
+	height <- sum(unit.c(unit(rep(1, if (columns.grouped) 2 else 1), "lines"), unit(c(0.5, 1), "lines")))
+	space <- 1.0 - convertY(height, "npc", valueOnly=TRUE)
+
+	pages <- list(c())
+	height <- 0
+	for (i in 1:length(data)) {
+		myHeight <- convertY(sum(groupHeight(data[[i]])), "npc", valueOnly=TRUE)
+		if (myHeight > space) {
+			stop("PAGE WONT FIT")
+		}
+		if (height + myHeight > space) { # new page
+			height <- myHeight
+			pages <- c(pages, c(i))
+		} else { # append to this page
+			height <- height + myHeight
+			pages[[length(pages)]] <- c(pages[[length(pages)]], i)
 		}
 	}
 
-	# No-effect line
-	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=row.offset+(1:nr), xscale=xrange))
-	grid.lines(x=unit(c(0, 0), "native"), y=unit(c(0, 1), "npc"))
-	popViewport()
-
-	# Axis and ticks
-	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+row.offset, xscale=xrange))
-	grid.lines(x=unit(c(0, 1), "npc"), y=unit(1, "npc"))
-	grid.lines(x=unit(0, "npc"), y=unit(c(0, 1), "npc"))
-	grid.lines(x=unit(1, "npc"), y=unit(c(0, 1), "npc"))
-	popViewport()
-
-	# Tick labels
-	pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+row.offset+1, xscale=xrange))
-	grid.draw(textGrob(scale.trf(0), just="center", x=unit(0, "native")))
-	grid.draw(textGrob(scale.trf(xrange[1]), just="center", x=unit(0, "npc")))
-	grid.draw(textGrob(scale.trf(xrange[2]), just="center", x=unit(1, "npc")))
-	popViewport()
+	# Now plot each group
+	for (i in 1:length(pages)) {
+		if (i > 1) grid.newpage()
+		page <- pages[[i]]
+		draw.page(data[page], colwidth, data.labels[page], ci.label, ci.labels[page], grouped, groupHeight, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv)
+	}
 }
 
-blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
-	columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-	column.groups=c(1, 2), column.group.labels=c('Intervention', 'Control'),
-	id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
-
-
 if (FALSE) {
+	data <- read.table(textConnection('
+	id         group pe   ci.l ci.u style    value.A  value.B 
+	"Study 1"  1     0.35 0.08 0.92 "normal" "2/46"   "7/46" 
+	"Study 2"  1     0.43 0.15 1.14 "normal" "4/50"   "8/49" 
+	"Study 3"  2     0.31 0.07 0.74 "normal" "2/97"   "10/100"
+	"Study 4"  2     0.86 0.34 2.90 "normal" "9/104"  "6/105" 
+	"Study 5"  2     0.33 0.10 0.72 "normal" "4/74"   "14/74" 
+	"Study 6"  2     0.47 0.23 0.91 "normal" "11/120" "22/129"
+	"Pooled"   NA    0.42 0.15 1.04 "pooled" NA       NA 
+	'), header=TRUE)
+	data$pe <- log(data$pe)
+	data$ci.l <- log(data$ci.l)
+	data$ci.u <- log(data$ci.u)
+
+	blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
+		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
+		column.groups=c(1, 2), column.group.labels=c('Intervention', 'Control'),
+		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
+
 	blobbogram(data,
 		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
+		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
+		grouped=FALSE)
 }
