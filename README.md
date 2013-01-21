@@ -34,6 +34,7 @@ The [R][6] package requires [rJava][7] and several other packages.
 
 Versions
 --------
+0.14.3: Fixed bug in initial values calculation and minor improvements 
 
 0.14.1: Bugfix and minor improvements.
 

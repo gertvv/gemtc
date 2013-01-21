@@ -33,6 +33,7 @@ existing data file (e.g. those provided in the examples directory) or
 
 Versions
 --------
+0.14.3: Fixed bug in initial values calculation and minor improvements 
 
 0.14.1: Bugfixes and minor improvements.
 
