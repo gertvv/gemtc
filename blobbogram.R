@@ -56,6 +56,7 @@ grob.ci <- function(pe, ci.l, ci.u, xrange) {
 	ciGrob
 }
 
+
 draw.page <- function(colwidth, rowheights, data.labels, ci.label, ci.plots, ci.labels, grouped, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv) {
 	columns.grouped <- !is.null(column.groups)
 	row.offset <- if (columns.grouped) 2 else 1
@@ -150,15 +151,19 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	scale.trf <- if (log.scale) exp else identity
 	scale.inv <- if (log.scale) log else identity
 
+	grobWithStyle  <- function(text, style, x) { 
+		ff <- if (is.na(style$font.weight)) "plain" else style$font.weight
+		textGrob(text, x=unit(0, "npc"), just="left", gp=gpar(fontface=ff))
+	}
+
 	# FIXME: alignment, etc.
 	rowToGrobs <- function(row) {
 		style <- styles[row['style'],]
 		lapply(row, function(x) { 
-				ff <- if (is.na(style$font.weight)) "plain" else style$font.weight
-				if (!is.na(x)) textGrob(x, x=unit(0, "npc"), just="left", gp=gpar(fontface=ff))
+				if (!is.na(x)) grobWithStyle(x, style) 
 			})
 	}
-
+	
 	# Create labels
 	header.labels <- rowToGrobs(column.labels)
 	data.labels <- lapply(data, function(datagrp) { apply(datagrp$data, 1, rowToGrobs) })
@@ -171,7 +176,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 		lapply(1:nrow(datagrp$data), function(i) {
 			fmt <- lapply(datagrp$data[i, c('pe', 'ci.l', 'ci.u')], function(x) { formatC(scale.trf(x), format='f') })
 			text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
-			textGrob(text)
+			grobWithStyle(text, styles[datagrp$data[i,'style'],])
 		})
 	})
 
