@@ -131,7 +131,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	if (is.null(styles)) {
 		styles <- data.frame(
 			style=c('normal', 'pooled', 'group'),
-			font.weight=c('plain', 'bold', 'bold'),
+			font.weight=c('plain', 'plain', 'bold'),
 			row.height=c(1, 1, 1.5),
 			pe.style=c('circle', 'square', NA),
 			pe.scale=c(FALSE, FALSE, NA))
@@ -256,7 +256,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 			pages[[length(pages)]] <- c(pages[[length(pages)]], i)
 		}
 	}
-
+	
 	# Now plot each group
 	for (i in 1:length(pages)) {
 		if (i > 1) grid.newpage()
