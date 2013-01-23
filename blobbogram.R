@@ -23,9 +23,9 @@ add.group.label <- function(label, layout.row) {
 	layout.row + 1
 }
 
-add.group <- function(columns, data, labels, ci.labels, layout.row, xrange) {
+add.group <- function(columns, ci.plots, labels, ci.labels, layout.row) {
 	nc <- length(columns)
-	for (row in 1:nrow(data)) {
+	for (row in 1:length(ci.plots)) {
 		for (col in columns) {
 			if (!is.null(labels[[row]][[col]])){
 				pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2 * which(columns == col) - 1))
@@ -34,33 +34,34 @@ add.group <- function(columns, data, labels, ci.labels, layout.row, xrange) {
 			}
 		}
 
-		if (!is.na(data$pe[row])) {
-			ciGrob <- gTree(children=gList(
-				linesGrob(x=unit(c(data$ci.l[row], data$ci.u[row]), "native"), y=0.5), #, arrow=arrow(ends=ends, length=unit(0.05, "inches")), gp=gpar(col=col$lines))
-				rectGrob(x=unit(data$pe[row], "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
-				
-			))
-			ciGrob$vp <- viewport(xscale=xrange)
+		if (!is.null(ci.plots[[row]])) {
 			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+1))
-			grid.draw(ciGrob)
+			grid.draw(ci.plots[[row]])
 			popViewport()
 			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+3))
 			grid.draw(ci.labels[[row]])
 			popViewport()
 		}
-
 		layout.row <- layout.row + 1
 	}
 	layout.row
 }
 
-draw.page <- function(data, colwidth, data.labels, ci.label, ci.labels, grouped, groupHeight, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv) {
+grob.ci <- function(pe, ci.l, ci.u, xrange) {
+	ciGrob <- gTree(children=gList(
+		linesGrob(x=unit(c(ci.l, ci.u), "native"), y=0.5), 
+		rectGrob(x=unit(pe, "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
+	))
+	ciGrob$vp <- viewport(xscale=xrange)
+	ciGrob
+}
+
+draw.page <- function(colwidth, rowheights, data.labels, ci.label, ci.plots, ci.labels, grouped, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv) {
 	columns.grouped <- !is.null(column.groups)
 	row.offset <- if (columns.grouped) 2 else 1
 
 	# Initialize plot and layout
-	dataheight <- do.call(unit.c, lapply(data, groupHeight))
-	rowheight <- unit.c(unit(rep(1, row.offset), "lines"), dataheight, unit(c(0.5, 1), "lines"))
+	rowheight <- unit.c(unit(rep(1, row.offset), "lines"), rowheights, unit(c(0.5, 1), "lines"))
 	layout <- grid.layout(length(rowheight), length(colwidth), widths=colwidth, heights=rowheight)
 	pushViewport(viewport(layout=layout))
 
@@ -88,11 +89,12 @@ draw.page <- function(data, colwidth, data.labels, ci.label, ci.labels, grouped,
 	# Main content
 	nc <- length(columns)
 	layout.row <- row.offset + 1
-	for (grp in 1:length(data)) {
+	for (grp in 1:length(ci.plots)) {
 		if (grouped) {
-			layout.row <- add.group.label(if (!is.na(data[[grp]]$label)) textGrob(data[[grp]]$label), layout.row)
+			groupName <- names(ci.plots)[[grp]]
+			layout.row <- add.group.label(if (!is.na(groupName)) textGrob(groupName), layout.row)
 		}
-		layout.row <- add.group(columns, data[[grp]]$data, data.labels[[grp]], ci.labels[[grp]], layout.row, xrange)
+		layout.row <- add.group(columns, ci.plots[[grp]], data.labels[[grp]], ci.labels[[grp]], layout.row)
 	}
 	nr <- layout.row
 
@@ -123,12 +125,12 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	columns=NULL, column.labels=NULL,
 	column.groups=NULL, column.group.labels=NULL) {
 
-	grouped <- ('group' %in% colnames(data))
+	grouped <- !is.null(group.labels) && isTRUE(grouped)
 
 	if (is.null(styles)) {
 		styles <- data.frame(
 			style=c('normal', 'pooled', 'group'),
-			font.weight=c('plain', 'plain', 'bold'),
+			font.weight=c('plain', 'bold', 'bold'),
 			row.height=c(1, 1, 1.5),
 			pe.style=c('circle', 'square', NA),
 			pe.scale=c(FALSE, FALSE, NA))
@@ -150,7 +152,11 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
 	# FIXME: alignment, etc.
 	rowToGrobs <- function(row) {
-		lapply(row, function(x) { if (!is.na(x)) textGrob(x, x=unit(0, "npc"), just="left") })
+		style <- styles[row['style'],]
+		lapply(row, function(x) { 
+				ff <- if (is.na(style$font.weight)) "plain" else style$font.weight
+				if (!is.na(x)) textGrob(x, x=unit(0, "npc"), just="left", gp=gpar(fontface=ff))
+			})
 	}
 
 	# Create labels
@@ -212,6 +218,14 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	} else {
 		xlim
 	}
+	# Create CI plots with group labels
+	ci.plots <- lapply(data, function(datagrp) {
+		lapply(1:nrow(datagrp$data), function(i) { 
+			fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
+			grob <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange)
+		})
+	})
+	names(ci.plots) <- lapply(data, function(grp) { grp$label })
 
 	groupHeight <- function(grp) {
 		if (grouped) unit(c(styles['group', 'row.height'], styles[grp$data$style, 'row.height']), "lines")
@@ -242,7 +256,8 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	for (i in 1:length(pages)) {
 		if (i > 1) grid.newpage()
 		page <- pages[[i]]
-		draw.page(data[page], colwidth, data.labels[page], ci.label, ci.labels[page], grouped, groupHeight, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv)
+		rowheights <- do.call(unit.c, lapply(data[page], groupHeight))
+		draw.page(colwidth, rowheights, data.labels[page], ci.label, ci.plots[page], ci.labels[page], grouped, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv)
 	}
 }
 
@@ -263,12 +278,12 @@ if (TRUE) {
 
 	blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
 		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-		column.groups=c(1, 2), column.group.labels=c('Intervention', 'Control'),
+		column.groups=c(1, 2), grouped=TRUE, column.group.labels=c('Intervention', 'Control'),
 		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
 
-#	grid.newpage()
-#	blobbogram(data,
-#		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-#		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
-#		grouped=FALSE)
+	#grid.newpage()
+	#blobbogram(data,
+		#columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
+		#id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
+		#grouped=FALSE)
 }
