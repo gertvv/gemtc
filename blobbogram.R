@@ -23,23 +23,24 @@ add.group.label <- function(label, layout.row) {
 	layout.row + 1
 }
 
-add.group <- function(columns, ci.plots, labels, ci.labels, layout.row) {
+add.group <- function(columns, ci.data, layout.row) {
 	nc <- length(columns)
-	for (row in 1:length(ci.plots)) {
+  print(ci.data)
+	for (row in 1:length(ci.data$plots)) {
 		for (col in columns) {
-			if (!is.null(labels[[row]][[col]])){
+			if (!is.null(ci.data$labels[[row]][[col]])){
 				pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2 * which(columns == col) - 1))
-				grid.draw(labels[[row]][[col]])
+				grid.draw(ci.data$labels[[row]][[col]])
 				popViewport()
 			}
 		}
 
-		if (!is.null(ci.plots[[row]])) {
+		if (!is.null(ci.data$plots[[row]])) {
 			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+1))
-			grid.draw(ci.plots[[row]])
+			grid.draw(ci.data$plots[[row]])
 			popViewport()
 			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+3))
-			grid.draw(ci.labels[[row]])
+			grid.draw(ci.data$text[[row]])
 			popViewport()
 		}
 		layout.row <- layout.row + 1
@@ -47,17 +48,29 @@ add.group <- function(columns, ci.plots, labels, ci.labels, layout.row) {
 	layout.row
 }
 
-grob.ci <- function(pe, ci.l, ci.u, xrange) {
+grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
+	grob.pe <- NULL
+	if(style$pe.style == "circle") { 
+		grob.pe <- circleGrob(x=unit(pe, "native"), y=0.5, r=unit(0.2, "snpc"), gp=gpar(col="black"))
+	} else { # Default is square
+		grob.pe <- rectGrob(x=unit(pe, "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
+	}
 	ciGrob <- gTree(children=gList(
-		linesGrob(x=unit(c(ci.l, ci.u), "native"), y=0.5), 
-		rectGrob(x=unit(pe, "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
+		linesGrob(x=unit(c(ci.l, ci.u), "native"), y=0.5),
+		grob.pe
 	))
 	ciGrob$vp <- viewport(xscale=xrange)
 	ciGrob
 }
 
+text.style	<- function(styles) {
+	function(text, style) { 
+		ff <- if (is.na(styles[style,]$font.weight)) "plain" else styles[style,]$font.weight
+		textGrob(text, x=unit(0, "npc"), just="left", gp=gpar(fontface=ff))
+	}
+}
 
-draw.page <- function(colwidth, rowheights, data.labels, ci.label, ci.plots, ci.labels, grouped, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv) {
+draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv) {
 	columns.grouped <- !is.null(column.groups)
 	row.offset <- if (columns.grouped) 2 else 1
 
@@ -90,12 +103,12 @@ draw.page <- function(colwidth, rowheights, data.labels, ci.label, ci.plots, ci.
 	# Main content
 	nc <- length(columns)
 	layout.row <- row.offset + 1
-	for (grp in 1:length(ci.plots)) {
+	for (grp in 1:nrow(ci.data)) {
 		if (grouped) {
-			groupName <- names(ci.plots)[[grp]]
-			layout.row <- add.group.label(if (!is.na(groupName)) textGrob(groupName), layout.row)
+			groupName <- colnames(ci.data)[[grp]]
+			layout.row <- add.group.label(if (!is.na(groupName)) text.fn(groupName, 'group'), layout.row)
 		}
-		layout.row <- add.group(columns, ci.plots[[grp]], data.labels[[grp]], ci.labels[[grp]], layout.row)
+		layout.row <- add.group(columns, ci.data[,grp], layout.row)
 	}
 	nr <- layout.row
 
@@ -137,6 +150,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 			pe.scale=c(FALSE, FALSE, NA))
 		rownames(styles) <- styles$style
 	}
+	text.fn <- text.style(styles)
 
 	# Rewrite input: split into groups
 	data <- get.row.groups(data, group.labels)
@@ -151,16 +165,9 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	scale.trf <- if (log.scale) exp else identity
 	scale.inv <- if (log.scale) log else identity
 
-	grobWithStyle  <- function(text, style, x) { 
-		ff <- if (is.na(style$font.weight)) "plain" else style$font.weight
-		textGrob(text, x=unit(0, "npc"), just="left", gp=gpar(fontface=ff))
-	}
-
-	# FIXME: alignment, etc.
 	rowToGrobs <- function(row) {
-		style <- styles[row['style'],]
 		lapply(row, function(x) { 
-				if (!is.na(x)) grobWithStyle(x, style) 
+				if (!is.na(x)) text.fn(x, row['style']) 
 			})
 	}
 	
@@ -176,7 +183,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 		lapply(1:nrow(datagrp$data), function(i) {
 			fmt <- lapply(datagrp$data[i, c('pe', 'ci.l', 'ci.u')], function(x) { formatC(scale.trf(x), format='f') })
 			text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
-			grobWithStyle(text, styles[datagrp$data[i,'style'],])
+			text.fn(text, datagrp$data[i,'style'])
 		})
 	})
 
@@ -227,7 +234,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	ci.plots <- lapply(data, function(datagrp) {
 		lapply(1:nrow(datagrp$data), function(i) { 
 			fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
-			grob <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange)
+			grob <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
 		})
 	})
 	names(ci.plots) <- lapply(data, function(grp) { grp$label })
@@ -256,26 +263,30 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 			pages[[length(pages)]] <- c(pages[[length(pages)]], i)
 		}
 	}
-	
+
+  do.call(rbind, list(labels=data.labels, plots=ci.plots, text=ci.labels)) -> ci.data
+  p <- ci.data[,1]
+  print(p$plots[[1]])
+
 	# Now plot each group
 	for (i in 1:length(pages)) {
 		if (i > 1) grid.newpage()
 		page <- pages[[i]]
 		rowheights <- do.call(unit.c, lapply(data[page], groupHeight))
-		draw.page(colwidth, rowheights, data.labels[page], ci.label, ci.plots[page], ci.labels[page], grouped, columns, column.groups, column.group.labels, header.labels, xrange, scale.trf, scale.inv)
+		draw.page(ci.data[, page], colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv)
 	}
 }
 
 if (TRUE) {
 	data <- read.table(textConnection('
-	id         group pe   ci.l ci.u style    value.A  value.B 
-	"Study 1"  1     0.35 0.08 0.92 "normal" "2/46"   "7/46" 
-	"Study 2"  1     0.43 0.15 1.14 "normal" "4/50"   "8/49" 
-	"Study 3"  2     0.31 0.07 0.74 "normal" "2/97"   "10/100"
-	"Study 4"  2     0.86 0.34 2.90 "normal" "9/104"  "6/105" 
-	"Study 5"  2     0.33 0.10 0.72 "normal" "4/74"   "14/74" 
-	"Study 6"  2     0.47 0.23 0.91 "normal" "11/120" "22/129"
-	"Pooled"   NA    0.42 0.15 1.04 "pooled" NA       NA 
+	id				 group pe		ci.l ci.u style		 value.A	value.B 
+	"Study 1"  1		 0.35 0.08 0.92 "normal" "2/46"		"7/46" 
+	"Study 2"  1		 0.43 0.15 1.14 "normal" "4/50"		"8/49" 
+	"Study 3"  2		 0.31 0.07 0.74 "normal" "2/97"		"10/100"
+	"Study 4"  2		 0.86 0.34 2.90 "normal" "9/104"	"6/105" 
+	"Study 5"  2		 0.33 0.10 0.72 "normal" "4/74"		"14/74" 
+	"Study 6"  2		 0.47 0.23 0.91 "normal" "11/120" "22/129"
+	"Pooled"	 NA		 0.42 0.15 1.04 "pooled" NA				NA 
 	'), header=TRUE)
 	data$pe <- log(data$pe)
 	data$ci.l <- log(data$ci.l)
