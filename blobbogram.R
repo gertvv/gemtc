@@ -25,7 +25,6 @@ add.group.label <- function(label, layout.row) {
 
 add.group <- function(columns, ci.data, layout.row) {
 	nc <- length(columns)
-  print(ci.data)
 	for (row in 1:length(ci.data$plots)) {
 		for (col in columns) {
 			if (!is.null(ci.data$labels[[row]][[col]])){
@@ -265,8 +264,6 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}
 
   do.call(rbind, list(labels=data.labels, plots=ci.plots, text=ci.labels)) -> ci.data
-  p <- ci.data[,1]
-  print(p$plots[[1]])
 
 	# Now plot each group
 	for (i in 1:length(pages)) {
