@@ -1,7 +1,8 @@
-library('coda')
-library('igraph')
-
 ## mtc.network class methods
+
+forest <- function (x, ...) 
+  UseMethod("forest")
+
 print.mtc.network <- function(x, ...) {
 	cat("MTC dataset: ", x$description, "\n", sep="")
 	print(x$data)
@@ -23,7 +24,7 @@ summary.mtc.network <- function(object, ...) {
 }
 
 plot.mtc.network <- function(x, ...) {
-	plot(mtc.network.graph(x), ...)
+  igraph::plot.igraph(mtc.network.graph(x), ...)
 }
 
 ## mtc.model class methods
@@ -37,7 +38,7 @@ summary.mtc.model <- function(object, ...) {
 }
 
 plot.mtc.model <- function(x, ...) {
-	plot(mtc.model.graph(x), ...)
+  igraph::plot.igraph(mtc.model.graph(x), ...)
 }
 
 ## mtc.result class methods
