@@ -6,8 +6,6 @@ if (!exists("result")) {
 	result <- mtc.run(model)
 }
 
-source('blobbogram.R')
-
 ts <- network$treatments$id
 t1 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { rep(t, length(ts) - which(ts == t)) }))
 t2 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { ts[(which(ts == t) + 1):length(ts)] }))
