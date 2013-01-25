@@ -55,14 +55,13 @@ plot.mtc.result <- function(x, ...) {
 }
 
 forest.mtc.result <- function(x, ...) { 
-	stats <- summary(x)$statistics
+  stats <- summary(x)$quantiles 
 	stats <- stats[-dim(stats)[1],]
-	forest(metagen(stats[,1], stats[,2]), 
-				 comb.fixed=FALSE, 
-				 comb.random=FALSE,
-				 overall=FALSE, 
-				 leftcols=c("studlab"), 
-				 leftlab=c("Comparison"))
+  data <- data.frame(id=rownames(stats), pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5], group=NA, style="normal")
+  blobbogram(data,
+    columns=c(), column.labels=c(),
+    id.label="Comparison", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
+    grouped=FALSE)
 }
 
 as.mcmc.list.mtc.result <- function(x, ...) {
