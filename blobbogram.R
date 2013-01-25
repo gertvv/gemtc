@@ -246,7 +246,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}
 }
 
-if (TRUE) {
+if (FALSE) {
 	data <- read.table(textConnection('
 	id         group pe   ci.l ci.u style    value.A  value.B 
 	"Study 1"  1     0.35 0.08 0.92 "normal" "2/46"   "7/46" 
