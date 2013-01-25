@@ -185,11 +185,11 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 			text.fn(text, datagrp$data[i,'style'])
 		})
 	})
-
+	
 	# Calculate column widths
 	colgap <- unit(3, "mm")
 	colwidth <- do.call(unit.c, lapply(columns, function(col) {
-		col <- c(header.labels[col], do.call(c, sapply(data.labels, function(grp) { sapply(grp, function(row) { row[col] }) })))
+		col <- c(header.labels[col], do.call(c, lapply(data.labels, function(grp) { sapply(grp, function(row) { row[col] }) })))
 		col <- col[!sapply(col, is.null)]
 		unit.c(max(unit(rep(1, length(col)), "grobwidth", col)), colgap)
 	}))
