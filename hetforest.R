@@ -6,9 +6,9 @@ if (!exists("result")) {
 	result <- mtc.run(model)
 }
 
-source('blobbogram.R')
+#source('blobbogram.R')
 
-ts <- network$treatments$id
+ts <- levels(network$treatments$id)
 t1 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { rep(t, length(ts) - which(ts == t)) }))
 t2 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { ts[(which(ts == t) + 1):length(ts)] }))
 
@@ -36,7 +36,7 @@ for (i in 1:length(t1)) {
 			r1 <- network$data[sel1 & (network$data$study == study), ]
 			r2 <- network$data[sel2 & (network$data$study == study), ]
 
-			if ('mean' %in% colnames(data)) {
+			if ('mean' %in% colnames(network$data)) {
 				md <- as.numeric(r2['mean'] - r1['mean'])
 				var.1 <- (r1['std.dev'] / sqrt(r1['sampleSize']))^2
 				var.2 <- (r2['std.dev'] / sqrt(r2['sampleSize']))^2
@@ -56,6 +56,8 @@ for (i in 1:length(t1)) {
 						s2 <- s2 + 0.5
 						f1 <- f1 + 0.5
 						f2 <- f2 + 0.5
+
+						data$id[length(data$id)] <- paste(data$id[length(data$id)], "*")
 					}
 					md <- as.numeric(log((s2/f2)/(s1/f1)))
 					se <- as.numeric(1/s1 + 1/f1 + 1/s2 + 1/f2)
