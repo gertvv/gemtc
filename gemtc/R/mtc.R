@@ -1,6 +1,5 @@
 ## mtc.network class methods
-
-forest <- function (x, ...) 
+forest <- function (x, ...)  
 	UseMethod("forest")
 
 print.mtc.network <- function(x, ...) {

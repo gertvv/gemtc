@@ -1,7 +1,6 @@
 useDynLib(gemtc)
-
-import(rJava)
 import(grid)
+import(rJava)
 importFrom(igraph, graph, graph.empty, V, E, get.edge, edges, vertex, are.connected, get.shortest.paths)
 
 S3method(forest, mtc.result)
