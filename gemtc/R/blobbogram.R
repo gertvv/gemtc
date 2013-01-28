@@ -185,7 +185,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	xrange <- if (is.null(xlim)) {
 		ci.l <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.l']}))
 		ci.u <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.u']}))
-		c(nice(min(ci.l,na.rm=TRUE), floor), nice(max(ci.u,na.rm=TRUE), ceiling))
+		c(min(nice(min(ci.l,na.rm=TRUE), floor), 0), max(nice(max(ci.u,na.rm=TRUE), ceiling), 0))
 	} else {
 		xlim
 	}
