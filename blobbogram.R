@@ -25,7 +25,7 @@ add.group.label <- function(label, layout.row) {
 
 add.group <- function(columns, ci.data, layout.row) {
 	nc <- length(columns)
-	for (row in 1:length(ci.data$plots)) {
+	for (row in 1:length(ci.data$labels)) {
 		for (col in columns) {
 			if (!is.null(ci.data$labels[[row]][[col]])){
 				pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2 * which(columns == col) - 1))
@@ -33,13 +33,12 @@ add.group <- function(columns, ci.data, layout.row) {
 				popViewport()
 			}
 		}
-
-		if (!is.null(ci.data$plots[[row]])) {
+		if (!is.null(ci.data$ci.plot[[row]])) {
 			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+1))
-			grid.draw(ci.data$plots[[row]])
+			grid.draw(ci.data$ci.plot[[row]])
 			popViewport()
 			pushViewport(viewport(layout.pos.row=layout.row, layout.pos.col=2*nc+3))
-			grid.draw(ci.data$text[[row]])
+			grid.draw(ci.data$ci.label[[row]])
 			popViewport()
 		}
 		layout.row <- layout.row + 1
@@ -102,12 +101,12 @@ draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns,
 	# Main content
 	nc <- length(columns)
 	layout.row <- row.offset + 1
-	for (grp in 1:nrow(ci.data)) {
+	groupNames <- names(ci.data)
+	for (grp in 1:length(ci.data)) {
 		if (grouped) {
-			groupName <- colnames(ci.data)[[grp]]
-			layout.row <- add.group.label(if (!is.na(groupName)) text.fn(groupName, 'group'), layout.row)
+			layout.row <- add.group.label(if (!is.na(groupNames[[grp]])) text.fn(groupNames[[grp]], 'group'), layout.row)
 		}
-		layout.row <- add.group(columns, ci.data[,grp], layout.row)
+		layout.row <- add.group(columns, ci.data[[grp]], layout.row)
 	}
 	nr <- layout.row
 
@@ -134,11 +133,12 @@ draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns,
 blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	left.label=NULL, right.label=NULL,
 	log.scale=FALSE, xlim=NULL, styles=NULL,
-	grouped=NULL, group.labels=NULL,
+	grouped=TRUE, group.labels=NULL,
 	columns=NULL, column.labels=NULL,
 	column.groups=NULL, column.group.labels=NULL) {
 
 	grouped <- !is.null(group.labels) && isTRUE(grouped)
+
 	if (is.null(styles)) {
 		styles <- data.frame(
 			style=c('normal', 'pooled', 'group'),
@@ -163,32 +163,57 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	scale.trf <- if (log.scale) exp else identity
 	scale.inv <- if (log.scale) log else identity
 
+	# Round to a single significant digit, according to round.fun
+	nice <- function(x, round.fun) {
+		x <- scale.trf(x)
+		p <- 10^floor(log10(abs(x)))
+		scale.inv(round.fun(x / p) * p)
+	}
+
+	# Calculate plot range
+	xrange <- if (is.null(xlim)) {
+		ci.l <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.l']}))
+		ci.u <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.u']}))
+		c(nice(min(ci.l,na.rm=TRUE), floor), nice(max(ci.u,na.rm=TRUE), ceiling))
+	} else {
+		xlim
+	}
+
 	rowToGrobs <- function(row) {
 		lapply(row, function(x) { 
 				if (!is.na(x)) text.fn(x, row['style']) 
 			})
 	}
-	
-	# Create labels
+
 	header.labels <- rowToGrobs(column.labels)
-	data.labels <- lapply(data, function(datagrp) { apply(datagrp$data, 1, rowToGrobs) })
+	forest.data <- lapply(data, function(datagrp) { 
+			# Create labels
+			labels <- apply(datagrp$data, 1, rowToGrobs)
+		
+			ci.label <- lapply(1:nrow(datagrp$data), function(i) { 
+				# Create CI interval labels (right side) 
+				fmt <- lapply(datagrp$data[i, c('pe', 'ci.l', 'ci.u')], function(x) { formatC(scale.trf(x), format='f') })
+				text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
+				text.fn(text, datagrp$data[i,'style'])
+			})
+
+			ci.plot <- lapply(1:nrow(datagrp$data), function(i) { 
+				# Create CI interval labels (right side) 
+				fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
+				grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
+			})
+			list(labels=labels, ci.plot=ci.plot, ci.label=ci.label)
+		})
+	names(forest.data) <- lapply(data, function(grp) { grp$label })
+
 	if (columns.grouped) {
 		group.labels <- rowToGrobs(column.group.labels)
 	}
 
-	# Create CI labels
-	ci.labels <- lapply(data, function(datagrp) {
-		lapply(1:nrow(datagrp$data), function(i) {
-			fmt <- lapply(datagrp$data[i, c('pe', 'ci.l', 'ci.u')], function(x) { formatC(scale.trf(x), format='f') })
-			text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
-			text.fn(text, datagrp$data[i,'style'])
-		})
-	})
-	
 	# Calculate column widths
 	colgap <- unit(3, "mm")
 	colwidth <- do.call(unit.c, lapply(columns, function(col) {
-		col <- c(header.labels[col], do.call(c, lapply(data.labels, function(grp) { sapply(grp, function(row) { row[col] }) })))
+		col <- c(header.labels[col], do.call(c, lapply(forest.data, function(grp) { sapply(grp$labels, function(row) { row[col] }) })))
 		col <- col[!sapply(col, is.null)]
 		unit.c(max(unit(rep(1, length(col)), "grobwidth", col)), colgap)
 	}))
@@ -209,33 +234,10 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}
 
 	graphwidth <- unit(5, "cm")
-	all.ci.labels <- do.call(c, ci.labels)
+	all.ci.labels <- do.call(c, lapply(forest.data, function(x) { x$ci.label }) )
+	
 	ci.colwidth <- max(unit(rep(1, length(all.ci.labels)), "grobwidth", all.ci.labels))
 	colwidth <- unit.c(colwidth, graphwidth, colgap, ci.colwidth)
-
-	# Round to a single significant digit, according to round.fun
-	nice <- function(x, round.fun) {
-		x <- scale.trf(x)
-		p <- 10^floor(log10(abs(x)))
-		scale.inv(round.fun(x / p) * p)
-	}
-
-	# Calculate plot range
-	xrange <- if (is.null(xlim)) {
-		ci.l <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.l']}))
-		ci.u <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.u']}))
-		c(nice(min(ci.l,na.rm=TRUE), floor), nice(max(ci.u,na.rm=TRUE), ceiling))
-	} else {
-		xlim
-	}
-	# Create CI plots with group labels
-	ci.plots <- lapply(data, function(datagrp) {
-		lapply(1:nrow(datagrp$data), function(i) { 
-			fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
-			grob <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
-		})
-	})
-	names(ci.plots) <- lapply(data, function(grp) { grp$label })
 
 	groupHeight <- function(grp) {
 		if (grouped) unit(c(styles['group', 'row.height'], styles[grp$data$style, 'row.height']), "lines")
@@ -262,40 +264,47 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 		}
 	}
 
-  do.call(rbind, list(labels=data.labels, plots=ci.plots, text=ci.labels)) -> ci.data
-
 	# Now plot each group
 	for (i in 1:length(pages)) {
 		if (i > 1) grid.newpage()
 		page <- pages[[i]]
 		rowheights <- do.call(unit.c, lapply(data[page], groupHeight))
-		draw.page(ci.data[, page], colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv)
+		draw.page(forest.data[page], colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv)
 	}
 }
+if (F) {
+	stats <- summary(results)$quantiles 
+	stats <- stats[-dim(stats)[1],]
+	data <- data.frame(id=rownames(stats), pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5], group=NA, style="normal")
+	blobbogram(data,
+		columns=c(), column.labels=c(),
+		id.label="Comparison", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
+		grouped=FALSE)
+}
 
-#if (TRUE) {
-	#data <- read.table(textConnection('
-	#id				 group pe		ci.l ci.u style		 value.A	value.B 
-	#"Study 1"  1		 0.35 0.08 0.92 "normal" "2/46"		"7/46" 
-	#"Study 2"  1		 0.43 0.15 1.14 "normal" "4/50"		"8/49" 
-	#"Study 3"  2		 0.31 0.07 0.74 "normal" "2/97"		"10/100"
-	#"Study 4"  2		 0.86 0.34 2.90 "normal" "9/104"	"6/105" 
-	#"Study 5"  2		 0.33 0.10 0.72 "normal" "4/74"		"14/74" 
-	#"Study 6"  2		 0.47 0.23 0.91 "normal" "11/120" "22/129"
-	#"Pooled"	 NA		 0.42 0.15 1.04 "pooled" NA				NA 
-	#'), header=TRUE)
-	#data$pe <- log(data$pe)
-	#data$ci.l <- log(data$ci.l)
-	#data$ci.u <- log(data$ci.u)
+if (F) {
+	data <- read.table(textConnection('
+	id				 group pe		ci.l ci.u style		 value.A	value.B 
+	"Study 1"  1		 0.35 0.08 0.92 "normal" "2/46"		"7/46" 
+	"Study 2"  1		 0.43 0.15 1.14 "normal" "4/50"		"8/49" 
+	"Study 3"  2		 0.31 0.07 0.74 "normal" "2/97"		"10/100"
+	"Study 4"  2		 0.86 0.34 2.90 "normal" "9/104"	"6/105" 
+	"Study 5"  2		 0.33 0.10 0.72 "normal" "4/74"		"14/74" 
+	"Study 6"  2		 0.47 0.23 0.91 "normal" "11/120" "22/129"
+	"Pooled"	 NA		 0.42 0.15 1.04 "pooled" NA				NA 
+	'), header=TRUE)
+	data$pe <- log(data$pe)
+	data$ci.l <- log(data$ci.l)
+	data$ci.u <- log(data$ci.u)
 
-	#blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
-		#columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-		#column.groups=c(1, 2), grouped=TRUE, column.group.labels=c('Intervention', 'Control'),
-		#id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
+	blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
+		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
+		column.groups=c(1, 2), grouped=TRUE, column.group.labels=c('Intervention', 'Control'),
+		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
 
 	#grid.newpage()
 	#blobbogram(data,
 		#columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
 		#id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
 		#grouped=FALSE)
-#}
+}
