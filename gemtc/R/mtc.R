@@ -1,7 +1,7 @@
 ## mtc.network class methods
 
 forest <- function (x, ...) 
-  UseMethod("forest")
+	UseMethod("forest")
 
 print.mtc.network <- function(x, ...) {
 	cat("MTC dataset: ", x$description, "\n", sep="")
@@ -24,7 +24,7 @@ summary.mtc.network <- function(object, ...) {
 }
 
 plot.mtc.network <- function(x, ...) {
-  igraph::plot.igraph(mtc.network.graph(x), ...)
+	igraph::plot.igraph(mtc.network.graph(x), ...)
 }
 
 ## mtc.model class methods
@@ -38,7 +38,7 @@ summary.mtc.model <- function(object, ...) {
 }
 
 plot.mtc.model <- function(x, ...) {
-  igraph::plot.igraph(mtc.model.graph(x), ...)
+	igraph::plot.igraph(mtc.model.graph(x), ...)
 }
 
 ## mtc.result class methods
@@ -56,13 +56,13 @@ plot.mtc.result <- function(x, ...) {
 }
 
 forest.mtc.result <- function(x, ...) { 
-  stats <- summary(x)$quantiles 
+	stats <- summary(x)$quantiles 
 	stats <- stats[-dim(stats)[1],]
-  data <- data.frame(id=rownames(stats), pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5], group=NA, style="normal")
-  blobbogram(data,
-    columns=c(), column.labels=c(),
-    id.label="Comparison", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
-    grouped=FALSE)
+	data <- data.frame(id=rownames(stats), pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5], group=NA, style="normal")
+	blobbogram(data,
+		columns=c(), column.labels=c(),
+		id.label="Comparison", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
+		grouped=FALSE)
 }
 
 as.mcmc.list.mtc.result <- function(x, ...) {
@@ -99,20 +99,20 @@ graph.create <- function(v, e, ...) {
 }
 
 w.factors <- function(parameters) {
-  basic <- do.call(rbind, filter.parameters(parameters, function(x) { x[1] == 'd' }))
-  extract.unique <- function(f, basic) {
+	basic <- do.call(rbind, filter.parameters(parameters, function(x) { x[1] == 'd' }))
+	extract.unique <- function(f, basic) {
 		f <- c(f, f[1])
-    factors <- lapply(1:length(f), function(x, pars) { c(pars[x - 1], pars[x]) }, f)[-1]
-    factors <- do.call(rbind, factors)
-    apply(factors, 1, function(fac) {
-      if(!any(basic[,1]==fac[1] & basic[,2] == fac[2]) &&
-         !any(basic[,2]==fac[1] & basic[,1] == fac[2])) {
-        fac
-      } else NULL
-    })
-  }
-  w.factors <- filter.parameters(parameters, function(x) { x[1] == 'w' })
-  w.factors <- unlist(lapply(w.factors, extract.unique, basic), recursive=FALSE)
+		factors <- lapply(1:length(f), function(x, pars) { c(pars[x - 1], pars[x]) }, f)[-1]
+		factors <- do.call(rbind, factors)
+		apply(factors, 1, function(fac) {
+			if(!any(basic[,1]==fac[1] & basic[,2] == fac[2]) &&
+				 !any(basic[,2]==fac[1] & basic[,1] == fac[2])) {
+				fac
+			} else NULL
+		})
+	}
+	w.factors <- filter.parameters(parameters, function(x) { x[1] == 'w' })
+	w.factors <- unlist(lapply(w.factors, extract.unique, basic), recursive=FALSE)
 	w.factors[!sapply(w.factors, is.null)]
 }
 
