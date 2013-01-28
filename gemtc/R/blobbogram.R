@@ -188,18 +188,21 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 			# Create labels
 			labels <- apply(datagrp$data, 1, rowToGrobs)
 		
-			ci.label <- lapply(1:nrow(datagrp$data), function(i) { 
-				# Create CI interval labels (right side) 
-				fmt <- lapply(datagrp$data[i, c('pe', 'ci.l', 'ci.u')], function(x) { formatC(scale.trf(x), format='f') })
-				text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
-				text.fn(text, datagrp$data[i,'style'])
-			})
-
-			ci.plot <- lapply(1:nrow(datagrp$data), function(i) { 
-				# Create CI interval labels (right side) 
+			ci.data <- lapply(1:nrow(datagrp$data), function(i) { 
+				# Create CI plots
 				fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
-				grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
+				ci <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
+	
+				# Create CI interval labels (right side) 
+				fmt <- lapply(fmt, function(x) { formatC(scale.trf(x), format='f') })
+				text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
+				label <-  text.fn(text, datagrp$data[i,'style'])
+
+				list(ci=ci, label=label)
 			})
+			ci.plot <- lapply(ci.data, function(x) { x$ci })
+			ci.label <- lapply(ci.data, function(x) { x$label })
+
 			list(labels=labels, ci.plot=ci.plot, ci.label=ci.label)
 		})
 	names(forest.data) <- lapply(data, function(grp) { grp$label })
