@@ -14,4 +14,5 @@ export(
 	print.mtc.result, plot.mtc.result, summary.mtc.result, 
 	forest, forest.mtc.result,
 	as.mcmc.list.mtc.result, read.mtc.result.samples,
-	relative.effect, rank.probability)
+	relative.effect, rank.probability,
+	blobbogram)
