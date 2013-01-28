@@ -51,8 +51,21 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
 	} else { # Default is square
 		grob.pe <- rectGrob(x=unit(pe, "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
 	}
+
+	ends <- if (ci.l < xrange[[1]] && ci.u > xrange[[2]]) "both" 
+					else if(ci.l < xrange[[1]]) "first" 
+					else if (ci.u > xrange[[2]]) "last"
+					else NULL
+	
+	line <- NULL
+	if(!is.null(ends)) { 
+		line <- linesGrob(x=unit(c(max(ci.l, xrange[[1]]), min(ci.u, xrange[[2]])), "native"), arrow=arrow(ends=ends, length=unit(0.5, "snpc")), y=0.5) 
+	} else { 
+		line <- linesGrob(x=unit(c(ci.l, ci.u), "native"), y=0.5) 
+	}
+
 	ciGrob <- gTree(children=gList(
-		linesGrob(x=unit(c(ci.l, ci.u), "native"), y=0.5),
+		line,
 		grob.pe
 	))
 	ciGrob$vp <- viewport(xscale=xrange)
