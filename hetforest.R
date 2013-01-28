@@ -6,9 +6,8 @@ if (!exists("result")) {
 	result <- mtc.run(model)
 }
 
-source('blobbogram.R')
+ts <- levels(network$treatments$id)
 
-ts <- network$treatments$id
 t1 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { rep(t, length(ts) - which(ts == t)) }))
 t2 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { ts[(which(ts == t) + 1):length(ts)] }))
 
@@ -32,19 +31,46 @@ for (i in 1:length(t1)) {
 			data$id <- c(data$id, study)
 			data$group <- c(data$group, param)
 			data$style <- c(data$style, 'normal')
-
 			
 			r1 <- network$data[sel1 & (network$data$study == study), ]
 			r2 <- network$data[sel2 & (network$data$study == study), ]
 
-			md <- as.numeric(r2['mean'] - r1['mean'])
-			var.1 <- (r1['std.dev'] / sqrt(r1['sampleSize']))^2
-			var.2 <- (r2['std.dev'] / sqrt(r2['sampleSize']))^2
-			se <- as.numeric(sqrt(var.1 + var.2))
+			if ('mean' %in% colnames(network$data)) {
+				md <- as.numeric(r2['mean'] - r1['mean'])
+				var.1 <- (r1['std.dev'] / sqrt(r1['sampleSize']))^2
+				var.2 <- (r2['std.dev'] / sqrt(r2['sampleSize']))^2
+				se <- as.numeric(sqrt(var.1 + var.2))
+
+				data$pe <- c(data$pe, md)
+				data$ci.l <- c(data$ci.l, md - 1.96 * se)
+				data$ci.u <- c(data$ci.u, md + 1.96 * se)
+			} else {
+				if (r1['responders'] != 0 || r2['responders'] != 0) {
+					s1 <- r1['responders']
+					f1 <- r1['sampleSize'] - s1
+					s2 <- r2['responders']
+					f2 <- r2['sampleSize'] - s2
+					if (s1 == 0 || s2 == 0 || f1 == 0 || f2 == 0) {
+						s1 <- s1 + 0.5
+						s2 <- s2 + 0.5
+						f1 <- f1 + 0.5
+						f2 <- f2 + 0.5
+
+						data$id[length(data$id)] <- paste(data$id[length(data$id)], "*")
+					}
+					md <- as.numeric(log((s2/f2)/(s1/f1)))
+					se <- as.numeric(1/s1 + 1/f1 + 1/s2 + 1/f2)
+
+					data$pe <- c(data$pe, md)
+					data$ci.l <- c(data$ci.l, md - 1.96 * se)
+					data$ci.u <- c(data$ci.u, md + 1.96 * se)
+				} else {
+					data$pe <- c(data$pe, NA)
+					data$ci.l <- c(data$ci.l, NA)
+					data$ci.u <- c(data$ci.u, NA)
+				}
+			}
 			
-			data$pe <- c(data$pe, md)
-			data$ci.l <- c(data$ci.l, md - 1.96 * se)
-			data$ci.u <- c(data$ci.u, md + 1.96 * se)
 		}
 		data$id <- c(data$id, 'Pooled')
 		data$group <- c(data$group, param)
@@ -55,4 +81,4 @@ for (i in 1:length(t1)) {
 	}
 }
 data <- as.data.frame(data)
-blobbogram(data, group.labels=group.labels, ci.label="Median (95% CrI)")
+blobbogram(data, group.labels=group.labels, ci.label="Median (95% CrI)", log.scale='responders' %in% colnames(network$data))
