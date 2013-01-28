@@ -56,8 +56,12 @@ plot.mtc.result <- function(x, ...) {
 }
 
 forest.mtc.result <- function(x, ...) { 
-	stats <- summary(x)$quantiles 
-	stats <- stats[-dim(stats)[1],]
+	quantiles <- summary(x)$quantiles 
+	stats <- quantiles[-dim(quantiles)[1],]
+	if(class(stats) == "numeric") { # Selecting a single row returns a numeric 
+		stats <- as.matrix(t(stats))
+		row.names(stats) <- row.names(quantiles)[[1]]
+	}
 	data <- data.frame(id=rownames(stats), pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5], group=NA, style="normal")
 	blobbogram(data,
 		columns=c(), column.labels=c(),
