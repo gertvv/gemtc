@@ -1,8 +1,9 @@
 useDynLib(gemtc)
-
-import(coda)
+import(grid)
 import(rJava)
-import(meta)
+importFrom(igraph, graph, graph.empty, V, E, get.edge, edges, vertex, are.connected, get.shortest.paths)
+
+S3method(forest, mtc.result)
 
 export(
 	read.mtc.network, write.mtc.network, mtc.network,
@@ -10,6 +11,7 @@ export(
 	mtc.model,
 	print.mtc.model, plot.mtc.model, summary.mtc.model,
 	mtc.run,
-	print.mtc.result, plot.mtc.result, summary.mtc.result, forest.mtc.result,
+	print.mtc.result, plot.mtc.result, summary.mtc.result, 
+	forest, forest.mtc.result,
 	as.mcmc.list.mtc.result, read.mtc.result.samples,
 	relative.effect, rank.probability)
