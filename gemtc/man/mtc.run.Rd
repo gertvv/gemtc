@@ -42,7 +42,7 @@ Convergence of the model can be assessed using methods from the \code{coda} pack
 For example the Brooks-Gelman-Rubin method (\code{gelman.diag}, \code{gelman.plot}).
 The \code{summary} also provides useful information, such as the MCMC error and the time series and densities given by \code{plot} should also be inspected.
 
-The \code{\link{forest}} function from the \code{meta} package has been overridden for \code{mtc.result} objects.
+The \code{forest} function can provide forest plots for \code{mtc.result} objects.
 This is especially useful in combination with the \code{\link{relative.effect}} function that can be used to calculate relative effects compared to any baseline for consistency models.
 The \code{\link{rank.probability}} function calculated rank probabilities for consistency models.
 }
