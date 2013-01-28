@@ -51,10 +51,12 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
 	} else { # Default is square
 		grob.pe <- rectGrob(x=unit(pe, "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
 	}
+	
+	build.arrow <- function(ends) { arrow(ends=ends, length=unit(0.5, "snpc")) }
 
-	arrow <- if (ci.l < xrange[[1]] && ci.u > xrange[[2]]) arrow(ends='both', length=unit(0.5, "snpc")) 
-					else if(ci.l < xrange[[1]]) arrow(ends='first', length=unit(0.5, "snpc")) 
-					else if (ci.u > xrange[[2]]) arrow(ends='last', length=unit(0.5, "snpc"))
+	arrow <- if (ci.l < xrange[[1]] && ci.u > xrange[[2]]) build.arrow("both") 
+					else if(ci.l < xrange[[1]]) build.arrow("first")  
+					else if (ci.u > xrange[[2]]) build.arrow("last")
 					else NULL
 	
 	line <- linesGrob(x=unit(c(max(ci.l, xrange[[1]]), min(ci.u, xrange[[2]])), "native"), arrow=arrow, y=0.5) 
@@ -282,21 +284,20 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	}
 }
 
-if (TRUE) {
-	#data <- read.table(textConnection('
-	#id				 group pe		ci.l ci.u style		 value.A	value.B 
-	#"Study 1"  1		 0.35 0.08 0.92 "normal" "2/46"		"7/46" 
-	#"Study 2"  1		 0.43 0.15 1.14 "normal" "4/50"		"8/49" 
-	#"Study 3"  2		 0.31 0.07 0.74 "normal" "2/97"		"10/100"
-	#"Study 4"  2		 0.86 0.34 2.90 "normal" "9/104"	"6/105" 
-	#"Study 5"  2		 0.33 0.10 0.72 "normal" "4/74"		"14/74" 
-	#"Study 6"  2		 0.47 0.23 0.91 "normal" "11/120" "22/129"
-	#"Pooled"	 NA		 0.42 0.15 1.04 "pooled" NA				NA 
-	#'), header=TRUE)
-	#data$pe <- log(data$pe)
-	#data$ci.l <- log(data$ci.l)
-	#data$ci.u <- log(data$ci.u)
-
+if (FALSE) {
+	data <- read.table(textConnection('
+	id				 group pe		ci.l ci.u style		 value.A	value.B 
+	"Study 1"  1		 0.35 0.08 0.92 "normal" "2/46"		"7/46" 
+	"Study 2"  1		 0.43 0.15 1.14 "normal" "4/50"		"8/49" 
+	"Study 3"  2		 0.31 0.07 0.74 "normal" "2/97"		"10/100"
+	"Study 4"  2		 0.86 0.34 2.90 "normal" "9/104"	"6/105" 
+	"Study 5"  2		 0.33 0.10 0.72 "normal" "4/74"		"14/74" 
+	"Study 6"  2		 0.47 0.23 0.91 "normal" "11/120" "22/129"
+	"Pooled"	 NA		 0.42 0.15 1.04 "pooled" NA				NA 
+	'), header=TRUE)
+	data$pe <- log(data$pe)
+	data$ci.l <- log(data$ci.l)
+	data$ci.u <- log(data$ci.u)
 
 	data <- read.table(textConnection('
 	id				 group pe		ci.l ci.u style		 value.A	value.B 
