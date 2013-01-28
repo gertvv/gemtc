@@ -51,8 +51,18 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
 	} else { # Default is square
 		grob.pe <- rectGrob(x=unit(pe, "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
 	}
+	
+	build.arrow <- function(ends) { arrow(ends=ends, length=unit(0.5, "snpc")) }
+
+	arrow <- if (ci.l < xrange[[1]] && ci.u > xrange[[2]]) build.arrow("both") 
+					else if(ci.l < xrange[[1]]) build.arrow("first")  
+					else if (ci.u > xrange[[2]]) build.arrow("last")
+					else NULL
+	
+	line <- linesGrob(x=unit(c(max(ci.l, xrange[[1]]), min(ci.u, xrange[[2]])), "native"), arrow=arrow, y=0.5) 
+
 	ciGrob <- gTree(children=gList(
-		linesGrob(x=unit(c(ci.l, ci.u), "native"), y=0.5),
+		line,
 		grob.pe
 	))
 	ciGrob$vp <- viewport(xscale=xrange)
@@ -172,7 +182,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	xrange <- if (is.null(xlim)) {
 		ci.l <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.l']}))
 		ci.u <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.u']}))
-		c(nice(min(ci.l,na.rm=TRUE), floor), nice(max(ci.u,na.rm=TRUE), ceiling))
+		c(min(nice(min(ci.l,na.rm=TRUE), floor), 0), max(nice(max(ci.u,na.rm=TRUE), ceiling), 0))
 	} else {
 		xlim
 	}
@@ -289,9 +299,17 @@ if (FALSE) {
 	data$ci.l <- log(data$ci.l)
 	data$ci.u <- log(data$ci.u)
 
+	data <- read.table(textConnection('
+	id				 group pe		ci.l ci.u style		 value.A	value.B 
+	"Study 1"  1		 20 -10 50 "normal" "2/46"		"7/46" 
+	"Study 3"  2		 30 15 70 "normal" "11/120" "22/129"
+	"Study 3"  2		 30 -15 70 "normal" "11/120" "22/129"
+	"Study 3"  2		 15 10 20 "normal" "11/120" "22/129"
+	'), header=TRUE)
+	
 	blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
 		columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-		column.groups=c(1, 2), grouped=TRUE, column.group.labels=c('Intervention', 'Control'),
-		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE)
+		column.groups=c(1, 2), grouped=FALSE, xlim=c(0, 50), column.group.labels=c('Intervention', 'Control'),
+		id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=FALSE)
 
 }
