@@ -143,7 +143,8 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 	log.scale=FALSE, xlim=NULL, styles=NULL,
 	grouped=TRUE, group.labels=NULL,
 	columns=NULL, column.labels=NULL,
-	column.groups=NULL, column.group.labels=NULL) {
+	column.groups=NULL, column.group.labels=NULL,
+	ask=dev.interactive(orNone=TRUE)) {
 
 	grouped <- !is.null(group.labels) && isTRUE(grouped)
 
@@ -277,7 +278,12 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
 	# Now plot each group
 	for (i in 1:length(pages)) {
-		if (i > 1) grid.newpage()
+		if (i > 1) {
+			if (ask) {
+				readline('Hit <Return> to see next plot:')
+			}
+			grid.newpage()
+		}
 		page <- pages[[i]]
 		rowheights <- do.call(unit.c, lapply(data[page], groupHeight))
 		draw.page(forest.data[page], colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv)

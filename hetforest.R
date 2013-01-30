@@ -1,7 +1,7 @@
 library(gemtc)
 
-hetforest <- function(network, model, result) {
-	ts <- levels(network$treatments$id)
+hetforest <- function(network, model, result, ...) {
+	ts <- sort(unique(network$treatments$id))
 
 	t1 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { rep(t, length(ts) - which(ts == t)) }))
 	t2 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { ts[(which(ts == t) + 1):length(ts)] }))
@@ -76,7 +76,7 @@ hetforest <- function(network, model, result) {
 		}
 	}
 	data <- as.data.frame(data)
-	blobbogram(data, group.labels=group.labels, ci.label="Median (95% CrI)", log.scale='responders' %in% colnames(network$data))
+	blobbogram(data, group.labels=group.labels, ci.label="Median (95% CrI)", log.scale='responders' %in% colnames(network$data), ...)
 }
 
 if (!exists("result")) {

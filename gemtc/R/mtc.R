@@ -51,7 +51,7 @@ summary.mtc.result <- function(object, ...) {
 }
 
 plot.mtc.result <- function(x, ...) {
-	plot(x$samples)
+	plot(x$samples, ...)
 }
 
 forest.mtc.result <- function(x, ...) { 
