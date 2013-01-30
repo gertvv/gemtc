@@ -78,10 +78,3 @@ hetforest <- function(network, model, result, ...) {
 	data <- as.data.frame(data)
 	blobbogram(data, group.labels=group.labels, ci.label="Median (95% CrI)", log.scale='responders' %in% colnames(network$data), ...)
 }
-
-if (!exists("result")) {
-	network <- read.mtc.network('~/Downloads/langford.gemtc')
-	model <- mtc.model(network)
-	result <- mtc.run(model)
-}
-hetforest(network, model, result)
