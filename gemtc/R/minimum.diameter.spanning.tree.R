@@ -6,6 +6,7 @@ edge.length <- function(g, e) {
 minimum.diameter.spanning.tree <- function(graph) {
 	l <- function(edge) { edge.length(graph, edge) }
 
+	# Determine the center of the graph
 	f <- absolute.one.center(graph)
 	dc <- f['t'] - 0.5 * l(f['e'])
 	v <- get.edge(graph, f['e'])
@@ -15,6 +16,7 @@ minimum.diameter.spanning.tree <- function(graph) {
 		edgelist <- rev(v)
 	}
 
+	# For each vertex, if the center is on (v[1], v[2]), determine which of the shortest paths through v[1] or v[2] to the center is shorter
 	d <- shortest.paths(graph, mode="all")
 	t1 <- f['t']
 	t2 <- l(f['e']) - t1
@@ -64,7 +66,7 @@ absolute.one.center <- function(g) {
 #    distance from the left vertex
 #  - a center is a triple f = (e, t, r) where (e, t) is a point and r is the graph's radius around that
 #    point
-local.center <- function(graph, edge, second.order) {
+local.center <- function(graph, edge) {
 	d <- shortest.paths(graph)
 
 	# L(v): vertices ordered by distance from v
