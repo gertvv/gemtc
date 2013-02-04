@@ -61,10 +61,16 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
 	
 	line <- linesGrob(x=unit(c(max(ci.l, xrange[[1]]), min(ci.u, xrange[[2]])), "native"), arrow=arrow, y=0.5) 
 
-	ciGrob <- gTree(children=gList(
-		line,
-		grob.pe
-	))
+	if (pe > xrange[1] && pe < xrange[2]) {
+		ciGrob <- gTree(children=gList(
+			line,
+			grob.pe
+		))
+	} else {
+		ciGrob <- gTree(children=gList(
+			line
+		))
+	}
 	ciGrob$vp <- viewport(xscale=xrange)
 	ciGrob
 }
