@@ -2,13 +2,6 @@ j.getId <- function(jobj) {
 	.jcall(jobj, "S", "getId")
 }
 
-standardize.treatments <- function(treatments) {
-	treatments$id <- as.factor(treatments$id)
-	treatments$description <- as.character(treatments$description)
-	rownames(treatments) <- treatments$id
-	treatments[order(treatments$id), ]
-}
-
 # Get a list of included treatments from an org.drugis.mtc.model.Network
 mtc.treatments <- function(network) {
 	asTreatment <- function(jobj) { .jcast(jobj, "org/drugis/mtc/model/Treatment") }
@@ -22,12 +15,6 @@ mtc.treatments <- function(network) {
 		description = sapply(lst, getDesc)
 	))
 	standardize.treatments(treatments)
-}
-
-standardize.data <- function(data, treatment.levels) {
-	data$study <- as.factor(data$study)
-	data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
-	data
 }
 
 # Get the included data from an org.drugis.mtc.model.Network
@@ -84,10 +71,7 @@ mtc.data <- function(network, treatment.levels) {
 	data
 }
 
-# Read an org.drugis.mtc.model.Network from file and convert it to the S3 class 'mtc.network'
-read.mtc.network <- function(file) {
-	is <- .jcast(.jnew("java/io/FileInputStream", normalizePath(file)), "java/io/InputStream")
-	j.network <- .jcall("org/drugis/mtc/model/JAXBHandler", "Lorg/drugis/mtc/model/Network;", "readNetwork", is)
+j.network.to.network <- function(j.network) {
 	treatments <- mtc.treatments(j.network)
 	network <- list(
 		description=.jcall(j.network, "S", "getDescription"),
@@ -98,68 +82,11 @@ read.mtc.network <- function(file) {
 	network
 }
 
-mtc.network <- function(data, description="Network", treatments=NULL) {
-	# standardize the data
-	if (!is.data.frame(data)) { 
-		data <- as.data.frame(do.call(rbind, data))
-	}
-	rownames(data) <- seq(1:dim(data)[1])
-
-	# standardize the treatments
-	if (is.null(treatments)) {
-		treatments <- unique(data$treatment)
-	}
-	if (is.list(treatments)) { 
-		treatments <- as.data.frame(do.call(rbind, treatments))
-	}
-	if (is.character(treatments) || is.factor(treatments)) {
-		treatments <- data.frame(id=treatments, description=treatments)
-	}
-	standardize.treatments(treatments)
-
-	network <- list(
-		description=description,
-		treatments=treatments,
-		data=standardize.data(data, levels(treatments$id))
-	)
-
-	mtc.network.validate(network)
-
-	class(network) <- "mtc.network"
-	network
-}
-
-mtc.network.validate <- function(network) { 
-	# Check that there is some data
-	stopifnot(nrow(network$treatments) > 0)  
-	stopifnot(nrow(network$data) > 0)
-
-	# Check that the treatments are correctly cross-referenced and have valid names
-	stopifnot(all(network$data$treatment %in% network$treatments$id))
-	stopifnot(all(network$treatments$id %in% network$data$treatment))
-	idok <- regexpr("^[A-Za-z0-9_]+$", network$treatment$id) != -1
-	if(!all(idok)) {
-		stop(paste('Treatment name "',
-			network$treatment$id[which(!idok)], '" invalid.\n',
-			' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
-	}
-
-	# Check that the data frame has a sensible combination of columns
-	columns <- colnames(network$data)
-	contColumns <- c('mean', 'std.dev', 'sampleSize')
-	dichColumns <- c('responders', 'sampleSize')
-
-	if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
-		stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
-	}
-
-	if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
-		stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
-	}
-
-	if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
-		stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
-	}
+# Read an org.drugis.mtc.model.Network from file and convert it to the S3 class 'mtc.network'
+read.mtc.network <- function(file) {
+	is <- .jcast(.jnew("java/io/FileInputStream", normalizePath(file)), "java/io/InputStream")
+	j.network <- .jcall("org/drugis/mtc/model/JAXBHandler", "Lorg/drugis/mtc/model/Network;", "readNetwork", is)
+	j.network.to.network(j.network)
 }
 
 mtc.network.as.java <- function(network) {
@@ -270,25 +197,8 @@ mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 	model
 }
 
-comparisons <- function(j.network) {
-	j.cgraph <- .jcall('org/drugis/mtc/parameterization/NetworkModel',
-		'Ledu/uci/ics/jung/graph/UndirectedGraph;',
-		'createComparisonGraph', j.network)
-
-	edges <- as.list(.jcall(j.cgraph, 'Ljava/util/Collection;', 'getEdges'))
-
-	sapply(edges, function(e) {
-		v <- as.list(.jcall(j.cgraph, 'Ljava/util/Collection;', 'getIncidentVertices', e))
-		c(j.getId(v[[1]]), j.getId(v[[2]]))
-	})
-}
-
-mtc.network.comparisons <- function(network) {
-	comparisons(mtc.network.as.java(network))
-}
-
 mtc.model.comparisons <- function(model) {
-	comparisons(model$j.network)
+	mtc.network.comparisons(j.network.to.network(model$j.network))
 }
 
 # If is.na(sampler), a sampler will be chosen based on availability, in this order:

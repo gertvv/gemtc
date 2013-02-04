@@ -73,12 +73,6 @@ as.mcmc.list.mtc.result <- function(x, ...) {
 }
 
 ####
-mtc.network.graph <- function(network) {
-	comparisons <- mtc.network.comparisons(network)
-	treatments <- as.character(network$treatments$id)
-	graph.create(treatments, comparisons, arrow.mode=0)
-}
-
 filter.parameters <- function(parameters, criterion) { 
 	parameters <- lapply(parameters, function(x) { 
 	path <- unlist(strsplit(x, '\\.')) 
@@ -90,15 +84,10 @@ filter.parameters <- function(parameters, criterion) {
 
 mtc.spanning.tree <- function(parameters) {
 	parameters <- unlist(filter.parameters(parameters, function(x) { x[1] == 'd' }))
+	parameters <- matrix(parameters, nrow=2)
 	treatments <- unique(as.vector(parameters))
+	parameters <- data.frame(t1=parameters[1,], t2=parameters[2,])
 	graph.create(treatments, parameters, arrow.mode=2, color="black", lty=1)
-}
-
-graph.create <- function(v, e, ...) {
-	g <- graph.empty()
-	g <- g + vertex(v, label=v)
-	g <- g + edges(as.vector(e), ...)
-	g
 }
 
 w.factors <- function(parameters) {
