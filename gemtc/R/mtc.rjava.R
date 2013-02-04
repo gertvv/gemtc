@@ -24,8 +24,14 @@ mtc.treatments <- function(network) {
 	standardize.treatments(treatments)
 }
 
+standardize.data <- function(data, treatment.levels) {
+	data$study <- as.factor(data$study)
+	data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
+	data
+}
+
 # Get the included data from an org.drugis.mtc.model.Network
-mtc.data <- function(network) {
+mtc.data <- function(network, treatment.levels) {
 	as <- function(type, jobj) { 
 		class <- paste("org/drugis/mtc/model", type, sep="/")
 		.jcast(jobj, class)
@@ -73,18 +79,20 @@ mtc.data <- function(network) {
 
 	lst <- as.list(.jcall(network, "Lcom/jgoodies/binding/list/ObservableList;", "getStudies"))
 	lst <- lapply(lst, function(x) { study.measurements(as("Study", x)) })
-	as.data.frame(do.call(function(...) { mapply(c, ..., SIMPLIFY=FALSE) }, lst))
+	data <- as.data.frame(do.call(function(...) { mapply(c, ..., SIMPLIFY=FALSE) }, lst))
+	data <- standardize.data(data, treatment.levels)
+	data
 }
 
 # Read an org.drugis.mtc.model.Network from file and convert it to the S3 class 'mtc.network'
 read.mtc.network <- function(file) {
 	is <- .jcast(.jnew("java/io/FileInputStream", normalizePath(file)), "java/io/InputStream")
 	j.network <- .jcall("org/drugis/mtc/model/JAXBHandler", "Lorg/drugis/mtc/model/Network;", "readNetwork", is)
-
+	treatments <- mtc.treatments(j.network)
 	network <- list(
 		description=.jcall(j.network, "S", "getDescription"),
-		treatments=mtc.treatments(j.network),
-		data=mtc.data(j.network)
+		treatments=treatments,
+		data=mtc.data(j.network, levels(treatments$id))
 	)
 	class(network) <- "mtc.network"
 	network
@@ -112,7 +120,8 @@ mtc.network <- function(data, description="Network", treatments=NULL) {
 	network <- list(
 		description=description,
 		treatments=treatments,
-		data=data)
+		data=standardize.data(data, levels(treatments$id))
+	)
 
 	mtc.network.validate(network)
 

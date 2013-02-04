@@ -51,7 +51,7 @@ e <- rbind(c("ASPAC", "AtPA"), c("ASPAC", "tPA"), c("ASPAC", "SK"), c("AtPA", "T
 g <- graph.edgelist(e)
 E(g)$arrow.mode <- 0
 
-plot(g, vertex.label=v)
+plot(g, vertex.label=v) # FIXME: order of vertex labels does not match order of vertices
 
 h <- minimum.diameter.spanning.tree(g)
 
