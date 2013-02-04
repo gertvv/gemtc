@@ -2,6 +2,13 @@ j.getId <- function(jobj) {
 	.jcall(jobj, "S", "getId")
 }
 
+standardize.treatments <- function(treatments) {
+	treatments$id <- as.factor(treatments$id)
+	treatments$description <- as.character(treatments$description)
+	rownames(treatments) <- treatments$id
+	treatments[order(treatments$id), ]
+}
+
 # Get a list of included treatments from an org.drugis.mtc.model.Network
 mtc.treatments <- function(network) {
 	asTreatment <- function(jobj) { .jcast(jobj, "org/drugis/mtc/model/Treatment") }
@@ -10,10 +17,11 @@ mtc.treatments <- function(network) {
 	lst <- as.list(.jcall(network, "Lcom/jgoodies/binding/list/ObservableList;", "getTreatments"))
 	lst <- lapply(lst, asTreatment)
 	ids <- unlist(sapply(lst, j.getId))
-	as.data.frame(list(
+	treatments <- as.data.frame(list(
 		id = ids,
 		description = sapply(lst, getDesc)
-	), row.names = ids)
+	))
+	standardize.treatments(treatments)
 }
 
 # Get the included data from an org.drugis.mtc.model.Network
@@ -99,8 +107,7 @@ mtc.network <- function(data, description="Network", treatments=NULL) {
 	if (is.character(treatments) || is.factor(treatments)) {
 		treatments <- data.frame(id=treatments, description=treatments)
 	}
-	rownames(treatments) <- treatments$id
-
+	standardize.treatments(treatments)
 
 	network <- list(
 		description=description,
