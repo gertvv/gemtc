@@ -85,23 +85,29 @@ as.treatment.factor <- function(x, network) {
 	}
 }
 
+mtc.study.design <- function(network, study) {
+	data <- network$data
+	sort(data$treatment[data$study == study])
+}
+
+mtc.treatment.pairs <- function(treatments) {
+	n <- length(treatments)
+	t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
+	t2 <- do.call(c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
+	data.frame(t1=t1, t2=t2)
+}
+
 # Get all comparisons with direct evidence from the data set.
 # Returns a (sorted) data frame with two columns (t1 and t2).
-mtc.network.comparisons <- function(network) {
+mtc.comparisons <- function(network) {
 	data <- network$data
 
 	# Identify the unique "designs" (treatment combinations)
-	design <- function(study) { sort(data$treatment[data$study == study]) }
+	design <- function(study) { mtc.study.design(network, study) }
 	designs <- unique(lapply(levels(data$study), design))
 
 	# Generate all pair-wise comparisons from each "design"
-	design.comparisons <- function(treatments) {
-		n <- length(treatments)
-		t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
-		t2 <- do.call(c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
-		data.frame(t1=t1, t2=t2)
-	}
-	comparisons <- do.call(rbind, lapply(designs, design.comparisons))
+	comparisons <- do.call(rbind, lapply(designs, mtc.treatment.pairs))
 
 	# Ensure the output comparisons are unique and always in the same order
 	comparisons <- unique(comparisons)
@@ -125,7 +131,7 @@ graph.create <- function(v, e, ...) {
 }
 
 mtc.network.graph <- function(network) {
-	comparisons <- mtc.network.comparisons(network)
+	comparisons <- mtc.comparisons(network)
     treatments <- network$treatments$id
 	graph.create(treatments, comparisons, arrow.mode=0)
 }

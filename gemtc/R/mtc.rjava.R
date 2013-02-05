@@ -198,7 +198,7 @@ mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 }
 
 mtc.model.comparisons <- function(model) {
-	mtc.network.comparisons(j.network.to.network(model$j.network))
+	mtc.comparisons(j.network.to.network(model$j.network))
 }
 
 # If is.na(sampler), a sampler will be chosen based on availability, in this order:
