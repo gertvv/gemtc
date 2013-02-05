@@ -77,7 +77,12 @@ mtc.network.validate <- function(network) {
 
 as.treatment.factor <- function(x, network) {
 	v <- network$treatments$id
-	factor(x, levels=1:nlevels(v), labels=levels(v))
+	if (is.numeric(x)) {
+		factor(x, levels=1:nlevels(v), labels=levels(v))
+	} else if (is.factor(x) || is.character(x)) {
+		x <- as.character(x)
+		factor(x, levels=levels(v))
+	}
 }
 
 # Get all comparisons with direct evidence from the data set.
@@ -107,11 +112,15 @@ mtc.network.comparisons <- function(network) {
 	comparisons
 }
 
-graph.create <- function(v, e, ...) {
+edges.create <- function(e, ...) {
 	e <- t(matrix(c(e$t1, e$t2), ncol=2))
+	edges(as.vector(e), ...)
+}
+
+graph.create <- function(v, e, ...) {
     g <- graph.empty()
     g <- g + vertex(v, label=levels(v))
-    g <- g + edges(as.vector(e), ...)
+    g <- g + edges.create(e, ...)
     g
 }
 
@@ -120,4 +129,3 @@ mtc.network.graph <- function(network) {
     treatments <- network$treatments$id
 	graph.create(treatments, comparisons, arrow.mode=0)
 }
-
