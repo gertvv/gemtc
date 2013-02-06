@@ -90,11 +90,15 @@ mtc.study.design <- function(network, study) {
 	sort(data$treatment[data$study == study])
 }
 
+coerce.factor <- function(x, prototype) {
+	factor(x, levels=1:nlevels(prototype), labels=levels(prototype))
+}
+
 mtc.treatment.pairs <- function(treatments) {
 	n <- length(treatments)
 	t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
 	t2 <- do.call(c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
-	data.frame(t1=t1, t2=t2)
+	data.frame(t1=coerce.factor(t1, treatments), t2=coerce.factor(t2, treatments))
 }
 
 # Get all comparisons with direct evidence from the data set.

@@ -1,8 +1,18 @@
+mtc.basic.parameters <- function(model) {
+	tree <- model$tree
+	params <- sapply(E(tree), function(e) {
+		v <- get.edge(tree, e)
+		paste("d", v[1], v[2], sep=".")
+	})
+}
+
 mtc.model.consistency <- function(network) {
 	model <- list(
 		type = 'consistency',
 		network = network,
-		tree = minimum.diameter.spanning.tree(mtc.network.graph(network))
+		tree = minimum.diameter.spanning.tree(mtc.network.graph(network)),
+		n.chain = 4,
+		factor = 2.5
 	)
 
 	if ('responders' %in% colnames(network$data)) {
@@ -15,7 +25,9 @@ mtc.model.consistency <- function(network) {
 
 	model$om.scale <- guess.scale(model)
 	model$data <- mtc.model.data(model)
-	# FIXME: code, inits
+	model$code <- mtc.model.code(model)
+	model$inits <- mtc.init(model)
+	model
 }
 
 mtc.model.code <- function(model) {
@@ -28,10 +40,7 @@ mtc.model.code <- function(model) {
 	network <- model$network
 	tree <- model$tree
 	re <- tree.relative.effect(tree, V(tree)[1], t2=NULL)
-	params <- sapply(E(tree), function(e) {
-		v <- get.edge(tree, e)
-		paste("d", v[1], v[2], sep=".")
-	})
+	params <- mtc.basic.parameters(model)
 
 	# Generate list of linear expressions
 	expr <- apply(re, 2, function(col) { paste(sapply(which(col != 0), function(i) {
