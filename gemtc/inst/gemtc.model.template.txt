@@ -1,0 +1,36 @@
+model {
+	for (i in 1:ns) {
+		# Likelihood for each arm
+		for (k in 1:na[i]) {
+			$likelihood$
+		}
+
+		# Study-level relative effects
+		w[i, 1] <- 0
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) { # parameterize multi-arm trials using a trick to avoid dmnorm
+			delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+			md[i, k] <- d[t[i, k]] - d[t[i, 1]] + sw[i, k]
+			taud[i, k] <- tau.d * 2 * (k - 1) / k
+			w[i, k] <- delta[i, k] - (d[t[i, k]] - d[t[i, 1]])
+			sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
+		}
+	}
+
+	# Relative effect vector
+	$relativeEffectVector$
+
+	prior.prec <- pow(15 * om.scale, -2)
+
+	# Study baseline priors
+	for (i in 1:ns) {
+		mu[i] ~ dnorm(0, prior.prec)
+	}
+
+	# Variance prior
+	sd.d ~ dunif(0, om.scale)
+	tau.d <- pow(sd.d, -2)
+
+	# Effect parameter priors
+	$relativeEffectPriors$
+}
