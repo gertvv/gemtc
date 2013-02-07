@@ -18,7 +18,7 @@ Building
 --------
 
 The build has only been tested on Ubuntu GNU/Linux. You need R, make,
-and wget. To build and install the R package, simple 'make install'.
+and wget. To build and install the R package, simply 'make install'.
 
 The required mtc-mcmc JAR file is automatically retrieved from the maven
-repository, so the build in independent from the Java build.
+repository, so the build is independent from the Java build.
