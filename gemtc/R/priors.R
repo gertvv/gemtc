@@ -3,7 +3,7 @@ guess.scale <- function(model) {
 	fn <- paste("mtc.rel.mle", model$likelihood, model$link, sep=".")
 	data <- model$network$data
 
-	max(sapply(unique(data$study), function(study) {
+	max(sapply(levels(data$study), function(study) {
 		pairs <- mtc.treatment.pairs(mtc.study.design(model$network, study))
 		max(sapply(1:nrow(pairs), function(i) {
 			sel1 <- data$treatment == pairs$t1[i]

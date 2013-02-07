@@ -134,13 +134,21 @@ w.factors <- function(parameters, network) {
 }
 
 mtc.model.graph <- function(model) { 
-	network <- j.network.to.network(model$j.network)
-	comparisons <- mtc.model.comparisons(model)
-	parameters <- mtc.parameters(model)
-	g <- mtc.spanning.tree(parameters, network)
-	g <- g + edges.create(w.factors(parameters, network), arrow.mode=2, color="black", lty=2)
-	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
-	g
+	if (model$type == 'Inconsistency') {
+		network <- j.network.to.network(model$j.network)
+		comparisons <- mtc.model.comparisons(model)
+		parameters <- mtc.parameters(model)
+		g <- mtc.spanning.tree(parameters, network)
+		g <- g + edges.create(w.factors(parameters, network), arrow.mode=2, color="black", lty=2)
+		g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
+		g
+	} else if (model$type == 'Consistency') {
+		comparisons <- mtc.comparisons(model$network)
+		parameters <- mtc.basic.parameters(model)
+		g <- mtc.spanning.tree(parameters, network)
+		g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
+		g
+	}
 }
 
 # filters list of comparison by edges that are not yet present in graph g 
@@ -168,6 +176,7 @@ tree.relative.effect <- function(g, t1, t2) {
 			else 0
 		})
 	})
+	paths <- as.matrix(paths) # necessary when there is only 1
 	colnames(paths) <-	apply(pairs, 1, function(pair) { 
 		paste('d', pair[1], pair[2], sep='.')
 	})

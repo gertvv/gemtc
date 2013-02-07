@@ -51,7 +51,7 @@ mtc.init.std.dev <- function(model) {
 mtc.init <- function(model) {
 	data <- model$network$data
 	s.mat <- arm.index.matrix(model$network)
-	studies <- unique(data$study)
+	studies <- levels(data$study)
 
 	# Generate initial values for each parameter
 	mu <- sapply(studies, function(study) {

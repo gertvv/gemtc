@@ -1,6 +1,6 @@
 arm.index.matrix <- function(network) {
 	data <- network$data
-	studies <- unique(data$study)
+	studies <- levels(data$study)
 	n <- max(sapply(studies, function(study) { sum(data$study == study) }))
 	t(sapply(studies, function(study) {
 		v <- which(data$study == study)
@@ -12,7 +12,7 @@ arm.index.matrix <- function(network) {
 mtc.model.data <- function(model) {
 	data <- model$network$data
 	
-	studies <- unique(data$study)
+	studies <- levels(data$study)
 	na <- sapply(studies, function(study) { sum(data$study == study) })
 	s.mat <- arm.index.matrix(model$network)
 

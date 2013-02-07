@@ -3,7 +3,7 @@
 mtc.arm.mle.binom.logit <- function(data) {
 	s <- data['responders'] + 0.5
 	f <- data['sampleSize'] - s + 0.5
-	c('mean'=as.numeric(log(s/f)), 'sd'=as.numeric(sqrt(1/s + 1/f)))
+	x <- c('mean'=as.numeric(log(s/f)), 'sd'=as.numeric(sqrt(1/s + 1/f)))
 }
 
 # Relative effect estimate (given a two-row data frame)

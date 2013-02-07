@@ -29,17 +29,20 @@ minimum.diameter.spanning.tree <- function(graph) {
 			c(v[2], u)
 		}
 	})
+	pairs <- as.matrix(pairs) # necessary if there is only one pair
 
 	h <- graph.empty()
 	h <- h + vertex(V(graph))
 	V(h)$name <- V(graph)$name
 	h <- h + edge(edgelist)
-	for (i in 1:ncol(pairs)) {
-		p <- get.shortest.paths(graph, pairs[1, i], pairs[2, i], mode="all")[[1]]
-		if (length(p) == 2) {
-			h <- h + edge(p) # bug in one-edge paths?
-		} else {
-			h <- h + path(p)
+	if (ncol(pairs) > 0 && nrow(pairs) > 0) {
+		for (i in 1:ncol(pairs)) {
+			p <- get.shortest.paths(graph, pairs[1, i], pairs[2, i], mode="all")[[1]]
+			if (length(p) == 2) {
+				h <- h + edge(p) # bug in one-edge paths?
+			} else {
+				h <- h + path(p)
+			}
 		}
 	}
 	simplify(h)
@@ -209,12 +212,12 @@ local.center <- function(graph, edge) {
 		if (is.na(tm)) {
 			f
 		} else {
-			xt <- c(f['e'], tm)
-			ct <- c(xt, 'r' = de(xt, vn))
-			if (ct['r'] < c['r']) {
-				ct
+			xt <- c(f['e'], 't'=tm)
+			ft <- c(xt, 'r' = de(xt, vn))
+			if (ft['r'] < f['r']) {
+				ft
 			} else {
-				c
+				f
 			}
 		}
 	}
