@@ -2,7 +2,7 @@
 # Returns mean, variance.
 mtc.arm.mle.binom.logit <- function(data) {
 	s <- data['responders'] + 0.5
-	f <- data['sampleSize'] - s + 0.5
+	f <- data['sampleSize'] - s + 1
 	x <- c('mean'=as.numeric(log(s/f)), 'sd'=as.numeric(sqrt(1/s + 1/f)))
 }
 
