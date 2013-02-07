@@ -1,0 +1,16 @@
+structure(list(effectiveSize = structure(c(13516.9517444132, 
+2394.40617240463), .Names = c("d.psych.usual", "sd.d")), summary = structure(list(
+    statistics = structure(c(1.3739911370432, 2.17191195995403, 
+    0.97779284952694, 1.20770029896979, 0.00691403954496217, 
+    0.0085397307104256, 0.00905911892629433, 0.0267345764176522
+    ), .Dim = c(2L, 4L), .Dimnames = list(c("d.psych.usual", 
+    "sd.d"), c("Mean", "SD", "Naive SE", "Time-series SE"))), 
+    quantiles = structure(c(-0.583703242632186, 0.269895452241856, 
+    0.812286573949492, 1.32482614672122, 1.38266923390503, 2.01761122314097, 
+    1.93694976367925, 2.83848183858799, 3.34715931006031, 5.03440825377756
+    ), .Dim = c(2L, 5L), .Dimnames = list(c("d.psych.usual", 
+    "sd.d"), c("2.5%", "25%", "50%", "75%", "97.5%"))), start = 5002, 
+    end = 15000, thin = 2, nchain = 4L), .Names = c("statistics", 
+"quantiles", "start", "end", "thin", "nchain"), class = "summary.mcmc"), 
+    cov = structure(0.956078856586012, .Dim = c(1L, 1L))), .Names = c("effectiveSize", 
+"summary", "cov"))
