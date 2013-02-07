@@ -6,13 +6,13 @@ mtc.basic.parameters <- function(model) {
 	})
 }
 
-mtc.model.consistency <- function(network) {
+mtc.model.consistency <- function(network, factor, n.chain) {
 	model <- list(
-		type = 'consistency',
+		type = 'Consistency',
 		network = network,
 		tree = minimum.diameter.spanning.tree(mtc.network.graph(network)),
-		n.chain = 4,
-		factor = 2.5
+		n.chain = n.chain,
+		var.scale = factor
 	)
 
 	if ('responders' %in% colnames(network$data)) {
@@ -27,6 +27,8 @@ mtc.model.consistency <- function(network) {
 	model$data <- mtc.model.data(model)
 	model$code <- mtc.model.code(model)
 	model$inits <- mtc.init(model)
+	class(model) <- "mtc.model"
+
 	model
 }
 

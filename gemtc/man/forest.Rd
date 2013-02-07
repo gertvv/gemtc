@@ -22,12 +22,10 @@ file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 network <- read.mtc.network(file)
 model <- mtc.model(network, n.chain=2)
 
-# Using BUGS or JAGS is preferred over YADAS, 
-# however YADAS does not require additional dependencies.
 \dontrun{
-results <- mtc.run(model, "YADAS", n.iter=10000, n.adapt=2500, thin=10)
+results <- mtc.run(model, n.iter=10000, n.adapt=2500, thin=10)
 }
-results <- mtc.run(model, "YADAS", n.iter=1000, n.adapt=250, thin=1)
+results <- mtc.run(model, n.iter=1000, n.adapt=250, thin=1)
 summary(results)
 
 forest(results) 

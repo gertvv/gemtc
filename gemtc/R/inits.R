@@ -4,7 +4,7 @@ mtc.init.baseline.effect <- function(model, study, treatment) {
 	data <- model$network$data
 
 	mle <- do.call(fn, list(data[data$study == study & data$treatment == treatment, ]))
-	rnorm(model$n.chain, mle['mean'], model$factor * mle['sd'])
+	rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
 }
 
 # Initial values for study-level relative effects based on (adjusted) MLE
@@ -13,7 +13,7 @@ mtc.init.relative.effect <- function(model, study, t1, t2) {
 	data <- model$network$data
 
 	mle <- do.call(fn, list(data[data$study == study & (data$treatment == t1 | data$treatment == t2), ]))
-	rnorm(model$n.chain, mle['mean'], model$factor * mle['sd'])
+	rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
 }
 
 # Initial values for pooled effect (basic parameter) based on
@@ -39,7 +39,7 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
 
 	meta <- metagen(study.mle['mean', ], study.mle['sd', ])
 
-	rnorm(model$n.chain, meta$TE.random, model$factor * meta$seTE.random)
+	rnorm(model$n.chain, meta$TE.random, model$var.scale * meta$seTE.random)
 }
 
 # Initial values for random effects standard deviation from prior

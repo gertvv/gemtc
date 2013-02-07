@@ -27,6 +27,27 @@ plot.mtc.network <- function(x, ...) {
 }
 
 ## mtc.model class methods
+mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
+	typeMap <- c(
+		'Consistency'='Consistency',
+		'consistency'='Consistency',
+		'cons'='Consistency',
+		'Inconsistency'='Inconsistency',
+		'inconsistency'='Inconsistency',
+		'incons'='Inconsistency')
+
+	if (is.na(typeMap[type])) {
+		stop(paste(type, 'is not an MTC model type.'))
+	}
+	type <- typeMap[type]
+
+	if (type == 'Consistency') {
+		mtc.model.consistency(network, factor=factor, n.chain=n.chain)
+	} else {
+		mtc.model.inconsistency(network, factor=factor, n.chain=n.chain)
+	}
+}
+
 print.mtc.model <- function(x, ...) {
 	cat("MTC ", x$type, " model: ", x$description, "\n", sep="")
 }
@@ -157,7 +178,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 	if(result$model$type != "Consistency") stop("Cannot apply relative.effect to this model")
 
 	# Build relative effect transformation matrix
-	network <- j.network.to.network(result$model$j.network)
+	network <- result$model$network
 	g <- mtc.spanning.tree(mtc.parameters(result), network)
 	if (is.character(t1)) {
 		t1 <- as.treatment.factor(t1, network)
@@ -194,12 +215,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 }
 
 rank.probability <- function(result) {
-	model <- result$model
-	data <- result$samples
-	network <- j.network.to.network(model$j.network)
-
-	treatments <- as.vector(mtc.treatments(model$j.network)$id)
-	mtcGraph <- mtc.spanning.tree(mtc.parameters(result), network)
+	treatments <- result$model$network$treatments$id
 	n.alt <- length(treatments)
 
 	# count ranks given a matrix d of relative effects (treatments as rows)
@@ -216,7 +232,8 @@ rank.probability <- function(result) {
 	ranks <- Reduce(function(a, b) { a + b }, counts)
 	colnames(ranks) <- treatments
 
-	n.iter <- nchain(data) * (end(data) - start(data) + 1) / thin(data)
+	data <- result$samples
+	n.iter <- nchain(data) * (end(data) - start(data) + thin(data)) / thin(data)
 
 	t(ranks / n.iter)
 }

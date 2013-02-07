@@ -147,31 +147,13 @@ write.mtc.network <- function(network, file="") {
 	write(.jcall(bos, "S", "toString"), file=file)
 }
 
-# Create the specific model (consistency/inconsistency/nodesplit)
-# FIXME: support nodesplit
-mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
-	typeMap <- c(
-		'Consistency'='Consistency',
-		'consistency'='Consistency',
-		'cons'='Consistency',
-		'NodeSplit'='NodeSplit',
-		'nodeSplit'='NodeSplit',
-		'nodesplit'='NodeSplit',
-		'split'='NodeSplit',
-		'Inconsistency'='Inconsistency',
-		'inconsistency'='Inconsistency',
-		'incons'='Inconsistency')
-
-	if (is.na(typeMap[type])) {
-		stop(paste(type, 'is not an MTC model type.'))
-	}
-	type <- typeMap[type]
-
+# Create the inconsistency model
+mtc.model.inconsistency <- function(network, factor, n.chain) {
 	# create java network structure
 	j.network <- mtc.network.as.java(network)
 
 	# create parameterization
-	class <- paste('org/drugis/mtc/parameterization/', type, 'Parameterization', sep='')
+	class <- 'org/drugis/mtc/parameterization/InconsistencyParameterization'
 	j.model <- .jcall(class, paste('L', class, ';', sep=''), 'create', j.network)
 
 	# create starting value generator
@@ -185,7 +167,7 @@ mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 
 	# create data structure
 	model <- list(
-		type = type,
+		type = "Inconsistency",
 		description = network$description,
 		j.network = j.network,
 		j.model = j.model,
@@ -202,12 +184,12 @@ mtc.model.comparisons <- function(model) {
 }
 
 # If is.na(sampler), a sampler will be chosen based on availability, in this order:
-# JAGS, BUGS, YADAS. When the sampler is BUGS, BRugs or R2WinBUGS will be used.
+# JAGS, BUGS. When the sampler is BUGS, BRugs or R2WinBUGS will be used.
 mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 	bugs <- c('BRugs', 'R2WinBUGS')
 	jags <- c('rjags')
 	available <- if (is.na(sampler)) {
-		c(jags, bugs, 'YADAS')
+		c(jags, bugs)
 	} else if (sampler == 'BUGS') {
 		bugs
 	} else if (sampler == 'JAGS') {
@@ -223,7 +205,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 	found <- NA
 	i <- 1
 	while (is.na(found) && i <= length(available)) {
-		if (available[i] == 'YADAS' || have.package(available[i])) {
+		if (have.package(available[i])) {
 			found <- available[i]
 		}
 		i <- i + 1
@@ -234,9 +216,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 	sampler <- found
 
 	# Switch on sampler
-	samples <- if (sampler == 'YADAS') {
-		mtc.run.yadas(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
-	} else if (sampler %in% bugs) {
+	samples <- if (sampler %in% bugs) {
 		mtc.run.bugs(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 	} else if (sampler %in% jags) {
 		mtc.run.jags(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
@@ -261,15 +241,26 @@ jags.as.list <- function(str) {
 }
 
 mtc.build.syntaxModel <- function(model, is.jags) {
-	j.model <- .jcast(model$j.model, 'org/drugis/mtc/parameterization/Parameterization')
-	j.syntaxModel <- .jnew('org/drugis/mtc/jags/JagsSyntaxModel', model$j.network, j.model, is.jags)
+	if (model$type == 'Consistency') {
+		list(
+			model = model$code,
+			data = model$data,
+			inits = model$inits,
+			vars = c(mtc.basic.parameters(model), "sd.d")
+		)
+	} else if (model$type == 'Inconsistency') {
+		j.model <- .jcast(model$j.model, 'org/drugis/mtc/parameterization/Parameterization')
+		j.syntaxModel <- .jnew('org/drugis/mtc/jags/JagsSyntaxModel', model$j.network, j.model, is.jags)
 
-	list(
-		model = .jcall(j.syntaxModel, "S", "modelText"),
-		data = jags.as.list(.jcall(j.syntaxModel, "S", "dataText")),
-		inits = lapply(1:model$n.chain, function(i) {jags.as.list(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
-		vars = c(mtc.parameters(model$j.model), c("sd.d", if (model$type == 'Inconsistency') "sd.w"))
-	)
+		list(
+			model = .jcall(j.syntaxModel, "S", "modelText"),
+			data = jags.as.list(.jcall(j.syntaxModel, "S", "dataText")),
+			inits = lapply(1:model$n.chain, function(i) {jags.as.list(.jcall(j.syntaxModel, "S", "initialValuesText", model$j.generator))}),
+			vars = c(mtc.parameters(model$j.model), c("sd.d", if (model$type == 'Inconsistency') "sd.w"))
+		)
+	} else {
+		stop(paste("Model type", model$type, "unknown."))
+	}
 }
 
 mtc.parameters <- function(object) { 
