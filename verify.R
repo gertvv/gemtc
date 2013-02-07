@@ -46,7 +46,7 @@ compare.summaries <- function(s1, s2) {
 }
 
 verify.example <- function(name) {
-	cat(paste("=== Verifying", name, "==="))
+	cat(paste("=== Verifying", name, "===\n"))
 	s1 <- dget(paste(name, 'summaries.txt', sep='.'))
 
 	n.chain <- s1$summary$nchain
@@ -64,4 +64,4 @@ verify.example <- function(name) {
 
 examples <- c('cipriani-efficacy', 'luades-smoking', 'luades-thrombolytic', 'parkinson', 'welton-cholesterol', 'welton-diastolic', 'welton-systolic')
 
-lapply(examples, verify.example)
+#lapply(examples, verify.example)
