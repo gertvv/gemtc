@@ -1,8 +1,8 @@
 mtc.basic.parameters <- function(model) {
 	tree <- model$tree
-	params <- sapply(E(tree), function(e) {
+	sapply(E(tree), function(e) {
 		v <- get.edge(tree, e)
-		paste("d", v[1], v[2], sep=".")
+		paste("d", V(tree)[v[1]]$name, V(tree)[v[2]]$name, sep=".")
 	})
 }
 

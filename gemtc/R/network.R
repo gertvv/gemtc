@@ -129,7 +129,7 @@ edges.create <- function(e, ...) {
 
 graph.create <- function(v, e, ...) {
     g <- graph.empty()
-    g <- g + vertex(v, label=levels(v))
+    g <- g + vertex(levels(v))
     g <- g + edges.create(e, ...)
     g
 }

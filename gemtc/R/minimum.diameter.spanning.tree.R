@@ -32,6 +32,7 @@ minimum.diameter.spanning.tree <- function(graph) {
 
 	h <- graph.empty()
 	h <- h + vertex(V(graph))
+	V(h)$name <- V(graph)$name
 	h <- h + edge(edgelist)
 	for (i in 1:ncol(pairs)) {
 		p <- get.shortest.paths(graph, pairs[1, i], pairs[2, i], mode="all")[[1]]

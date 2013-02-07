@@ -166,6 +166,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 		t2 <- as.treatment.factor(t2, network)
 	}
 	effects <- tree.relative.effect(g, t1, t2)
+	print(effects)
 
 	# Add rows/columns for parameters that are not relative effects
 	nOut <- ncol(effects)
