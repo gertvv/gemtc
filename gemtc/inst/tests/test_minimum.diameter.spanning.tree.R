@@ -22,7 +22,7 @@ test_that("absolute.one.center takes edge weights into account", {
 })
 
 # Simple line graph with 6 vertices, 5 edges
-test_that("absolute.one.center of 6-vertex line graph is on the middl of the middle edge", {
+test_that("absolute.one.center of 6-vertex line graph is on the middle of the middle edge", {
 	n <- 6
 	g <- graph.edgelist(matrix(c(1:(n-1), 2:n), ncol=2))
 	expect_that(local.center(g, 1), equals(c('e' = 1, 't' = 1, 'r' = 4)))
@@ -51,6 +51,13 @@ test_that("absolute.once.center of a cyclic graph is correct", {
 	expect_that(local.center(g, 4), equals(c('e' = 4, 't' = 0, 'r' = 1)))
 	expect_that(local.center(g, 5), equals(c('e' = 5, 't' = 0, 'r' = 2)))
 	expect_that(absolute.one.center(g), equals(c('e' = 1, 't' = 0, 'r' = 1)))
+})
+
+# Graph with only one edge
+test_that("absolute.once.center of one-edge graph is correct", {
+	g <- graph.edgelist(rbind(c(1, 2)))
+	expect_that(local.center(g, 1), equals(c('e' = 1, 't' = 0.5, 'r' = 0.5)))
+	expect_that(absolute.one.center(g), equals(c('e' = 1, 't' = 0.5, 'r' = 0.5)))
 })
 
 if (FALSE) {
