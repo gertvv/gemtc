@@ -15,7 +15,7 @@ JAR_PACKAGE := $(JAR_PKG_NAME)_$(JAR_VERSION).tar.gz
 
 all: $(PACKAGE)
 
-$(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/man/*.Rd $(PKG_NAME)/DESCRIPTION $(PKG_NAME)/NAMESPACE ../example/*.gemtc install-$(JAR_PACKAGE)
+$(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/tests/*.R $(PKG_NAME)/inst/*.txt $(PKG_NAME)/inst/tests/*.R $(PKG_NAME)/man/*.Rd $(PKG_NAME)/DESCRIPTION $(PKG_NAME)/NAMESPACE ../example/*.gemtc install-$(JAR_PACKAGE)
 	rm -Rf $(PKG_NAME)/inst/extdata
 	mkdir -p $(PKG_NAME)/inst/extdata
 	cp ../example/*.gemtc $(PKG_NAME)/inst/extdata
@@ -39,5 +39,5 @@ install-$(JAR_PACKAGE): $(JAR_PACKAGE)
 .PHONY: install
 
 install: $(PACKAGE)
-#	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
+	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 	R CMD INSTALL $(PACKAGE)
