@@ -80,7 +80,16 @@ test_that("absolute.one.center of complex graph is correct", {
 	)
 	e <- do.call(rbind, lapply(e, function(x) { factor(x, levels=levels(v)) }))
 	g <- graph.edgelist(e)
+	V(g)$name <- levels(v)
 	expect_that(absolute.one.center(g), equals(c('e' = 1, 't' = 0.5, 'r' = 1.5)))
+
+	tree <- minimum.diameter.spanning.tree(g)
+	expect_that(degree(tree, mode="out"), equals(c(
+		'ASPAC'=3, 'AtPA'=4, 'Ret'=0, 'SK'=0, 'SKtPA'=0, 'Ten'=0, 'tPA'=0, 'UK'=0)))
+	expect_that(degree(tree, mode="in"), equals(c(
+		'ASPAC'=0, 'AtPA'=1, 'Ret'=1, 'SK'=1, 'SKtPA'=1, 'Ten'=1, 'tPA'=1, 'UK'=1)))
+	expect_that(tree['AtPA', 'SK'], equals(0))
+	expect_that(tree['ASPAC', 'AtPA'], equals(1))
 })
 
 if (FALSE) {
