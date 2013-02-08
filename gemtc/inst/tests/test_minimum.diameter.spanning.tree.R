@@ -91,13 +91,3 @@ test_that("absolute.one.center of complex graph is correct", {
 	expect_that(tree['AtPA', 'SK'], equals(0))
 	expect_that(tree['ASPAC', 'AtPA'], equals(1))
 })
-
-if (FALSE) {
-E(g)$arrow.mode <- 0
-
-plot(g, vertex.label=v) # FIXME: order of vertex labels does not match order of vertices
-
-h <- minimum.diameter.spanning.tree(g)
-
-plot(h, vertex.label=v)
-}
