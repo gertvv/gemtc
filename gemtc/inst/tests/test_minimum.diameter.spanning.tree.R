@@ -60,11 +60,30 @@ test_that("absolute.once.center of one-edge graph is correct", {
 	expect_that(absolute.one.center(g), equals(c('e' = 1, 't' = 0.5, 'r' = 0.5)))
 })
 
-if (FALSE) {
 # Complex real network (luades-thrombolytic)
-v <- c("ASPAC", "AtPA", "Ret", "SK", "SKtPA", "Ten", "tPA", "UK")
-e <- rbind(c("ASPAC", "AtPA"), c("ASPAC", "tPA"), c("ASPAC", "SK"), c("AtPA", "Ten"), c("AtPA", "SKtPA"), c("AtPA", "Ret"), c("AtPA", "SK"), c("Ret", "SK"), c("SK", "UK"), c("SK", "SKtPA"), c("SK", "tPA"), c("tPA", "UK"))
-g <- graph.edgelist(e)
+test_that("absolute.one.center of complex graph is correct", {
+	v <- as.factor(c("ASPAC", "AtPA", "Ret", "SK", "SKtPA", "Ten", "tPA", "UK"))
+	e <- list(
+		c("ASPAC", "AtPA"),
+		c("ASPAC", "tPA"),
+		c("ASPAC", "SK"),
+		c("AtPA", "Ten"),
+		c("AtPA", "SKtPA"),
+		c("AtPA", "Ret"),
+		c("AtPA", "SK"),
+		c("AtPA", "UK"),
+		c("Ret", "SK"),
+		c("SK", "UK"),
+		c("SK", "SKtPA"),
+		c("SK", "tPA"),
+		c("tPA", "UK")
+	)
+	e <- do.call(rbind, lapply(e, function(x) { factor(x, levels=levels(v)) }))
+	g <- graph.edgelist(e)
+	expect_that(absolute.one.center(g), equals(c('e' = 1, 't' = 0.5, 'r' = 1.5)))
+})
+
+if (FALSE) {
 E(g)$arrow.mode <- 0
 
 plot(g, vertex.label=v) # FIXME: order of vertex labels does not match order of vertices
