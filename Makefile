@@ -41,3 +41,10 @@ install-$(JAR_PACKAGE): $(JAR_PACKAGE)
 install: $(PACKAGE)
 	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 	R CMD INSTALL $(PACKAGE)
+
+# Special test target since R CMD check is incredibly slow :-(
+test: $(PACKAGE)
+	mktemp -d > tmp.Rlib.loc
+	R CMD INSTALL -l `cat tmp.Rlib.loc` $(PACKAGE)
+	echo "library($(PKG_NAME), lib.loc='`cat tmp.Rlib.loc`'); source('$(PKG_NAME)/tests/test.R')" | R --vanilla --slave
+	rm -rf `cat tmp.Rlib.loc`
