@@ -87,8 +87,6 @@ test_that("absolute.one.center of complex graph is correct", {
 	expect_that(absolute.one.center(g), equals(c('e' = 1, 't' = 0.5, 'r' = 1.5)))
 
 	tree <- minimum.diameter.spanning.tree(g)
-	print(degree(tree, mode="out"))
-	print(sort(c('ASPAC', 'tPA', 'UK')))
 	expect_that(degree(tree, mode="out"), equals(c(
 		'ASPAC'=3, 'AtPA'=4, 'Ret'=0, 'SK'=0, 'SKtPA'=0, 'Ten'=0, 'UK'=0, 'tPA'=0)))
 	expect_that(degree(tree, mode="in"), equals(c(
