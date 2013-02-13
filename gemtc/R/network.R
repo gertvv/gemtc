@@ -23,7 +23,7 @@ mtc.network <- function(data, description="Network", treatments=NULL) {
 	if (is.null(treatments)) {
 		treatments <- unique(data$treatment)
 	}
-	if (is.list(treatments)) { 
+	if (is.list(treatments) && !is.data.frame(treatments)) { 
 		treatments <- as.data.frame(do.call(rbind, treatments))
 	}
 	if (is.character(treatments) || is.factor(treatments)) {
