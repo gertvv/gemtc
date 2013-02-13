@@ -1,7 +1,7 @@
 standardize.treatments <- function(treatments) {
 	treatments$id <- as.factor(treatments$id)
 	treatments$description <- as.character(treatments$description)
-	rownames(treatments) <- treatments$id
+	rownames(treatments) <- as.character(treatments$id)
 	treatments[order(treatments$id), ]
 }
 
@@ -14,7 +14,7 @@ standardize.data <- function(data, treatment.levels) {
 mtc.network <- function(data, description="Network", treatments=NULL) {
 	# standardize the data
 	if (!is.data.frame(data)) { 
-		data <- as.data.frame(do.call(rbind, data))
+		data <- do.call(rbind, lapply(data, as.data.frame))
 	}
 	rownames(data) <- seq(1:dim(data)[1])
 
@@ -28,7 +28,7 @@ mtc.network <- function(data, description="Network", treatments=NULL) {
 	if (is.character(treatments) || is.factor(treatments)) {
 		treatments <- data.frame(id=treatments, description=treatments)
 	}
-	standardize.treatments(treatments)
+	treatments <- standardize.treatments(treatments)
 
 	network <- list(
 		description=description,
@@ -40,6 +40,54 @@ mtc.network <- function(data, description="Network", treatments=NULL) {
 
 	class(network) <- "mtc.network"
 	network
+}
+
+read.mtc.network <- function(file) {
+	doc <- XML::xmlInternalTreeParse(file)
+	description <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "description"))
+	type <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "type", "dichotomous"))
+	treatments <- XML::xpathApply(doc, "/network/treatments/treatment",
+		function(node) {
+			c(
+				id = XML::xmlGetAttr(node, "id"),
+				description = XML::xmlValue(node)
+			)
+		}
+	)
+	if (identical(type, "dichotomous")) {
+		data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+			function(node) {
+				list(
+					study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
+					treatment = XML::xmlGetAttr(node, "treatment"),
+					responders = as.numeric(XML::xmlGetAttr(node, "responders")),
+					sampleSize = as.numeric(XML::xmlGetAttr(node, "sample"))
+				)
+			}
+		)
+	} else if (identical(type, "continuous")) {
+		data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+			function(node) {
+				list(
+					study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
+					treatment = XML::xmlGetAttr(node, "treatment"),
+					mean = as.numeric(XML::xmlGetAttr(node, "mean")),
+					std.dev = as.numeric(XML::xmlGetAttr(node, "standardDeviation")),
+					sampleSize = as.numeric(XML::xmlGetAttr(node, "sample"))
+				)
+			}
+		)
+	} else if (identical(type, "none")) {
+		data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+			function(node) {
+				list(
+					study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
+					treatment = XML::xmlGetAttr(node, "treatment")
+				)
+			}
+		)
+	}
+	mtc.network(data, treatments=treatments, description=description)
 }
 
 mtc.network.validate <- function(network) { 
