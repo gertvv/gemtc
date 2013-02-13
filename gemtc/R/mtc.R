@@ -135,7 +135,7 @@ w.factors <- function(parameters, network) {
 
 mtc.model.graph <- function(model) { 
 	if (model$type == 'Inconsistency') {
-		network <- j.network.to.network(model$j.network)
+		network <- model$network
 		comparisons <- mtc.model.comparisons(model)
 		parameters <- mtc.parameters(model)
 		g <- mtc.spanning.tree(parameters, network)

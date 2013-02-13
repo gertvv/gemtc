@@ -1,87 +1,3 @@
-j.getId <- function(jobj) {
-	.jcall(jobj, "S", "getId")
-}
-
-# Get a list of included treatments from an org.drugis.mtc.model.Network
-mtc.treatments <- function(network) {
-	asTreatment <- function(jobj) { .jcast(jobj, "org/drugis/mtc/model/Treatment") }
-	getDesc <- function(treatment) { .jcall(treatment, "S", "getDescription") }
-
-	lst <- as.list(.jcall(network, "Lcom/jgoodies/binding/list/ObservableList;", "getTreatments"))
-	lst <- lapply(lst, asTreatment)
-	ids <- unlist(sapply(lst, j.getId))
-	treatments <- as.data.frame(list(
-		id = ids,
-		description = sapply(lst, getDesc)
-	))
-	standardize.treatments(treatments)
-}
-
-# Get the included data from an org.drugis.mtc.model.Network
-mtc.data <- function(network, treatment.levels) {
-	as <- function(type, jobj) { 
-		class <- paste("org/drugis/mtc/model", type, sep="/")
-		.jcast(jobj, class)
-	}
-	getBoxedInt <- function(jobj, method) {
-		.jcall(.jcall(jobj, "Ljava/lang/Integer;", method), "I", "intValue")
-	}
-	getBoxedDouble <- function(jobj, method) {
-		.jcall(.jcall(jobj, "Ljava/lang/Double;", method), "D", "doubleValue")
-	}
-
-	convertNone <- function(m) {
-		t <- .jcall(m$measurement, "Lorg/drugis/mtc/model/Treatment;", "getTreatment")
-		s <- m$study
-		list(study=j.getId(as("Study", s)), treatment=j.getId(as("Treatment", t)))
-	}
-	convertDichotomous <- function(m) {
-		measurement <- convertNone(m)
-		measurement$responders <- getBoxedInt(m$measurement, "getResponders")
-		measurement$sampleSize <- getBoxedInt(m$measurement, "getSampleSize")
-		measurement
-	}
-	convertContinuous <- function(m) {
-		measurement <- convertNone(m)
-		measurement$mean <- getBoxedDouble(m$measurement, "getMean")
-		measurement$std.dev <- getBoxedDouble(m$measurement, "getStdDev")
-		measurement$sampleSize <- getBoxedInt(m$measurement, "getSampleSize")
-		measurement
-	}
-
-	dataType <- .jcall(.jcall(network, "Lorg/drugis/mtc/data/DataType;", "getType"), "S", "value")
-	convert <- if (dataType == "rate") {
-		convertDichotomous
-	} else if (dataType == "continuous") {
-		convertContinuous
-	} else {
-		convertNone
-	}
-
-	study.measurements <- function(study) {
-		lst <- as.list(.jcall(study, "Lcom/jgoodies/binding/list/ObservableList;", "getMeasurements"))
-		lst <- lapply(lst, function(x) { convert(list(study=study, measurement=as("Measurement", x))) })
-		do.call(function(...) { mapply(c, ..., SIMPLIFY=FALSE) }, lst)
-	}
-
-	lst <- as.list(.jcall(network, "Lcom/jgoodies/binding/list/ObservableList;", "getStudies"))
-	lst <- lapply(lst, function(x) { study.measurements(as("Study", x)) })
-	data <- as.data.frame(do.call(function(...) { mapply(c, ..., SIMPLIFY=FALSE) }, lst))
-	data <- standardize.data(data, treatment.levels)
-	data
-}
-
-j.network.to.network <- function(j.network) {
-	treatments <- mtc.treatments(j.network)
-	network <- list(
-		description=.jcall(j.network, "S", "getDescription"),
-		treatments=treatments,
-		data=mtc.data(j.network, levels(treatments$id))
-	)
-	class(network) <- "mtc.network"
-	network
-}
-
 mtc.network.as.java <- function(network) {
 	mtc.network.validate(network)
 
@@ -150,6 +66,7 @@ mtc.model.inconsistency <- function(network, factor, n.chain) {
 	model <- list(
 		type = "Inconsistency",
 		description = network$description,
+		network = network,
 		j.network = j.network,
 		j.model = j.model,
 		j.generator = j.generator,
@@ -161,7 +78,7 @@ mtc.model.inconsistency <- function(network, factor, n.chain) {
 }
 
 mtc.model.comparisons <- function(model) {
-	mtc.comparisons(j.network.to.network(model$j.network))
+	mtc.comparisons(model$network)
 }
 
 # If is.na(sampler), a sampler will be chosen based on availability, in this order:
