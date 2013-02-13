@@ -1,5 +1,8 @@
 context("Minimum diameter spanning tree")
 
+lc_collate <- Sys.getlocale("LC_COLLATE")
+Sys.setlocale("LC_COLLATE", "C")
+
 # Simple line graph with 5 vertices, 4 edges
 test_that("absolute.one.center of a 5-vertex line graph is on the middle vertex", {
 	n <- 5
@@ -84,10 +87,14 @@ test_that("absolute.one.center of complex graph is correct", {
 	expect_that(absolute.one.center(g), equals(c('e' = 1, 't' = 0.5, 'r' = 1.5)))
 
 	tree <- minimum.diameter.spanning.tree(g)
+	print(degree(tree, mode="out"))
+	print(sort(c('ASPAC', 'tPA', 'UK')))
 	expect_that(degree(tree, mode="out"), equals(c(
-		'ASPAC'=3, 'AtPA'=4, 'Ret'=0, 'SK'=0, 'SKtPA'=0, 'Ten'=0, 'tPA'=0, 'UK'=0)))
+		'ASPAC'=3, 'AtPA'=4, 'Ret'=0, 'SK'=0, 'SKtPA'=0, 'Ten'=0, 'UK'=0, 'tPA'=0)))
 	expect_that(degree(tree, mode="in"), equals(c(
-		'ASPAC'=0, 'AtPA'=1, 'Ret'=1, 'SK'=1, 'SKtPA'=1, 'Ten'=1, 'tPA'=1, 'UK'=1)))
+		'ASPAC'=0, 'AtPA'=1, 'Ret'=1, 'SK'=1, 'SKtPA'=1, 'Ten'=1, 'UK'=1, 'tPA'=1)))
 	expect_that(tree['AtPA', 'SK'], equals(0))
 	expect_that(tree['ASPAC', 'AtPA'], equals(1))
 })
+
+Sys.setlocale("LC_COLLATE", lc_collate)
