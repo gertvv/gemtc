@@ -128,18 +128,6 @@ mtc.network.as.java <- function(network) {
 	j.network
 }
 
-# Convert the S3 class 'mtc.network' to an org.drugis.mtc.model.Network and write it to file
-write.mtc.network <- function(network, file="") {
-	j.network <- mtc.network.as.java(network)
-
-	# write to file
-	bos <- .jnew("java/io/ByteArrayOutputStream")
-	os <- .jcast(bos, "java/io/OutputStream")
-	.jcall("org/drugis/mtc/model/JAXBHandler", "V",
-		"writeNetwork", j.network, os)
-	write(.jcall(bos, "S", "toString"), file=file)
-}
-
 # Create the inconsistency model
 mtc.model.inconsistency <- function(network, factor, n.chain) {
 	# create java network structure

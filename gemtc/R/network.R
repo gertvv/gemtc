@@ -8,6 +8,8 @@ standardize.treatments <- function(treatments) {
 standardize.data <- function(data, treatment.levels) {
 	data$study <- as.factor(data$study)
 	data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
+	data <- data[order(data$study, data$treatment), ]
+	rownames(data) <- seq(1:nrow(data))
 	data
 }
 
@@ -16,7 +18,6 @@ mtc.network <- function(data, description="Network", treatments=NULL) {
 	if (!is.data.frame(data)) { 
 		data <- do.call(rbind, lapply(data, as.data.frame))
 	}
-	rownames(data) <- seq(1:dim(data)[1])
 
 	# standardize the treatments
 	if (is.null(treatments)) {
@@ -45,7 +46,7 @@ mtc.network <- function(data, description="Network", treatments=NULL) {
 read.mtc.network <- function(file) {
 	doc <- XML::xmlInternalTreeParse(file)
 	description <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "description"))
-	type <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "type", "dichotomous"))
+	type <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "type", "rate"))
 	treatments <- XML::xpathApply(doc, "/network/treatments/treatment",
 		function(node) {
 			c(
@@ -54,7 +55,7 @@ read.mtc.network <- function(file) {
 			)
 		}
 	)
-	if (identical(type, "dichotomous")) {
+	if (identical(type, "rate")) {
 		data <- XML::xpathApply(doc, "/network/studies/study/measurement",
 			function(node) {
 				list(
@@ -88,6 +89,49 @@ read.mtc.network <- function(file) {
 		)
 	}
 	mtc.network(data, treatments=treatments, description=description)
+}
+
+write.mtc.network <- function(network, file) {
+	root <- XML::newXMLNode("network")
+	XML::xmlAttrs(root)["description"] <- network$description
+	type <- if ('responders' %in% colnames(network$data)) {
+		'rate'
+	} else if ('mean' %in% colnames(network$data)) {
+		'continuous'
+	} else {
+		'none'
+	}
+	XML::xmlAttrs(root)["type"] <- type
+
+	treatments <- XML::newXMLNode("treatments", parent = root)
+	apply(network$treatments, 1, function(row) {
+		node <- XML::newXMLNode("treatment", parent = treatments)
+		XML::xmlAttrs(node)["id"] <- row['id']
+		XML::xmlValue(node) <- row['description']
+	})
+
+	studies <- XML::newXMLNode("studies", parent = root)
+	study <- sapply(levels(network$data$study), function(sid) {
+		node <- XML::newXMLNode("study", parent = studies)
+		XML::xmlAttrs(node)["id"] <- sid
+		node
+	})
+
+	apply(network$data, 1, function(row) {
+		node <- XML::newXMLNode('measurement', parent=study[[row['study']]])
+		XML::xmlAttrs(node)['treatment'] <- row['treatment']
+		if (identical(type, 'rate')) {
+			XML::xmlAttrs(node)['responders'] <- row['responders']
+			XML::xmlAttrs(node)['sample'] <- row['sampleSize']
+		} else if (identical(type, 'continuous')) {
+			XML::xmlAttrs(node)['mean'] <- row['mean']
+			XML::xmlAttrs(node)['standardDeviation'] <- row['std.dev']
+			XML::xmlAttrs(node)['sample'] <- row['sampleSize']
+		}
+		node
+	})
+
+	cat(XML::saveXML(root), file=file)
 }
 
 mtc.network.validate <- function(network) { 
