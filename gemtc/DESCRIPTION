@@ -5,8 +5,7 @@ Title: GeMTC network meta-analysis
 Author: Gert van Valkenhoef, Joel Kuiper 
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
 Description: An R package for performing network meta-analyses (mixed treatment comparisons).
-Depends: R (>= 2.7.0), gemtc.jar (>= 0.14.3), coda (>= 0.13)
-Imports: igraph (>= 0.6.4), meta (>= 2.1), rJava (>= 0.8-0), XML (>= 3.6)
+Depends: coda (>= 0.13)
+Imports: igraph (>= 0.6.4), meta (>= 2.1), XML (>= 3.6)
 Suggests: rjags (>= 3-0), BRugs (>= 0.8), R2WinBUGS (>= 2.1), testthat (>= 0.7)
-SystemRequirements: Java (>= 1.5)
 License: GPL-3

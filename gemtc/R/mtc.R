@@ -31,10 +31,7 @@ mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 	typeMap <- c(
 		'Consistency'='Consistency',
 		'consistency'='Consistency',
-		'cons'='Consistency',
-		'Inconsistency'='Inconsistency',
-		'inconsistency'='Inconsistency',
-		'incons'='Inconsistency')
+		'cons'='Consistency')
 
 	if (is.na(typeMap[type])) {
 		stop(paste(type, 'is not an MTC model type.'))
@@ -43,8 +40,6 @@ mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
 
 	if (type == 'Consistency') {
 		mtc.model.consistency(network, factor=factor, n.chain=n.chain)
-	} else {
-		mtc.model.inconsistency(network, factor=factor, n.chain=n.chain)
 	}
 }
 
@@ -136,7 +131,7 @@ w.factors <- function(parameters, network) {
 mtc.model.graph <- function(model) { 
 	if (model$type == 'Inconsistency') {
 		network <- model$network
-		comparisons <- mtc.model.comparisons(model)
+		comparisons <- mtc.comparisons(model$network)
 		parameters <- mtc.parameters(model)
 		g <- mtc.spanning.tree(parameters, network)
 		g <- g + edges.create(w.factors(parameters, network), arrow.mode=2, color="black", lty=2)

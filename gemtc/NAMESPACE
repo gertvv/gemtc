@@ -1,6 +1,5 @@
 useDynLib(gemtc)
 import(grid)
-import(rJava)
 import(igraph)
 import(meta)
 
