@@ -37,7 +37,7 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
 		study.mle <- matrix(study.mle, nrow=2, row, dimnames=list(c('mean', 'sd')))
 	}
 
-	meta <- metagen(study.mle['mean', ], study.mle['sd', ])
+	meta <- meta::metagen(study.mle['mean', ], study.mle['sd', ])
 
 	rnorm(model$n.chain, meta$TE.random, model$var.scale * meta$seTE.random)
 }

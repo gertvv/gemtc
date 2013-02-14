@@ -1,18 +1,27 @@
 useDynLib(gemtc)
 import(grid)
-import(igraph)
-import(meta)
+import(igraph) # Get rid of this
+importFrom(meta, forest)
+importFrom(coda, as.mcmc.list)
 
+S3method(print, mtc.network)
+S3method(summary, mtc.network)
+S3method(plot, mtc.network)
+
+S3method(print, mtc.model)
+S3method(summary, mtc.model)
+S3method(plot, mtc.model)
+
+S3method(print, mtc.result)
+S3method(summary, mtc.result)
+S3method(plot, mtc.result)
+S3method(as.mcmc.list, mtc.result)
 S3method(forest, mtc.result)
 
 export(
 	read.mtc.network, write.mtc.network, mtc.network,
-	print.mtc.network, plot.mtc.network, summary.mtc.network,
 	mtc.model,
-	print.mtc.model, plot.mtc.model, summary.mtc.model,
 	mtc.run,
-	print.mtc.result, plot.mtc.result, summary.mtc.result, 
-	forest, forest.mtc.result,
-	as.mcmc.list.mtc.result, read.mtc.result.samples,
+	read.mtc.result.samples,
 	relative.effect, rank.probability,
-	blobbogram)
+	blobbogram, forest)
