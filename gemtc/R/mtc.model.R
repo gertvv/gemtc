@@ -25,8 +25,8 @@ summary.mtc.model <- function(object, ...) {
          "Parameters"=mtc.parameters(object))
 }
 
-plot.mtc.model <- function(x, ...) {
-    igraph::plot.igraph(mtc.model.graph(x), ...)
+plot.mtc.model <- function(x, layout=igraph::layout.circle, ...) {
+    igraph::plot.igraph(mtc.model.graph(x), layout=layout, ...)
 }
 
 mtc.model.graph <- function(model) { 

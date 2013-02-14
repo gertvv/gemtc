@@ -253,6 +253,6 @@ summary.mtc.network <- function(object, ...) {
          "Number of n-arm studies"=summary(x)) 
 }
 
-plot.mtc.network <- function(x, ...) {
-    igraph::plot.igraph(mtc.network.graph(x), ...)
+plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
+    igraph::plot.igraph(mtc.network.graph(x), layout=layout, ...)
 }
