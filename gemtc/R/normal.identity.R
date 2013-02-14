@@ -1,7 +1,6 @@
 # Arm-level effect estimate (given a one-row data frame)
-# Returns mean, variance.
 mtc.arm.mle.normal.identity <- function(data) {
-	c('mean'=as.numeric(data['mean']), 'sd'=as.numeric(data['std.dev'] / data['sampleSize']))
+	c('mean'=as.numeric(data['mean']), 'sd'=as.numeric(data['std.dev'] / sqrt(data['sampleSize'])))
 }
 
 # Relative effect estimate (given a two-row data frame)
