@@ -62,14 +62,13 @@ Journal of the American Statistical Association, 101(474): 447-459.
 
 \examples{
 # Load the example network and generate a consistency model:
-file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
+file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
 network <- read.mtc.network(file) 
 model <- mtc.model(network, type="consistency")
 
 # Load pre-generated samples instead of runing the model:
 \dontrun{results <- mtc.run(model)}
-file.samples <- system.file("extdata/luades-thrombolytic.samples.gz", package="gemtc")
-results <- read.mtc.result.samples(file.samples, model, "rjags")
+results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
 
 # Print a basic statistical summary of the results:
 summary(results)

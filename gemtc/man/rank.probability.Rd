@@ -29,8 +29,7 @@ network <- read.mtc.network(file)
 model <- mtc.model(network)
 # To save computation time we load the samples instead of running the model
 \dontrun{results <- mtc.run(model)}
-file.samples <- system.file("extdata/luades-smoking.samples.gz", package="gemtc")
-results <- read.mtc.result.samples(file.samples, model, "rjags")
+results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
 
 ranks <- rank.probability(results)
 print(ranks)

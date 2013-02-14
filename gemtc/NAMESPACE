@@ -22,6 +22,5 @@ export(
 	read.mtc.network, write.mtc.network, mtc.network,
 	mtc.model,
 	mtc.run,
-	read.mtc.result.samples,
 	relative.effect, rank.probability,
 	blobbogram, forest)

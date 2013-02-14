@@ -64,7 +64,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
     # compile & run BUGS model
     file.model <- tempfile()
     cat(paste(syntax$model, "\n", collapse=""), file=file.model)
-    data <- if (identical(package, 'rjags')
+    data <- if (identical(package, 'rjags')) {
         # Note: n.iter must be specified *excluding* the n.adapt
         jags <- jags.model(file.model, data=syntax$data,
             inits=syntax$inits, n.chains=model$n.chain,
@@ -97,16 +97,4 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
 
     # return
     data
-}
-
-# Semi-internal utility for loading samples from previous simulations
-# Samples that can be loaded were saved using dput
-read.mtc.result.samples <- function(file, model, sampler=NULL) {
-    samples <- dget(file)
-    result <- list(
-        samples=samples, 
-        model=model, 
-        sampler=sampler)
-    class(result) <- "mtc.result"
-    result
 }
