@@ -22,7 +22,7 @@ print.mtc.model <- function(x, ...) {
 
 summary.mtc.model <- function(object, ...) {
     list("Description"=paste("MTC ", object$type, " model: ", object$description, sep=""), 
-         "Parameters"=mtc.parameters(object))
+         "Parameters"=mtc.basic.parameters(object))
 }
 
 plot.mtc.model <- function(x, layout=igraph::layout.circle, ...) {

@@ -110,15 +110,3 @@ read.mtc.result.samples <- function(file, model, sampler=NULL) {
     class(result) <- "mtc.result"
     result
 }
-
-mtc.parameters <- function(object) { 
-    UseMethod('mtc.parameters', object)
-}
-
-mtc.parameters.mtc.model <- function(model) {
-    mtc.basic.parameters(model)
-}
-
-mtc.parameters.mtc.result <- function(result) {
-    colnames(result$samples[[1]])
-}
