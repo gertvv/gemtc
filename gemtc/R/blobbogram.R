@@ -204,12 +204,12 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     forest.data <- lapply(data, function(datagrp) { 
             # Create labels
             labels <- apply(datagrp$data, 1, rowToGrobs)
-        
+
             ci.data <- lapply(1:nrow(datagrp$data), function(i) { 
                 # Create CI plots
                 fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
                 ci <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
-    
+
                 # Create CI interval labels (right side) 
                 fmt <- lapply(fmt, function(x) { formatC(scale.trf(x), format='f') })
                 text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
@@ -294,34 +294,4 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
         rowheights <- do.call(unit.c, lapply(data[page], groupHeight))
         draw.page(forest.data[page], colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv)
     }
-}
-
-if (FALSE) {
-    data <- read.table(textConnection('
-    id               group pe       ci.l ci.u style      value.A    value.B 
-    "Study 1"  1         0.35 0.08 0.92 "normal" "2/46"     "7/46" 
-    "Study 2"  1         0.43 0.15 1.14 "normal" "4/50"     "8/49" 
-    "Study 3"  2         0.31 0.07 0.74 "normal" "2/97"     "10/100"
-    "Study 4"  2         0.86 0.34 2.90 "normal" "9/104"    "6/105" 
-    "Study 5"  2         0.33 0.10 0.72 "normal" "4/74"     "14/74" 
-    "Study 6"  2         0.47 0.23 0.91 "normal" "11/120" "22/129"
-    "Pooled"     NA      0.42 0.15 1.04 "pooled" NA             NA 
-    '), header=TRUE)
-    data$pe <- log(data$pe)
-    data$ci.l <- log(data$ci.l)
-    data$ci.u <- log(data$ci.u)
-
-    data <- read.table(textConnection('
-    id               group pe       ci.l ci.u style      value.A    value.B 
-    "Study 1"  1         20 -10 50 "normal" "2/46"      "7/46" 
-    "Study 3"  2         30 15 70 "normal" "11/120" "22/129"
-    "Study 3"  2         30 -15 70 "normal" "11/120" "22/129"
-    "Study 3"  2         15 10 20 "normal" "11/120" "22/129"
-    '), header=TRUE)
-    
-    blobbogram(data, group.labels=c('GROEP 1', 'GROEP 2'),
-        columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-        column.groups=c(1, 2), grouped=FALSE, xlim=c(0, 50), column.group.labels=c('Intervention', 'Control'),
-        id.label="Trial", ci.label="Odds Ratio (95% CrI)", log.scale=FALSE)
-
 }
