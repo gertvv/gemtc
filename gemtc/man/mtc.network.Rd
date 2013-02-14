@@ -32,17 +32,20 @@ A object of the class \code{mtc.network}
 \code{\link{read.mtc.network}}
 }
 \examples{
-treatments <- list(c('id' = 'A', 'description' = 'Treatment A'),
-                   c('id' = 'B', 'description' = 'Treatment B'),
-                   c('id' = 'C', 'description' = 'Treatment C'))
-data <- list(
-   c('study' = '01', 'treatment' = 'A', 'responders' = 2, 'sampleSize' = 100),
-   c('study' = '01', 'treatment' = 'B', 'responders' = 5, 'sampleSize' = 100),
-   c('study' = '02', 'treatment' = 'B', 'responders' = 6, 'sampleSize' = 110),
-   c('study' = '02', 'treatment' = 'C', 'responders' = 1, 'sampleSize' = 110),
-   c('study' = '03', 'treatment' = 'A', 'responders' = 3, 'sampleSize' = 60),
-   c('study' = '03', 'treatment' = 'C', 'responders' = 4, 'sampleSize' = 80),
-   c('study' = '03', 'treatment' = 'B', 'responders' = 7, 'sampleSize' = 80))
+treatments <- read.table(textConnection('
+	id  description
+	A   "Treatment A"
+	B   "Treatment B"
+	C   "Treatment C"'), header=TRUE)
+data <- read.table(textConnection('
+	study  treatment  responders  sampleSize
+	01     A          2           100
+	01     B          5           100
+	02     B          6           110
+	02     C          1           110
+	03     A          3           60
+	03     C          4           80
+	03     B          7           80'), header=TRUE)
 network <- mtc.network(data, description="Example", treatments=treatments)
 plot(network)
 

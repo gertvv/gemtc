@@ -1,13 +1,11 @@
 useDynLib(gemtc)
 import(grid)
-import(rJava)
-importFrom(coda, mcmc, thin, nchain, mcmc.list, as.mcmc.list, gelman.diag, gelman.plot)
-importFrom(igraph, graph, graph.empty, V, E, get.edge, edges, vertex, are.connected, get.shortest.paths)
+import(igraph)
+import(meta)
 
 S3method(forest, mtc.result)
 
 export(
-  gelman.diag, gelman.plot, 
 	read.mtc.network, write.mtc.network, mtc.network,
 	print.mtc.network, plot.mtc.network, summary.mtc.network,
 	mtc.model,

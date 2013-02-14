@@ -27,6 +27,22 @@ plot.mtc.network <- function(x, ...) {
 }
 
 ## mtc.model class methods
+mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
+	typeMap <- c(
+		'Consistency'='Consistency',
+		'consistency'='Consistency',
+		'cons'='Consistency')
+
+	if (is.na(typeMap[type])) {
+		stop(paste(type, 'is not an MTC model type.'))
+	}
+	type <- typeMap[type]
+
+	if (type == 'Consistency') {
+		mtc.model.consistency(network, factor=factor, n.chain=n.chain)
+	}
+}
+
 print.mtc.model <- function(x, ...) {
 	cat("MTC ", x$type, " model: ", x$description, "\n", sep="")
 }
@@ -73,12 +89,6 @@ as.mcmc.list.mtc.result <- function(x, ...) {
 }
 
 ####
-mtc.network.graph <- function(network) {
-	comparisons <- mtc.network.comparisons(network)
-	treatments <- as.character(network$treatments$id)
-	graph.create(treatments, comparisons, arrow.mode=0)
-}
-
 filter.parameters <- function(parameters, criterion) { 
 	parameters <- lapply(parameters, function(x) { 
 	path <- unlist(strsplit(x, '\\.')) 
@@ -88,20 +98,16 @@ filter.parameters <- function(parameters, criterion) {
 	parameters[!sapply(parameters, is.null)]
 }
 
-mtc.spanning.tree <- function(parameters) {
+mtc.spanning.tree <- function(parameters, network) {
 	parameters <- unlist(filter.parameters(parameters, function(x) { x[1] == 'd' }))
-	treatments <- unique(as.vector(parameters))
-	graph.create(treatments, parameters, arrow.mode=2, color="black", lty=1)
+	parameters <- matrix(parameters, nrow=2)
+	t1 <- factor(parameters[1,], levels=levels(network$treatments$id))
+	t2 <- factor(parameters[2,], levels=levels(network$treatments$id))
+	parameters <- data.frame(t1=t1, t2=t2)
+	graph.create(network$treatments$id, parameters, arrow.mode=2, color="black", lty=1)
 }
 
-graph.create <- function(v, e, ...) {
-	g <- graph.empty()
-	g <- g + vertex(v, label=v)
-	g <- g + edges(as.vector(e), ...)
-	g
-}
-
-w.factors <- function(parameters) {
+w.factors <- function(parameters, network) {
 	basic <- do.call(rbind, filter.parameters(parameters, function(x) { x[1] == 'd' }))
 	extract.unique <- function(f, basic) {
 		f <- c(f, f[1])
@@ -116,27 +122,41 @@ w.factors <- function(parameters) {
 	}
 	w.factors <- filter.parameters(parameters, function(x) { x[1] == 'w' })
 	w.factors <- unlist(lapply(w.factors, extract.unique, basic), recursive=FALSE)
-	w.factors[!sapply(w.factors, is.null)]
+	w.factors <- matrix(unlist(w.factors), nrow=2)
+	data.frame(
+		t1 = as.treatment.factor(w.factors[1,], network),
+		t2 = as.treatment.factor(w.factors[2,], network))
 }
 
 mtc.model.graph <- function(model) { 
-	comparisons <- mtc.model.comparisons(model)
-	parameters <- mtc.parameters(model)
-	g <- mtc.spanning.tree(parameters)
-	g <- g + edges(w.factors(parameters), arrow.mode=2, color="black", lty=2)
-	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
-	g
+	if (model$type == 'Inconsistency') {
+		network <- model$network
+		comparisons <- mtc.comparisons(model$network)
+		parameters <- mtc.parameters(model)
+		g <- mtc.spanning.tree(parameters, network)
+		g <- g + edges.create(w.factors(parameters, network), arrow.mode=2, color="black", lty=2)
+		g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
+		g
+	} else if (model$type == 'Consistency') {
+		comparisons <- mtc.comparisons(model$network)
+		parameters <- mtc.basic.parameters(model)
+		g <- mtc.spanning.tree(parameters, network)
+		g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
+		g
+	}
 }
 
 # filters list of comparison by edges that are not yet present in graph g 
 non.edges <- function(g, comparisons) { 
-	apply(comparisons, 2,
-		function(x) { if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x })
+	sapply(1:nrow(comparisons), function(i) {
+		x <- c(comparisons$t1[i], comparisons$t2[i])
+		if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x
+	})
 }
 
 tree.relative.effect <- function(g, t1, t2) {
 	if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
-		t2 <- V(g)[V(g)$name != t1]$name
+		t2 <- V(g)[V(g) != t1]
 	}
 	if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
 	if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
@@ -151,6 +171,7 @@ tree.relative.effect <- function(g, t1, t2) {
 			else 0
 		})
 	})
+	paths <- as.matrix(paths) # necessary when there is only 1
 	colnames(paths) <-	apply(pairs, 1, function(pair) { 
 		paste('d', pair[1], pair[2], sep='.')
 	})
@@ -161,8 +182,16 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 	if(result$model$type != "Consistency") stop("Cannot apply relative.effect to this model")
 
 	# Build relative effect transformation matrix
-	g <- mtc.spanning.tree(mtc.parameters(result))
+	network <- result$model$network
+	g <- mtc.spanning.tree(mtc.parameters(result), network)
+	if (is.character(t1)) {
+		t1 <- as.treatment.factor(t1, network)
+	}
+	if (is.character(t2)) {
+		t2 <- as.treatment.factor(t2, network)
+	}
 	effects <- tree.relative.effect(g, t1, t2)
+	print(effects)
 
 	# Add rows/columns for parameters that are not relative effects
 	nOut <- ncol(effects)
@@ -190,11 +219,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 }
 
 rank.probability <- function(result) {
-	model <- result$model
-	data <- result$samples
-
-	treatments <- as.vector(mtc.treatments(model$j.network)$id)
-	mtcGraph <- mtc.spanning.tree(mtc.parameters(result))
+	treatments <- result$model$network$treatments$id
 	n.alt <- length(treatments)
 
 	# count ranks given a matrix d of relative effects (treatments as rows)
@@ -211,7 +236,8 @@ rank.probability <- function(result) {
 	ranks <- Reduce(function(a, b) { a + b }, counts)
 	colnames(ranks) <- treatments
 
-	n.iter <- nchain(data) * (end(data) - start(data) + 1) / thin(data)
+	data <- result$samples
+	n.iter <- nchain(data) * (end(data) - start(data) + thin(data)) / thin(data)
 
 	t(ranks / n.iter)
 }

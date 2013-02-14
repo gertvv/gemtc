@@ -12,7 +12,7 @@ Network meta-analysis R package based on the Java GeMTC library from \url{http:/
 Network meta-analysis, or mixed treatment comparison (MTC) is a technique to meta-analyze networks of trials comparing two or more treatments at the same time (Lu & Ades, 2004).
 Using a Bayesian hierarchical model, all direct and indirect comparisons are taken into account to arrive at a single, integrated, estimate of the effect of all included treatments based on all included studies.
 
-This package allows the automated generation of consistency and inconsistency models that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package), WinBUGS (using the R2WinBUGS package) or YADAS (provided by GeMTC).
+This package allows the automated generation of consistency and inconsistency models that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package) or WinBUGS (using the R2WinBUGS package).
 Furthermore it allows interoperability with GeMTC files that were created by the GeMTC GUI or exported through \href{http://drugis.org/addis}{ADDIS}.
 The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/mtc}{Github}.
 

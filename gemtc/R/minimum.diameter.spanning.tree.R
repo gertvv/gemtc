@@ -20,7 +20,7 @@ minimum.diameter.spanning.tree <- function(graph) {
 	d <- shortest.paths(graph, mode="all")
 	t1 <- f['t']
 	t2 <- l(f['e']) - t1
-	v.rem <- V(g)[!(1:length(V(g)) %in% v)]
+	v.rem <- V(graph)[!(1:length(V(graph)) %in% v)]
 	pairs <- sapply(v.rem, function(u) {
 		d <- c(t1 + d[v[1], u], t2 + d[v[2], u])
 		if (d[1] < d[2] || (d[1] == d[2] && v[1] < v[2])) {
@@ -29,14 +29,20 @@ minimum.diameter.spanning.tree <- function(graph) {
 			c(v[2], u)
 		}
 	})
+	pairs <- as.matrix(pairs) # necessary if there is only one pair
 
 	h <- graph.empty()
-	h <- h + vertex(V(g))
-	for (p in get.shortest.paths(graph, pairs[1, ], pairs[2, ], mode="all")) {
-		if (length(p) == 2) {
-			h <- h + edge(p) # bug in one-edge paths?
-		} else {
-			h <- h + path(p)
+	h <- h + vertex(V(graph))
+	V(h)$name <- V(graph)$name
+	h <- h + edge(edgelist)
+	if (ncol(pairs) > 0 && nrow(pairs) > 0) {
+		for (i in 1:ncol(pairs)) {
+			p <- get.shortest.paths(graph, pairs[1, i], pairs[2, i], mode="all")[[1]]
+			if (length(p) == 2) {
+				h <- h + edge(p) # bug in one-edge paths?
+			} else {
+				h <- h + path(p)
+			}
 		}
 	}
 	simplify(h)
@@ -70,7 +76,7 @@ local.center <- function(graph, edge) {
 	d <- shortest.paths(graph)
 
 	# L(v): vertices ordered by distance from v
-	L <- t(apply(d, 2, function(x) { order(-x, V(g)) }))
+	L <- t(apply(d, 2, function(x) { order(-x, V(graph)) }))
 
 	# l(e): length of edge e
 	l <- function(edge) { edge.length(graph, edge) }
@@ -206,12 +212,12 @@ local.center <- function(graph, edge) {
 		if (is.na(tm)) {
 			f
 		} else {
-			xt <- c(f['e'], tm)
-			ct <- c(xt, 'r' = de(xt, vn))
-			if (ct['r'] < c['r']) {
-				ct
+			xt <- c(f['e'], 't'=tm)
+			ft <- c(xt, 'r' = de(xt, vn))
+			if (ft['r'] < f['r']) {
+				ft
 			} else {
-				c
+				f
 			}
 		}
 	}

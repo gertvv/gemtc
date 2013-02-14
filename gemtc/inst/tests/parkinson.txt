@@ -1,0 +1,16 @@
+structure(list(description = NULL, treatments = structure(list(
+    id = structure(1:5, .Label = c("A", "B", "C", "D", "E"), class = "factor"), 
+    description = c("", "", "", "", "")), .Names = c("id", "description"
+), row.names = c("A", "B", "C", "D", "E"), class = "data.frame"), 
+    data = structure(list(study = structure(c(1L, 1L, 2L, 2L, 
+    3L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L), .Label = c("1", 
+    "2", "3", "4", "5", "6", "7"), class = "factor"), treatment = structure(c(1L, 
+    3L, 1L, 2L, 1L, 2L, 4L, 3L, 4L, 3L, 4L, 4L, 5L, 4L, 5L), .Label = c("A", 
+    "B", "C", "D", "E"), class = "factor"), mean = c(-1.22, -1.53, 
+    -0.7, -2.4, -0.3, -2.6, -1.2, -0.24, -0.59, -0.73, -0.18, 
+    -2.2, -2.5, -1.8, -2.1), std.dev = c(3.7, 4.28, 3.7, 3.4, 
+    4.4, 4.3, 4.3, 3, 3, 3, 3, 2.31, 2.18, 2.48, 2.99), sampleSize = c(54L, 
+    95L, 172L, 173L, 76L, 71L, 81L, 128L, 72L, 80L, 46L, 137L, 
+    131L, 154L, 143L)), .Names = c("study", "treatment", "mean", 
+    "std.dev", "sampleSize"), row.names = c(NA, -15L), class = "data.frame")), .Names = c("description", 
+"treatments", "data"), class = "mtc.network")

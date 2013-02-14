@@ -21,9 +21,9 @@ mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
   \item{model}{A object of S3 class \code{mtc.model} describing a consistency or inconsistency model}
   \item{sampler}{
 A string literal indicating which sampler to use.
-Allowed values are \code{'JAGS'}, \code{'BUGS'} or \code{'YADAS'}. 
+Allowed values are \code{'JAGS'} or \code{'BUGS'}.
 Alternatively, the specific package to be used can be specified: \code{'rjags'}, \code{'BRugs'} or \code{'R2WinBUGS'}.
-When unspecified it will try JAGS, BUGS and YADAS, in that order.}
+When unspecified it will try \code{'rjags'}, \code{'BRugs'}, and \code{'R2WinBUGS'}, in that order.}
   \item{n.adapt}{Amount of adaptation (or tuning) iterations}
   \item{n.iter}{Amount of simulation iterations}
   \item{thin}{Thinning factor}
@@ -61,12 +61,10 @@ file <- system.file("extdata/luades-thrombolytic.gemtc", package="gemtc")
 network <- read.mtc.network(file)
 model <- mtc.model(network, n.chain=2)
 
-# Using BUGS or JAGS is preferred over YADAS, 
-# however YADAS does not require additional dependencies.
 \dontrun{
-results <- mtc.run(model, "YADAS", n.iter=10000, n.adapt=2500, thin=10)
+results <- mtc.run(model, n.iter=10000, n.adapt=2500, thin=10)
 }
-results <- mtc.run(model, "YADAS", n.iter=1000, n.adapt=250, thin=1)
+results <- mtc.run(model, n.iter=1000, n.adapt=250, thin=1)
 summary(results)
 
 ## Iterations = 2501:12491

@@ -54,7 +54,7 @@ hetforest <- function(network, model, result, ...) {
 							data$id[length(data$id)] <- paste(data$id[length(data$id)], "*")
 						}
 						md <- as.numeric(log((s2/f2)/(s1/f1)))
-						se <- as.numeric(1/s1 + 1/f1 + 1/s2 + 1/f2)
+						se <- as.numeric(sqrt(1/s1 + 1/f1 + 1/s2 + 1/f2))
 
 						data$pe <- c(data$pe, md)
 						data$ci.l <- c(data$ci.l, md - 1.96 * se)

@@ -15,7 +15,7 @@ JAR_PACKAGE := $(JAR_PKG_NAME)_$(JAR_VERSION).tar.gz
 
 all: $(PACKAGE)
 
-$(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/man/*.Rd $(PKG_NAME)/DESCRIPTION $(PKG_NAME)/NAMESPACE ../example/*.gemtc install-$(JAR_PACKAGE)
+$(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/tests/*.R $(PKG_NAME)/inst/*.txt $(PKG_NAME)/inst/tests/*.R $(PKG_NAME)/man/*.Rd $(PKG_NAME)/DESCRIPTION $(PKG_NAME)/NAMESPACE ../example/*.gemtc install-$(JAR_PACKAGE)
 	rm -Rf $(PKG_NAME)/inst/extdata
 	mkdir -p $(PKG_NAME)/inst/extdata
 	cp ../example/*.gemtc $(PKG_NAME)/inst/extdata
@@ -41,3 +41,10 @@ install-$(JAR_PACKAGE): $(JAR_PACKAGE)
 install: $(PACKAGE)
 	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 	R CMD INSTALL $(PACKAGE)
+
+# Special test target since R CMD check is incredibly slow :-(
+test: $(PACKAGE)
+	mktemp -d > tmp.Rlib.loc
+	R CMD INSTALL -l `cat tmp.Rlib.loc` $(PACKAGE)
+	echo "library($(PKG_NAME), lib.loc='`cat tmp.Rlib.loc`'); source('$(PKG_NAME)/tests/test.R')" | R --vanilla --slave
+	rm -rf `cat tmp.Rlib.loc`
