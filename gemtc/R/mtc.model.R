@@ -22,7 +22,7 @@ print.mtc.model <- function(x, ...) {
 
 summary.mtc.model <- function(object, ...) {
     list("Description"=paste("MTC ", object$type, " model: ", object$description, sep=""), 
-             "Parameters"=mtc.parameters(object))
+         "Parameters"=mtc.parameters(object))
 }
 
 plot.mtc.model <- function(x, ...) {
@@ -30,18 +30,9 @@ plot.mtc.model <- function(x, ...) {
 }
 
 mtc.model.graph <- function(model) { 
-    if (model$type == 'Inconsistency') {
-        network <- model$network
+    if (model$type == 'Consistency') {
         comparisons <- mtc.comparisons(model$network)
-        parameters <- mtc.parameters(model)
-        g <- mtc.spanning.tree(parameters, network)
-        g <- g + edges.create(w.factors(parameters, network), arrow.mode=2, color="black", lty=2)
-        g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
-        g
-    } else if (model$type == 'Consistency') {
-        comparisons <- mtc.comparisons(model$network)
-        parameters <- mtc.basic.parameters(model)
-        g <- mtc.spanning.tree(parameters, network)
+        g <- model$tree
         g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
         g
     }
@@ -52,5 +43,13 @@ non.edges <- function(g, comparisons) {
     sapply(1:nrow(comparisons), function(i) {
         x <- c(comparisons$t1[i], comparisons$t2[i])
         if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x
+    })
+}
+
+mtc.basic.parameters <- function(model) {
+    tree <- model$tree
+    sapply(E(tree), function(e) {
+        v <- get.edge(tree, e)
+        paste("d", V(tree)[v[1]]$name, V(tree)[v[2]]$name, sep=".")
     })
 }

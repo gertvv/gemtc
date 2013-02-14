@@ -27,7 +27,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
 
     # Build relative effect transformation matrix
     network <- result$model$network
-    g <- mtc.spanning.tree(mtc.parameters(result), network)
+    g <- result$model$tree
     if (is.character(t1)) {
         t1 <- as.treatment.factor(t1, network)
     }

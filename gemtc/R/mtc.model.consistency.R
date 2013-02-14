@@ -1,9 +1,16 @@
 # Master function to generate consistency models
 mtc.model.consistency <- function(network, factor, n.chain) {
+    style.tree <- function(tree) {
+        tree <- set.edge.attribute(tree, 'arrow.mode', value=2)
+        tree <- set.edge.attribute(tree, 'color', value='black')
+        tree <- set.edge.attribute(tree, 'lty', value=1)
+        tree
+    }
+
 	model <- list(
 		type = 'Consistency',
 		network = network,
-		tree = minimum.diameter.spanning.tree(mtc.network.graph(network)),
+		tree = style.tree(minimum.diameter.spanning.tree(mtc.network.graph(network))),
 		n.chain = n.chain,
 		var.scale = factor
 	)

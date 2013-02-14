@@ -1,11 +1,3 @@
-mtc.basic.parameters <- function(model) {
-	tree <- model$tree
-	sapply(E(tree), function(e) {
-		v <- get.edge(tree, e)
-		paste("d", V(tree)[v[1]]$name, V(tree)[v[2]]$name, sep=".")
-	})
-}
-
 mtc.model.code <- function(model) {
 	fileName <- system.file('gemtc.model.template.txt', package='gemtc')
 	template <- readChar(fileName, file.info(fileName)$size)
