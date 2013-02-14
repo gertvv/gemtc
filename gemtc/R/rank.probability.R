@@ -5,7 +5,7 @@ rank.probability <- function(result) {
     # count ranks given a matrix d of relative effects (treatments as rows)
     rank.count <- function(d) {
         n.iter <- dim(d)[2]
-        .C("rank_count",
+        .C("gemtc_rank_count",
             as.double(d), as.integer(n.iter), as.integer(n.alt),
             counts=matrix(0.0, nrow=n.alt, ncol=n.alt),
             NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts

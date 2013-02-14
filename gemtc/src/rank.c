@@ -25,7 +25,7 @@ inline double *get(Matrix *m, int i, int j) {
  * The rank of t[i] is the number of elements greater than t[i].
  * Assumes that n is small (complexity O(n^2)).
  */
-void rank(double const *t, int *r, int n) {
+inline void rank(double const *t, int *r, int n) {
 	for (int i = 0; i < n; ++i) {
 		r[i] = 0;
 		for (int j = 0; j < n; ++j) {
@@ -36,7 +36,7 @@ void rank(double const *t, int *r, int n) {
 	}
 }
 
-void rank_count(
+void gemtc_rank_count(
 		double const *sData, int const *nIter, int const *nAlt,
 		double *cData) {
 	Matrix c = { cData, *nAlt, *nAlt };
