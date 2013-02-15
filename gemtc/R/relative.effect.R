@@ -1,6 +1,6 @@
 tree.relative.effect <- function(g, t1, t2) {
     if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
-        t2 <- V(g)[V(g) != t1]
+        t2 <- V(g)[V(g) != as.numeric(t1)]
     }
     if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
     if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
@@ -17,6 +17,7 @@ tree.relative.effect <- function(g, t1, t2) {
     })
     paths <- as.matrix(paths) # necessary when there is only 1
     colnames(paths) <-  apply(pairs, 1, function(pair) { 
+        pair <- V(g)[pair]$name
         paste('d', pair[1], pair[2], sep='.')
     })
     paths
@@ -35,7 +36,6 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
         t2 <- as.treatment.factor(t2, network)
     }
     effects <- tree.relative.effect(g, t1, t2)
-    print(effects)
 
     # Add rows/columns for parameters that are not relative effects
     nOut <- ncol(effects)
@@ -56,7 +56,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
     effects <- list(
         samples=samples,
         model=result$model,
-        sampler=result$model$sampler)
+        sampler=result$sampler)
 
     class(effects) <- "mtc.result"
     effects
