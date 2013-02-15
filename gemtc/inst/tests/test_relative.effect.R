@@ -1,4 +1,4 @@
-context("relative.effect")
+context("relative.effect and rank.probability")
 
 test_that("relative.effect outputs the correct parameters", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
@@ -30,10 +30,10 @@ test_that("relative.effect generates the expected statistics", {
 
   expected <- textConnection('
            Mean     SD  Naive.SE Time-series.SE
-  d.B.A -0.4901 0.4041 0.0014286       0.002935
-  d.B.C  0.3429 0.4158 0.0014700       0.002715
-  d.B.D  0.6092 0.4868 0.0017210       0.003421
-  sd.d   0.8430 0.1853 0.0006551       0.002481
+  d.B.A -0.4965 0.4081 0.004563       0.004989
+  d.B.C  0.3394 0.4144 0.004634       0.004859
+  d.B.D  0.6123 0.4789 0.005354       0.005297
+  sd.d   0.8465 0.1913 0.002139       0.002965
   ')
   expected <- as.matrix(read.table(expected, header=TRUE))
   colnames(expected)[3] <- "Naive SE"
