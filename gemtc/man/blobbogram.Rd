@@ -17,6 +17,7 @@ blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
 \arguments{
   \item{data}{A data frame containing one row for each confidence interval to be visualized.
     The data format is described below.}
+  \item{id.label}{Label to show above the row-id column.}
   \item{ci.label}{Label to show above the confidence intervals.}
   \item{left.label}{Label to show on the left-hand side of the no-difference line.}
   \item{right.label}{Label to show on the right-hand side of the no-difference line.}
@@ -65,7 +66,7 @@ The interface may change at any time.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{meta::forest}}, \code{\link{grid::Grid}}
+\code{meta::forest}, \code{grid::Grid}
 }
 \examples{
 data <- read.table(textConnection('

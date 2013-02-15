@@ -1,7 +1,6 @@
 \encoding{utf8}
 \name{rank.probability}
 \alias{rank.probability}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calculating rank-probabilities}
 \description{
 Rank probabilities indicate the probability for each treatment to be best, second best, etc.
@@ -33,10 +32,11 @@ results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"
 
 ranks <- rank.probability(results)
 print(ranks)
-##       [,1]      [,2]     [,3]     [,4]
-## A 0.0000500 0.0024250 0.104000 0.893525
-## B 0.0571125 0.1802375 0.661125 0.101525
-## C 0.2409625 0.5893875 0.169375 0.000275
-## D 0.7020250 0.2279000 0.065450 0.004625
-barplot(t(ranks), beside=TRUE)
+##       [,1]      [,2]      [,3]      [,4]
+## A 0.000100 0.0021000 0.1073125 0.8904875
+## B 0.059125 0.1776500 0.6580000 0.1052250
+## C 0.230425 0.5983625 0.1709250 0.0002875
+## D 0.710500 0.2218375 0.0637125 0.0039500
+
+barplot(t(ranks), beside=TRUE) # plot a 'rankogram'
 }

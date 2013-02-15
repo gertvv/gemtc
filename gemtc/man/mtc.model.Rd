@@ -44,20 +44,21 @@ Unfortunately, inconsistency models have not been re-implemented, and are unsupp
 
 \section{Visualization}{Calling the generic plot method on an S3 \code{mtc.model} object
 will show a graph with the treatments as vertices and the comparisons as edges.
-The solid arrows represent basic parameters, the dotted arrows represent inconsistency factors and solid lines represent comparisons that are not associated with any parameter but do have direct evidence from trials.
+The lines with solid arrows represent basic parameters, and the other lines represent comparisons that are not associated with any parameter but do have direct evidence from trials.
 
 \if{html}{
 The example code will generate the following graph:
 
-\figure{parkinson-inconsistency.png}{Graph showing structure of inconsistency model generated from parkison example data}
+\figure{parkinson.png}{Graph showing structure of a consistency model generated from parkison example data}
 }
 \if{latex}{
 The example code will generate the following graph:
 
-\figure{parkinson-inconsistency.pdf}{options: width=3in}
+\figure{parkinson.pdf}{options: width=3in}
 }
-
-Note that the layout algorithm used in visualization is non-deterministic and might produce different results on each run.
+The default layout algorithm is \code{igraph::layout.circle}, other layout algorithms can be used by passing them as an optional argument called \code{layout} to \code{plot}.
+The \code{igraph::layout.fruchterman.reingold} algorithm also seems to produce nice results and may be better for large graphs.
+The default up-to version 0.1-2 was \code{igraph::layout.kamada.kawai} but could produce overlapping edges.
 }
 
 

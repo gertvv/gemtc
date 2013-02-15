@@ -24,8 +24,8 @@ mtc.model.consistency <- function(network, factor, n.chain) {
     }
 
     model$om.scale <- guess.scale(model)
-    model$data <- mtc.model.data(model)
     model$code <- mtc.model.code(model)
+    model$data <- mtc.model.data(model)
     model$inits <- mtc.init(model)
     class(model) <- "mtc.model"
 

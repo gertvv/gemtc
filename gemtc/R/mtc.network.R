@@ -13,7 +13,7 @@ standardize.data <- function(data, treatment.levels) {
     data
 }
 
-mtc.network <- function(data, description="Network", treatments=NULL) {
+mtc.network <- function(data, treatments=NULL, description="Network") {
     # standardize the data
     if (!is.data.frame(data)) { 
         data <- do.call(rbind, lapply(data, as.data.frame))

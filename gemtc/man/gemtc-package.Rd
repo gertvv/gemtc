@@ -12,7 +12,7 @@ Network meta-analysis R package based on the Java GeMTC library from \url{http:/
 Network meta-analysis, or mixed treatment comparison (MTC) is a technique to meta-analyze networks of trials comparing two or more treatments at the same time (Lu & Ades, 2004).
 Using a Bayesian hierarchical model, all direct and indirect comparisons are taken into account to arrive at a single, integrated, estimate of the effect of all included treatments based on all included studies.
 
-This package allows the automated generation of consistency and inconsistency models that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package) or WinBUGS (using the R2WinBUGS package).
+This package allows the automated generation of consistency that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package) or WinBUGS (using the R2WinBUGS package).
 Furthermore it allows interoperability with GeMTC files that were created by the GeMTC GUI or exported through \href{http://drugis.org/addis}{ADDIS}.
 The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/mtc}{Github}.
 
@@ -28,7 +28,8 @@ In network meta-analysis, the exchangeability assumption can also be violated be
 Inconsistency occurs when a treatment C has a different effect when it is compared with A or B, i.e. studies comparing A and C are systematically different from studies comparing B and C.
 Thus, inconsistency may also be present when a series of pair-wise meta-analyses are conducted, but can only be detected in a network meta-analysis, and then only when there are closed loops in the evidence structure. 
 
-Statistical models can be used to detect inconsistency (Lu & Ades, 2006), but careful consideration of the characteristics of the studies is even more important to ensure valid results from a network meta-analysis.
+Statistical models can be used to detect inconsistency (Lu & Ades, 2006; Dias et al. 2010), but careful consideration of the characteristics of the studies is even more important to ensure valid results from a network meta-analysis. 
+Unfortunately, inconsistency models are currently not available in this R package, but will be in the future. 
 
 If there is no relevant inconsistency in the evidence, a consistency model can be used to draw conclusions about the relative effects of the included treatments and their ranking.
 }
@@ -52,8 +53,11 @@ Statistics in Medicine, 23(20):3105-3124.
 G. Lu and A.E. Ades (2006), \emph{Assessing evidence inconsistency in mixed treatment comparisons},
 Journal of the American Statistical Association, 101(474): 447-459.
 [\href{http://dx.doi.org/10.1198/016214505000001302}{doi:10.1198/016214505000001302}]
-}
 
+S. Dias, N.J. Welton, D.M. Caldwell, A.E. Ades (2010), \emph{Checking consistency in mixed treatment comparison meta-analysis},
+Statistics in Medicine,  30;29(7-8):932-44.
+[\href{http://dx.doi.org/10.1002/sim.3767}{doi:10.1002/sim.3767}]
+}
 \seealso{
 \code{\link{mtc.network}},
 \code{\link{mtc.model}},
@@ -72,4 +76,25 @@ results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"
 
 # Print a basic statistical summary of the results:
 summary(results)
+## Iterations = 5001:25000
+## Thinning interval = 1 
+## Number of chains = 4 
+## Sample size per chain = 20000 
+## 
+## 1. Empirical mean and standard deviation for each variable,
+##    plus standard error of the mean:
+## 
+##         Mean     SD  Naive SE Time-series SE
+## d.A.B 0.4901 0.4041 0.0014286       0.002935
+## d.A.C 0.8330 0.2398 0.0008478       0.002130
+## d.A.D 1.0992 0.4382 0.0015493       0.003751
+## sd.d  0.8430 0.1853 0.0006551       0.002481
+## 
+## 2. Quantiles for each variable:
+## 
+##          2.5%    25%    50%    75% 97.5%
+## d.A.B -0.2948 0.2249 0.4840 0.7475 1.305
+## d.A.C  0.3781 0.6744 0.8261 0.9848 1.328
+## d.A.D  0.2679 0.8063 1.0873 1.3809 2.003
+## sd.d   0.5493 0.7104 0.8203 0.9494 1.272
 }
