@@ -166,7 +166,11 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     text.fn <- text.style(styles)
 
     # Rewrite input: split into groups
-    data <- get.row.groups(data, group.labels)
+    data <- if (grouped) {
+        get.row.groups(data, group.labels)
+    } else {
+        list(list(label=NULL, data=data))
+    }
 
     columns.grouped <- !is.null(column.groups)
 
@@ -224,6 +228,10 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
         })
     names(forest.data) <- lapply(data, function(grp) { grp$label })
 
+    forest.data.index <- function(fd, idx) {
+        list(labels=fd$labels[idx], ci.plot=fd$ci.plot[idx], ci.label=fd$ci.label[idx])
+    }
+
     if (columns.grouped) {
         group.labels <- rowToGrobs(column.group.labels)
     }
@@ -253,7 +261,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
     graphwidth <- unit(5, "cm")
     all.ci.labels <- do.call(c, lapply(forest.data, function(x) { x$ci.label }) )
-    
+
     ci.colwidth <- max(unit(rep(1, length(all.ci.labels)), "grobwidth", all.ci.labels))
     colwidth <- unit.c(colwidth, graphwidth, colgap, ci.colwidth)
 
@@ -262,23 +270,55 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
         else unit(styles[grp$data$style, 'row.height'], "lines")
     }
 
+    groupHeightNPC <- function(grp) {
+        convertY(sum(groupHeight(grp)), "npc", valueOnly=TRUE)
+    }
+
     # divide data into pages
     height <- sum(unit.c(unit(rep(1, if (columns.grouped) 2 else 1), "lines"), unit(c(0.5, 1), "lines")))
     space <- 1.0 - convertY(height, "npc", valueOnly=TRUE)
 
-    pages <- list(c())
+    pages <- list(list())
     height <- 0
     for (i in 1:length(data)) {
-        myHeight <- convertY(sum(groupHeight(data[[i]])), "npc", valueOnly=TRUE)
+        myHeight <- groupHeightNPC(data[[i]]) 
         if (myHeight > space) {
-            stop("PAGE WONT FIT")
-        }
-        if (height + myHeight > space) { # new page
+            # Create (sub) groups that fit
+            i0 <- 1
+            i1 <- 1
+            while (i0 <= nrow(data[[i]]$data)) {
+                if (height / space > 0.7) { # create a new page
+                    pages <- c(pages, list(list()))
+                    height <- 0
+                }
+                while (groupHeightNPC(list(data=data[[i]]$data[i0:i1,])) < (space - height) && i1 <= nrow(data[[i]]$data)) {
+                    i1 <- i1 + 1
+                }
+                block <- list(list(
+                    forest.data=forest.data.index(forest.data[[i]], i0:(i1 - 1)),
+                    rowheight=groupHeight(list(data=data[[i]]$data[i0:(i1 - 1),]))
+                    ))
+                names(block) <- names(forest.data)[i]
+                pages[[length(pages)]] <- c(pages[[length(pages)]], block)
+                i0 <- i1
+                height <- space
+            }
+        } else if (height + myHeight > space) { # new page
             height <- myHeight
-            pages <- c(pages, c(i))
+            block <- list(list(
+                forest.data=forest.data[[i]],
+                rowheight=groupHeight(data[[i]])
+                ))
+            names(block) <- names(forest.data)[i]
+            pages <- c(pages, list(block))
         } else { # append to this page
             height <- height + myHeight
-            pages[[length(pages)]] <- c(pages[[length(pages)]], i)
+            block <- list(list(
+                forest.data=forest.data[[i]],
+                rowheight=groupHeight(data[[i]])
+                ))
+            names(block) <- names(forest.data)[i]
+            pages[[length(pages)]] <- c(pages[[length(pages)]], block)
         }
     }
 
@@ -291,7 +331,10 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
             grid.newpage()
         }
         page <- pages[[i]]
-        rowheights <- do.call(unit.c, lapply(data[page], groupHeight))
-        draw.page(forest.data[page], colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv)
+        if (length(page) > 0) {
+            rowheights <- do.call(unit.c, lapply(page, function(grp) { grp$rowheight }))
+            fd <- lapply(page, function(grp) { grp$forest.data })
+            draw.page(fd, colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv)
+        }
     }
 }
