@@ -83,7 +83,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
         # Note: n.iter must be specified *including* the n.adapt
         as.mcmc.list(bugs(model.file=file.model, data=syntax$data,
             inits=syntax$inits, n.chains=model$n.chain,
-            parameters.to.save=syntax$vars, codaPkg=FALSE,
+            parameters.to.save=syntax$vars, codaPkg=FALSE, DIC=FALSE,
             n.burnin=n.adapt, n.iter=n.adapt+n.iter, n.thin=thin))
         # Note: does not always work on Unix systems due to a problem
         # with Wine not being able to access the R temporary path.
@@ -92,6 +92,8 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
         #       mkdir ~/.wine/drive_c/bugstmp
         # And then adding these arguments to the BUGS call:
         #       working.directory='~/.wine/drive_c/bugstmp', clearWD=TRUE
+        # Or alternatively invoke R as:
+        #       TMPDIR=~/.wine/drive_c/bugstmp R 
     }
     unlink(file.model)
 
