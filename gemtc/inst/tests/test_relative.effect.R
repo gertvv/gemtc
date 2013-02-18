@@ -98,3 +98,16 @@ test_that("relative.effect.tree throws an error if requested comparison is not c
 
   expect_error(tree.relative.effect(g, t1=1, t2=4))
 })
+
+test_that("spanning.tree.mtc.result handles two-treatment case", {
+  result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+  result <- relative.effect(result, t1="A", t2="B")
+  
+  g <- graph.edgelist(matrix(c("A", "B"), ncol=2))
+  g <- g + vertices(c("C", "D"))
+
+  h <- spanning.tree.mtc.result(result)
+
+  expect_that(V(h)$name, equals(V(g)$name))
+  expect_that(h[,], equals(g[,]))
+})

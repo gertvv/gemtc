@@ -43,6 +43,7 @@ extract.comparisons <- function(parameters) {
 spanning.tree.mtc.result <- function(result) {
     network <- result$model$network
     pairs <- extract.comparisons(colnames(result$samples[[1]]))
+		pairs <- matrix(pairs, ncol=2)
     parameters <- data.frame(
         t1=as.treatment.factor(pairs[,1], network),
         t2=as.treatment.factor(pairs[,2], network)
