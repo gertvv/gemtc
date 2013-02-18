@@ -8,6 +8,7 @@ Dropped Java dependency by rewriting core algorithms in R.
 * Use own forest plot methods instead of meta package
 * Fix bug in rank.probabilities when only two treatments in network
 * Various bugfixes
+* Compatibility note: incompatibility models are no longer supported by this package
 * Compatibility note: the argument order of mtc.network has changed
 * Compatibility note: the YADAS sampler is no longer available
 
