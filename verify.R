@@ -6,7 +6,8 @@ generate.summaries <- function(result) {
 	list(
 		effectiveSize = effectiveSize(result$samples),
 		summary       = summary(result$samples),
-		cov           = cov(as.matrix(data))
+		cov           = cov(as.matrix(data)),
+		ranks         = rank.probability(result)
 	)
 }
 
@@ -43,10 +44,25 @@ compare.summaries <- function(s1, s2) {
 	# TODO: compare covariance matrices
 
 	# TODO: compare quantiles for the standard deviation using http://www.jstor.org/stable/2673594
+
+	# Test equality of rank probabilities
+	thin <- s2$summary$thin
+	n.adapt <- s2$summary$start - thin
+	n.iter <- s2$summary$end - n.adapt
+	test <- sapply(rownames(s2$ranks), function(alt) {
+			x <- round(s2$ranks[alt, ] * min(s2$effectiveSize[d.idx]))
+			p <- s1$ranks[alt, ]
+			test <- chisq.test(x, p=p, rescale.p=TRUE, simulate.p.value=TRUE)
+			c('statistic'=unname(test$statistic), 'p.value'=test$p.value)
+  })
+	cat("Test equality of rank probabilities (Chi-squared based on effective sample size): \n")
+	print(test)
+	if (!all(test['p.value', ] > 0.025)) {
+		print("!!! TEST FAILED")
+	}
 }
 
-verify.example <- function(name) {
-	cat(paste("=== Verifying", name, "===\n"))
+replicate.example <- function(name, sampler) {
 	s1 <- dget(paste(name, 'summaries.txt', sep='.'))
 
 	n.chain <- s1$summary$nchain
@@ -56,12 +72,27 @@ verify.example <- function(name) {
 
 	network <- read.mtc.network(paste(name, 'gemtc', sep='.'))
 	model <- mtc.model(network, n.chain=4)
-	result <- mtc.run(model, sampler="JAGS", n.adapt=n.adapt, n.iter=n.iter, thin=thin)
-
+	result <- mtc.run(model, sampler=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 	s2 <- generate.summaries(result)
-	compare.summaries(s1, s2)
+	list(s1=s1, s2=s2)
+}
+
+verify.example <- function(name, sampler) {
+	cat(paste("=== Verifying", name, "===\n"))
+	x <- replicate.example(name, sampler)
+	compare.summaries(x$s1, x$s2)
+}
+
+verify.example.jags <- function(name) {
+	verify.example(name, "JAGS")
+}
+
+verify.example.winbugs <- function(name) {
+	verify.example(name, "R2WinBUGS")
+}
+
+verify.example.openbugs <- function(name) {
+	verify.example(name, "BRugs")
 }
 
 examples <- c('cipriani-efficacy', 'luades-smoking', 'luades-thrombolytic', 'parkinson', 'welton-cholesterol', 'welton-diastolic', 'welton-systolic')
-
-#lapply(examples, verify.example)

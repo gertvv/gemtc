@@ -1,0 +1,111 @@
+=== Verifying cipriani-efficacy ===
+[1] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits1.txt"
+[2] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits2.txt"
+[3] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits3.txt"
+[4] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits4.txt"
+Test equality of means: 
+   d.fluoxetine.bupropion   d.fluoxetine.citalopram   d.fluoxetine.duloxetine 
+                0.8478473                 0.7371233                 0.1026736 
+d.fluoxetine.escitalopram  d.fluoxetine.fluvoxamine  d.fluoxetine.milnacipran 
+                0.9212041                 0.4404632                 0.4747088 
+ d.fluoxetine.mirtazapine   d.fluoxetine.paroxetine   d.fluoxetine.reboxetine 
+                0.6376170                 0.7883705                 0.2921037 
+  d.fluoxetine.sertraline  d.fluoxetine.venlafaxine                      sd.d 
+                0.6180760                 0.8635993                 0.9442779 
+Test equality of variances: 
+   d.fluoxetine.bupropion   d.fluoxetine.citalopram   d.fluoxetine.duloxetine 
+                0.4335161                 0.2796410                 0.6706362 
+d.fluoxetine.escitalopram  d.fluoxetine.fluvoxamine  d.fluoxetine.milnacipran 
+                0.2818057                 0.6217355                 0.2668038 
+ d.fluoxetine.mirtazapine   d.fluoxetine.paroxetine   d.fluoxetine.reboxetine 
+                0.3099911                 0.7244621                 0.5515227 
+  d.fluoxetine.sertraline  d.fluoxetine.venlafaxine 
+                0.5670228                 0.5371216 
+=== Verifying luades-smoking ===
+[1] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits1.txt"
+[2] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits2.txt"
+[3] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits3.txt"
+[4] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits4.txt"
+Test equality of means: 
+     d.A.B      d.A.C      d.A.D       sd.d 
+0.57553823 0.32655590 0.21520562 0.03231329 
+Test equality of variances: 
+    d.A.B     d.A.C     d.A.D 
+0.7572789 0.2116237 0.4562485 
+=== Verifying luades-thrombolytic ===
+[1] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits1.txt"
+[2] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits2.txt"
+[3] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits3.txt"
+[4] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits4.txt"
+Test equality of means: 
+d.ASPAC.AtPA   d.ASPAC.SK  d.ASPAC.tPA   d.AtPA.Ret d.AtPA.SKtPA   d.AtPA.Ten 
+   0.1914487    0.3553586    0.3989272    0.4080028    0.8795396    0.3474434 
+   d.AtPA.UK         sd.d 
+   0.7924285    0.8835741 
+Test equality of variances: 
+d.ASPAC.AtPA   d.ASPAC.SK  d.ASPAC.tPA   d.AtPA.Ret d.AtPA.SKtPA   d.AtPA.Ten 
+   0.7643419    0.9983655    0.9585458    0.9993055    0.9397451    0.9999494 
+   d.AtPA.UK 
+   0.3016807 
+=== Verifying parkinson ===
+[1] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits1.txt"
+[2] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits2.txt"
+[3] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits3.txt"
+[4] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits4.txt"
+Test equality of means: 
+    d.D.A     d.D.B     d.D.C     d.D.E      sd.d 
+0.4764777 0.4909688 0.7663636 0.5832059 0.7947343 
+Test equality of variances: 
+    d.D.A     d.D.B     d.D.C     d.D.E 
+0.9074047 0.8481359 0.9198623 0.3655345 
+=== Verifying welton-cholesterol ===
+[1] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits1.txt"
+[2] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits2.txt"
+[3] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits3.txt"
+[4] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits4.txt"
+Test equality of means: 
+d.psych.usual          sd.d 
+   0.35151132    0.09937911 
+Test equality of variances: 
+[1] 0.2462859
+=== Verifying welton-diastolic ===
+[1] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits1.txt"
+[2] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits2.txt"
+[3] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits3.txt"
+[4] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits4.txt"
+Test equality of means: 
+d.psych.usual          sd.d 
+    0.8765858     0.3878299 
+Test equality of variances: 
+[1] 0.2754532
+=== Verifying welton-systolic ===
+[1] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits1.txt"
+[2] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits2.txt"
+[3] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits3.txt"
+[4] "/home/joel/.wine/c_drive/bugstmp/Rtmpa7bA7X/inits4.txt"
+Test equality of means: 
+d.psych.usual          sd.d 
+    0.7562722     0.6257415 
+Test equality of variances: 
+[1] 0.6004286
+[[1]]
+NULL
+
+[[2]]
+NULL
+
+[[3]]
+NULL
+
+[[4]]
+NULL
+
+[[5]]
+NULL
+
+[[6]]
+NULL
+
+[[7]]
+NULL
+

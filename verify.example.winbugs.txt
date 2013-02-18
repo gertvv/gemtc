@@ -1,0 +1,84 @@
+=== Verifying cipriani-efficacy ===
+Test equality of means: 
+   d.fluoxetine.bupropion   d.fluoxetine.citalopram   d.fluoxetine.duloxetine 
+                0.8417630                 0.9745092                 0.5886600 
+d.fluoxetine.escitalopram  d.fluoxetine.fluvoxamine  d.fluoxetine.milnacipran 
+                0.9407571                 0.4422494                 0.2878361 
+ d.fluoxetine.mirtazapine   d.fluoxetine.paroxetine   d.fluoxetine.reboxetine 
+                0.3590107                 0.7076958                 0.1811093 
+  d.fluoxetine.sertraline  d.fluoxetine.venlafaxine                      sd.d 
+                0.6301974                 0.7046555                 0.5065204 
+Test equality of variances: 
+   d.fluoxetine.bupropion   d.fluoxetine.citalopram   d.fluoxetine.duloxetine 
+                0.2428261                 0.3357814                 0.3421609 
+d.fluoxetine.escitalopram  d.fluoxetine.fluvoxamine  d.fluoxetine.milnacipran 
+                0.7380898                 0.6664989                 0.4934153 
+ d.fluoxetine.mirtazapine   d.fluoxetine.paroxetine   d.fluoxetine.reboxetine 
+                0.1149714                 0.1921770                 0.2794839 
+  d.fluoxetine.sertraline  d.fluoxetine.venlafaxine 
+                0.8199679                 0.4187180 
+=== Verifying luades-smoking ===
+Test equality of means: 
+     d.A.B      d.A.C      d.A.D       sd.d 
+0.68976788 0.50443653 0.07120257 0.25127674 
+Test equality of variances: 
+    d.A.B     d.A.C     d.A.D 
+0.8357987 0.1494983 0.6364148 
+=== Verifying luades-thrombolytic ===
+Test equality of means: 
+d.ASPAC.AtPA   d.ASPAC.SK  d.ASPAC.tPA   d.AtPA.Ret d.AtPA.SKtPA   d.AtPA.Ten 
+   0.3788822    0.7268013    0.6052946    0.7182645    0.6447356    0.2836780 
+   d.AtPA.UK         sd.d 
+   0.7181893    0.7154662 
+Test equality of variances: 
+d.ASPAC.AtPA   d.ASPAC.SK  d.ASPAC.tPA   d.AtPA.Ret d.AtPA.SKtPA   d.AtPA.Ten 
+   0.3579068    0.6272831    0.5661941    0.8345838    0.9353384    0.9997828 
+   d.AtPA.UK 
+   0.6936366 
+=== Verifying parkinson ===
+Test equality of means: 
+    d.D.A     d.D.B     d.D.C     d.D.E      sd.d 
+0.5019528 0.3509492 0.9218864 0.2137757 0.5269331 
+Test equality of variances: 
+    d.D.A     d.D.B     d.D.C     d.D.E 
+0.9728267 0.9280626 0.9663431 0.2250470 
+=== Verifying welton-cholesterol ===
+Test equality of means: 
+d.psych.usual          sd.d 
+    0.1077303     0.0425985 
+Test equality of variances: 
+[1] 0.01848199
+[1] "!!! TEST FAILED"
+=== Verifying welton-diastolic ===
+Test equality of means: 
+d.psych.usual          sd.d 
+    0.1364165     0.8882599 
+Test equality of variances: 
+[1] 0.9981486
+=== Verifying welton-systolic ===
+Test equality of means: 
+d.psych.usual          sd.d 
+    0.6354466     0.6427270 
+Test equality of variances: 
+[1] 0.1067639
+[[1]]
+NULL
+
+[[2]]
+NULL
+
+[[3]]
+NULL
+
+[[4]]
+NULL
+
+[[5]]
+[1] "!!! TEST FAILED"
+
+[[6]]
+NULL
+
+[[7]]
+NULL
+
