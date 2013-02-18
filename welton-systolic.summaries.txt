@@ -1,15 +1,17 @@
-structure(list(effectiveSize = structure(c(10503.6882281286, 
-3505.94933284483), .Names = c("d.psych.usual", "sd.d")), summary = structure(list(
-    statistics = structure(c(1.23843662687678, 3.66659762273346, 
-    1.60660899965767, 1.54564852201618, 0.0113604411837327, 0.0109293855124861, 
-    0.0167763388589314, 0.0308362117137563), .Dim = c(2L, 4L), .Dimnames = list(
+structure(list(effectiveSize = structure(c(10420.6336002824, 
+3302.35826192739), .Names = c("d.psych.usual", "sd.d")), summary = structure(list(
+    statistics = structure(c(1.22061247119591, 3.60223738888617, 
+    1.60030038746422, 1.55551736273052, 0.0113158325591141, 0.0109991687544016, 
+    0.0162165565595118, 0.0290028342721291), .Dim = c(2L, 4L), .Dimnames = list(
         c("d.psych.usual", "sd.d"), c("Mean", "SD", "Naive SE", 
-        "Time-series SE"))), quantiles = structure(c(-2.19702427306323, 
-    1.13747832063213, 0.297077540298415, 2.57711065804748, 1.31242383164034, 
-    3.46166191318603, 2.27332440676922, 4.58124612069224, 4.22931407031987, 
-    7.33786026401426), .Dim = c(2L, 5L), .Dimnames = list(c("d.psych.usual", 
+        "Time-series SE"))), quantiles = structure(c(-2.20644473413903, 
+    1.06158255902847, 0.277804507411594, 2.48480011174171, 1.32576331984446, 
+    3.38907415178408, 2.25215558528361, 4.51166268835305, 4.13071453787359, 
+    7.29511242532043), .Dim = c(2L, 5L), .Dimnames = list(c("d.psych.usual", 
     "sd.d"), c("2.5%", "25%", "50%", "75%", "97.5%"))), start = 5002, 
     end = 15000, thin = 2, nchain = 4L), .Names = c("statistics", 
 "quantiles", "start", "end", "thin", "nchain"), class = "summary.mcmc"), 
-    cov = structure(2.58119247778102, .Dim = c(1L, 1L))), .Names = c("effectiveSize", 
-"summary", "cov"))
+    cov = structure(2.56096133011815, .Dim = c(1L, 1L)), ranks = structure(c(0.20205, 
+    0.79795, 0.79795, 0.20205), .Dim = c(2L, 2L), .Dimnames = list(
+        c("psych", "usual"), NULL))), .Names = c("effectiveSize", 
+"summary", "cov", "ranks"))

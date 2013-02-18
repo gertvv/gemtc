@@ -1,16 +1,17 @@
-structure(list(effectiveSize = structure(c(13516.9517444132, 
-2394.40617240463), .Names = c("d.psych.usual", "sd.d")), summary = structure(list(
-    statistics = structure(c(1.3739911370432, 2.17191195995403, 
-    0.97779284952694, 1.20770029896979, 0.00691403954496217, 
-    0.0085397307104256, 0.00905911892629433, 0.0267345764176522
-    ), .Dim = c(2L, 4L), .Dimnames = list(c("d.psych.usual", 
-    "sd.d"), c("Mean", "SD", "Naive SE", "Time-series SE"))), 
-    quantiles = structure(c(-0.583703242632186, 0.269895452241856, 
-    0.812286573949492, 1.32482614672122, 1.38266923390503, 2.01761122314097, 
-    1.93694976367925, 2.83848183858799, 3.34715931006031, 5.03440825377756
-    ), .Dim = c(2L, 5L), .Dimnames = list(c("d.psych.usual", 
+structure(list(effectiveSize = structure(c(12655.6175975839, 
+2372.98210959637), .Names = c("d.psych.usual", "sd.d")), summary = structure(list(
+    statistics = structure(c(1.35092789320737, 2.19225893128292, 
+    0.983956914809342, 1.2242240958334, 0.0069576260685708, 0.0086565715985577, 
+    0.00885983376735788, 0.0278458347498079), .Dim = c(2L, 4L
+    ), .Dimnames = list(c("d.psych.usual", "sd.d"), c("Mean", 
+    "SD", "Naive SE", "Time-series SE"))), quantiles = structure(c(-0.658053218692988, 
+    0.324654173971782, 0.787225293886728, 1.33155994239758, 1.35735696956074, 
+    2.01024138499043, 1.91351043170031, 2.83025388159952, 3.34312874345753, 
+    5.19866211698561), .Dim = c(2L, 5L), .Dimnames = list(c("d.psych.usual", 
     "sd.d"), c("2.5%", "25%", "50%", "75%", "97.5%"))), start = 5002, 
     end = 15000, thin = 2, nchain = 4L), .Names = c("statistics", 
 "quantiles", "start", "end", "thin", "nchain"), class = "summary.mcmc"), 
-    cov = structure(0.956078856586012, .Dim = c(1L, 1L))), .Names = c("effectiveSize", 
-"summary", "cov"))
+    cov = structure(0.968171210201119, .Dim = c(1L, 1L)), ranks = structure(c(0.07155, 
+    0.92845, 0.92845, 0.07155), .Dim = c(2L, 2L), .Dimnames = list(
+        c("psych", "usual"), NULL))), .Names = c("effectiveSize", 
+"summary", "cov", "ranks"))

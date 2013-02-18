@@ -1,16 +1,18 @@
-structure(list(effectiveSize = structure(c(14602.0804398444, 
-5278.82010578685), .Names = c("d.psych.usual", "sd.d")), summary = structure(list(
-    statistics = structure(c(0.317850824474921, 0.288232842896948, 
-    0.0910854783173665, 0.0880341568913397, 0.000644071593858301, 
-    0.000622495493139067, 0.000848756622112312, 0.00128790121634649
+structure(list(effectiveSize = structure(c(13928.2176788702, 
+5435.87856885651), .Names = c("d.psych.usual", "sd.d")), summary = structure(list(
+    statistics = structure(c(0.319103993427809, 0.290416103025045, 
+    0.0923727581124487, 0.0885117939083647, 0.000653174036582171, 
+    0.000625872896875908, 0.000784741752889834, 0.00131018299612887
     ), .Dim = c(2L, 4L), .Dimnames = list(c("d.psych.usual", 
     "sd.d"), c("Mean", "SD", "Naive SE", "Time-series SE"))), 
-    quantiles = structure(c(0.133664408893716, 0.151735348061009, 
-    0.26068241232668, 0.22728513360179, 0.319102185156035, 0.276192088320721, 
-    0.375781944491068, 0.335020781644483, 0.49872689866205, 0.499227764714718
-    ), .Dim = c(2L, 5L), .Dimnames = list(c("d.psych.usual", 
-    "sd.d"), c("2.5%", "25%", "50%", "75%", "97.5%"))), start = 5002, 
-    end = 15000, thin = 2, nchain = 4L), .Names = c("statistics", 
+    quantiles = structure(c(0.131052073189912, 0.153612310265488, 
+    0.261683493525484, 0.227989993374357, 0.320082726073534, 
+    0.277435682435631, 0.376869366761249, 0.338219652175793, 
+    0.501609650452965, 0.501927629419063), .Dim = c(2L, 5L), .Dimnames = list(
+        c("d.psych.usual", "sd.d"), c("2.5%", "25%", "50%", "75%", 
+        "97.5%"))), start = 5002, end = 15000, thin = 2, nchain = 4L), .Names = c("statistics", 
 "quantiles", "start", "end", "thin", "nchain"), class = "summary.mcmc"), 
-    cov = structure(0.00829656436030344, .Dim = c(1L, 1L))), .Names = c("effectiveSize", 
-"summary", "cov"))
+    cov = structure(0.00853272644130096, .Dim = c(1L, 1L)), ranks = structure(c(0.0015, 
+    0.9985, 0.9985, 0.0015), .Dim = c(2L, 2L), .Dimnames = list(
+        c("psych", "usual"), NULL))), .Names = c("effectiveSize", 
+"summary", "cov", "ranks"))
