@@ -96,3 +96,5 @@ verify.example.openbugs <- function(name) {
 }
 
 examples <- c('cipriani-efficacy', 'luades-smoking', 'luades-thrombolytic', 'parkinson', 'welton-cholesterol', 'welton-diastolic', 'welton-systolic')
+
+# lapply(examples, function(name) { x <- replicate.example(name, "rjags")$s2; dput(x, paste(name, "summaries.txt", sep=".")) })
