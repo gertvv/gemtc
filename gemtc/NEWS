@@ -1,46 +1,55 @@
 gemtc 0.2
 ===========
+
 Released 2013-02-18
 
 Dropped Java dependency by rewriting core algorithms in R. 
 
-* Remove dependency on rJava
-* Use own forest plot methods instead of meta package
-* Fix bug in rank.probabilities when only two treatments in network
-* Various bugfixes
-* Compatibility note: incompatibility models are no longer supported by this package
-* Compatibility note: the argument order of mtc.network has changed
-* Compatibility note: the YADAS sampler is no longer available
+ * Remove dependency on rJava
+ * Use own forest plot methods instead of meta package
+ * Fix bug in rank.probabilities when only two treatments in network
+ * Various bugfixes
+ * Compatibility note: inconsistency models are no longer supported by
+   this package
+ * Compatibility note: the argument order of mtc.network has changed
+ * Compatibility note: the YADAS sampler is no longer available
 
-See [roadmap](http://mantis.drugis.org/roadmap_page.php?version_id=61) for details.
+See [roadmap](http://mantis.drugis.org/roadmap_page.php?version_id=61)
+for details.
 
 gemtc 0.1-2
 ===========
+
 Released 2013-01-21
 
 Bugfix release. Addresses the following issues: 
 
-* Correct the initial values generation for the random effects standard deviation parameter
-* Do not fail on relative.effect when saving and loading samples
-* Make Java open tab-completed paths
-* Use correct column name for continuous data
-* When only YADAS available, run YADAS by default
+ * Correct the initial values generation for the random effects standard
+   deviation parameter
+ * Do not fail on relative.effect when saving and loading samples
+ * Make Java open tab-completed paths
+ * Use correct column name for continuous data
+ * When only YADAS available, run YADAS by default
  
-See [roadmap](http://mantis.drugis.org/roadmap_page.php?version_id=65) for details.
+See [roadmap](http://mantis.drugis.org/roadmap_page.php?version_id=65)
+for details.
 
 gemtc 0.1-1
 ===========
+
 Released 2012-10-30
 
-Fix compatibility issue with Java on 32bit Mac OS X. 
+ * Fix compatibility issue with Java on 32bit Mac OS X. 
 
 gemtc 0.1
 ===========
+
 Released 2012-10-25
 
 First official release of the GeMTC R package. The  package enables
-Bayesian network meta-analysis (also known as MTC, Mixed Treatment Comparisons)
-in R. Network meta-analysis models can be generated and then run using MCMC
-software: JAGS (using the rjags package), OpenBUGS (using the BRugs package),
-WinBUGS (using the R2WinBUGS package) or YADAS (provided by GeMTC). The GeMTC
-GUI can be used instead of or in conjunction with the R package.
+Bayesian network meta-analysis (also known as MTC, Mixed Treatment
+Comparisons) in R. Network meta-analysis models can be generated and
+then run using MCMC software: JAGS (using the rjags package), OpenBUGS
+(using the BRugs package), WinBUGS (using the R2WinBUGS package) or
+YADAS (provided by GeMTC). The GeMTC GUI can be used instead of or in
+conjunction with the R package.
