@@ -38,7 +38,7 @@ test_that("relative.effect generates the expected statistics", {
   expected <- as.matrix(read.table(expected, header=TRUE))
   colnames(expected)[3] <- "Naive SE"
   colnames(expected)[4] <- "Time-series SE"
-  expect_that(stats$statistics, equals(expected, tolerance=0.00005, scale=1))
+  expect_that(stats$statistics, equals(expected, tolerance=0.0001, scale=1))
 })
 
 test_that("tree.relative.effect handles a simple tree", {
@@ -89,7 +89,7 @@ test_that("relative.effect can be applied recursively", {
   expected <- as.matrix(read.table(expected, header=TRUE))
   colnames(expected)[3] <- "Naive SE"
   colnames(expected)[4] <- "Time-series SE"
-  expect_that(stats$statistics, equals(expected, tolerance=0.00005, scale=1))
+  expect_that(stats$statistics, equals(expected, tolerance=0.0001, scale=1))
 })
 
 test_that("relative.effect.tree throws an error if requested comparison is not connected", {
