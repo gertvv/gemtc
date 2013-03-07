@@ -1,5 +1,6 @@
 rank.probability <- function(result) {
-    treatments <- result$model$network$treatments$id
+	treatments <- sort(unique(as.vector(extract.comparisons(colnames(result$samples[[1]])))))
+
     n.alt <- length(treatments)
 
     # count ranks given a matrix d of relative effects (treatments as rows)

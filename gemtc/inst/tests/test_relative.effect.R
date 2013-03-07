@@ -92,6 +92,12 @@ test_that("relative.effect can be applied recursively", {
   expect_that(stats$statistics, equals(expected, tolerance=0.00005, scale=1))
 })
 
+test_that("rank.probability can be applied to a subset of parameters", {
+  result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+  result <- relative.effect(result, "A", c("B", "C"))
+  rank.probability(result)
+})
+
 test_that("relative.effect.tree throws an error if requested comparison is not connected", {
   g <- graph.edgelist(t(matrix(c("A", "B", "A", "C"), nrow=2)))
   g <- g + vertex("D")
