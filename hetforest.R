@@ -1,6 +1,6 @@
 library(gemtc)
 
-hetforest <- function(result, studyEffects=NULL, ...) {
+hetforest <- function(result, studyEffects=NULL, pairEffects=NULL, ...) {
 	model <- result$model
 	network <- model$network
 
@@ -77,7 +77,20 @@ hetforest <- function(result, studyEffects=NULL, ...) {
 				}
 				
 			}
-			data$id <- c(data$id, 'Pooled')
+
+			# Pair-wise pooled effect
+			if (!is.null(pairEffects)) {
+				data$id <- c(data$id, 'Pooled (pair-wise)')
+				data$group <- c(data$group, param)
+				data$style <- c(data$style, 'pooled')
+				sel <- pairEffects$param == param
+				data$pe <- c(data$pe, pairEffects$pe[sel])
+				data$ci.l <- c(data$ci.l, pairEffects$ci.l[sel])
+				data$ci.u <- c(data$ci.u, pairEffects$ci.u[sel])
+			}
+
+			# Network pooled effect
+			data$id <- c(data$id, 'Pooled (network)')
 			data$group <- c(data$group, param)
 			data$style <- c(data$style, 'pooled')
 			data$pe <- c(data$pe, re.est$quantiles[param, 3])
