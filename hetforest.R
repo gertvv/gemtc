@@ -1,6 +1,9 @@
 library(gemtc)
 
-hetforest <- function(network, model, result, ...) {
+hetforest <- function(result, studyEffects=NULL, ...) {
+	model <- result$model
+	network <- model$network
+
 	ts <- sort(unique(network$treatments$id))
 
 	t1 <- unlist(lapply(ts[1:(length(ts)-1)], function(t) { rep(t, length(ts) - which(ts == t)) }))
@@ -30,7 +33,14 @@ hetforest <- function(network, model, result, ...) {
 				r1 <- network$data[sel1 & (network$data$study == study), ]
 				r2 <- network$data[sel2 & (network$data$study == study), ]
 
-				if ('mean' %in% colnames(network$data)) {
+				if (!is.null(studyEffects)) {
+					sel <- studyEffects$study == study &
+						studyEffects$t1 == t1[i] &
+						studyEffects$t2 == t2[i]
+					data$pe <- c(data$pe, studyEffects$pe[sel])
+					data$ci.l <- c(data$ci.l, studyEffects$ci.l[sel])
+					data$ci.u <- c(data$ci.u, studyEffects$ci.u[sel])
+				} else if ('mean' %in% colnames(network$data)) {
 					md <- as.numeric(r2['mean'] - r1['mean'])
 					var.1 <- (r1['std.dev'] / sqrt(r1['sampleSize']))^2
 					var.2 <- (r2['std.dev'] / sqrt(r2['sampleSize']))^2
