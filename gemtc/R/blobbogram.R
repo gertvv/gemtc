@@ -329,6 +329,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     }
 
     # Now plot each group
+	plot.new()
     for (i in 1:length(pages)) {
         if (i > 1) {
             if (ask) {
