@@ -45,6 +45,10 @@ add.group <- function(columns, ci.data, layout.row) {
 }
 
 grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
+	if (is.na(pe) || is.na(ci.l) || is.na(ci.u)) {
+		return(grob())
+	}
+
     grob.pe <- NULL
     if(style$pe.style == "circle") { 
         grob.pe <- circleGrob(x=unit(pe, "native"), y=0.5, r=unit(0.2, "snpc"), gp=gpar(col="black"))
@@ -52,7 +56,9 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
         grob.pe <- rectGrob(x=unit(pe, "native"), y=0.5, width=unit(0.2, "snpc"), height=unit(0.2, "snpc"), gp=gpar(fill="black",col="black"))
     }
     
-    build.arrow <- function(ends) { arrow(ends=ends, length=unit(0.5, "snpc")) }
+    build.arrow <- function(ends) {
+		arrow(ends=ends, length=unit(0.5, "snpc"))
+	}
 
     arrow <- if (ci.l < xrange[[1]] && ci.u > xrange[[2]]) build.arrow("both") 
                     else if(ci.l < xrange[[1]]) build.arrow("first")  
@@ -215,7 +221,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
                 ci <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
 
                 # Create CI interval labels (right side) 
-                fmt <- lapply(fmt, function(x) { formatC(scale.trf(x), format='f') })
+                fmt <- lapply(fmt, function(x) { formatC(scale.trf(x), digits=3, zero.print="0") })
                 text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
                 label <-  text.fn(text, datagrp$data[i,'style'])
 
