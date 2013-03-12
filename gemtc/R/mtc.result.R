@@ -30,7 +30,9 @@ forest.mtc.result <- function(x, ...) {
         group=groups, style="normal")
     blobbogram(data,
         columns=c(), column.labels=c(),
-        id.label="Comparison", ci.label="Odds Ratio (95% CrI)", log.scale=TRUE,
+        id.label="Comparison",
+		ci.label=paste(ll.call('scale.name', model), "(95% CrI)"),
+		log.scale=ll.call('scale.log', model),
         grouped=length(group.labels)>1, group.labels=group.labels)
 }
 

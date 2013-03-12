@@ -1,5 +1,5 @@
 # Arm-level effect estimate (given a one-row data frame)
-# Returns mean, variance.
+# Returns mean, standard deviation.
 mtc.arm.mle.binom.logit <- function(data) {
     s <- data['responders'] + 0.5
     f <- data['sampleSize'] - s + 1
@@ -17,3 +17,6 @@ mtc.code.likelihood.binom.logit <- function() {
 "r[i, k] ~ dbin(p[i, k], n[i, k])
 			logit(p[i, k]) <- mu[i] + delta[i, k]"
 }
+
+scale.log.binom.logit <- function() { TRUE }
+scale.name.binom.logit <- function() { "Odds Ratio" }

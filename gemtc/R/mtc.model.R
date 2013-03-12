@@ -1,6 +1,6 @@
 ## mtc.model class methods
 
-mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
+mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4, ...) {
     typeMap <- c(
         'Consistency'='Consistency',
         'consistency'='Consistency',
@@ -12,7 +12,7 @@ mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4) {
     type <- typeMap[type]
 
     if (type == 'Consistency') {
-        mtc.model.consistency(network, factor=factor, n.chain=n.chain)
+        mtc.model.consistency(network, factor=factor, n.chain=n.chain, ...)
     }
 }
 

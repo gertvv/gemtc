@@ -6,7 +6,7 @@ standardize.treatments <- function(treatments) {
 }
 
 standardize.data <- function(data, treatment.levels) {
-    data$study <- as.factor(data$study)
+    data$study <- factor(as.factor(data$study))
     data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
     data <- data[order(data$study, data$treatment), ]
     rownames(data) <- seq(1:nrow(data))

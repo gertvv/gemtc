@@ -15,3 +15,6 @@ mtc.code.likelihood.normal.identity <- function() {
 			theta[i, k] <- mu[i] + delta[i, k]
 			prec[i, k] <- pow(e[i, k], -2)"
 }
+
+scale.log.normal.identity <- function() { FALSE }
+scale.name.normal.identity <- function() { "Mean Difference" }
