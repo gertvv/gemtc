@@ -3,8 +3,9 @@
 mtc.arm.mle.binom.cloglog <- function(data) {
     s <- data['responders'] + 0.5
     n <- data['sampleSize'] + 1
-	mu <- log(-log(1 - s/n))
-    x <- c('mean'=as.numeric(mu), 'sd'=as.numeric(sqrt(1/n)/mu))
+    mu <- as.numeric(log(-log(1 - s/n)))
+    sigma <- as.numeric(sqrt(1/n^2)/exp(mu))
+    x <- c('mean'=mu, 'sd'=min(1, sigma))
 }
 
 # Relative effect estimate (given a two-row data frame)
@@ -16,7 +17,7 @@ mtc.rel.mle.binom.cloglog <- function(data) {
 
 mtc.code.likelihood.binom.cloglog <- function() {
 "r[i, k] ~ dbin(p[i, k], n[i, k])
-			cloglog(p[i, k]) <- mu[i] + delta[i, k]"
+            cloglog(p[i, k]) <- mu[i] + delta[i, k]"
 }
 
 scale.log.binom.cloglog <- function() { TRUE }

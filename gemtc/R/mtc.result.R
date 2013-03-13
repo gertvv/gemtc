@@ -14,6 +14,7 @@ plot.mtc.result <- function(x, ...) {
 
 forest.mtc.result <- function(x, ...) { 
     quantiles <- summary(x)$quantiles 
+    model <- x$model
     stats <- quantiles[grep("^d\\.", rownames(quantiles)),]
     if(class(stats) == "numeric") { # Selecting a single row returns a numeric 
         stats <- as.matrix(t(stats))
@@ -31,8 +32,8 @@ forest.mtc.result <- function(x, ...) {
     blobbogram(data,
         columns=c(), column.labels=c(),
         id.label="Comparison",
-		ci.label=paste(ll.call('scale.name', model), "(95% CrI)"),
-		log.scale=ll.call('scale.log', model),
+        ci.label=paste(ll.call('scale.name', model), "(95% CrI)"),
+        log.scale=ll.call('scale.log', model),
         grouped=length(group.labels)>1, group.labels=group.labels)
 }
 
