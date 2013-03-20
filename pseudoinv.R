@@ -3,6 +3,7 @@ library(rjags)
 library(coda)
 
 source('gemtc/R/ll.binom.logit.R')
+source('gemtc/R/ll.normal.identity.R')
 source('gemtc/R/ll.call.R')
 
 all.pair.matrix <- function(m) {
@@ -20,20 +21,19 @@ delta.names <- function(i, na) {
 # Modify the given model to an independent study effects model
 independent.study.effects <- function(model) {
 	code <- "model {
-		for (i in 1:ns) {
-			for (k in 1:na[i]) {
-				$likelihood$
-			}
-			mu[i] ~ dnorm(0, prior.prec)
-			delta[i, 1] <- 0
-			for (k in 2:na[i]) {
-				delta[i, k] ~ dnorm(0, prior.prec)
-			}
+	for (i in 1:ns) {
+		for (k in 1:na[i]) {
+			$likelihood$
 		}
-
-		prior.prec <- pow(15 * om.scale, -2)
+		mu[i] ~ dnorm(0, prior.prec)
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) {
+			delta[i, k] ~ dnorm(0, prior.prec)
+		}
 	}
-"
+
+	prior.prec <- pow(15 * om.scale, -2)
+}\n"
 
 	study.data <- model$data
 	study.data$t <- NULL
@@ -119,11 +119,33 @@ decompose.trials <- function(study.samples, ts, mu0, prec0) {
 
 	ts <- do.call(rbind, lapply(decomposed, function(x) { x$t }))
 
-	list(t=ts, na=rep(2, length(mu)), m=mu, e=sigma)
+	list(t=ts, m=mu, e=sigma)
 }
 
 network <- read.mtc.network(system.file('extdata/luades-smoking.gemtc', package='gemtc'))
+## disable multi-arm trials
+#network$data <- network$data[!(network$data$study %in% c('09', '20')), ]
+#network$data <- network$data[!(network$data$study %in% c('01', '02')), ]
+#network <- mtc.network(network$data)
+## /disable multi-arm trials
+## Rewrite to continuous 
+if (
+#	FALSE) {
+	'responders' %in% colnames(network$data)) {
+	data <- network$data
+	r <- data$responders
+	s <- data$sampleSize - r
+	sel <- r == 0 | s == 0
+	r[sel] <- r[sel] + 0.001
+	s[sel] <- s[sel] + 0.999
+	data$mean <- log(r/s)
+	data$std.dev <- sqrt(1/r+1/s) * sqrt(data$sampleSize)
+	data$responders <- NULL
+	network <- mtc.network(data, treatments=network$treatments)
+}
+##
 model <- mtc.model(network)
+result <- mtc.run(model)
 
 study.model <- independent.study.effects(model)
 
@@ -138,17 +160,15 @@ prior.prec <- 1/(15 * model$om.scale)^2
 prior.mu <- 0
 
 decomp.data <- decompose.trials(study.samples, model$data$t, prior.mu, prior.prec)
-decomp.data$ns <- length(decomp.data$na)
+decomp.data$ns <- length(decomp.data$m)
 decomp.data$om.scale <- model$om.scale
 decomp.data$nt <- nrow(model$network$treatments)
 
-		#delta[i] ~ dnorm(md[i], tau.d)
-	#sd.d ~ dunif(0, om.scale)
-	#tau.d <- pow(sd.d, -2)
 # Now what
 decomp.model <- "model {
     for (i in 1:ns) {
-		m[i] ~ dnorm(md[i], prec[i])
+		m[i] ~ dnorm(delta[i], prec[i])
+		delta[i] ~ dnorm(md[i], tau.d)
 		md[i] <- d[t[i, 2]] - d[t[i, 1]]
 		prec[i] <- pow(e[i], -2)
     }
@@ -158,7 +178,9 @@ decomp.model <- "model {
 	}
         
     prior.prec <- pow(15 * om.scale, -2)
-}"
+	sd.d ~ dunif(0, om.scale)
+	tau.d <- pow(sd.d, -2)
+}\n"
 
 jmodel <- jags.model(textConnection(decomp.model), data=decomp.data, n.chains=4)
-decomp.samples <- coda.samples(jmodel, variable.names=c("d"), n.iter=1E4)
+decomp.samples <- coda.samples(jmodel, variable.names=c("d", "sd.d"), n.iter=1E4)
