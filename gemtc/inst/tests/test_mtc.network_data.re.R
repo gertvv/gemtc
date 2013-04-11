@@ -49,3 +49,28 @@ test_that("treatments for data and data.re are merged", {
 	expect_that(as.character(network$data$treatment), equals(as.character(data.arm$treatment)))
 	expect_that(as.character(network$data.re$treatment), equals(as.character(data.re$treatment)))
 })
+
+test_that("duplicate studies raise an error", {
+	data <- data.arm
+	data$study <- c('s07', 's07', 's09', 's09', 's09')
+	expect_error(mtc.network(data=data, data.re=data.re))
+})
+
+test_that("data.re column names are checked", {
+	expect_error(mtc.network(data.re=data.frame(study="s01", treatment="A")))
+	expect_error(mtc.network(data.re=data.frame(study="s01", treatment="A", diff=NA)))
+	expect_error(mtc.network(data.re=data.frame(study="s01", treatment="A", std.err=NA)))
+})
+
+test_that("data.re checks that every study has a baseline (diff=NA) arm", {
+	expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01"), treatment=c('A', 'B'), diff=c(1, 2), std.err=c(0.5, 0.5))))
+})
+
+test_that("data.re checks that non-baseline arms have std.err specified", {
+	mtc.network(data.re=data.frame(study=c("s01", "s01"), treatment=c('A', 'B'), diff=c(NA, 2), std.err=c(NA, 1)))
+	expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01"), treatment=c('A', 'B'), diff=c(NA, 2), std.err=c(NA, NA))))
+})
+
+test_that("data.re checks that multi-arm trials must have std.err specified for all arms", {
+	expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01", "s01"), treatment=c('A', 'B', 'C'), diff=c(NA, 2, 1), std.err=c(NA, 1, 1))))
+})

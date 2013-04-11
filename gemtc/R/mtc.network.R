@@ -57,7 +57,7 @@ mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.
 		network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id))))
 	}
 
-    mtc.network.validate(network)
+	mtc.network.validate(network)
 
     class(network) <- "mtc.network"
     network
@@ -114,9 +114,9 @@ read.mtc.network <- function(file) {
 write.mtc.network <- function(network, file) {
     root <- XML::newXMLNode("network")
     XML::xmlAttrs(root)["description"] <- network$description
-    type <- if ('responders' %in% colnames(network$data)) {
+    type <- if ('responders' %in% colnames(network[['data']])) {
         'rate'
-    } else if ('mean' %in% colnames(network$data)) {
+    } else if ('mean' %in% colnames(network[['data']])) {
         'continuous'
     } else {
         'none'
@@ -131,13 +131,13 @@ write.mtc.network <- function(network, file) {
     })
 
     studies <- XML::newXMLNode("studies", parent = root)
-    study <- sapply(levels(network$data$study), function(sid) {
+    study <- sapply(levels(network[['data']]$study), function(sid) {
         node <- XML::newXMLNode("study", parent = studies)
         XML::xmlAttrs(node)["id"] <- sid
         node
     })
 
-    apply(network$data, 1, function(row) {
+    apply(network[['data']], 1, function(row) {
         node <- XML::newXMLNode('measurement', parent=study[[row['study']]])
         XML::xmlAttrs(node)['treatment'] <- row['treatment']
         if (identical(type, 'rate')) {
@@ -157,10 +157,10 @@ write.mtc.network <- function(network, file) {
 mtc.network.validate <- function(network) { 
     # Check that there is some data
     stopifnot(nrow(network$treatments) > 0)  
-    stopifnot(nrow(network$data) > 0 || nrow(network$data.re) > 0)
+    stopifnot(nrow(network[['data']]) > 0 || nrow(network[['data.re']]) > 0)
 
     # Check that the treatments are correctly cross-referenced and have valid names
-	all.treatments <- c(network$data$treatment, network$data.re$treatment)
+	all.treatments <- c(network[['data']]$treatment, network[['data.re']]$treatment)
 	all.treatments <- factor(all.treatments, levels=1:nlevels(network$treatments$id), labels=levels(network$treatments$id))
     stopifnot(all(all.treatments %in% network$treatments$id))
     stopifnot(all(network$treatments$id %in% all.treatments))
@@ -171,22 +171,59 @@ mtc.network.validate <- function(network) {
             ' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
     }
 
+	# Check that studies are not duplicated between $data and $data.re
+	if (!is.null(network[['data']]) && !is.null(network[['data.re']])) {
+		dup.study <- intersect(unique(network[['data']]$study), unique(network[['data.re']]$study))
+		if (length(dup.study) > 0) {
+			stop(paste('Studies', paste(dup.study, collapse=", "), 'occur in both data and data.re'))
+		}
+	}
+
     # Check that the data frame has a sensible combination of columns
-    columns <- colnames(network$data)
-    contColumns <- c('mean', 'std.dev', 'sampleSize')
-    dichColumns <- c('responders', 'sampleSize')
+	if (!is.null(network[['data']])) {
+		columns <- colnames(network[['data']])
+		contColumns <- c('mean', 'std.dev', 'sampleSize')
+		dichColumns <- c('responders', 'sampleSize')
 
-    if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
-        stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
-    }
+		if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
+			stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
+		}
 
-    if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
-        stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
-    }
+		if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
+			stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
+		}
 
-    if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
-        stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
-    }
+		if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
+			stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
+		}
+	}
+
+	# Check data.re is well formed
+	if (!is.null(network[['data.re']])) {
+		data.re <- network[['data.re']]
+		columns <- colnames(data.re)
+		reColumns <- c('diff', 'std.err')
+		if (!all(reColumns %in% columns)) {
+			stop(paste('data.re must contain columns: ', paste(reColumns, collapse=', ')))
+		}
+
+		baselineCount <- sapply(unique(data.re$study), function(study) { sum(is.na(data.re$diff[data.re$study == study])) })
+		if (!all(baselineCount == 1)) {
+			stop('Each study in data.re must have a unique baseline arm (diff=NA)')
+		}
+		if (!all(!is.na(data.re$std.err[!is.na(data.re$diff)]))) {
+			stop('All non-baseline arms in data.re must have std.err specified')
+		}
+
+		studies <- unique(data.re$study)
+		ma <- sapply(studies, function(study) { sum(data.re$study == study) > 2 })
+		ma <- studies[ma]
+		if (!all(!is.na(data.re$std.err[data.re$study %in% ma]))) {
+			stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
+		}
+	}
+
+	
 }
 
 as.treatment.factor <- function(x, network) {
@@ -200,7 +237,7 @@ as.treatment.factor <- function(x, network) {
 }
 
 mtc.study.design <- function(network, study) {
-    data <- network$data
+    data <- network[['data']]
     sort(data$treatment[data$study == study])
 }
 
@@ -218,7 +255,7 @@ mtc.treatment.pairs <- function(treatments) {
 # Get all comparisons with direct evidence from the data set.
 # Returns a (sorted) data frame with two columns (t1 and t2).
 mtc.comparisons <- function(network) {
-    data <- network$data
+    data <- network[['data']]
 
     # Identify the unique "designs" (treatment combinations)
     design <- function(study) { mtc.study.design(network, study) }
@@ -257,14 +294,14 @@ mtc.network.graph <- function(network) {
 ## mtc.network class methods
 print.mtc.network <- function(x, ...) {
     cat("MTC dataset: ", x$description, "\n", sep="")
-    print(x$data)
+    print(x[['data']])
 }
 
 summary.mtc.network <- function(object, ...) {
-    studies <- levels(object$data[,1])
+    studies <- levels(object[['data']][,1])
     m <- sapply(object$treatments[,1], function(treatment) {
         sapply(studies, function(study) { 
-            any(object$data[,1] == study & object$data[,2] == treatment)
+            any(object[['data']][,1] == study & object[['data']][,2] == treatment)
         })
     })
     colnames(m) <- object$treatments[,1]
