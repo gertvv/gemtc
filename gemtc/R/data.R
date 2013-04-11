@@ -17,6 +17,7 @@ mtc.model.data <- function(model) {
     s.mat <- arm.index.matrix(model$network)
 
     model.data <- list(
+        ns.a = length(studies),
         ns = length(studies),
         na = na,
         t = matrix(as.numeric(data$treatment[s.mat]), nrow=nrow(s.mat)),

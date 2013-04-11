@@ -4,6 +4,7 @@ mtc.model.code <- function(model) {
 
     lik.code <- do.call(paste("mtc.code.likelihood", model$likelihood, model$link, sep="."), list())
     template <- sub('$likelihood$', lik.code, template, fixed=TRUE)
+    template <- sub('$releffect$', '', template, fixed=TRUE)
 
     network <- model$network
     tree <- model$tree
