@@ -222,8 +222,6 @@ mtc.network.validate <- function(network) {
 			stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
 		}
 	}
-
-	
 }
 
 as.treatment.factor <- function(x, network) {
@@ -236,8 +234,18 @@ as.treatment.factor <- function(x, network) {
     }
 }
 
+mtc.merge.data <- function(network) {
+	data.frame(
+		study=c(
+			as.character(network[['data']]$study),
+			as.character(network[['data.re']]$study)),
+		treatment=as.treatment.factor(c(
+			network[['data']]$treatment,
+			network[['data.re']]$treatment), network))
+}
+
 mtc.study.design <- function(network, study) {
-    data <- network[['data']]
+    data <- mtc.merge.data(network)
     sort(data$treatment[data$study == study])
 }
 
@@ -255,7 +263,7 @@ mtc.treatment.pairs <- function(treatments) {
 # Get all comparisons with direct evidence from the data set.
 # Returns a (sorted) data frame with two columns (t1 and t2).
 mtc.comparisons <- function(network) {
-    data <- network[['data']]
+    data <- mtc.merge.data(network)
 
     # Identify the unique "designs" (treatment combinations)
     design <- function(study) { mtc.study.design(network, study) }
@@ -294,17 +302,25 @@ mtc.network.graph <- function(network) {
 ## mtc.network class methods
 print.mtc.network <- function(x, ...) {
     cat("MTC dataset: ", x$description, "\n", sep="")
-    print(x[['data']])
+	if (!is.null(x[['data']])) {
+		cat('Arm-level data: \n')
+		print(x[['data']])
+	}
+	if (!is.null(x[['data.re']])) {
+		cat('Relative effect data: \n')
+		print(x[['data.re']])
+	}
 }
 
 summary.mtc.network <- function(object, ...) {
-    studies <- levels(object[['data']][,1])
-    m <- sapply(object$treatments[,1], function(treatment) {
+	data <- mtc.merge.data(object)
+    studies <- levels(data$study)
+    m <- sapply(object$treatments$id, function(treatment) {
         sapply(studies, function(study) { 
-            any(object[['data']][,1] == study & object[['data']][,2] == treatment)
+            any(data$study == study & data$treatment == treatment)
         })
     })
-    colnames(m) <- object$treatments[,1]
+    colnames(m) <- object$treatments$id
     x <- as.factor(apply(m, 1, sum))
     levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
     list("Description"=paste("MTC dataset: ", object$description, sep=""),

@@ -50,6 +50,12 @@ test_that("treatments for data and data.re are merged", {
 	expect_that(as.character(network$data.re$treatment), equals(as.character(data.re$treatment)))
 })
 
+test_that("merged list of arms is correct", {
+	network <- mtc.network(data=data.arm, data.re=data.re)
+	expect_that(as.character(mtc.merge.data(network)$study), equals(c(as.character(data.arm$study), as.character(data.re$study))))
+	expect_that(as.character(mtc.merge.data(network)$treatment), equals(c(as.character(data.arm$treatment), as.character(data.re$treatment))))
+})
+
 test_that("duplicate studies raise an error", {
 	data <- data.arm
 	data$study <- c('s07', 's07', 's09', 's09', 's09')
