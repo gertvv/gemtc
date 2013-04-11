@@ -9,19 +9,34 @@ standardize.data <- function(data, treatment.levels) {
     data$study <- factor(as.factor(data$study))
     data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
     data <- data[order(data$study, data$treatment), ]
-    rownames(data) <- seq(1:nrow(data))
+	if (nrow(data) > 0) {
+		rownames(data) <- seq(1:nrow(data))
+	}
     data
 }
 
-mtc.network <- function(data, treatments=NULL, description="Network") {
+mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.re=NULL) {
+	if (is.null(data) && is.null(data.re)) {
+		error("Either `data' or `data.re' (or both) must be specified")
+	}
     # standardize the data
-    if (!is.data.frame(data)) { 
+    if (!is.null(data) && !is.data.frame(data)) {
         data <- do.call(rbind, lapply(data, as.data.frame))
+    }
+    if (!is.null(data.re) && !is.data.frame(data.re)) {
+        data.re <- do.call(rbind, lapply(data.re, as.data.frame))
     }
 
     # standardize the treatments
     if (is.null(treatments)) {
-        treatments <- unique(data$treatment)
+		data.treatments <- vector(mode="character")
+		if (!is.null(data)) {
+			data.treatments <- c(data.treatments, as.character(data$treatment))
+		}
+		if (!is.null(data.re)) {
+			data.treatments <- c(data.treatments, as.character(data.re$treatment))
+		}
+        treatments <- unique(data.treatments)
     }
     if (is.list(treatments) && !is.data.frame(treatments)) { 
         treatments <- as.data.frame(do.call(rbind, treatments))
@@ -33,9 +48,14 @@ mtc.network <- function(data, treatments=NULL, description="Network") {
 
     network <- list(
         description=description,
-        treatments=treatments,
-        data=standardize.data(data, levels(treatments$id))
-    )
+        treatments=treatments)
+
+	if (!is.null(data)) {
+		network <- c(network, list(data=standardize.data(data, levels(treatments$id))))
+	}
+	if (!is.null(data.re)) {
+		network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id))))
+	}
 
     mtc.network.validate(network)
 
@@ -137,11 +157,13 @@ write.mtc.network <- function(network, file) {
 mtc.network.validate <- function(network) { 
     # Check that there is some data
     stopifnot(nrow(network$treatments) > 0)  
-    stopifnot(nrow(network$data) > 0)
+    stopifnot(nrow(network$data) > 0 || nrow(network$data.re) > 0)
 
     # Check that the treatments are correctly cross-referenced and have valid names
-    stopifnot(all(network$data$treatment %in% network$treatments$id))
-    stopifnot(all(network$treatments$id %in% network$data$treatment))
+	all.treatments <- c(network$data$treatment, network$data.re$treatment)
+	all.treatments <- factor(all.treatments, levels=1:nlevels(network$treatments$id), labels=levels(network$treatments$id))
+    stopifnot(all(all.treatments %in% network$treatments$id))
+    stopifnot(all(network$treatments$id %in% all.treatments))
     idok <- regexpr("^[A-Za-z0-9_]+$", network$treatment$id) != -1
     if(!all(idok)) {
         stop(paste('Treatment name "',

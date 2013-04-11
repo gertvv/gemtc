@@ -18,6 +18,8 @@ mtc.model.data <- function(model) {
 
     model.data <- list(
         ns.a = length(studies),
+		ns.r2 = 0,
+		ns.rm = 0,
         ns = length(studies),
         na = na,
         t = matrix(as.numeric(data$treatment[s.mat]), nrow=nrow(s.mat)),

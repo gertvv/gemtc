@@ -7,16 +7,22 @@
 \title{Create an mtc.network}
 \description{Creates an object of class \code{mtc.network}}
 \usage{
-mtc.network(data, treatments, description)
+mtc.network(data, treatments, description, data.re)
 read.mtc.network(file)
 write.mtc.network(network, file)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{data}{
+  \item{data}{Arm-level data.
 A data frame defining the arms of each study, containing the columns `study' and `treatment', where `treatment' must refer to an existing treatment ID if treatments were specified.
 To specify a network with dichotomous data, the number of responders should be given in a column `responders' and the sample size in a column `sampleSize'.
 To specify a network with continuous data, the mean should be given in a column `mean', the standard deviation in a column `std.dev' and the sample size in a column `sampleSize'.}
+  \item{data.re}{Relative effect data.
+A data frame defining the arms of each study, containing the columns `study' and `treatment', where `treatment' must refer to an existing treatment ID if treatments were specified.
+The column `diff' specifies the mean difference between the current arm and the baseline arm; set `diff=NA' for the baseline arm.
+The column `std.err' specifies the standard error of the mean difference (for non-baseline arms).
+For trials with more than two arms, specify the standard error of the mean of the baseline arm in `std.err', as this determines the covariance of the differences.
+}
   \item{treatments}{Optional.
 A data frame with columns `id' and `description' defining the treatments or a vector giving the treatment IDs.}
   \item{description}{Optional. Short description of the network.}
