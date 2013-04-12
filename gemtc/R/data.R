@@ -20,12 +20,12 @@ mtc.model.data <- function(model) {
 	)
 	nrow.ab <- if (!is.null(data.ab)) nrow(data.ab) else 0
 	nrow.re <- if (!is.null(data.re)) nrow(data.re) else 0
-	if (!is.null(data.ab) && 'responders' %in% colnames(data)) {
+	if (!is.null(data.ab) && 'responders' %in% colnames(data.ab)) {
 		data$r <- NA
 		data$n <- NA
 		data$r[1:nrow.ab] <- data.ab$responders
 		data$n[1:nrow.ab] <- data.ab$sampleSize
-	} else if (!is.null(data.re) && 'mean' %in% colnames(data)) {
+	} else if (!is.null(data.ab) && 'mean' %in% colnames(data.ab)) {
 		data$m <- NA
 		data$e <- NA
 		data$m[1:nrow.ab] <- data.ab$mean
@@ -45,7 +45,7 @@ mtc.model.data <- function(model) {
 	studies <- c(studies.ab, studies.re)
 	study.arms <- c(as.character(data.ab$study), as.character(data.re$study))
     na <- sapply(studies, function(study) { sum(study.arms == study) })
-	na.re <- na[length(studies.ab)+1:length(studies)]
+	na.re <- na[(length(studies.ab)+1):length(studies)]
     s.mat <- arm.index.matrix(model$network)
 
     model.data <- list(

@@ -39,7 +39,7 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
 		})
 
 		if (!is.matrix(study.mle)) {
-			study.mle <- matrix(study.mle, nrow=2, row)
+			study.mle <- matrix(study.mle, nrow=2)
 		}
 		rownames(study.mle) <- c('mean', 'sd')
 
@@ -60,8 +60,9 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
 			rel.mle.re(data, pair)
 		}))
 	}
-
-    meta <- meta::metagen(study.mle['mean', ], study.mle['sd', ])
+	print(pair)
+	print(study.mle['mean', ])
+    meta <- meta::metagen(unlist(study.mle['mean', ]), unlist(study.mle['sd', ]))
 
     rnorm(model$n.chain, meta$TE.random, model$var.scale * meta$seTE.random)
 }
