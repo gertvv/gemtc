@@ -25,10 +25,11 @@ rel.mle.re <- function(data, pairs) {
 	# construct the permutation matrix
 	b <- sapply(1:nrow(pairs), function(i) {
 		x <- rep(0, length(se))
-		x[pairs$t1[i]] <- -1
-		x[pairs$t2[i]] <- 1
+		x[data$treatment == pairs$t1[i]] <- -1
+		x[data$treatment == pairs$t2[i]] <- 1
 		x
 	})
+	b <- matrix(b, nrow=length(se))
 
 	mu <- t(b) %*% mu
 	sigma <- t(b) %*% sigma %*% b
