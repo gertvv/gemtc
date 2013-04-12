@@ -5,10 +5,16 @@ standardize.treatments <- function(treatments) {
     treatments[order(treatments$id), ]
 }
 
-standardize.data <- function(data, treatment.levels) {
+standardize.data <- function(data, treatment.levels, re.order=FALSE) {
     data$study <- factor(as.factor(data$study))
     data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
-    data <- data[order(data$study, data$treatment), ]
+	if (re.order) {
+		na <- sapply(data$study, function(study) { sum(data$study == study) })
+		bl <- !is.na(data$diff)
+		data <- data[order(na, data$study, bl, data$treatment), ]
+	} else {
+		data <- data[order(data$study, data$treatment), ]
+	}
 	if (nrow(data) > 0) {
 		rownames(data) <- seq(1:nrow(data))
 	}
@@ -54,7 +60,7 @@ mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.
 		network <- c(network, list(data=standardize.data(data, levels(treatments$id))))
 	}
 	if (!is.null(data.re)) {
-		network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id))))
+		network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id), re.order=TRUE)))
 	}
 
 	mtc.network.validate(network)

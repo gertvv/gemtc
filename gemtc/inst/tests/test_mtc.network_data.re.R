@@ -80,3 +80,39 @@ test_that("data.re checks that non-baseline arms have std.err specified", {
 test_that("data.re checks that multi-arm trials must have std.err specified for all arms", {
 	expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01", "s01"), treatment=c('A', 'B', 'C'), diff=c(NA, 2, 1), std.err=c(NA, 1, 1))))
 })
+
+test_that("data.re is ordered by number of arms", {
+	data <- read.table(textConnection("
+study  treatment  diff  std.err
+s01    A          NA    0.43
+s01    C          -0.31 0.67
+s01    D          -0.31 0.67
+s02    A          NA    NA
+s02    B          -1.7  0.38"), header=T)
+	expected <- read.table(textConnection("
+study  treatment  diff  std.err
+s02    A          NA    NA
+s02    B          -1.7  0.38
+s01    A          NA    0.43
+s01    C          -0.31 0.67
+s01    D          -0.31 0.67"), header=T)
+	expect_that(mtc.network(data.re=data)$data.re, equals(expected))
+})
+
+test_that("data.re has the baseline arm of every study first", {
+	data <- read.table(textConnection("
+study  treatment  diff  std.err
+s01    C          -0.31 0.67
+s01    A          -0.31 0.67
+s01    D          NA    0.43
+s02    A          NA    NA
+s02    B          -1.7  0.38"), header=T)
+	expected <- read.table(textConnection("
+study  treatment  diff  std.err
+s02    A          NA    NA
+s02    B          -1.7  0.38
+s01    D          NA    0.43
+s01    A          -0.31 0.67
+s01    C          -0.31 0.67"), header=T)
+	expect_that(mtc.network(data.re=data)$data.re, equals(expected))
+})
