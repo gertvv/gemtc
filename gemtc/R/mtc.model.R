@@ -1,23 +1,32 @@
 ## mtc.model class methods
 
+mtc.model.call <- function(fn, model, ...) {
+    fn <- paste(fn, model$type, sep='.')
+	do.call(fn, c(list(model), list(...)))
+}
+
+mtc.model.defined <- function(model) {
+	fns <- c('mtc.model', 'mtc.model.name')
+	fns <- paste(fns, model$type, sep='.')
+	all(exists(fns, mode='function'))
+}
+
 mtc.model <- function(network, type="consistency",
 		factor=2.5, n.chain=4,
 		likelihood=NULL, link=NULL, ...) {
-    typeMap <- c(
-        'Consistency'='consistency',
-        'consistency'='consistency',
-        'cons'='consistency')
-
-    if (is.na(typeMap[type])) {
-        stop(paste(type, 'is not an MTC model type.'))
-    }
-    type <- typeMap[type]
+	if (!inherits(network, "mtc.network")) {
+		stop('Given network is not an mtc.network')
+	}
 
 	model <- list(
         type = type,
         network = network,
         n.chain = n.chain,
         var.scale = factor)
+
+    if (!mtc.model.defined(model)) {
+        stop(paste(type, 'is not an MTC model type.'))
+    }
 
 	model$likelihood <- likelihood
 	model$link <- link
@@ -52,9 +61,7 @@ mtc.model <- function(network, type="consistency",
 
     model$om.scale <- guess.scale(model)
 
-    if (type == 'consistency') {
-        mtc.model.consistency(model, ...)
-    }
+	mtc.model.call('mtc.model', model, ...)
 }
 
 print.mtc.model <- function(x, ...) {

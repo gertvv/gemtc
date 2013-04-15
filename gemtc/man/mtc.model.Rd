@@ -13,14 +13,16 @@ The \code{mtc.model} function generates network meta-analysis models from an \co
 The \code{mtc.model} function generates an object of S3 class \code{mtc.model}, which can be visualized by the generic \code{plot} function or summarized by the generic \code{summary} function.
 }
 \usage{
-mtc.model(network, type = "Consistency", factor = 2.5, n.chain = 4)
+mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4, likelihood=NULL, link=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{network}{An object of S3 class \code{mtc.network}}
-  \item{type}{A string literal indicating the type of model (only "Consistency" is allowed).}
+  \item{type}{A string literal indicating the type of model (only "consistency" is allowed).}
   \item{factor}{Variance scaling factor for the starting values}
   \item{n.chain}{Number of chains in the model}
+  \item{likelihood}{The likelihood to be used. If unspecified, a suitable likelihood will be inferred for the given data.}
+  \item{link}{The link function to be used. If unspecified, a suitable link function will be inferred for the given data.}
 }
 \value{
 An object of class \code{mtc.model}.

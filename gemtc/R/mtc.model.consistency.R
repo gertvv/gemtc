@@ -16,3 +16,7 @@ mtc.model.consistency <- function(model) {
 
     model
 }
+
+mtc.model.name.consistency <- function(model) {
+	"Consistency"
+}
