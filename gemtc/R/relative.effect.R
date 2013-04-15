@@ -53,7 +53,7 @@ spanning.tree.mtc.result <- function(result) {
 }
 
 relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
-    if(result$model$type != "Consistency") stop("Cannot apply relative.effect to this model")
+    if(tolower(result$model$type) != 'consistency') stop("Cannot apply relative.effect to this model")
 
     # Build relative effect transformation matrix
     network <- result$model$network

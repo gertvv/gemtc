@@ -26,11 +26,17 @@ mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.
 		error("Either `data' or `data.re' (or both) must be specified")
 	}
     # standardize the data
-    if (!is.null(data) && !is.data.frame(data)) {
-        data <- do.call(rbind, lapply(data, as.data.frame))
+    if (!is.null(data)) {
+		if (!is.data.frame(data)) {
+			data <- do.call(rbind, lapply(data, as.data.frame))
+		}
+		mtc.validate.data.ab(data)
     }
-    if (!is.null(data.re) && !is.data.frame(data.re)) {
-        data.re <- do.call(rbind, lapply(data.re, as.data.frame))
+    if (!is.null(data.re)) {
+		if (!is.data.frame(data.re)) {
+			data.re <- do.call(rbind, lapply(data.re, as.data.frame))
+		}
+		mtc.validate.data.re(data.re)
     }
 
     # standardize the treatments
@@ -160,6 +166,47 @@ write.mtc.network <- function(network, file) {
     cat(XML::saveXML(root), file=file)
 }
 
+mtc.validate.data.ab <- function(data) {
+	columns <- colnames(data)
+	contColumns <- c('mean', 'std.dev', 'sampleSize')
+	dichColumns <- c('responders', 'sampleSize')
+
+	if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
+		stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
+	}
+
+	if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
+		stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
+	}
+
+	if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
+		stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
+	}
+}
+
+mtc.validate.data.re <- function(data) {
+	columns <- colnames(data)
+	reColumns <- c('diff', 'std.err')
+	if (!all(reColumns %in% columns)) {
+		stop(paste('data.re must contain columns: ', paste(reColumns, collapse=', ')))
+	}
+
+	baselineCount <- sapply(unique(data$study), function(study) { sum(is.na(data$diff[data$study == study])) })
+	if (!all(baselineCount == 1)) {
+		stop('Each study in data.re must have a unique baseline arm (diff=NA)')
+	}
+	if (!all(!is.na(data$std.err[!is.na(data$diff)]))) {
+		stop('All non-baseline arms in data.re must have std.err specified')
+	}
+
+	studies <- unique(data$study)
+	ma <- sapply(studies, function(study) { sum(data$study == study) > 2 })
+	ma <- studies[ma]
+	if (!all(!is.na(data$std.err[data$study %in% ma]))) {
+		stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
+	}
+}
+
 mtc.network.validate <- function(network) { 
     # Check that there is some data
     stopifnot(nrow(network$treatments) > 0)  
@@ -187,46 +234,12 @@ mtc.network.validate <- function(network) {
 
     # Check that the data frame has a sensible combination of columns
 	if (!is.null(network[['data']])) {
-		columns <- colnames(network[['data']])
-		contColumns <- c('mean', 'std.dev', 'sampleSize')
-		dichColumns <- c('responders', 'sampleSize')
-
-		if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
-			stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
-		}
-
-		if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
-			stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
-		}
-
-		if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
-			stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
-		}
+		mtc.validate.data.ab(network[['data']])
 	}
 
 	# Check data.re is well formed
 	if (!is.null(network[['data.re']])) {
-		data.re <- network[['data.re']]
-		columns <- colnames(data.re)
-		reColumns <- c('diff', 'std.err')
-		if (!all(reColumns %in% columns)) {
-			stop(paste('data.re must contain columns: ', paste(reColumns, collapse=', ')))
-		}
-
-		baselineCount <- sapply(unique(data.re$study), function(study) { sum(is.na(data.re$diff[data.re$study == study])) })
-		if (!all(baselineCount == 1)) {
-			stop('Each study in data.re must have a unique baseline arm (diff=NA)')
-		}
-		if (!all(!is.na(data.re$std.err[!is.na(data.re$diff)]))) {
-			stop('All non-baseline arms in data.re must have std.err specified')
-		}
-
-		studies <- unique(data.re$study)
-		ma <- sapply(studies, function(study) { sum(data.re$study == study) > 2 })
-		ma <- studies[ma]
-		if (!all(!is.na(data.re$std.err[data.re$study %in% ma]))) {
-			stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
-		}
+		mtc.validate.data.re(network[['data.re']])
 	}
 }
 

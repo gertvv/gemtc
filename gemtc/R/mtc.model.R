@@ -1,18 +1,59 @@
 ## mtc.model class methods
 
-mtc.model <- function(network, type="Consistency", factor=2.5, n.chain=4, ...) {
+mtc.model <- function(network, type="consistency",
+		factor=2.5, n.chain=4,
+		likelihood=NULL, link=NULL, ...) {
     typeMap <- c(
-        'Consistency'='Consistency',
-        'consistency'='Consistency',
-        'cons'='Consistency')
+        'Consistency'='consistency',
+        'consistency'='consistency',
+        'cons'='consistency')
 
     if (is.na(typeMap[type])) {
         stop(paste(type, 'is not an MTC model type.'))
     }
     type <- typeMap[type]
 
-    if (type == 'Consistency') {
-        mtc.model.consistency(network, factor=factor, n.chain=n.chain, ...)
+	model <- list(
+        type = type,
+        network = network,
+        n.chain = n.chain,
+        var.scale = factor)
+
+	model$likelihood <- likelihood
+	model$link <- link
+	if (!is.null(network[['data']]) && 'responders' %in% colnames(network[['data']])) {
+		if (is.null(likelihood)) {
+			model$likelihood = 'binom'
+		}
+		if (is.null(link)) {
+			model$link = 'logit'
+		}
+	} else if (!is.null(network[['data']]) && 'mean' %in% colnames(network[['data']])) {
+		if (is.null(likelihood)) {
+			model$likelihood = 'normal'
+		}
+		if (is.null(link)) {
+			model$link = 'identity'
+		}
+	} else {
+		if (is.null(likelihood)) {
+			warning('Likelihood can not be inferred. Defaulting to normal.')
+			model$likelihood = 'normal'
+		}
+		if (is.null(link)) {
+			warning('Link can not be inferred. Defaulting to identity.')
+			model$link = 'identity'
+		}
+	}
+	if (!ll.defined(model)) {
+		stop(paste('likelihood = ', model$likelihood,
+			', link = ', model$link, ' not found!', sep=''))
+	}
+
+    model$om.scale <- guess.scale(model)
+
+    if (type == 'consistency') {
+        mtc.model.consistency(model, ...)
     }
 }
 
@@ -30,7 +71,7 @@ plot.mtc.model <- function(x, layout=igraph::layout.circle, ...) {
 }
 
 mtc.model.graph <- function(model) { 
-    if (model$type == 'Consistency') {
+    if (tolower(model$type) == 'consistency') {
         comparisons <- mtc.comparisons(model$network)
         g <- model$tree
         g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")

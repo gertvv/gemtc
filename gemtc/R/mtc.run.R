@@ -41,7 +41,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 }
 
 mtc.build.syntaxModel <- function(model) {
-    if (model$type == 'Consistency') {
+    if (tolower(model$type) == 'consistency') {
         list(
             model = model$code,
             data = model$data,

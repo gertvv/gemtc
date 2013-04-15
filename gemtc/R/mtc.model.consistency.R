@@ -1,44 +1,14 @@
 # Master function to generate consistency models
-mtc.model.consistency <- function(network, factor, n.chain,
-		likelihood=NULL, link=NULL) {
+mtc.model.consistency <- function(model) {
     style.tree <- function(tree) {
         tree <- set.edge.attribute(tree, 'arrow.mode', value=2)
         tree <- set.edge.attribute(tree, 'color', value='black')
         tree <- set.edge.attribute(tree, 'lty', value=1)
         tree
     }
+	model$tree <-
+		style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model$network)))
 
-    model <- list(
-        type = 'Consistency',
-        network = network,
-        tree = style.tree(minimum.diameter.spanning.tree(mtc.network.graph(network))),
-        n.chain = n.chain,
-        var.scale = factor
-    )
-
-	model$likelihood <- likelihood
-	model$link <- link
-    if ('responders' %in% colnames(network$data)) {
-		if (is.null(likelihood)) {
-			model$likelihood = 'binom'
-		}
-		if (is.null(link)) {
-			model$link = 'logit'
-		}
-    } else if ('mean' %in% colnames(network$data)) {
-		if (is.null(likelihood)) {
-			model$likelihood = 'normal'
-		}
-		if (is.null(link)) {
-			model$link = 'identity'
-		}
-    }
-	if (!ll.defined(model)) {
-		stop(paste('likelihood = ', model$likelihood,
-			', link = ', model$link, ' not found!', sep=''))
-	}
-
-    model$om.scale <- guess.scale(model)
     model$code <- mtc.model.code(model)
     model$data <- mtc.model.data(model)
     model$inits <- mtc.init(model)

@@ -25,6 +25,24 @@ test_that("study counts are defined even if there is no data of said type", {
         s01     B          1.5  0.5     20"), header=T)
 	network <- mtc.network(data=data)
 	model <- mtc.model(network)
+	expect_that(model$data$ns.a, equals(1))
 	expect_that(model$data$ns.r2, equals(0))
 	expect_that(model$data$ns.rm, equals(0))
+
+	network <- mtc.network(data.re=data.re)
+	model <- mtc.model(network, likelihood='normal', link='identity')
+	expect_that(model$data$ns.a, equals(0))
+	expect_that(model$data$ns.r2, equals(6))
+	expect_that(model$data$ns.rm, equals(1))
+})
+
+test_that("not specifying likelihood / link generates warnings", {
+	network <- mtc.network(data.re=data.re)
+
+	expect_warning(model <- mtc.model(network, likelihood='normal'), 'Link can not be inferred. Defaulting to identity.')
+	expect_that(model$link, equals('identity'))
+	expect_warning(model <- mtc.model(network, link='identity'), 'Likelihood can not be inferred. Defaulting to normal.')
+	expect_that(model$likelihood, equals('normal'))
+
+	expect_error(mtc.model(network, link='logit', likelihood='normal'))
 })

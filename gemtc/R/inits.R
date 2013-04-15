@@ -60,8 +60,6 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
 			rel.mle.re(data, pair)
 		}))
 	}
-	print(pair)
-	print(study.mle['mean', ])
     meta <- meta::metagen(unlist(study.mle['mean', ]), unlist(study.mle['sd', ]))
 
     rnorm(model$n.chain, meta$TE.random, model$var.scale * meta$seTE.random)
