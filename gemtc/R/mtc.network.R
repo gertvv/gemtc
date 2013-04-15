@@ -265,7 +265,7 @@ mtc.merge.data <- function(network) {
 
 mtc.study.design <- function(network, study) {
     data <- mtc.merge.data(network)
-    sort(data$treatment[data$study == study])
+    data$treatment[data$study == study]
 }
 
 coerce.factor <- function(x, prototype) {

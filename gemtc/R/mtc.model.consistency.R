@@ -1,4 +1,4 @@
-# Master function to generate consistency models
+# Consistency model
 mtc.model.consistency <- function(model) {
     style.tree <- function(tree) {
         tree <- set.edge.attribute(tree, 'arrow.mode', value=2)
@@ -18,5 +18,5 @@ mtc.model.consistency <- function(model) {
 }
 
 mtc.model.name.consistency <- function(model) {
-	"Consistency"
+	"consistency"
 }
