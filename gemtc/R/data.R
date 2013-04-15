@@ -45,7 +45,7 @@ mtc.model.data <- function(model) {
 	studies <- c(studies.ab, studies.re)
 	study.arms <- c(as.character(data.ab$study), as.character(data.re$study))
     na <- sapply(studies, function(study) { sum(study.arms == study) })
-	na.re <- na[(length(studies.ab)+1):length(studies)]
+	na.re <- if (length(studies.re) > 0 ) na[(length(studies.ab)+1):length(studies)] else c()
     s.mat <- arm.index.matrix(model$network)
 
     model.data <- list(
