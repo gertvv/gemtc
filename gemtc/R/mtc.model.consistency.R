@@ -12,6 +12,13 @@ mtc.model.consistency <- function(model) {
     model$code <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model))
     model$data <- mtc.model.data(model)
     model$inits <- mtc.init(model)
+
+	monitors <- inits.to.monitors(model$inits[[1]])
+	model$monitors <- list(
+		available=monitors,
+		enabled=c(monitors[grep('^d\\.', monitors)], 'sd.d')
+	)
+
     class(model) <- "mtc.model"
 
     model

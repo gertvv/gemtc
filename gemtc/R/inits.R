@@ -115,3 +115,23 @@ mtc.init <- function(model) {
         ), sapply(params, function(p) { d[chain, which(params == p)] }))
     })
 }
+
+# All non-NA initial values correspond to a variable that can be monitored
+inits.to.monitors <- function(inits) {
+	unlist(lapply(names(inits), function(var) {
+		struct <- inits[[var]]
+		if (is.matrix(struct)) {
+			lapply(1:(nrow(struct)*ncol(struct)), function(idx) {
+				i <- (idx - 1) %/% ncol(struct) + 1
+				j <- (idx - 1) %% ncol(struct) + 1
+				if (!is.na(struct[i, j])) paste(var, "[", i, ",", j, "]", sep="")
+			})
+		} else if (length(struct) > 1) {
+			lapply(1:length(struct), function(i) {
+				if (!is.na(struct[i])) paste(var, "[", i, "]", sep="")
+			})
+		} else {
+			var
+		}
+	}))
+}

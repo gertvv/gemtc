@@ -19,6 +19,12 @@ mtc.model.ume <- function(model) {
 	model$data$nt <- NULL
 	model$inits <- mtc.init(model)
 
+	monitors <- inits.to.monitors(model$inits[[1]])
+	model$monitors <- list(
+		available=monitors,
+		enabled=c(monitors[grep('^d\\.', monitors)], 'sd.d')
+	)
+
     class(model) <- "mtc.model"
 
 	model

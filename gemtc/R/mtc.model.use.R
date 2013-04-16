@@ -13,18 +13,10 @@ mtc.model.use <- function(model) {
 			delta=inits$delta)
 	})
 
-	model$monitors <- list()
-	delta <- model$inits[[1]]$delta
-	model$monitors$enabled <- unlist(lapply(1:nrow(delta), function(i) {
-		lapply(2:ncol(delta), function(j) {
-			if (!is.na(delta[i, j])) {
-				paste("delta[", i, ", ", j, "]", sep="")
-			}
-		})
-	}))
-	model$monitors$available <- c(
-		model$monitors$enabled,
-		paste("mu[", 1:length(model$inits[[1]]$mu), "]", sep="")
+	monitors <- inits.to.monitors(model$inits[[1]])
+	model$monitors <- list(
+		available=monitors,
+		enabled=monitors[grep('^delta\\[', monitors)]
 	)
 
     class(model) <- "mtc.model"
