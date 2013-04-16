@@ -30,6 +30,6 @@ consistency.relative.effect.matrix <- function(model) {
         paste(if (col[i] == -1) "-" else "", params[i], sep="")
     }), collapse = " + ") })
     expr <- sapply(1:length(expr), function(i) { paste('d[1, ', i + 1, '] <- ', expr[i], sep='') })
-    expr <- c('d[1, 1] <- 0', expr, '\tfor (i in 2:nt) {\n\t\tfor (j in 1:nt) {\n\t\t\td[i, j] <- d[1, j] - d[1, i]\n\t\t}\n\t}')
+    expr <- c('d[1, 1] <- 0', expr, 'for (i in 2:nt) {\n\tfor (j in 1:nt) {\n\t\td[i, j] <- d[1, j] - d[1, i]\n\t}\n}')
     paste(expr, collapse="\n")
 }

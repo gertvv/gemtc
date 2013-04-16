@@ -12,8 +12,8 @@ mtc.rel.mle.normal.identity <- function(data) {
 
 mtc.code.likelihood.normal.identity <- function() {
 "m[i, k] ~ dnorm(theta[i, k], prec[i, k])
-			theta[i, k] <- mu[i] + delta[i, k]
-			prec[i, k] <- pow(e[i, k], -2)"
+theta[i, k] <- mu[i] + delta[i, k]
+prec[i, k] <- pow(e[i, k], -2)"
 }
 
 scale.log.normal.identity <- function() { FALSE }

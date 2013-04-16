@@ -17,7 +17,7 @@ mtc.rel.mle.binom.cloglog <- function(data) {
 
 mtc.code.likelihood.binom.cloglog <- function() {
 "r[i, k] ~ dbin(p[i, k], n[i, k])
-            cloglog(p[i, k]) <- mu[i] + delta[i, k]"
+cloglog(p[i, k]) <- mu[i] + delta[i, k]"
 }
 
 scale.log.binom.cloglog <- function() { TRUE }

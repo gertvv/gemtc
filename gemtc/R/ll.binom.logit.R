@@ -15,7 +15,7 @@ mtc.rel.mle.binom.logit <- function(data) {
 
 mtc.code.likelihood.binom.logit <- function() {
 "r[i, k] ~ dbin(p[i, k], n[i, k])
-			logit(p[i, k]) <- mu[i] + delta[i, k]"
+logit(p[i, k]) <- mu[i] + delta[i, k]"
 }
 
 scale.log.binom.logit <- function() { TRUE }

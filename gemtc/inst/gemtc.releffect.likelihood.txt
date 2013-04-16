@@ -1,15 +1,15 @@
-	# Likelihood for constrast-based data (univariate for 2-arm trials)
-	for(i in (ns.a + 1):(ns.a + ns.r2)) {
-		m[i,2] ~ dnorm(delta[i,2], prec[i,2])
-		prec[i,2] <- pow(e[i,2], -2)
-	}
-	# Likelihood for constrast-based data (multivariate for 3-arm trials)
-	for(i in (ns.a + ns.r2 + 1):(ns.a + ns.r2 + ns.rm)) {
-		for (k in 1:(na[i]-1)) {
-			for (j in 1:(na[i]-1)) {
-				Sigma[i,j,k] <- pow(e[i,1], 2) * (1 - equals(j,k)) + pow(e[i,k+1], 2) * equals(j,k)
-			}
+# Likelihood for constrast-based data (univariate for 2-arm trials)
+for(i in (ns.a + 1):(ns.a + ns.r2)) {
+	m[i,2] ~ dnorm(delta[i,2], prec[i,2])
+	prec[i,2] <- pow(e[i,2], -2)
+}
+# Likelihood for constrast-based data (multivariate for 3-arm trials)
+for(i in (ns.a + ns.r2 + 1):(ns.a + ns.r2 + ns.rm)) {
+	for (k in 1:(na[i]-1)) {
+		for (j in 1:(na[i]-1)) {
+			Sigma[i,j,k] <- pow(e[i,1], 2) * (1 - equals(j,k)) + pow(e[i,k+1], 2) * equals(j,k)
 		}
-		Omega[i,1:(na[i]-1),1:(na[i]-1)] <- inverse(Sigma[i,1:(na[i]-1),1:(na[i]-1)])
-		m[i,2:na[i]] ~ dmnorm(delta[i,2:na[i]],Omega[i,1:(na[i]-1),1:(na[i]-1)])
 	}
+	Omega[i,1:(na[i]-1),1:(na[i]-1)] <- inverse(Sigma[i,1:(na[i]-1),1:(na[i]-1)])
+	m[i,2:na[i]] ~ dmnorm(delta[i,2:na[i]],Omega[i,1:(na[i]-1),1:(na[i]-1)])
+}
