@@ -2,8 +2,9 @@
 mtc.model.ume <- function(model) {
 	network <- model$network
 
-	arms <- mtc.merge.data(network)$study
-	na <- sapply(unique(arms), function(study) { sum(arms == study) })
+	studies <- mtc.studies.list(network)
+	na <- studies$lengths
+	studies <- studies$values
 	if (any(na > 2)) {
 		warning("The Unrelated Mean Effects model does not handle multi-arm trials correctly.")
 	}

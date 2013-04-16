@@ -260,7 +260,12 @@ mtc.merge.data <- function(network) {
 			as.character(network[['data.re']]$study)),
 		treatment=as.treatment.factor(c(
 			network[['data']]$treatment,
-			network[['data.re']]$treatment), network))
+			network[['data.re']]$treatment), network),
+		stingsAsFactors=FALSE)
+}
+
+mtc.studies.list <- function(network) {
+	rle(as.character(mtc.merge.data(network)$study))
 }
 
 mtc.study.design <- function(network, study) {

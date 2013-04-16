@@ -1,10 +1,8 @@
 arm.index.matrix <- function(network) {
-    data <- network[['data']]
-	data.re <- network[['data.re']]
-	all.studies <- factor(c(as.character(data$study), as.character(data.re$study)))
-    studies <- levels(all.studies)
-    n <- max(sapply(studies, function(study) { sum(all.studies == study) }))
-    t(sapply(studies, function(study) {
+    studies <- mtc.studies.list(network)
+	all.studies <- inverse.rle(studies)
+    n <- max(studies$lengths)
+    t(sapply(studies$values, function(study) {
         v <- which(all.studies == study)
         length(v) <- n
         v
