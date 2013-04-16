@@ -92,13 +92,18 @@ mtc.init <- function(model) {
                      ts[s.mat[study, i]])
         })
     })
-    params <- mtc.basic.parameters(model)
 	graph <- if(!is.null(model$tree)) model$tree else model$graph
-    d <- sapply(E(graph), function(e) {
-        v <- get.edge(graph, e)
-        mtc.init.pooled.effect(model, v[1], v[2])
-    })
-    sd.d <- mtc.init.std.dev(model)
+	if (!is.null(graph)) {
+		params <- mtc.basic.parameters(model)
+		d <- sapply(E(graph), function(e) {
+			v <- get.edge(graph, e)
+			mtc.init.pooled.effect(model, v[1], v[2])
+		})
+		sd.d <- mtc.init.std.dev(model)
+	} else { # FIXME: a more intelligent solution
+		params <- c()
+		sd.d <- c()
+	}
 
     # Separate the initial values per chain
     lapply(1:model$n.chain, function(chain) {

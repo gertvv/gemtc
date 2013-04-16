@@ -45,7 +45,7 @@ mtc.build.syntaxModel <- function(model) {
 		model = model$code,
 		data = model$data,
 		inits = model$inits,
-		vars = c(mtc.basic.parameters(model), "sd.d")
+		vars = if (!is.null(model$monitors$enabled)) model$monitors$enabled else c(mtc.basic.parameters(model), "sd.d")
 	)
 }
 

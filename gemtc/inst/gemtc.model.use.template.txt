@@ -1,0 +1,18 @@
+model {
+	$armeffect$
+	$releffect$
+
+	prior.prec <- pow(15 * om.scale, -2)
+
+	# Study baseline priors
+	for (i in 1:ns.a) {
+		mu[i] ~ dnorm(0, prior.prec)
+	}
+
+	for (i in 1:ns) {
+		delta[i, 1] <- 0
+		for (k in 2:na[i]) {
+			delta[i, k] ~ dnorm(0, prior.prec)
+		}
+	}
+}
