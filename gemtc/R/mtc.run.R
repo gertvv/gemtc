@@ -41,16 +41,12 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 }
 
 mtc.build.syntaxModel <- function(model) {
-    if (tolower(model$type) == 'consistency') {
-        list(
-            model = model$code,
-            data = model$data,
-            inits = model$inits,
-            vars = c(mtc.basic.parameters(model), "sd.d")
-        )
-    } else {
-        stop(paste("Model type", model$type, "unknown."))
-    }
+	list(
+		model = model$code,
+		data = model$data,
+		inits = model$inits,
+		vars = c(mtc.basic.parameters(model), "sd.d")
+	)
 }
 
 mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {

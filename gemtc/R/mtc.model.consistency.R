@@ -9,7 +9,7 @@ mtc.model.consistency <- function(model) {
 	model$tree <-
 		style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model$network)))
 
-    model$code <- mtc.model.code(model)
+    model$code <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model))
     model$data <- mtc.model.data(model)
     model$inits <- mtc.init(model)
     class(model) <- "mtc.model"
@@ -19,4 +19,17 @@ mtc.model.consistency <- function(model) {
 
 mtc.model.name.consistency <- function(model) {
 	"consistency"
+}
+
+consistency.relative.effect.matrix <- function(model) {
+    # Generate list of linear expressions
+    params <- mtc.basic.parameters(model)
+    tree <- model$tree
+    re <- tree.relative.effect(tree, V(tree)[1], t2=NULL)
+    expr <- apply(re, 2, function(col) { paste(sapply(which(col != 0), function(i) {
+        paste(if (col[i] == -1) "-" else "", params[i], sep="")
+    }), collapse = " + ") })
+    expr <- sapply(1:length(expr), function(i) { paste('d[1, ', i + 1, '] <- ', expr[i], sep='') })
+    expr <- c('d[1, 1] <- 0', expr, '\tfor (i in 2:nt) {\n\t\tfor (j in 1:nt) {\n\t\t\td[i, j] <- d[1, j] - d[1, i]\n\t\t}\n\t}')
+    paste(expr, collapse="\n")
 }

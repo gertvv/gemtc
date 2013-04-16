@@ -54,6 +54,7 @@ mtc.model.data <- function(model) {
 		ns.rm = sum(na.re > 2),
         ns = length(studies),
         na = na,
+		nt = nrow(model$network$treatments),
         t = matrix(as.numeric(data$treatment[s.mat]), nrow=nrow(s.mat)),
         om.scale = model$om.scale)
 

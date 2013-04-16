@@ -93,8 +93,9 @@ mtc.init <- function(model) {
         })
     })
     params <- mtc.basic.parameters(model)
-    d <- sapply(E(model$tree), function(e) {
-        v <- get.edge(model$tree, e)
+	graph <- if(!is.null(model$tree)) model$tree else model$graph
+    d <- sapply(E(graph), function(e) {
+        v <- get.edge(graph, e)
         mtc.init.pooled.effect(model, v[1], v[2])
     })
     sd.d <- mtc.init.std.dev(model)

@@ -1,10 +1,38 @@
 # Unrelated mean effects model
 mtc.model.ume <- function(model) {
+	network <- model$network
 
+	model$graph <- graph.create(
+		network$treatments$id,
+		mtc.comparisons.baseline(network),
+		arrow.mode=2, color='black', lty=1)
+
+	model$code <- mtc.model.code(model, mtc.basic.parameters(model), sparse.relative.effect.matrix(model))
+
+	model$data <- mtc.model.data(model)
+	model$data$nt <- NULL
+	model$inits <- mtc.init(model)
+
+    class(model) <- "mtc.model"
+
+	model
 }
 
 mtc.model.name.ume <- function(model) {
 	"unrelated mean effects"
+}
+
+sparse.relative.effect.matrix <- function(model) {
+	ts <- model$network$treatments$id
+	nt <- length(ts)
+	x <- unlist(lapply(1:nt, function(i) {
+		lapply(1:nt, function(j) {
+			if (model$graph[i, j]) {
+				paste("\td[", i, ", ", j, "] <- d.", ts[i], ".", ts[j], sep="")
+			}
+		})
+	}))
+	paste(x, collapse="\n")
 }
 
 mtc.comparisons.baseline <- function(network) {

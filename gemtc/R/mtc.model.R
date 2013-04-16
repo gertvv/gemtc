@@ -78,12 +78,10 @@ plot.mtc.model <- function(x, layout=igraph::layout.circle, ...) {
 }
 
 mtc.model.graph <- function(model) { 
-    if (tolower(model$type) == 'consistency') {
-        comparisons <- mtc.comparisons(model$network)
-        g <- model$tree
-        g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
-        g
-    }
+	comparisons <- mtc.comparisons(model$network)
+	g <- if (!is.null(model$tree)) model$tree else model$graph
+	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
+	g
 }
 
 # filters list of comparison by edges that are not yet present in graph g 
@@ -95,9 +93,9 @@ non.edges <- function(g, comparisons) {
 }
 
 mtc.basic.parameters <- function(model) {
-    tree <- model$tree
-    sapply(E(tree), function(e) {
-        v <- get.edge(tree, e)
-        paste("d", V(tree)[v[1]]$name, V(tree)[v[2]]$name, sep=".")
+    graph <- if (!is.null(model$tree)) model$tree else model$graph
+    sapply(E(graph), function(e) {
+        v <- get.edge(graph, e)
+        paste("d", V(graph)[v[1]]$name, V(graph)[v[2]]$name, sep=".")
     })
 }

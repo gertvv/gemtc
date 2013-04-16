@@ -36,3 +36,25 @@ test_that("mtc.comparisons.baseline respects baseline in data.re", {
 		t2=as.treatment.factor(c('A', 'C'), network))
 	expect_that(mtc.comparisons.baseline(network), equals(expected))
 })
+
+test_that("Vertices agree between mtc.network.graph and ume model$graph", {
+    network <- read.mtc.network(system.file("extdata/luades-thrombolytic.gemtc", package='gemtc'))
+    model <- mtc.model(network, type='ume')
+    graph <- mtc.network.graph(network)
+    expect_that(V(model$graph)$name, equals(V(graph)$name))
+    expect_that(V(mtc.model.graph(model))$name, equals(V(graph)$name))
+})
+
+test_that("Edges are consistent for ume model$graph", { 
+	data <- read.table(textConnection('
+		study  treatment  diff  std.err
+        s01    A          2.0   0.5
+        s01    B          NA    0.3
+        s01    C          1.5   0.6'), header=T)
+	network <- mtc.network(data.re=data)
+    model <- mtc.model(network, type='ume', likelihood='normal', link='identity')
+
+	expect_that(length(E(model$graph)), equals(2))
+	expect_that(model$graph['B', 'A'], equals(1))
+	expect_that(model$graph['B', 'C'], equals(1))
+})
