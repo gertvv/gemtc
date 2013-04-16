@@ -6,3 +6,8 @@ template.block.sub <- function(template, var, val) {
 	val <- paste(strsplit(val, "\n")[[1]], collapse=paste("\n", indent, sep=""))
 	sub(paste('$', var, '$', sep=''), val, template, fixed=TRUE)
 }
+
+read.template <- function(file.name) {
+    fileName <- system.file(file.name, package='gemtc')
+    readChar(fileName, file.info(fileName)$size)
+}

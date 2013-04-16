@@ -1,12 +1,13 @@
-mtc.model.code <- function(model, params, relEffectMatrix) {
-    fileName <- system.file('gemtc.model.template.txt', package='gemtc')
-    template <- readChar(fileName, file.info(fileName)$size)
+mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model.template.txt') {
+    template <- read.template(template)
+
+    arm.code <- read.template('gemtc.armeffect.likelihood.txt')
+    template <- template.block.sub(template, 'armeffect', arm.code)
+    rel.code <- read.template('gemtc.releffect.likelihood.txt')
+    template <- template.block.sub(template, 'releffect', rel.code)
 
     lik.code <- do.call(paste("mtc.code.likelihood", model$likelihood, model$link, sep="."), list())
-    fileName <- system.file('gemtc.releffect.likelihood.txt', package='gemtc')
-    rel.code <- readChar(fileName, file.info(fileName)$size)
     template <- template.block.sub(template, 'likelihood', lik.code)
-    template <- template.block.sub(template, 'releffect', rel.code)
 
     network <- model$network
 

@@ -1,10 +1,5 @@
 model {
-	# Likelihood for arm-based data
-	for (i in 1:ns.a) {
-		for (k in 1:na[i]) {
-			$likelihood$
-		}
-	}
+	$armeffect$
 	$releffect$
 
 	for (i in 1:ns) {
