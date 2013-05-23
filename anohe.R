@@ -124,15 +124,15 @@ decompose.network <- function(network, result=NULL, likelihood=NULL, link=NULL) 
 	mtc.network(data=ta.network[['data']], data.re=rbind(ta.network[['data.re']], data.re))
 }
 
-anohe <- function(network) {
-	model.use <- mtc.model(network, type='use')
+anohe <- function(network, likelihood=NULL, link=NULL) {
+	model.use <- mtc.model(network, type='use', likelihood=likelihood, link=link)
 	result.use <- mtc.run(model.use)
 
-	network.decomp <- decompose.network(network, result=result.use)
-	model.ume <- mtc.model(network.decomp, type='ume')
+	network.decomp <- decompose.network(network, result=result.use, likelihood=likelihood, link=link)
+	model.ume <- mtc.model(network.decomp, type='ume', likelihood=likelihood, link=link)
 	result.ume <- mtc.run(model.ume)
 
-	model.cons <- mtc.model(network, type='consistency')
+	model.cons <- mtc.model(network, type='consistency', likelihood=likelihood, link=link)
 	result.cons <- mtc.run(model.cons)
 
 	se <- decompose.trials(result.use)
