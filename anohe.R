@@ -2,11 +2,11 @@ library(gemtc)
 source('hetforest.R')
 
 all.pair.matrix <- function(m) {
-    do.call(rbind, lapply(1:(m - 1), function(i) {
-        do.call(rbind, lapply((i + 1):m, function(j) {
+	do.call(rbind, lapply(1:(m - 1), function(i) {
+		do.call(rbind, lapply((i + 1):m, function(j) {
 			c(i, j)
-        }))
-    }))
+		}))
+	}))
 }
 
 filter.network <- function(network, filter, filter.ab=filter, filter.re=filter) {
@@ -151,13 +151,65 @@ anohe <- function(network, likelihood=NULL, link=NULL) {
 	qs <- apply(ume.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
 	pairEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,], param=varNames)
 
-	result <- list(result=result.cons, studyEffects=se, pairEffects=pairEffects)
+	cons.samples <- as.matrix(relative.effect(result.cons, t1=comps[,1], t2=comps[,2], preserve.extra=FALSE)$samples)
+	qs <- apply(cons.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
+	consEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,], param=varNames)
+
+	result <- list(result=result.cons, studyEffects=se, pairEffects=pairEffects, consEffects=consEffects)
 	class(result) <- "mtc.anohe"
 	result
 }
 
 plot.mtc.anohe <- function(x, ...) {
 	hetforest(x$result, x$studyEffects, x$pairEffects, ...)
+}
+
+i.squared <- function (mu, se, x, df.adj=-1) {
+	stopifnot(length(mu) == length(se))
+	stopifnot(length(mu) == length(x))
+	dev <- (mu - x)^2 # squared deviance
+	q <- sum(dev * 1/se^2) # Cochran's Q
+	100 * max(0, (q - length(mu) - df.adj) / q) # I^2
+}
+
+summary.mtc.anohe <- function(x, ...) {
+	data <- x$studyEffects
+	data$t1 <- as.character(data$t1)
+	data$t2 <- as.character(data$t2)
+	data$p <- sapply(1:nrow(data), function(i) {
+		row <- data[i,]
+		x$pairEffects$pe[x$pairEffects$t1 == row$t1 & x$pairEffects$t2 == row$t2]
+	})
+	data$c <- sapply(1:nrow(data), function(i) {
+		row <- data[i,]
+		x$consEffects$pe[x$consEffects$t1 == row$t1 & x$consEffects$t2 == row$t2]
+	})
+	data$se <- (data$ci.u - data$ci.l) / 3.92
+
+	pairEffects <- x$pairEffects
+	pairEffects$t1 <- as.character(pairEffects$t1)
+	pairEffects$t2 <- as.character(pairEffects$t2)
+	i2.pair <- apply(pairEffects, 1, function(row) {
+		data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
+		if (nrow(data2) > 1) {
+			i.squared(data2$pe, data2$se, data2[['p']])
+		} else {
+			NA
+		}
+	})
+	i2.cons <- apply(pairEffects, 1, function(row) {
+		data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
+		if (nrow(data2) > 1) {
+			# FIXME: df depends on network
+			i.squared(data2$pe, data2$se, data2[['c']])
+		} else {
+			NA
+		}
+	})
+
+	i.sq <- data.frame(t1=pairEffects$t1, t2=pairEffects$t2, i2.pair=i2.pair, i2.cons=i2.cons)
+	total <- list(i2.pair=i.squared(data$pe, data$se, data[['p']]), i2.cons=i.squared(data$pe, data$se, data[['c']]))
+	list(comparisons=i.sq, total=total)
 }
 
 env <- new.env(parent = getNamespace("gemtc"))
