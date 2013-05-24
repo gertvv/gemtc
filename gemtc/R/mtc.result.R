@@ -20,13 +20,15 @@ forest.mtc.result <- function(x, ...) {
         stats <- as.matrix(t(stats))
         row.names(stats) <- row.names(quantiles)[[1]]
     }
-    groups <- extract.comparisons(rownames(quantiles))[,1]
+    comps <- extract.comparisons(rownames(stats))
+    groups <- comps[,1]
     group.names <- unique(groups)
     group.labels <- rep("", length(group.names))
     #group.labels <- paste("Relative to ", group.names)
     names(group.labels) <- group.names
+    params <- list(...)
     data <- data.frame(
-        id=rownames(stats),
+        id=paste(comps[,2], comps[,1], sep=" vs "),
         pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5],
         group=groups, style="normal")
     blobbogram(data,
@@ -34,7 +36,9 @@ forest.mtc.result <- function(x, ...) {
         id.label="Comparison",
         ci.label=paste(ll.call('scale.name', model), "(95% CrI)"),
         log.scale=ll.call('scale.log', model),
-        grouped=length(group.labels)>1, group.labels=group.labels)
+        grouped=length(group.labels)>1, group.labels=group.labels,
+        left.label=params$left.label, right.label=params$right.label,
+        xlim=params$xlim)
 }
 
 as.mcmc.list.mtc.result <- function(x, ...) {
