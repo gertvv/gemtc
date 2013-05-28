@@ -1,0 +1,48 @@
+<!-- Continuous analysis from
+	Welton et al., Am J Epidemiol 2009;169:1158-1165
+This is the "single intervention effect" model for systolic blood pressure with the correlation between pre- and post-measures assumed 0.5.
+-->
+<network type="continuous">
+	<treatments>
+		<treatment id="usual" />
+		<treatment id="psych" />
+	</treatments>
+	<studies>
+		<study id="12">
+			<measurement treatment="psych" mean="-4.6" standardDeviation="20.5" sample="216" />
+			<measurement treatment="usual" mean="-3.6" standardDeviation="20.3" sample="217" />
+		</study>
+		<study id="20">
+			<measurement treatment="psych" mean="16.15580391" standardDeviation="12.8199064" sample="48" />
+			<measurement treatment="usual" mean="16.75559608" standardDeviation="12.98268077" sample="45" />
+		</study>
+		<study id="21">
+			<measurement treatment="psych" mean="-7.38" standardDeviation="7.85" sample="23" />
+			<measurement treatment="usual" mean="-0.78" standardDeviation="2.24" sample="20" />
+		</study>
+		<study id="22">
+			<measurement treatment="psych" mean="8" standardDeviation="17.767" sample="99" />
+			<measurement treatment="usual" mean="5" standardDeviation="18.034" sample="102" />
+		</study>
+		<study id="25">
+			<measurement treatment="psych" mean="-5.3" standardDeviation="17.66918221" sample="20" />
+			<measurement treatment="usual" mean="-13.9" standardDeviation="17.82834821" sample="15" />
+		</study>
+		<study id="38">
+			<measurement treatment="psych" mean="2" standardDeviation="18.218" sample="77" />
+			<measurement treatment="usual" mean="6" standardDeviation="19.321" sample="82" />
+		</study>
+		<study id="48">
+			<measurement treatment="psych" mean="2" standardDeviation="19" sample="196" />
+			<measurement treatment="usual" mean="3" standardDeviation="21" sample="196" />
+		</study>
+		<study id="49">
+			<measurement treatment="psych" mean="-4.525" standardDeviation="20.567" sample="118" />
+			<measurement treatment="usual" mean="-8.505" standardDeviation="23.578" sample="109" />
+		</study>
+		<study id="56">
+			<measurement treatment="psych" mean="0.1" standardDeviation="14.852" sample="331" />
+			<measurement treatment="usual" mean="4.5" standardDeviation="19.035" sample="348" />
+		</study>
+	</studies>
+</network>

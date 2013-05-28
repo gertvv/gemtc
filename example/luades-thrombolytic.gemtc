@@ -1,0 +1,130 @@
+<!-- Thrombolytic drugs data from
+	Lu & Ades, J Am Stat Assoc 2006;101(474):447-459, Table 1. -->
+<network description="Thrombolytic Drugs Data (death in 30 or 35 days/patients)">
+	<treatments>
+		<treatment id="SK" />
+		<treatment id="AtPA" />
+		<treatment id="tPA" />
+		<treatment id="SKtPA" />
+		<treatment id="Ten" />
+		<treatment id="Ret" />
+		<treatment id="UK" />
+		<treatment id="ASPAC" />
+	</treatments>
+	<studies>
+		<study id="01">
+			<measurement treatment="SK" responders="1472" sample="20163" />
+			<measurement treatment="AtPA" responders="652" sample="10344" />
+			<measurement treatment="SKtPA" responders="723" sample="10328" />
+		</study>
+		<study id="02">
+			<measurement treatment="SK" responders="1455" sample="13780" />
+			<measurement treatment="tPA" responders="1418" sample="13746" />
+			<measurement treatment="ASPAC" responders="1448" sample="13773" />
+		</study>
+		<study id="03">
+			<measurement treatment="SK" responders="9" sample="130" />
+			<measurement treatment="tPA" responders="6" sample="123" />
+		</study>
+		<study id="04">
+			<measurement treatment="SK" responders="5" sample="63" />
+			<measurement treatment="tPA" responders="2" sample="59" />
+		</study>
+		<study id="05">
+			<measurement treatment="SK" responders="3" sample="65" />
+			<measurement treatment="tPA" responders="3" sample="64" />
+		</study>
+		<study id="06">
+			<measurement treatment="SK" responders="887" sample="10396" />
+			<measurement treatment="tPA" responders="929" sample="10372" />
+		</study>
+		<study id="07">
+			<measurement treatment="SK" responders="7" sample="85" />
+			<measurement treatment="tPA" responders="4" sample="86" />
+		</study>
+		<study id="08">
+			<measurement treatment="SK" responders="12" sample="147" />
+			<measurement treatment="tPA" responders="7" sample="143" />
+		</study>
+		<study id="09">
+			<measurement treatment="SK" responders="10" sample="135" />
+			<measurement treatment="tPA" responders="5" sample="135" />
+		</study>
+		<study id="10">
+			<measurement treatment="SK" responders="4" sample="107" />
+			<measurement treatment="SKtPA" responders="6" sample="109" />
+		</study>
+		<study id="11">
+			<measurement treatment="SK" responders="285" sample="2992" />
+			<measurement treatment="Ret" responders="270" sample="2994" />
+		</study>
+		<study id="12">
+			<measurement treatment="SK" responders="10" sample="203" />
+			<measurement treatment="UK" responders="7" sample="198" />
+		</study>
+		<study id="13">
+			<measurement treatment="SK" responders="3" sample="58" />
+			<measurement treatment="ASPAC" responders="2" sample="52" />
+		</study>
+		<study id="14">
+			<measurement treatment="SK" responders="3" sample="86" />
+			<measurement treatment="ASPAC" responders="6" sample="89" />
+		</study>
+		<study id="15">
+			<measurement treatment="SK" responders="3" sample="58" />
+			<measurement treatment="ASPAC" responders="2" sample="58" />
+		</study>
+		<study id="16">
+			<measurement treatment="SK" responders="13" sample="182" />
+			<measurement treatment="ASPAC" responders="11" sample="188" />
+		</study>
+		<study id="17">
+			<measurement treatment="AtPA" responders="522" sample="8488" />
+			<measurement treatment="Ten" responders="523" sample="8461" />
+		</study>
+		<study id="18">
+			<measurement treatment="AtPA" responders="356" sample="4921" />
+			<measurement treatment="Ret" responders="757" sample="10138" />
+		</study>
+		<study id="19">
+			<measurement treatment="AtPA" responders="13" sample="155" />
+			<measurement treatment="Ret" responders="7" sample="169" />
+		</study>
+		<study id="20">
+			<measurement treatment="AtPA" responders="2" sample="26" />
+			<measurement treatment="UK" responders="7" sample="54" />
+		</study>
+		<study id="21">
+			<measurement treatment="AtPA" responders="12" sample="268" />
+			<measurement treatment="UK" responders="16" sample="350" />
+		</study>
+		<study id="22">
+			<measurement treatment="AtPA" responders="5" sample="210" />
+			<measurement treatment="ASPAC" responders="17" sample="211" />
+		</study>
+		<study id="23">
+			<measurement treatment="AtPA" responders="3" sample="138" />
+			<measurement treatment="ASPAC" responders="13" sample="147" />
+		</study>
+		<study id="24">
+			<measurement treatment="tPA" responders="8" sample="132" />
+			<measurement treatment="UK" responders="4" sample="66" />
+		</study>
+		<study id="25">
+			<measurement treatment="tPA" responders="10" sample="164" />
+			<measurement treatment="UK" responders="6" sample="166" />
+		</study>
+		<study id="26">
+			<measurement treatment="tPA" responders="6" sample="124" />
+			<measurement treatment="UK" responders="5" sample="121" />
+		</study>
+		<study id="27">
+			<measurement treatment="tPA" responders="13" sample="164" />
+			<measurement treatment="ASPAC" responders="10" sample="161" />
+		</study>
+		<study id="28">
+			<measurement treatment="tPA" responders="7" sample="93" />
+			<measurement treatment="ASPAC" responders="5" sample="90" />
+		</study>
+	</studies>
+</network>
