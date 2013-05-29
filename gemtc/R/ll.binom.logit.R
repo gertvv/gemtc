@@ -20,3 +20,9 @@ logit(p[i, k]) <- mu[i] + delta[i, k]"
 
 scale.log.binom.logit <- function() { TRUE }
 scale.name.binom.logit <- function() { "Odds Ratio" }
+
+# Initial values outside this range result in probability 0 or 1 for the
+# binomial, which may lead to BUGS/JAGS rejecting the data
+scale.limit.inits.binom.logit <- function() {
+	c(-745, 36.8)
+}

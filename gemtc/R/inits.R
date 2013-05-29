@@ -1,13 +1,26 @@
+# Limit initial values to allowed range
+mtc.init.limit <- function(model, value, offset=rep(0.0, model$n.chain)) {
+	limits <- ll.call("scale.limit.inits", model)
+	too.small <- (value + offset) < limits[1]
+	too.large <- (value + offset) > limits[2]
+	value[too.small] <- limits[1] - offset[too.small]
+	value[too.large] <- limits[2] - offset[too.large]
+	value
+}
+
 # Initial values for study-level absolute treatment effects based on (adjusted) MLE
 mtc.init.baseline.effect <- function(model, study, treatment) {
     data <- model$network[['data']]
     mle <- ll.call("mtc.arm.mle", model,
         data[data$study == study & data$treatment == treatment, ])
-    rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
+    mtc.init.limit(
+		model,
+		rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
+	)
 }
 
 # Initial values for study-level relative effects based on (adjusted) MLE
-mtc.init.relative.effect <- function(model, study, t1, t2) {
+mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model$n.chain)) {
     data <- model$network[['data']]
 	if (!is.null(data) && study %in% data$study) {
 		mle <- ll.call("mtc.rel.mle", model,
@@ -18,7 +31,11 @@ mtc.init.relative.effect <- function(model, study, t1, t2) {
 		data <- data[data$study == study & data$treatment == t2, ]
 		mle <- c('mean'=data$diff, 'sd'=data$std.err)
 	}
-	rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
+    mtc.init.limit(
+		model,
+		rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd']),
+		mu
+	)
 }
 
 # Initial values for pooled effect (basic parameter) based on
@@ -81,6 +98,9 @@ mtc.init <- function(model) {
     mu <- sapply(studies, function(study) {
         mtc.init.baseline.effect(model, study, data$treatment[s.mat[study, 1]])
     })
+	if (!is.matrix(mu)) {
+		mu <- matrix(mu, nrow=model$n.chain, ncol=length(studies))
+	}
 	studies <- c(studies, levels(data.re$study))
 	ts <- c(as.character(data$treatment), as.character(data.re$treatment))
     delta <- lapply(studies, function(study) {
@@ -89,7 +109,8 @@ mtc.init <- function(model) {
             else mtc.init.relative.effect(
                      model, study,
                      ts[s.mat[study, 1]],
-                     ts[s.mat[study, i]])
+                     ts[s.mat[study, i]],
+					 if (study %in% colnames(mu)) { mu[, study] } else { rep(0.0, model$n.chain) })
         })
     })
 	graph <- if(!is.null(model$tree)) model$tree else model$graph

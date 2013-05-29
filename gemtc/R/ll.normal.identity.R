@@ -18,3 +18,7 @@ prec[i, k] <- pow(e[i, k], -2)"
 
 scale.log.normal.identity <- function() { FALSE }
 scale.name.normal.identity <- function() { "Mean Difference" }
+
+scale.limit.inits.normal.identity <- function() {
+	c(-Inf, +Inf)
+}
