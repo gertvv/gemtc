@@ -44,12 +44,12 @@ void gemtc_rank_count(
 	double const *t = sData; // alternative values
 	int r[*nAlt]; // alternative ranks
 	for (int k = 0; k < *nIter; ++k) {
-		t += *nAlt;
-
 		rank(t, r, *nAlt); // rank the alternatives
 
 		for (int i = 0; i < *nAlt; ++i) {
 			*get(&c, r[i], i) += 1; // update rank counts
 		}
+
+		t += *nAlt;
 	}
 }
