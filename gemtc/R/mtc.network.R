@@ -23,7 +23,7 @@ standardize.data <- function(data, treatment.levels, re.order=FALSE) {
 
 mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.re=NULL) {
 	if (is.null(data) && is.null(data.re)) {
-		error("Either `data' or `data.re' (or both) must be specified")
+		stop("Either `data' or `data.re' (or both) must be specified")
 	}
     # standardize the data
     if (!is.null(data)) {
