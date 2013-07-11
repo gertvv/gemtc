@@ -1,14 +1,17 @@
 GeMTC R package
 ===============
 
-[GeMTC][1] is a library for Mixed Treatment Comparison (MTC) model
-generation. MTC is also known as Network Meta-Analysis.
+[GeMTC](http://drugis.org/gemtc) is an R package for Mixed Treatment
+Comparison (MTC) model generation. MTC is also known as Network
+Meta-Analysis.
 
 Building
 --------
 
 The build has only been tested on Ubuntu GNU/Linux. You need R and make.
 To build and install the R package, simply 'make install'.
+
+You will need a working installation of rjags, BRugs, or R2WinBUGS.
 
 License
 -------
