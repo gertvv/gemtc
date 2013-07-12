@@ -62,39 +62,81 @@ compare.summaries <- function(s1, s2) {
 	}
 }
 
-replicate.example <- function(name, sampler) {
-	s1 <- dget(paste(name, 'summaries.txt', sep='.'))
+replicate.example <- function(example, sampler) {
+	s1 <- dget(paste(example$name, 'summaries.txt', sep='.'))
 
 	n.chain <- s1$summary$nchain
 	thin <- s1$summary$thin
 	n.adapt <- s1$summary$start - thin
 	n.iter <- s1$summary$end - n.adapt
 
-	network <- read.mtc.network(paste(name, 'gemtc', sep='.'))
-	model <- mtc.model(network, n.chain=4)
+	model <- mtc.model(example$network, likelihood=example$likelihood, link=example$link, n.chain=4)
 	result <- mtc.run(model, sampler=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 	s2 <- generate.summaries(result)
 	list(s1=s1, s2=s2)
 }
 
-verify.example <- function(name, sampler) {
+verify.example <- function(example, sampler) {
 	cat(paste("=== Verifying", name, "===\n"))
-	x <- replicate.example(name, sampler)
+	x <- replicate.example(example, sampler)
 	compare.summaries(x$s1, x$s2)
 }
 
-verify.example.jags <- function(name) {
-	verify.example(name, "JAGS")
+verify.example.jags <- function(example) {
+	verify.example(example, "JAGS")
 }
 
-verify.example.winbugs <- function(name) {
-	verify.example(name, "R2WinBUGS")
+verify.example.winbugs <- function(example) {
+	verify.example(example, "R2WinBUGS")
 }
 
-verify.example.openbugs <- function(name) {
-	verify.example(name, "BRugs")
+verify.example.openbugs <- function(example) {
+	verify.example(example, "BRugs")
 }
 
-examples <- c('cipriani-efficacy', 'luades-smoking', 'luades-thrombolytic', 'parkinson', 'welton-cholesterol', 'welton-diastolic', 'welton-systolic')
+# Examples manually verified against reported summaries from the literature.
+# Validation summaries subsequently generated from verified results.
+examples <- list(
+	'cipriani-efficacy' = list( # Efficacy data from Cipriani et al. Lancet 2009;373:746-758.
+		likelihood='binom',
+		link='logit'
+	),
+	'luades-smoking' = list( # Smoking cessation data from Lu & Ades, J Am Stat Assoc 2006;101(474):447-459, Table 1.
+		likelihood='binom',
+		link='logit'
+	),
+	'luades-thrombolytic' = list( # Thrombolytic drugs data from Lu & Ades, J Am Stat Assoc 2006;101(474):447-459, Table 3.
+		likelihood='binom',
+		link='logit'
+	),
+	'parkinson' = list( # NICE TSD2 program 5a
+		likelihood='normal',
+		link='identity'
+	),
+	'welton-cholesterol' = list( # Welton et al., Am J Epidemiol 2009;169:1158-1165
+		likelihood='normal',
+		link='identity'
+	),
+	'welton-diastolic' = list( # Welton et al., Am J Epidemiol 2009;169:1158-1165
+		likelihood='normal',
+		link='identity'
+	),
+	'welton-systolic' = list( # Welton et al., Am J Epidemiol 2009;169:1158-1165
+		likelihood='normal',
+		link='identity'
+	),
+	'diabetes-surv' = list( # NICE TSD2 program 3a
+		network = mtc.network(read.table('diabetes-surv.data.txt')),
+		likelihood='binom',
+		link='cloglog'
+	)
+)
+
+for (name in names(examples)) {
+	if (is.null(examples[[name]][['network']])) {
+		examples[[name]][['network']] <- read.mtc.network(paste(name, 'gemtc', sep='.'))
+	}
+	examples[[name]][['name']] <- name
+}
 
 # lapply(examples, function(name) { x <- replicate.example(name, "rjags")$s2; dput(x, paste(name, "summaries.txt", sep=".")) })
