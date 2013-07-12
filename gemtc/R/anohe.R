@@ -137,55 +137,11 @@ mtc.anohe <- function(network, likelihood=NULL, link=NULL) {
     result
 }
 
-plot.mtc.anohe.summary <- function(x, ...) {
-	stats <- x
-    data <- list(id=character(), group=character(), pe=c(), ci.l=c(), ci.u=c(), style=factor(levels=c('normal','pooled')))
-    group.labels <- character()
-
-	studyEffects <- stats$studyEffects
-	pairEffects <- stats$pairEffects
-	consEffects <- stats$consEffects
-
-	appendEstimates <- function(data, rows) {
-		data$pe <- c(data$pe, rows$pe)
-		data$ci.l <- c(data$ci.l, rows$ci.l)
-		data$ci.u <- c(data$ci.u, rows$ci.u)
-		data
+print.mtc.anohe <- function(x, ...) {
+	cat("Analysis of heterogeneity (mtc.anohe) object\n")
+	for (name in names(x)) {
+		cat(paste("$", name, ": ", class(x[[name]]), "\n", sep=""))
 	}
-
-	for (i in 1:nrow(pairEffects)) {
-		t1 <- pairEffects$t1[i]
-		t2 <- pairEffects$t2[i]
-
-		param <- paste('d', t1, t2, sep='.')
-		group.labels[param] <- paste(t2, 'vs', t1)
-
-		# Study-level effects
-		rows <- studyEffects[studyEffects$t1 == t1 & studyEffects$t2 == t2, ]
-		data$id <- c(data$id, rows$study)
-		data$group <- c(data$group, rep(param, nrow(rows)))
-		data$style <- c(data$style, rep('normal', nrow(rows)))
-		data <- appendEstimates(data, rows)
-
-		# Pair-wise pooled effect
-		rows <- pairEffects[i, ]
-		data$id <- c(data$id, 'Pooled (pair-wise)')
-		data$group <- c(data$group, param)
-		data$style <- c(data$style, 'pooled')
-		data <- appendEstimates(data, rows)
-
-		# Network pooled effect
-		rows <- consEffects[consEffects$t1 == t1 & consEffects$t2 == t2, ]
-		data$id <- c(data$id, 'Pooled (network)')
-		data$group <- c(data$group, param)
-		data$style <- c(data$style, 'pooled')
-		data <- appendEstimates(data, rows)
-	}
-
-	data <- as.data.frame(data)
-	blobbogram(data, group.labels=group.labels,
-		ci.label=paste(ll.call("scale.name", x$cons.model), "(95% CrI)"),
-		log.scale=ll.call("scale.log", x$cons.model), ...)
 }
 
 i.squared <- function (mu, se, x, df.adj=-1) {
@@ -265,9 +221,64 @@ summary.mtc.anohe <- function(object, ...) {
 	result
 }
 
-print.mtc.anohe <- function(x, ...) {
-	cat("Analysis of heterogeneity (mtc.anohe) object\n")
-	for (name in names(x)) {
-		cat(paste("$", name, ": ", class(x[[name]]), "\n", sep=""))
+print.mtc.anohe.summary <- function(x, ...) {
+	cat("Analysis of heterogeneity\n")
+	cat("=========================\n\n")
+	cat("Per-comparison I-squared:\n")
+	cat("-------------------------\n\n")
+	print(x$isquared.comp)
+	cat("\nGlobal I-squared:\n")
+	cat("-------------------------\n\n")
+	print(as.data.frame(x$isquared.global))
+}
+
+plot.mtc.anohe.summary <- function(x, ...) {
+	stats <- x
+    data <- list(id=character(), group=character(), pe=c(), ci.l=c(), ci.u=c(), style=factor(levels=c('normal','pooled')))
+    group.labels <- character()
+
+	studyEffects <- stats$studyEffects
+	pairEffects <- stats$pairEffects
+	consEffects <- stats$consEffects
+
+	appendEstimates <- function(data, rows) {
+		data$pe <- c(data$pe, rows$pe)
+		data$ci.l <- c(data$ci.l, rows$ci.l)
+		data$ci.u <- c(data$ci.u, rows$ci.u)
+		data
 	}
+
+	for (i in 1:nrow(pairEffects)) {
+		t1 <- pairEffects$t1[i]
+		t2 <- pairEffects$t2[i]
+
+		param <- paste('d', t1, t2, sep='.')
+		group.labels[param] <- paste(t2, 'vs', t1)
+
+		# Study-level effects
+		rows <- studyEffects[studyEffects$t1 == t1 & studyEffects$t2 == t2, ]
+		data$id <- c(data$id, rows$study)
+		data$group <- c(data$group, rep(param, nrow(rows)))
+		data$style <- c(data$style, rep('normal', nrow(rows)))
+		data <- appendEstimates(data, rows)
+
+		# Pair-wise pooled effect
+		rows <- pairEffects[i, ]
+		data$id <- c(data$id, 'Pooled (pair-wise)')
+		data$group <- c(data$group, param)
+		data$style <- c(data$style, 'pooled')
+		data <- appendEstimates(data, rows)
+
+		# Network pooled effect
+		rows <- consEffects[consEffects$t1 == t1 & consEffects$t2 == t2, ]
+		data$id <- c(data$id, 'Pooled (network)')
+		data$group <- c(data$group, param)
+		data$style <- c(data$style, 'pooled')
+		data <- appendEstimates(data, rows)
+	}
+
+	data <- as.data.frame(data)
+	blobbogram(data, group.labels=group.labels,
+		ci.label=paste(ll.call("scale.name", x$cons.model), "(95% CrI)"),
+		log.scale=ll.call("scale.log", x$cons.model), ...)
 }

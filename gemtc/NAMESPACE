@@ -24,4 +24,5 @@ export(
 	mtc.run,
 	relative.effect, rank.probability,
 	blobbogram, forest,
-	mtc.anohe, print.mtc.anohe, summary.mtc.anohe, plot.mtc.anohe.summary)
+	mtc.anohe, print.mtc.anohe, summary.mtc.anohe,
+	plot.mtc.anohe.summary, print.mtc.anohe.summary)
