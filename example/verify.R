@@ -143,6 +143,13 @@ examples <- list(
 		),
 		likelihood='normal',
 		link='identity'
+	),
+	'parkinson-diff' = list( # NICE TSD2 program 7a
+		network = mtc.network(
+			data.re=read.table('parkinson-diff.data.txt', header=T)
+		),
+		likelihood='normal',
+		link='identity'
 	)
 )
 
