@@ -1,6 +1,3 @@
-library(gemtc)
-source('hetforest.R')
-
 all.pair.matrix <- function(m) {
     do.call(rbind, lapply(1:(m - 1), function(i) {
         do.call(rbind, lapply((i + 1):m, function(j) {
@@ -124,7 +121,7 @@ decompose.network <- function(network, result=NULL, likelihood=NULL, link=NULL) 
     mtc.network(data=ta.network[['data']], data.re=rbind(ta.network[['data.re']], data.re))
 }
 
-anohe <- function(network, likelihood=NULL, link=NULL) {
+mtc.anohe <- function(network, likelihood=NULL, link=NULL) {
     model.use <- mtc.model(network, type='use', likelihood=likelihood, link=link)
     result.use <- mtc.run(model.use)
 
@@ -135,33 +132,60 @@ anohe <- function(network, likelihood=NULL, link=NULL) {
     model.cons <- mtc.model(network, type='consistency', likelihood=likelihood, link=link)
     result.cons <- mtc.run(model.cons)
 
-    se <- decompose.trials(result.use)
-    se$s <- lapply(names(se$e), function(s) { rep(s, length(se$e[[s]])) })
-    se$s <- do.call(c, se$s)
-    se$t <- do.call(rbind, se$t)
-    se$m <- do.call(c, se$m)
-    se$e <- do.call(c, se$e)
-    se <- data.frame(study=se$s, t1=se$t[,1], t2=se$t[,2], pe=se$m, ci.l=se$m-1.96*se$e, ci.u=se$m+1.96*se$e, stringsAsFactors=FALSE)
-
-    ume.samples <- as.matrix(result.ume$samples)
-    varNames <- colnames(ume.samples)
-    varNames <- varNames[grep('^d\\.', varNames)]
-    ume.samples <- ume.samples[,varNames]
-    comps <- extract.comparisons(varNames)
-    qs <- apply(ume.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
-    pairEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,], param=varNames)
-
-    cons.samples <- as.matrix(relative.effect(result.cons, t1=comps[,1], t2=comps[,2], preserve.extra=FALSE)$samples)
-    qs <- apply(cons.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
-    consEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,], param=varNames)
-
-    result <- list(result=result.cons, studyEffects=se, pairEffects=pairEffects, consEffects=consEffects)
+    result <- list(result.cons=result.cons, result.ume=result.ume, result.use=result.use)
     class(result) <- "mtc.anohe"
     result
 }
 
-plot.mtc.anohe <- function(x, ...) {
-    hetforest(x$result, x$studyEffects, x$pairEffects, ...)
+plot.mtc.anohe.summary <- function(x, ...) {
+	stats <- x
+    data <- list(id=character(), group=character(), pe=c(), ci.l=c(), ci.u=c(), style=factor(levels=c('normal','pooled')))
+    group.labels <- character()
+
+	studyEffects <- stats$studyEffects
+	pairEffects <- stats$pairEffects
+	consEffects <- stats$consEffects
+
+	appendEstimates <- function(data, rows) {
+		data$pe <- c(data$pe, rows$pe)
+		data$ci.l <- c(data$ci.l, rows$ci.l)
+		data$ci.u <- c(data$ci.u, rows$ci.u)
+		data
+	}
+
+	for (i in 1:nrow(pairEffects)) {
+		t1 <- pairEffects$t1[i]
+		t2 <- pairEffects$t2[i]
+
+		param <- paste('d', t1, t2, sep='.')
+		group.labels[param] <- paste(t2, 'vs', t1)
+
+		# Study-level effects
+		rows <- studyEffects[studyEffects$t1 == t1 & studyEffects$t2 == t2, ]
+		data$id <- c(data$id, rows$study)
+		data$group <- c(data$group, rep(param, nrow(rows)))
+		data$style <- c(data$style, rep('normal', nrow(rows)))
+		data <- appendEstimates(data, rows)
+
+		# Pair-wise pooled effect
+		rows <- pairEffects[i, ]
+		data$id <- c(data$id, 'Pooled (pair-wise)')
+		data$group <- c(data$group, param)
+		data$style <- c(data$style, 'pooled')
+		data <- appendEstimates(data, rows)
+
+		# Network pooled effect
+		rows <- consEffects[consEffects$t1 == t1 & consEffects$t2 == t2, ]
+		data$id <- c(data$id, 'Pooled (network)')
+		data$group <- c(data$group, param)
+		data$style <- c(data$style, 'pooled')
+		data <- appendEstimates(data, rows)
+	}
+
+	data <- as.data.frame(data)
+	blobbogram(data, group.labels=group.labels,
+		ci.label=paste(ll.call("scale.name", x$cons.model), "(95% CrI)"),
+		log.scale=ll.call("scale.log", x$cons.model), ...)
 }
 
 i.squared <- function (mu, se, x, df.adj=-1) {
@@ -172,21 +196,48 @@ i.squared <- function (mu, se, x, df.adj=-1) {
     100 * max(0, (q - length(mu) - df.adj) / q) # I^2
 }
 
-summary.mtc.anohe <- function(x, ...) {
-    data <- x$studyEffects
+summary.mtc.anohe <- function(object, ...) {
+	result.use <- object$result.use
+	result.ume <- object$result.ume
+	result.cons <- object$result.cons
+
+    se <- decompose.trials(result.use)
+    se$s <- lapply(names(se$e), function(s) { rep(s, length(se$e[[s]])) })
+    se$s <- do.call(c, se$s)
+    se$t <- do.call(rbind, se$t)
+    se$m <- do.call(c, se$m)
+    se$e <- do.call(c, se$e)
+    studyEffects <- data.frame(study=se$s, t1=se$t[,1], t2=se$t[,2], pe=se$m, ci.l=se$m-1.96*se$e, ci.u=se$m+1.96*se$e, stringsAsFactors=FALSE)
+	rownames(studyEffects) <- NULL
+
+    ume.samples <- as.matrix(result.ume$samples)
+    varNames <- colnames(ume.samples)
+    varNames <- varNames[grep('^d\\.', varNames)]
+    ume.samples <- ume.samples[,varNames]
+    comps <- extract.comparisons(varNames)
+    qs <- apply(ume.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
+    pairEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,])
+	rownames(pairEffects) <- NULL
+
+    cons.samples <- as.matrix(relative.effect(result.cons, t1=comps[,1], t2=comps[,2], preserve.extra=FALSE)$samples)
+    qs <- apply(cons.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
+    consEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,])
+	rownames(consEffects) <- NULL
+
+	data <- studyEffects
     data$t1 <- as.character(data$t1)
     data$t2 <- as.character(data$t2)
     data$p <- sapply(1:nrow(data), function(i) {
         row <- data[i,]
-        x$pairEffects$pe[x$pairEffects$t1 == row$t1 & x$pairEffects$t2 == row$t2]
+        pairEffects$pe[pairEffects$t1 == row$t1 & pairEffects$t2 == row$t2]
     })
     data$c <- sapply(1:nrow(data), function(i) {
-        row <- data[i,]
-        x$consEffects$pe[x$consEffects$t1 == row$t1 & x$consEffects$t2 == row$t2]
+        row <- studyEffects[i,]
+        consEffects$pe[consEffects$t1 == row$t1 & consEffects$t2 == row$t2]
     })
     data$se <- (data$ci.u - data$ci.l) / 3.92
 
-    pairEffects <- x$pairEffects
+    pairEffects <- pairEffects
     pairEffects$t1 <- as.character(pairEffects$t1)
     pairEffects$t2 <- as.character(pairEffects$t2)
     i2.pair <- apply(pairEffects, 1, function(row) {
@@ -209,10 +260,14 @@ summary.mtc.anohe <- function(x, ...) {
 
     i.sq <- data.frame(t1=pairEffects$t1, t2=pairEffects$t2, i2.pair=i2.pair, i2.cons=i2.cons)
     total <- list(i2.pair=i.squared(data$pe, data$se, data[['p']]), i2.cons=i.squared(data$pe, data$se, data[['c']]))
-    list(comparisons=i.sq, total=total)
+    result <- list(studyEffects=studyEffects, pairEffects=pairEffects, consEffects=consEffects, isquared.comp=i.sq, isquared.global=total, cons.model=result.cons$model)
+	class(result) <- 'mtc.anohe.summary'
+	result
 }
 
-env <- new.env(parent = getNamespace("gemtc"))
-environment(decompose.network) <- env
-environment(decompose.trials) <- env
-environment(anohe) <- env
+print.mtc.anohe <- function(x, ...) {
+	cat("Analysis of heterogeneity (mtc.anohe) object\n")
+	for (name in names(x)) {
+		cat(paste("$", name, ": ", class(x[[name]]), "\n", sep=""))
+	}
+}
