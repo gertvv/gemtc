@@ -233,7 +233,7 @@ summary.mtc.anohe <- function(object, ...) {
 
     i.sq <- data.frame(t1=pairEffects$t1, t2=pairEffects$t2, i2.pair=i2.pair, i2.cons=i2.cons)
     total <- list(i2.pair=i.squared(data$pe, data$se, data[['p']]), i2.cons=i.squared(data$pe, data$se, data[['c']]))
-    result <- list(studyEffects=studyEffects, pairEffects=pairEffects, consEffects=consEffects, isquared.comp=i.sq, isquared.global=total, cons.model=result.cons$model)
+    result <- list(studyEffects=studyEffects, pairEffects=pairEffects, consEffects=consEffects, isquared.comp=i.sq, isquared.glob=total, cons.model=result.cons$model)
 	class(result) <- 'mtc.anohe.summary'
 	result
 }
@@ -246,7 +246,7 @@ print.mtc.anohe.summary <- function(x, ...) {
 	print(x$isquared.comp)
 	cat("\nGlobal I-squared:\n")
 	cat("-------------------------\n\n")
-	print(as.data.frame(x$isquared.global))
+	print(as.data.frame(x$isquared.glob))
 }
 
 plot.mtc.anohe.summary <- function(x, ...) {
