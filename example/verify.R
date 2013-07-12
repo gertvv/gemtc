@@ -83,7 +83,7 @@ replicate.example <- function(example, sampler) {
 }
 
 verify.example <- function(example, sampler) {
-	cat(paste("=== Verifying", name, "===\n"))
+	cat(paste("=== Verifying", example$name, "===\n"))
 	x <- replicate.example(example, sampler)
 	compare.summaries(x$s1, x$s2)
 }
