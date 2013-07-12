@@ -50,8 +50,14 @@ compare.summaries <- function(s1, s2) {
 	n.adapt <- s2$summary$start - thin
 	n.iter <- s2$summary$end - n.adapt
 	test <- sapply(rownames(s2$ranks), function(alt) {
-			x <- round(s2$ranks[alt, ] * min(s2$effectiveSize[d.idx]))
+			n.sample <- min(s2$effectiveSize[d.idx])
+			x <- round(s2$ranks[alt, ] * n.sample)
 			p <- s1$ranks[alt, ]
+			
+			# Continuity correction because too many zero cells cause the test to fail
+			x <- x + 1
+			p <- (p + 1/n.sample) / (1 + nrow(s2$ranks)/n.sample)
+
 			test <- chisq.test(x, p=p, rescale.p=TRUE, simulate.p.value=TRUE)
 			c('statistic'=unname(test$statistic), 'p.value'=test$p.value)
   })
