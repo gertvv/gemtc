@@ -18,11 +18,17 @@ S3method(plot, mtc.result)
 S3method(as.mcmc.list, mtc.result)
 S3method(forest, mtc.result)
 
+S3method(print, mtc.anohe)
+S3method(plot, mtc.anohe)
+S3method(summary, mtc.anohe)
+
+S3method(print, mtc.anohe.summary)
+S3method(plot, mtc.anohe.summary)
+
 export(
 	read.mtc.network, write.mtc.network, mtc.network,
 	mtc.model,
 	mtc.run,
 	relative.effect, rank.probability,
 	blobbogram, forest,
-	mtc.anohe, print.mtc.anohe, summary.mtc.anohe,
-	plot.mtc.anohe.summary, print.mtc.anohe.summary)
+	mtc.anohe)

@@ -144,6 +144,23 @@ print.mtc.anohe <- function(x, ...) {
 	}
 }
 
+plot.mtc.anohe <- function(x, ask=dev.interactive(orNone=TRUE), ...) {
+	cat("Analysis of heterogeneity -- convergence plots\n")
+
+	cat("Unrelated Study Effects (USE) model:\n")
+	plot(x$result.use, ask=ask, ...)
+	cat("Unrelated Mean Effects (UME) model: ")
+	if (ask) {
+		readline('Hit <Return> to see next plot:')
+	}
+	plot(x$result.ume, ask=ask, ...)
+	cat("Consistency model: ")
+	if (ask) {
+		readline('Hit <Return> to see next plot:')
+	}
+	plot(x$result.cons, ask=ask, ...)
+}
+
 i.squared <- function (mu, se, x, df.adj=-1) {
     stopifnot(length(mu) == length(se))
     stopifnot(length(mu) == length(x))
