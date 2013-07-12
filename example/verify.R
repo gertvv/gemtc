@@ -132,9 +132,17 @@ examples <- list(
 		link='identity'
 	),
 	'diabetes-surv' = list( # NICE TSD2 program 3a
-		network = mtc.network(read.table('diabetes-surv.data.txt')),
+		network = mtc.network(read.table('diabetes-surv.data.txt', header=T)),
 		likelihood='binom',
 		link='cloglog'
+	),
+	'parkinson-shared' = list( # NICE TSD2 program 8a
+		network = mtc.network(
+			data=read.table('parkinson-shared.data-ab.txt', header=T),
+			data.re=read.table('parkinson-shared.data-re.txt', header=T)
+		),
+		likelihood='normal',
+		link='identity'
 	)
 )
 
