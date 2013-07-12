@@ -1,5 +1,5 @@
 <!-- Thrombolytic drugs data from
-	Lu & Ades, J Am Stat Assoc 2006;101(474):447-459, Table 1. -->
+	Lu & Ades, J Am Stat Assoc 2006;101(474):447-459, Table 3. -->
 <network description="Thrombolytic Drugs Data (death in 30 or 35 days/patients)">
 	<treatments>
 		<treatment id="SK" />
