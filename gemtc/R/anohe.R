@@ -162,6 +162,10 @@ plot.mtc.anohe <- function(x, ask=dev.interactive(orNone=TRUE), ...) {
 }
 
 i.squared <- function (mu, se, x, df.adj=-1) {
+	stopifnot(is.numeric(mu))
+	stopifnot(is.numeric(se))
+	stopifnot(is.numeric(x))
+	stopifnot(is.numeric(df.adj))
     stopifnot(length(mu) == length(se))
     stopifnot(length(mu) == length(x))
     dev <- (mu - x)^2 # squared deviance
@@ -210,9 +214,33 @@ summary.mtc.anohe <- function(object, ...) {
     })
     data$se <- (data$ci.u - data$ci.l) / 3.92
 
-    pairEffects <- pairEffects
     pairEffects$t1 <- as.character(pairEffects$t1)
     pairEffects$t2 <- as.character(pairEffects$t2)
+
+	indEffects <- data.frame(t1=pairEffects$t1, t2=pairEffects$t2)
+	indEffects <- cbind(indEffects, t(apply(pairEffects, 1, function(row) {
+		has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
+        if (has.indirect) {
+			dir <- as.numeric(row[3:5])
+			names(dir) <- c('pe', 'ci.l', 'ci.u') # sigh
+			con <- consEffects[consEffects$t1 == row['t1'] & consEffects$t2 == row['t2'], 3:5]
+
+			se.con <- (con['ci.u'] - con['ci.l']) / 3.92
+			se.dir <- (dir['ci.u'] - dir['ci.l']) / 3.92
+			pe.con <- con['pe']
+			pe.dir <- dir['pe']
+
+			# Back-calculate indirect estimate (see Dias et al. 2010)
+			se.ind <- sqrt(1 / (1 / se.con^2 - 1 / se.dir^2))
+			pe.ind <- (pe.con / se.con^2 - pe.dir / se.dir^2) * se.ind^2
+
+			unlist(list('pe'=unname(pe.ind), 'se'=unname(se.ind)))
+		} else {
+			unlist(list('pe'=NA, 'se'=NA))
+		}
+	})))
+	
+
     i2.pair <- apply(pairEffects, 1, function(row) {
         data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
         if (nrow(data2) > 1) {
@@ -223,17 +251,46 @@ summary.mtc.anohe <- function(object, ...) {
     })
     i2.cons <- apply(pairEffects, 1, function(row) {
         data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
-        if (nrow(data2) > 1) {
-            # FIXME: df depends on network
+		has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
+        if (has.indirect) {
+			ind <- indEffects[indEffects$t1 == row['t1'] & indEffects$t2 == row['t2'], 3:4]
+			se.ind <- unname(ind['se'])
+			pe.ind <- unname(ind['pe'])
+
+            i.squared(unlist(c(data2[['pe']], pe.ind)), unlist(c(data2[['se']], se.ind)), c(data2[['c']], data2[['c']][1]), df.adj=-1 + has.indirect)
+        } else if (nrow(data2) > 1) {
             i.squared(data2$pe, data2$se, data2[['c']])
+		} else {
+            NA
+        }
+    })
+    incons <- apply(pairEffects, 1, function(row) {
+        data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
+		has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
+        if (has.indirect) {
+			dir <- as.numeric(row[3:5])
+			names(dir) <- c('pe', 'ci.l', 'ci.u') # sigh
+			se.dir <- (dir['ci.u'] - dir['ci.l']) / 3.92
+			pe.dir <- dir['pe']
+
+			ind <- indEffects[indEffects$t1 == row['t1'] & indEffects$t2 == row['t2'], 3:4]
+			se.ind <- ind['se']
+			pe.ind <- ind['pe']
+
+			pe.inc <- (pe.dir - pe.ind)
+			se.inc <- sqrt(se.dir^2 + se.ind^2)
+			p.inc <- pnorm(as.numeric(pe.inc / se.inc))
+
+			as.numeric(2 * min(p.inc, 1 - p.inc))
         } else {
             NA
         }
     })
 
-    i.sq <- data.frame(t1=pairEffects$t1, t2=pairEffects$t2, i2.pair=i2.pair, i2.cons=i2.cons)
+    i.sq <- data.frame(t1=pairEffects$t1, t2=pairEffects$t2, i2.pair=i2.pair, i2.cons=i2.cons, incons.p=incons)
     total <- list(i2.pair=i.squared(data$pe, data$se, data[['p']]), i2.cons=i.squared(data$pe, data$se, data[['c']]))
-    result <- list(studyEffects=studyEffects, pairEffects=pairEffects, consEffects=consEffects, isquared.comp=i.sq, isquared.glob=total, cons.model=result.cons$model)
+    result <- list(studyEffects=studyEffects, pairEffects=pairEffects, consEffects=consEffects, indEffects=indEffects,
+		isquared.comp=i.sq, isquared.glob=total, cons.model=result.cons$model)
 	class(result) <- 'mtc.anohe.summary'
 	result
 }
@@ -251,14 +308,21 @@ print.mtc.anohe.summary <- function(x, ...) {
 
 plot.mtc.anohe.summary <- function(x, ...) {
 	stats <- x
-    data <- list(id=character(), group=character(), pe=c(), ci.l=c(), ci.u=c(), style=factor(levels=c('normal','pooled')))
+    data <- list(id=character(), group=character(), i2=c(), pe=c(), ci.l=c(), ci.u=c(), style=factor(levels=c('normal','pooled')))
     group.labels <- character()
 
 	studyEffects <- stats$studyEffects
 	pairEffects <- stats$pairEffects
 	consEffects <- stats$consEffects
+	indEffects <- stats$indEffects
+	isq <- stats$isquared.comp
 
 	appendEstimates <- function(data, rows) {
+		if (!is.null(rows$i2) && !is.na(rows$i2)) {
+			data$i2 <- c(data$i2, paste(formatC(rows$i2, format="f", digits=1), "%", sep=""))
+		} else {
+			data$i2 <- c(data$i2, rep(NA, length(rows$pe)))
+		}
 		data$pe <- c(data$pe, rows$pe)
 		data$ci.l <- c(data$ci.l, rows$ci.l)
 		data$ci.u <- c(data$ci.u, rows$ci.u)
@@ -279,23 +343,42 @@ plot.mtc.anohe.summary <- function(x, ...) {
 		data$style <- c(data$style, rep('normal', nrow(rows)))
 		data <- appendEstimates(data, rows)
 
+		isq.rows <- isq[isq$t1 == t1 & isq$t2 == t2, ]
 		# Pair-wise pooled effect
 		rows <- pairEffects[i, ]
+		rows$i2 <- isq.rows[, 'i2.pair']
 		data$id <- c(data$id, 'Pooled (pair-wise)')
 		data$group <- c(data$group, param)
 		data$style <- c(data$style, 'pooled')
 		data <- appendEstimates(data, rows)
 
+		# Indirect effect
+		rows <- indEffects[indEffects$t1 == t1 & indEffects$t2 == t2, ]
+		data$id <- c(data$id, 'Indirect (back-calculated)')
+		data$group <- c(data$group, param)
+		data$style <- c(data$style, 'indirect')
+		rows$ci.l <- rows$pe - 1.96 * rows$se
+		rows$ci.u <- rows$pe + 1.96 * rows$se
+		data <- appendEstimates(data, rows)
+
 		# Network pooled effect
 		rows <- consEffects[consEffects$t1 == t1 & consEffects$t2 == t2, ]
+		rows$i2 <- isq.rows[, 'i2.cons']
 		data$id <- c(data$id, 'Pooled (network)')
 		data$group <- c(data$group, param)
 		data$style <- c(data$style, 'pooled')
 		data <- appendEstimates(data, rows)
 	}
 
+	styles <- blobbogram.styles.default()
+	my.styles <- data.frame(style='indirect', font.weight='plain', row.height=1, pe.style='circle', pe.scale=FALSE, lty=3)
+	rownames(my.styles) <- my.styles$style
+	styles <- rbind(styles, my.styles)
+
 	data <- as.data.frame(data)
 	blobbogram(data, group.labels=group.labels,
+		columns=c('i2'), column.labels=c('I^2'),
 		ci.label=paste(ll.call("scale.name", x$cons.model), "(95% CrI)"),
-		log.scale=ll.call("scale.log", x$cons.model), ...)
+		log.scale=ll.call("scale.log", x$cons.model),
+		styles=styles, ...)
 }
