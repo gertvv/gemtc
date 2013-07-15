@@ -65,7 +65,7 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
                     else if (ci.u > xrange[[2]]) build.arrow("last")
                     else NULL
     
-    line <- linesGrob(x=unit(c(max(ci.l, xrange[[1]]), min(ci.u, xrange[[2]])), "native"), arrow=arrow, y=0.5) 
+    line <- linesGrob(x=unit(c(max(ci.l, xrange[[1]]), min(ci.u, xrange[[2]])), "native"), arrow=arrow, y=0.5, gp=gpar(lty=style$lty)) 
 
     if (pe > xrange[1] && pe < xrange[2]) {
         ciGrob <- gTree(children=gList(
@@ -83,7 +83,7 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
 
 text.style  <- function(styles) {
     function(text, style) { 
-        ff <- if (is.na(styles[style,]$font.weight)) "plain" else styles[style,]$font.weight
+        ff <- if (is.na(styles[as.character(style),]$font.weight)) "plain" else styles[as.character(style),]$font.weight
         textGrob(text, x=unit(0, "npc"), just="left", gp=gpar(fontface=ff))
     }
 }
@@ -157,6 +157,18 @@ draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns,
     popViewport()
 }
 
+blobbogram.styles.default <- function() {
+	styles <- data.frame(
+		style=c('normal', 'pooled', 'group'),
+		font.weight=c('plain', 'plain', 'bold'),
+		row.height=c(1, 1, 1.5),
+		pe.style=c('circle', 'square', NA),
+		pe.scale=c(FALSE, FALSE, NA),
+		lty=c(1,1,NA))
+	rownames(styles) <- styles$style
+	styles
+}
+
 blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     left.label=NULL, right.label=NULL,
     log.scale=FALSE, xlim=NULL, styles=NULL,
@@ -168,13 +180,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     grouped <- !is.null(group.labels) && isTRUE(grouped)
 
     if (is.null(styles)) {
-        styles <- data.frame(
-            style=c('normal', 'pooled', 'group'),
-            font.weight=c('plain', 'plain', 'bold'),
-            row.height=c(1, 1, 1.5),
-            pe.style=c('circle', 'square', NA),
-            pe.scale=c(FALSE, FALSE, NA))
-        rownames(styles) <- styles$style
+		styles <- blobbogram.styles.default()
     }
     text.fn <- text.style(styles)
 
@@ -225,12 +231,16 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
             ci.data <- lapply(1:nrow(datagrp$data), function(i) { 
                 # Create CI plots
                 fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
-                ci <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[datagrp$data[i, 'style'],])
+                ci <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[as.character(datagrp$data[i, 'style']),])
 
                 # Create CI interval labels (right side) 
-                fmt <- lapply(fmt, function(x) { formatC(scale.trf(x), digits=3, zero.print="0") })
-                text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
-                label <-  text.fn(text, datagrp$data[i,'style'])
+				if (all(!is.na(fmt))) {
+					fmt <- lapply(fmt, function(x) { formatC(scale.trf(x), digits=3, zero.print="0") })
+					text <- paste(fmt$pe, " (", fmt$ci.l, ", ", fmt$ci.u, ")", sep="")
+				} else {
+					text <- "NA"
+				}
+                label <-  text.fn(text, as.character(datagrp$data[i,'style']))
 
                 list(ci=ci, label=label)
             })
@@ -279,8 +289,8 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     colwidth <- unit.c(colwidth, graphwidth, colgap, ci.colwidth)
 
     groupHeight <- function(grp) {
-        if (grouped) unit(c(styles['group', 'row.height'], styles[grp$data$style, 'row.height']), "lines")
-        else unit(styles[grp$data$style, 'row.height'], "lines")
+        if (grouped) unit(c(styles['group', 'row.height'], styles[as.character(grp$data$style), 'row.height']), "lines")
+        else unit(styles[as.character(grp$data$style), 'row.height'], "lines")
     }
 
     groupHeightNPC <- function(grp) {
