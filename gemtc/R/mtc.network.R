@@ -277,6 +277,27 @@ coerce.factor <- function(x, prototype) {
     factor(x, levels=1:nlevels(prototype), labels=levels(prototype))
 }
 
+# See nodesplit-auto draft for definition
+has.indirect.evidence <- function(network, t1, t2) {
+	has.both <- sapply(mtc.studies.list(network)$values, function(study) {
+		all(c(t1, t2) %in% mtc.study.design(network, study))
+	})
+
+	data.ab <- rbind(network[['data']], network[['data.re']])
+	data.ab <- data.ab[!has.both[data.ab[['study']]] | (data.ab[['treatment']] != t1 & data.ab[['treatment']] != t2), ]
+	study.size <- rle(as.character(data.ab$study))
+	keep <- data.ab$study %in% study.size$values[study.size$lengths > 1]
+	data.ab <- data.ab[keep, ]
+
+	if (nrow(data.ab) > 0) {
+		n <- mtc.network(data.ab)
+		g <- mtc.network.graph(n)
+		all(c(t1, t2) %in% V(g)$name) && as.logical(is.finite(shortest.paths(as.undirected(g), t1, t2)))
+	} else {
+		FALSE
+	}
+}
+
 mtc.treatment.pairs <- function(treatments) {
     n <- length(treatments)
     t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
