@@ -63,9 +63,9 @@ test_that("duplicate studies raise an error", {
 })
 
 test_that("data.re column names are checked", {
-	expect_error(mtc.network(data.re=data.frame(study="s01", treatment="A")))
-	expect_error(mtc.network(data.re=data.frame(study="s01", treatment="A", diff=NA)))
-	expect_error(mtc.network(data.re=data.frame(study="s01", treatment="A", std.err=NA)))
+	expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01"), treatment=c("A", "B"))))
+	expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01"), treatment=c("A", "B"), diff=c(NA, NA))))
+	expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01"), treatment=c("A", "B"), std.err=c(NA, NA))))
 })
 
 test_that("data.re checks that every study has a baseline (diff=NA) arm", {

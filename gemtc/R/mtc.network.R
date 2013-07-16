@@ -21,6 +21,18 @@ standardize.data <- function(data, treatment.levels, re.order=FALSE) {
     data
 }
 
+remove.onearm <- function(data, warn=FALSE) {
+    # Remove 1-arm studies
+    sel <- as.logical(sapply(data[,'study'], function(study) {
+        sum(data[,'study'] == study) > 1
+    }))
+
+	if (warn && !all(sel)) {
+		warning(paste("Removing", sum(!sel), "one-arm studies"))
+	}
+    data[sel, ]
+}
+
 mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.re=NULL) {
 	if (is.null(data) && is.null(data.re)) {
 		stop("Either `data' or `data.re' (or both) must be specified")
@@ -30,12 +42,14 @@ mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.
 		if (!is.data.frame(data)) {
 			data <- do.call(rbind, lapply(data, as.data.frame))
 		}
+		data <- remove.onearm(data, warn=TRUE)
 		mtc.validate.data.ab(data)
     }
     if (!is.null(data.re)) {
 		if (!is.data.frame(data.re)) {
 			data.re <- do.call(rbind, lapply(data.re, as.data.frame))
 		}
+		data.re <- remove.onearm(data.re, warn=TRUE)
 		mtc.validate.data.re(data.re)
     }
 
@@ -283,14 +297,12 @@ has.indirect.evidence <- function(network, t1, t2) {
 		all(c(t1, t2) %in% mtc.study.design(network, study))
 	})
 
-	data.ab <- rbind(network[['data']], network[['data.re']])
-	data.ab <- data.ab[!has.both[data.ab[['study']]] | (data.ab[['treatment']] != t1 & data.ab[['treatment']] != t2), ]
-	study.size <- rle(as.character(data.ab$study))
-	keep <- data.ab$study %in% study.size$values[study.size$lengths > 1]
-	data.ab <- data.ab[keep, ]
+	data <- rbind(network[['data']], network[['data.re']])
+	data <- data[!has.both[data[['study']]] | (data[['treatment']] != t1 & data[['treatment']] != t2), ]
+	data <- remove.onearm(data)
 
-	if (nrow(data.ab) > 0) {
-		n <- mtc.network(data.ab)
+	if (nrow(data) > 0) {
+		n <- mtc.network(data)
 		g <- mtc.network.graph(n)
 		all(c(t1, t2) %in% V(g)$name) && as.logical(is.finite(shortest.paths(as.undirected(g), t1, t2)))
 	} else {
