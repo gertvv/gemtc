@@ -62,7 +62,7 @@ compare.summaries <- function(s1, s2) {
       n.sample <- min(s2$effectiveSize[d.idx])
       x <- round(s2$ranks[alt, ] * n.sample)
       p <- s1$ranks[alt, ]
-      
+
       # Continuity correction because too many zero cells cause the test to fail
       x <- x + 1
       p <- (p + 1/n.sample) / (1 + nrow(s2$ranks)/n.sample)
@@ -161,13 +161,13 @@ examples <- list(
     likelihood='normal',
     link='identity'
   ),
-  'smoking-ume' = list( # Modified from NICE TSD4 smoking example 
+  'smoking-ume' = list( # Modified from NICE TSD4 smoking example
     network = mtc.network(
       data=read.table('smoking-ume.data.txt', header=T)
     ),
     likelihood='binom',
     link='logit',
-	type='ume'
+  type='ume'
   )
 )
 
