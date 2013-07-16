@@ -1,3 +1,21 @@
+gemtc 0.3
+===========
+
+Released 2013-07-16
+
+Many additional features:
+
+ * support for relative effect data
+ * support for mixed arm-based and relative effect data
+ * binom/cloglog likelihood/link for rate data
+ * unrelated mean effects (UME) model
+ * unrelated study effects (USE) model
+ * analysis of heterogeneity with heterogeneity plot (EXPERIMENTAL)
+ * full access to generated code, data structures, and parameters
+ * guard against "impossible" initial values
+
+Also, bugfixes and documentation updates.
+
 gemtc 0.2
 ===========
 
