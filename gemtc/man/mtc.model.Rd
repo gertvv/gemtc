@@ -13,12 +13,13 @@ The \code{mtc.model} function generates network meta-analysis models from an \co
 The \code{mtc.model} function generates an object of S3 class \code{mtc.model}, which can be visualized by the generic \code{plot} function or summarized by the generic \code{summary} function.
 }
 \usage{
-mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4, likelihood=NULL, link=NULL, ...)
+mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
+  likelihood=NULL, link=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{network}{An object of S3 class \code{mtc.network}}
-  \item{type}{A string literal indicating the type of model (only "consistency" is allowed).}
+  \item{type}{A string literal indicating the type of model (either "consistency", "ume", or "use").}
   \item{factor}{Variance scaling factor for the starting values}
   \item{n.chain}{Number of chains in the model}
   \item{likelihood}{The likelihood to be used. If unspecified, a suitable likelihood will be inferred for the given data.}
@@ -27,18 +28,21 @@ mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4, likelihood=N
 }
 \value{
 An object of class \code{mtc.model}.
-This is a list with the following elements:
-  \item{type}{The type of model} 
+The following elements are descriptive:
+  \item{type}{The type of model}
   \item{network}{Network the model was generated from}
   \item{tree}{Spanning tree formed by the basic parameters}
-  \item{n.chain}{The number of chains}
   \item{var.scale}{The scaling factor used to over-disperse starting values}
   \item{likelihood}{The likelihood used}
   \item{link}{The link function used}
   \item{om.scale}{The scale for the variance parameters}
+These elements determine the model run by JAGS/BUGS:
+  \item{n.chain}{The number of chains}
   \item{code}{Model code in JAGS/BUGS syntax}
   \item{data}{Data in JAGS/BUGS compatible format}
   \item{inits}{Initial values in JAGS/BUGS compatible format}
+  \item{monitors}{The nodes of the JAGS/BUGS model to monitor}
+These latter fields can be modified to alter the statistical model, but such changes may break the model or assumptions made elsewhere in the package.
 }
 \note{
 Due to various issues, rJava has been removed from the gemtc package.
