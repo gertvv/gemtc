@@ -35,8 +35,12 @@ For \code{write.mtc.network}, if \code{file=""}, the output is printed to standa
 For \code{mtc.network} and \code{read.mtc.network}, an object of the class \code{mtc.network} which is a list containing:
   \item{description}{A short description of the network}
   \item{treatments}{A data frame describing the treatments}
-  \item{data}{A data frame containing the network data}
+  \item{data}{A data frame containing the network data (arm-level)}
+  \item{data.re}{A data frame containing the network data (relative effects)}
 These are cleaned up and standardized versions of the arguments provided, or generated defaults for `treatments' if the argument was omitted.
+}
+\details{
+One-arm trials are automatically removed, which results in a warning.
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
