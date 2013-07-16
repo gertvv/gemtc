@@ -6,57 +6,30 @@
 
 \title{GeMTC: Network meta-analysis in R}
 \description{
-Network meta-analysis R package based on the Java GeMTC library from \url{http://drugis.org/gemtc}.
+An R package for performing network meta-analyses (mixed treatment comparisons).
 }
 \details{
-Network meta-analysis, or mixed treatment comparison (MTC) is a technique to meta-analyze networks of trials comparing two or more treatments at the same time (Lu & Ades, 2004).
-Using a Bayesian hierarchical model, all direct and indirect comparisons are taken into account to arrive at a single, integrated, estimate of the effect of all included treatments based on all included studies.
+Network meta-analysis, or mixed treatment comparison (MTC) is a technique to meta-analyze networks of trials comparing two or more treatments at the same time (Dias et al. 2013).
+Using a Bayesian hierarchical model, all direct and indirect comparisons are taken into account to arrive at a single consistent estimate of the effect of all included treatments based on all included studies.
 
-This package allows the automated generation of consistency that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package) or WinBUGS (using the R2WinBUGS package).
-Furthermore it allows interoperability with GeMTC files that were created by the GeMTC GUI or exported through \href{http://drugis.org/addis}{ADDIS}.
-The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/mtc}{Github}.
+This package allows the automated generation of network meta-analysis models that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package) or WinBUGS (using the R2WinBUGS package).
+Furthermore it allows interoperability with GeMTC files that were created by the GeMTC GUI or exported from \href{http://drugis.org/addis}{ADDIS}.
+The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/gemtc}{Github}.
 
 See \url{http://drugis.org/gemtc} for more information.
-}
-
-\section{Exchangeability and (in)consistency}{ 
-The key assumption in meta-analysis is that the included studies are exchangeable, meaning that they measure the same underlying relative effects.
-This assumption can be violated in many ways, for example because some studies were carried out in a different population, or because some studies had a longer duration.
-When the exchangeability assumption is violated in a pair-wise meta-analysis this results in heterogeneity, i.e. differences between studies within a comparison.
-
-In network meta-analysis, the exchangeability assumption can also be violated between comparisons.
-Inconsistency occurs when a treatment C has a different effect when it is compared with A or B, i.e. studies comparing A and C are systematically different from studies comparing B and C.
-Thus, inconsistency may also be present when a series of pair-wise meta-analyses are conducted, but can only be detected in a network meta-analysis, and then only when there are closed loops in the evidence structure. 
-
-Statistical models can be used to detect inconsistency (Lu & Ades, 2006; Dias et al. 2010), but careful consideration of the characteristics of the studies is even more important to ensure valid results from a network meta-analysis. 
-Unfortunately, inconsistency models are currently not available in this R package, but will be in the future. 
-
-If there is no relevant inconsistency in the evidence, a consistency model can be used to draw conclusions about the relative effects of the included treatments and their ranking.
 }
 
 \author{Gert van Valkenhoef}
 
 \references{
-G. van Valkenhoef, G. Lu, B. de Brock, H. Hillege, A.E. Ades and N.J. Welton (2012), \emph{Automating network meta-analysis},
-Research Synthesis Methods, in press.
+G. van Valkenhoef, G. Lu, B. de Brock, H. Hillege, A.E. Ades, and N.J. Welton (2012), \emph{Automating network meta-analysis},
+Research Synthesis Methods 3(4):285-299.
 [\href{http://dx.doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
 
-G. van Valkenhoef, T. Tervonen, B. de Brock and H. Hillege (2012),
-\emph{Algorithmic Parameterization of Mixed Treatment Comparisons},
-Statistics and Computing, 22(5): 1099-1111.
-[\href{http://dx.doi.org/10.1007/s11222-011-9281-9}{doi:10.1007/s11222-011-9281-9}]
-
-G. Lu and A.E. Ades (2004), \emph{Combination of direct and indirect evidence in mixed treatment comparisons},
-Statistics in Medicine, 23(20):3105-3124.
-[\href{http://dx.doi.org/10.1002/sim.1875}{doi:10.1002/sim.1875}]
-
-G. Lu and A.E. Ades (2006), \emph{Assessing evidence inconsistency in mixed treatment comparisons},
-Journal of the American Statistical Association, 101(474): 447-459.
-[\href{http://dx.doi.org/10.1198/016214505000001302}{doi:10.1198/016214505000001302}]
-
-S. Dias, N.J. Welton, D.M. Caldwell, A.E. Ades (2010), \emph{Checking consistency in mixed treatment comparison meta-analysis},
-Statistics in Medicine,  30;29(7-8):932-44.
-[\href{http://dx.doi.org/10.1002/sim.3767}{doi:10.1002/sim.3767}]
+S. Dias, A.J. Sutton, A.E. Ades, and N.J. Welton (2013),
+\emph{A Generalized Linear Modeling Framework for Pairwise and Network Meta-analysis of Randomized Controlled Trials},
+Medical Decision Making 33(5):607-617.
+[\href{http://dx.doi.org/10.1177/0272989X12458724}{doi:10.1177/0272989X12458724}]
 }
 \seealso{
 \code{\link{mtc.network}},
