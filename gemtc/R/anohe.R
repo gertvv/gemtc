@@ -177,6 +177,7 @@ summary.mtc.anohe <- function(object, ...) {
 	result.use <- object$result.use
 	result.ume <- object$result.ume
 	result.cons <- object$result.cons
+	network <- result.cons$model$network
 
     se <- decompose.trials(result.use)
     se$s <- lapply(names(se$e), function(s) { rep(s, length(se$e[[s]])) })
