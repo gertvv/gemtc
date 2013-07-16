@@ -1,5 +1,4 @@
 get.row.groups <- function(data, group.labels) {
-  row.old <- 1
   if (is.factor(data$group)) {
     data$group <- as.character(data$group)
   }
@@ -88,7 +87,8 @@ text.style  <- function(styles) {
   }
 }
 
-draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv, left.label, right.label) {
+draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns, column.groups,
+                      column.group.labels, header.labels, text.fn, xrange, scale.trf, left.label, right.label) {
   columns.grouped <- !is.null(column.groups)
   row.offset <- if (columns.grouped) 2 else 1
 
@@ -358,7 +358,11 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     if (length(page) > 0) {
       rowheights <- do.call(unit.c, lapply(page, function(grp) { grp$rowheight }))
       fd <- lapply(page, function(grp) { grp$forest.data })
-      draw.page(fd, colwidth, rowheights, ci.label, grouped, columns, column.groups, column.group.labels, header.labels, text.fn, xrange, scale.trf, scale.inv, left.label, right.label)
+      draw.page(fd, colwidth, rowheights, ci.label,
+                grouped, columns, column.groups,
+                column.group.labels, header.labels,
+                text.fn, xrange, scale.trf,
+                left.label, right.label)
     }
   }
 }

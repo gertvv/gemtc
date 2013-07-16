@@ -1,7 +1,5 @@
 # Unrelated study effects model
 mtc.model.use <- function(model) {
-  network <- model$network
-
   model$code <- mtc.model.code(model, c(), '', template='gemtc.model.use.template.txt')
 
   model$data <- mtc.model.data(model)
