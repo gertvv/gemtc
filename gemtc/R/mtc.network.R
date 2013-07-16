@@ -1,390 +1,390 @@
 standardize.treatments <- function(treatments) {
-    treatments$id <- as.factor(treatments$id)
-    treatments$description <- as.character(treatments$description)
-    rownames(treatments) <- as.character(treatments$id)
-    treatments[order(treatments$id), ]
+  treatments$id <- as.factor(treatments$id)
+  treatments$description <- as.character(treatments$description)
+  rownames(treatments) <- as.character(treatments$id)
+  treatments[order(treatments$id), ]
 }
 
 standardize.data <- function(data, treatment.levels, re.order=FALSE) {
-    data$study <- factor(as.factor(data$study))
-    data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
-	if (re.order) {
-		na <- sapply(data$study, function(study) { sum(data$study == study) })
-		bl <- !is.na(data$diff)
-		data <- data[order(na, data$study, bl, data$treatment), ]
-	} else {
-		data <- data[order(data$study, data$treatment), ]
-	}
-	if (nrow(data) > 0) {
-		rownames(data) <- seq(1:nrow(data))
-	}
-    data
+  data$study <- factor(as.factor(data$study))
+  data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
+  if (re.order) {
+    na <- sapply(data$study, function(study) { sum(data$study == study) })
+    bl <- !is.na(data$diff)
+    data <- data[order(na, data$study, bl, data$treatment), ]
+  } else {
+    data <- data[order(data$study, data$treatment), ]
+  }
+  if (nrow(data) > 0) {
+    rownames(data) <- seq(1:nrow(data))
+  }
+  data
 }
 
 remove.onearm <- function(data, warn=FALSE) {
-    # Remove 1-arm studies
-    sel <- as.logical(sapply(data[,'study'], function(study) {
-        sum(data[,'study'] == study) > 1
-    }))
+  # Remove 1-arm studies
+  sel <- as.logical(sapply(data[,'study'], function(study) {
+    sum(data[,'study'] == study) > 1
+  }))
 
-	if (warn && !all(sel)) {
-		warning(paste("Removing", sum(!sel), "one-arm studies"))
-	}
-    data[sel, ]
+  if (warn && !all(sel)) {
+    warning(paste("Removing", sum(!sel), "one-arm studies"))
+  }
+  data[sel, ]
 }
 
 mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.re=NULL) {
-	if (is.null(data) && is.null(data.re)) {
-		stop("Either `data' or `data.re' (or both) must be specified")
-	}
-    # standardize the data
+  if (is.null(data) && is.null(data.re)) {
+    stop("Either `data' or `data.re' (or both) must be specified")
+  }
+  # standardize the data
+  if (!is.null(data)) {
+    if (!is.data.frame(data)) {
+      data <- do.call(rbind, lapply(data, as.data.frame))
+    }
+    data <- remove.onearm(data, warn=TRUE)
+    mtc.validate.data.ab(data)
+  }
+  if (!is.null(data.re)) {
+    if (!is.data.frame(data.re)) {
+      data.re <- do.call(rbind, lapply(data.re, as.data.frame))
+    }
+    data.re <- remove.onearm(data.re, warn=TRUE)
+    mtc.validate.data.re(data.re)
+  }
+
+  # standardize the treatments
+  if (is.null(treatments)) {
+    data.treatments <- vector(mode="character")
     if (!is.null(data)) {
-		if (!is.data.frame(data)) {
-			data <- do.call(rbind, lapply(data, as.data.frame))
-		}
-		data <- remove.onearm(data, warn=TRUE)
-		mtc.validate.data.ab(data)
+      data.treatments <- c(data.treatments, as.character(data$treatment))
     }
     if (!is.null(data.re)) {
-		if (!is.data.frame(data.re)) {
-			data.re <- do.call(rbind, lapply(data.re, as.data.frame))
-		}
-		data.re <- remove.onearm(data.re, warn=TRUE)
-		mtc.validate.data.re(data.re)
+      data.treatments <- c(data.treatments, as.character(data.re$treatment))
     }
+    treatments <- unique(data.treatments)
+  }
+  if (is.list(treatments) && !is.data.frame(treatments)) {
+    treatments <- as.data.frame(do.call(rbind, treatments))
+  }
+  if (is.character(treatments) || is.factor(treatments)) {
+    treatments <- data.frame(id=treatments, description=treatments)
+  }
+  treatments <- standardize.treatments(treatments)
 
-    # standardize the treatments
-    if (is.null(treatments)) {
-		data.treatments <- vector(mode="character")
-		if (!is.null(data)) {
-			data.treatments <- c(data.treatments, as.character(data$treatment))
-		}
-		if (!is.null(data.re)) {
-			data.treatments <- c(data.treatments, as.character(data.re$treatment))
-		}
-        treatments <- unique(data.treatments)
-    }
-    if (is.list(treatments) && !is.data.frame(treatments)) { 
-        treatments <- as.data.frame(do.call(rbind, treatments))
-    }
-    if (is.character(treatments) || is.factor(treatments)) {
-        treatments <- data.frame(id=treatments, description=treatments)
-    }
-    treatments <- standardize.treatments(treatments)
+  network <- list(
+    description=description,
+    treatments=treatments)
 
-    network <- list(
-        description=description,
-        treatments=treatments)
+  if (!is.null(data)) {
+    network <- c(network, list(data=standardize.data(data, levels(treatments$id))))
+  }
+  if (!is.null(data.re)) {
+    network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id), re.order=TRUE)))
+  }
 
-	if (!is.null(data)) {
-		network <- c(network, list(data=standardize.data(data, levels(treatments$id))))
-	}
-	if (!is.null(data.re)) {
-		network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id), re.order=TRUE)))
-	}
+  mtc.network.validate(network)
 
-	mtc.network.validate(network)
-
-    class(network) <- "mtc.network"
-    network
+  class(network) <- "mtc.network"
+  network
 }
 
 read.mtc.network <- function(file) {
-    doc <- XML::xmlInternalTreeParse(file)
-    description <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "description"))
-    type <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "type", "rate"))
-    treatments <- XML::xpathApply(doc, "/network/treatments/treatment",
-        function(node) {
-            c(
-                id = XML::xmlGetAttr(node, "id"),
-                description = XML::xmlValue(node)
-            )
-        }
-    )
-    if (identical(type, "rate")) {
-        data <- XML::xpathApply(doc, "/network/studies/study/measurement",
-            function(node) {
-                list(
-                    study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
-                    treatment = XML::xmlGetAttr(node, "treatment"),
-                    responders = as.numeric(XML::xmlGetAttr(node, "responders")),
-                    sampleSize = as.numeric(XML::xmlGetAttr(node, "sample"))
-                )
-            }
-        )
-    } else if (identical(type, "continuous")) {
-        data <- XML::xpathApply(doc, "/network/studies/study/measurement",
-            function(node) {
-                list(
-                    study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
-                    treatment = XML::xmlGetAttr(node, "treatment"),
-                    mean = as.numeric(XML::xmlGetAttr(node, "mean")),
-                    std.dev = as.numeric(XML::xmlGetAttr(node, "standardDeviation")),
-                    sampleSize = as.numeric(XML::xmlGetAttr(node, "sample"))
-                )
-            }
-        )
-    } else if (identical(type, "none")) {
-        data <- XML::xpathApply(doc, "/network/studies/study/measurement",
-            function(node) {
-                list(
-                    study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
-                    treatment = XML::xmlGetAttr(node, "treatment")
-                )
-            }
-        )
+  doc <- XML::xmlInternalTreeParse(file)
+  description <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "description"))
+  type <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "type", "rate"))
+  treatments <- XML::xpathApply(doc, "/network/treatments/treatment",
+    function(node) {
+      c(
+        id = XML::xmlGetAttr(node, "id"),
+        description = XML::xmlValue(node)
+      )
     }
-    mtc.network(data, treatments=treatments, description=description)
+  )
+  if (identical(type, "rate")) {
+    data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+      function(node) {
+        list(
+          study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
+          treatment = XML::xmlGetAttr(node, "treatment"),
+          responders = as.numeric(XML::xmlGetAttr(node, "responders")),
+          sampleSize = as.numeric(XML::xmlGetAttr(node, "sample"))
+        )
+      }
+    )
+  } else if (identical(type, "continuous")) {
+    data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+      function(node) {
+        list(
+          study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
+          treatment = XML::xmlGetAttr(node, "treatment"),
+          mean = as.numeric(XML::xmlGetAttr(node, "mean")),
+          std.dev = as.numeric(XML::xmlGetAttr(node, "standardDeviation")),
+          sampleSize = as.numeric(XML::xmlGetAttr(node, "sample"))
+        )
+      }
+    )
+  } else if (identical(type, "none")) {
+    data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+      function(node) {
+        list(
+          study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
+          treatment = XML::xmlGetAttr(node, "treatment")
+        )
+      }
+    )
+  }
+  mtc.network(data, treatments=treatments, description=description)
 }
 
 write.mtc.network <- function(network, file) {
-    root <- XML::newXMLNode("network")
-    XML::xmlAttrs(root)["description"] <- network$description
-    type <- if ('responders' %in% colnames(network[['data']])) {
-        'rate'
-    } else if ('mean' %in% colnames(network[['data']])) {
-        'continuous'
-    } else {
-        'none'
+  root <- XML::newXMLNode("network")
+  XML::xmlAttrs(root)["description"] <- network$description
+  type <- if ('responders' %in% colnames(network[['data']])) {
+    'rate'
+  } else if ('mean' %in% colnames(network[['data']])) {
+    'continuous'
+  } else {
+    'none'
+  }
+  XML::xmlAttrs(root)["type"] <- type
+
+  treatments <- XML::newXMLNode("treatments", parent = root)
+  apply(network$treatments, 1, function(row) {
+    node <- XML::newXMLNode("treatment", parent = treatments)
+    XML::xmlAttrs(node)["id"] <- row['id']
+    XML::xmlValue(node) <- row['description']
+  })
+
+  studies <- XML::newXMLNode("studies", parent = root)
+  study <- sapply(levels(network[['data']]$study), function(sid) {
+    node <- XML::newXMLNode("study", parent = studies)
+    XML::xmlAttrs(node)["id"] <- sid
+    node
+  })
+
+  apply(network[['data']], 1, function(row) {
+    node <- XML::newXMLNode('measurement', parent=study[[row['study']]])
+    XML::xmlAttrs(node)['treatment'] <- row['treatment']
+    if (identical(type, 'rate')) {
+      XML::xmlAttrs(node)['responders'] <- row['responders']
+      XML::xmlAttrs(node)['sample'] <- row['sampleSize']
+    } else if (identical(type, 'continuous')) {
+      XML::xmlAttrs(node)['mean'] <- row['mean']
+      XML::xmlAttrs(node)['standardDeviation'] <- row['std.dev']
+      XML::xmlAttrs(node)['sample'] <- row['sampleSize']
     }
-    XML::xmlAttrs(root)["type"] <- type
+    node
+  })
 
-    treatments <- XML::newXMLNode("treatments", parent = root)
-    apply(network$treatments, 1, function(row) {
-        node <- XML::newXMLNode("treatment", parent = treatments)
-        XML::xmlAttrs(node)["id"] <- row['id']
-        XML::xmlValue(node) <- row['description']
-    })
-
-    studies <- XML::newXMLNode("studies", parent = root)
-    study <- sapply(levels(network[['data']]$study), function(sid) {
-        node <- XML::newXMLNode("study", parent = studies)
-        XML::xmlAttrs(node)["id"] <- sid
-        node
-    })
-
-    apply(network[['data']], 1, function(row) {
-        node <- XML::newXMLNode('measurement', parent=study[[row['study']]])
-        XML::xmlAttrs(node)['treatment'] <- row['treatment']
-        if (identical(type, 'rate')) {
-            XML::xmlAttrs(node)['responders'] <- row['responders']
-            XML::xmlAttrs(node)['sample'] <- row['sampleSize']
-        } else if (identical(type, 'continuous')) {
-            XML::xmlAttrs(node)['mean'] <- row['mean']
-            XML::xmlAttrs(node)['standardDeviation'] <- row['std.dev']
-            XML::xmlAttrs(node)['sample'] <- row['sampleSize']
-        }
-        node
-    })
-
-    cat(XML::saveXML(root), file=file)
+  cat(XML::saveXML(root), file=file)
 }
 
 mtc.validate.data.ab <- function(data) {
-	columns <- colnames(data)
-	contColumns <- c('mean', 'std.dev', 'sampleSize')
-	dichColumns <- c('responders', 'sampleSize')
+  columns <- colnames(data)
+  contColumns <- c('mean', 'std.dev', 'sampleSize')
+  dichColumns <- c('responders', 'sampleSize')
 
-	if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
-		stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
-	}
+  if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
+    stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
+  }
 
-	if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
-		stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
-	}
+  if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
+    stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
+  }
 
-	if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
-		stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
-	}
+  if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
+    stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
+  }
 }
 
 mtc.validate.data.re <- function(data) {
-	columns <- colnames(data)
-	reColumns <- c('diff', 'std.err')
-	if (!all(reColumns %in% columns)) {
-		stop(paste('data.re must contain columns: ', paste(reColumns, collapse=', ')))
-	}
+  columns <- colnames(data)
+  reColumns <- c('diff', 'std.err')
+  if (!all(reColumns %in% columns)) {
+    stop(paste('data.re must contain columns: ', paste(reColumns, collapse=', ')))
+  }
 
-	baselineCount <- sapply(unique(data$study), function(study) { sum(is.na(data$diff[data$study == study])) })
-	if (!all(baselineCount == 1)) {
-		stop('Each study in data.re must have a unique baseline arm (diff=NA)')
-	}
-	if (!all(!is.na(data$std.err[!is.na(data$diff)]))) {
-		stop('All non-baseline arms in data.re must have std.err specified')
-	}
+  baselineCount <- sapply(unique(data$study), function(study) { sum(is.na(data$diff[data$study == study])) })
+  if (!all(baselineCount == 1)) {
+    stop('Each study in data.re must have a unique baseline arm (diff=NA)')
+  }
+  if (!all(!is.na(data$std.err[!is.na(data$diff)]))) {
+    stop('All non-baseline arms in data.re must have std.err specified')
+  }
 
-	studies <- unique(data$study)
-	ma <- sapply(studies, function(study) { sum(data$study == study) > 2 })
-	ma <- studies[ma]
-	if (!all(!is.na(data$std.err[data$study %in% ma]))) {
-		stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
-	}
+  studies <- unique(data$study)
+  ma <- sapply(studies, function(study) { sum(data$study == study) > 2 })
+  ma <- studies[ma]
+  if (!all(!is.na(data$std.err[data$study %in% ma]))) {
+    stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
+  }
 }
 
-mtc.network.validate <- function(network) { 
-    # Check that there is some data
-    stopifnot(nrow(network$treatments) > 0)  
-    stopifnot(nrow(network[['data']]) > 0 || nrow(network[['data.re']]) > 0)
+mtc.network.validate <- function(network) {
+  # Check that there is some data
+  stopifnot(nrow(network$treatments) > 0)
+  stopifnot(nrow(network[['data']]) > 0 || nrow(network[['data.re']]) > 0)
 
-    # Check that the treatments are correctly cross-referenced and have valid names
-	all.treatments <- c(network[['data']]$treatment, network[['data.re']]$treatment)
-	all.treatments <- factor(all.treatments, levels=1:nlevels(network$treatments$id), labels=levels(network$treatments$id))
-    stopifnot(all(all.treatments %in% network$treatments$id))
-    stopifnot(all(network$treatments$id %in% all.treatments))
-    idok <- regexpr("^[A-Za-z0-9_]+$", network$treatment$id) != -1
-    if(!all(idok)) {
-        stop(paste('Treatment name "',
-            network$treatment$id[which(!idok)], '" invalid.\n',
-            ' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
+  # Check that the treatments are correctly cross-referenced and have valid names
+  all.treatments <- c(network[['data']]$treatment, network[['data.re']]$treatment)
+  all.treatments <- factor(all.treatments, levels=1:nlevels(network$treatments$id), labels=levels(network$treatments$id))
+  stopifnot(all(all.treatments %in% network$treatments$id))
+  stopifnot(all(network$treatments$id %in% all.treatments))
+  idok <- regexpr("^[A-Za-z0-9_]+$", network$treatment$id) != -1
+  if(!all(idok)) {
+    stop(paste('Treatment name "',
+      network$treatment$id[which(!idok)], '" invalid.\n',
+      ' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
+  }
+
+  # Check that studies are not duplicated between $data and $data.re
+  if (!is.null(network[['data']]) && !is.null(network[['data.re']])) {
+    dup.study <- intersect(unique(network[['data']]$study), unique(network[['data.re']]$study))
+    if (length(dup.study) > 0) {
+      stop(paste('Studies', paste(dup.study, collapse=", "), 'occur in both data and data.re'))
     }
+  }
 
-	# Check that studies are not duplicated between $data and $data.re
-	if (!is.null(network[['data']]) && !is.null(network[['data.re']])) {
-		dup.study <- intersect(unique(network[['data']]$study), unique(network[['data.re']]$study))
-		if (length(dup.study) > 0) {
-			stop(paste('Studies', paste(dup.study, collapse=", "), 'occur in both data and data.re'))
-		}
-	}
+  # Check that the data frame has a sensible combination of columns
+  if (!is.null(network[['data']])) {
+    mtc.validate.data.ab(network[['data']])
+  }
 
-    # Check that the data frame has a sensible combination of columns
-	if (!is.null(network[['data']])) {
-		mtc.validate.data.ab(network[['data']])
-	}
-
-	# Check data.re is well formed
-	if (!is.null(network[['data.re']])) {
-		mtc.validate.data.re(network[['data.re']])
-	}
+  # Check data.re is well formed
+  if (!is.null(network[['data.re']])) {
+    mtc.validate.data.re(network[['data.re']])
+  }
 }
 
 as.treatment.factor <- function(x, network) {
-    v <- network$treatments$id
-    if (is.numeric(x)) {
-        factor(x, levels=1:nlevels(v), labels=levels(v))
-    } else if (is.factor(x) || is.character(x)) {
-        x <- as.character(x)
-        factor(x, levels=levels(v))
-    }
+  v <- network$treatments$id
+  if (is.numeric(x)) {
+    factor(x, levels=1:nlevels(v), labels=levels(v))
+  } else if (is.factor(x) || is.character(x)) {
+    x <- as.character(x)
+    factor(x, levels=levels(v))
+  }
 }
 
 mtc.merge.data <- function(network) {
-	data.frame(
-		study=c(
-			as.character(network[['data']]$study),
-			as.character(network[['data.re']]$study)),
-		treatment=as.treatment.factor(c(
-			network[['data']]$treatment,
-			network[['data.re']]$treatment), network),
-		stingsAsFactors=FALSE)
+  data.frame(
+    study=c(
+      as.character(network[['data']]$study),
+      as.character(network[['data.re']]$study)),
+    treatment=as.treatment.factor(c(
+      network[['data']]$treatment,
+      network[['data.re']]$treatment), network),
+    stingsAsFactors=FALSE)
 }
 
 mtc.studies.list <- function(network) {
-	rle(as.character(mtc.merge.data(network)$study))
+  rle(as.character(mtc.merge.data(network)$study))
 }
 
 mtc.study.design <- function(network, study) {
-    data <- mtc.merge.data(network)
-    data$treatment[data$study == study]
+  data <- mtc.merge.data(network)
+  data$treatment[data$study == study]
 }
 
 coerce.factor <- function(x, prototype) {
-    factor(x, levels=1:nlevels(prototype), labels=levels(prototype))
+  factor(x, levels=1:nlevels(prototype), labels=levels(prototype))
 }
 
 # See nodesplit-auto draft for definition
 has.indirect.evidence <- function(network, t1, t2) {
-	has.both <- sapply(mtc.studies.list(network)$values, function(study) {
-		all(c(t1, t2) %in% mtc.study.design(network, study))
-	})
+  has.both <- sapply(mtc.studies.list(network)$values, function(study) {
+    all(c(t1, t2) %in% mtc.study.design(network, study))
+  })
 
-	data <- rbind(network[['data']], network[['data.re']])
-	data <- data[!has.both[data[['study']]] | (data[['treatment']] != t1 & data[['treatment']] != t2), ]
-	data <- remove.onearm(data)
+  data <- rbind(network[['data']], network[['data.re']])
+  data <- data[!has.both[data[['study']]] | (data[['treatment']] != t1 & data[['treatment']] != t2), ]
+  data <- remove.onearm(data)
 
-	if (nrow(data) > 0) {
-		n <- mtc.network(data)
-		g <- mtc.network.graph(n)
-		all(c(t1, t2) %in% V(g)$name) && as.logical(is.finite(shortest.paths(as.undirected(g), t1, t2)))
-	} else {
-		FALSE
-	}
+  if (nrow(data) > 0) {
+    n <- mtc.network(data)
+    g <- mtc.network.graph(n)
+    all(c(t1, t2) %in% V(g)$name) && as.logical(is.finite(shortest.paths(as.undirected(g), t1, t2)))
+  } else {
+    FALSE
+  }
 }
 
 mtc.treatment.pairs <- function(treatments) {
-    n <- length(treatments)
-    t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
-    t2 <- do.call(c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
-    data.frame(t1=coerce.factor(t1, treatments), t2=coerce.factor(t2, treatments))
+  n <- length(treatments)
+  t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
+  t2 <- do.call(c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
+  data.frame(t1=coerce.factor(t1, treatments), t2=coerce.factor(t2, treatments))
 }
 
 # Get all comparisons with direct evidence from the data set.
 # Returns a (sorted) data frame with two columns (t1 and t2).
 mtc.comparisons <- function(network) {
-    data <- mtc.merge.data(network)
+  data <- mtc.merge.data(network)
 
-    # Identify the unique "designs" (treatment combinations)
-    design <- function(study) { mtc.study.design(network, study) }
-    designs <- unique(lapply(levels(data$study), design))
+  # Identify the unique "designs" (treatment combinations)
+  design <- function(study) { mtc.study.design(network, study) }
+  designs <- unique(lapply(levels(data$study), design))
 
-    # Generate all pair-wise comparisons from each "design"
-    comparisons <- do.call(rbind, lapply(designs, mtc.treatment.pairs))
+  # Generate all pair-wise comparisons from each "design"
+  comparisons <- do.call(rbind, lapply(designs, mtc.treatment.pairs))
 
-    # Ensure the output comparisons are unique and always in the same order
-    comparisons <- unique(comparisons)
-    comparisons <- comparisons[order(comparisons$t1, comparisons$t2), ]
-    row.names(comparisons) <- NULL
-    comparisons$t1 <- as.treatment.factor(comparisons$t1, network)
-    comparisons$t2 <- as.treatment.factor(comparisons$t2, network)
-    comparisons
+  # Ensure the output comparisons are unique and always in the same order
+  comparisons <- unique(comparisons)
+  comparisons <- comparisons[order(comparisons$t1, comparisons$t2), ]
+  row.names(comparisons) <- NULL
+  comparisons$t1 <- as.treatment.factor(comparisons$t1, network)
+  comparisons$t2 <- as.treatment.factor(comparisons$t2, network)
+  comparisons
 }
 
 edges.create <- function(e, ...) {
-    e <- t(matrix(c(e$t1, e$t2), ncol=2))
-    edges(as.vector(e), ...)
+  e <- t(matrix(c(e$t1, e$t2), ncol=2))
+  edges(as.vector(e), ...)
 }
 
 graph.create <- function(v, e, ...) {
-    g <- graph.empty()
-    g <- g + vertex(levels(v))
-    g <- g + edges.create(e, ...)
-    g
+  g <- graph.empty()
+  g <- g + vertex(levels(v))
+  g <- g + edges.create(e, ...)
+  g
 }
 
 mtc.network.graph <- function(network) {
-    comparisons <- mtc.comparisons(network)
-    treatments <- network$treatments$id
-    graph.create(treatments, comparisons, arrow.mode=0)
+  comparisons <- mtc.comparisons(network)
+  treatments <- network$treatments$id
+  graph.create(treatments, comparisons, arrow.mode=0)
 }
 
 ## mtc.network class methods
 print.mtc.network <- function(x, ...) {
-    cat("MTC dataset: ", x$description, "\n", sep="")
-	if (!is.null(x[['data']])) {
-		cat('Arm-level data: \n')
-		print(x[['data']])
-	}
-	if (!is.null(x[['data.re']])) {
-		cat('Relative effect data: \n')
-		print(x[['data.re']])
-	}
+  cat("MTC dataset: ", x$description, "\n", sep="")
+  if (!is.null(x[['data']])) {
+    cat('Arm-level data: \n')
+    print(x[['data']])
+  }
+  if (!is.null(x[['data.re']])) {
+    cat('Relative effect data: \n')
+    print(x[['data.re']])
+  }
 }
 
 summary.mtc.network <- function(object, ...) {
-	data <- mtc.merge.data(object)
-    studies <- levels(data$study)
-    m <- sapply(object$treatments$id, function(treatment) {
-        sapply(studies, function(study) { 
-            any(data$study == study & data$treatment == treatment)
-        })
+  data <- mtc.merge.data(object)
+  studies <- levels(data$study)
+  m <- sapply(object$treatments$id, function(treatment) {
+    sapply(studies, function(study) {
+      any(data$study == study & data$treatment == treatment)
     })
-    colnames(m) <- object$treatments$id
-    x <- as.factor(apply(m, 1, sum))
-    levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
-    list("Description"=paste("MTC dataset: ", object$description, sep=""),
-         "Studies per treatment"=apply(m, 2, sum), 
-         "Number of n-arm studies"=summary(x)) 
+  })
+  colnames(m) <- object$treatments$id
+  x <- as.factor(apply(m, 1, sum))
+  levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
+  list("Description"=paste("MTC dataset: ", object$description, sep=""),
+     "Studies per treatment"=apply(m, 2, sum),
+     "Number of n-arm studies"=summary(x))
 }
 
 plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
-    igraph::plot.igraph(mtc.network.graph(x), layout=layout, ...)
+  igraph::plot.igraph(mtc.network.graph(x), layout=layout, ...)
 }

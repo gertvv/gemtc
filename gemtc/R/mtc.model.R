@@ -1,101 +1,101 @@
 ## mtc.model class methods
 
 mtc.model.call <- function(fn, model, ...) {
-    fn <- paste(fn, model$type, sep='.')
-	do.call(fn, c(list(model), list(...)))
+  fn <- paste(fn, model$type, sep='.')
+  do.call(fn, c(list(model), list(...)))
 }
 
 mtc.model.defined <- function(model) {
-	fns <- c('mtc.model', 'mtc.model.name')
-	fns <- paste(fns, model$type, sep='.')
-	all(exists(fns, mode='function'))
+  fns <- c('mtc.model', 'mtc.model.name')
+  fns <- paste(fns, model$type, sep='.')
+  all(exists(fns, mode='function'))
 }
 
 mtc.model <- function(network, type="consistency",
-		factor=2.5, n.chain=4,
-		likelihood=NULL, link=NULL, ...) {
-	if (!inherits(network, "mtc.network")) {
-		stop('Given network is not an mtc.network')
-	}
+    factor=2.5, n.chain=4,
+    likelihood=NULL, link=NULL, ...) {
+  if (!inherits(network, "mtc.network")) {
+    stop('Given network is not an mtc.network')
+  }
 
-	model <- list(
-        type = type,
-        network = network,
-        n.chain = n.chain,
-        var.scale = factor)
+  model <- list(
+    type = type,
+    network = network,
+    n.chain = n.chain,
+    var.scale = factor)
 
-    if (!mtc.model.defined(model)) {
-        stop(paste(type, 'is not an MTC model type.'))
+  if (!mtc.model.defined(model)) {
+    stop(paste(type, 'is not an MTC model type.'))
+  }
+
+  model$likelihood <- likelihood
+  model$link <- link
+  if (!is.null(network[['data']]) && 'responders' %in% colnames(network[['data']])) {
+    if (is.null(likelihood)) {
+      model$likelihood = 'binom'
     }
+    if (is.null(link)) {
+      model$link = 'logit'
+    }
+  } else if (!is.null(network[['data']]) && 'mean' %in% colnames(network[['data']])) {
+    if (is.null(likelihood)) {
+      model$likelihood = 'normal'
+    }
+    if (is.null(link)) {
+      model$link = 'identity'
+    }
+  } else {
+    if (is.null(likelihood)) {
+      warning('Likelihood can not be inferred. Defaulting to normal.')
+      model$likelihood = 'normal'
+    }
+    if (is.null(link)) {
+      warning('Link can not be inferred. Defaulting to identity.')
+      model$link = 'identity'
+    }
+  }
+  if (!ll.defined(model)) {
+    stop(paste('likelihood = ', model$likelihood,
+      ', link = ', model$link, ' not found!', sep=''))
+  }
 
-	model$likelihood <- likelihood
-	model$link <- link
-	if (!is.null(network[['data']]) && 'responders' %in% colnames(network[['data']])) {
-		if (is.null(likelihood)) {
-			model$likelihood = 'binom'
-		}
-		if (is.null(link)) {
-			model$link = 'logit'
-		}
-	} else if (!is.null(network[['data']]) && 'mean' %in% colnames(network[['data']])) {
-		if (is.null(likelihood)) {
-			model$likelihood = 'normal'
-		}
-		if (is.null(link)) {
-			model$link = 'identity'
-		}
-	} else {
-		if (is.null(likelihood)) {
-			warning('Likelihood can not be inferred. Defaulting to normal.')
-			model$likelihood = 'normal'
-		}
-		if (is.null(link)) {
-			warning('Link can not be inferred. Defaulting to identity.')
-			model$link = 'identity'
-		}
-	}
-	if (!ll.defined(model)) {
-		stop(paste('likelihood = ', model$likelihood,
-			', link = ', model$link, ' not found!', sep=''))
-	}
+  model$om.scale <- guess.scale(model)
 
-    model$om.scale <- guess.scale(model)
-
-	mtc.model.call('mtc.model', model, ...)
+  mtc.model.call('mtc.model', model, ...)
 }
 
 print.mtc.model <- function(x, ...) {
-    cat("MTC ", x$type, " model: ", x$description, "\n", sep="")
+  cat("MTC ", x$type, " model: ", x$description, "\n", sep="")
 }
 
 summary.mtc.model <- function(object, ...) {
-    list("Description"=paste("MTC ", object$type, " model: ", object$description, sep=""), 
-         "Parameters"=mtc.basic.parameters(object))
+  list("Description"=paste("MTC ", object$type, " model: ", object$description, sep=""),
+     "Parameters"=mtc.basic.parameters(object))
 }
 
 plot.mtc.model <- function(x, layout=igraph::layout.circle, ...) {
-    igraph::plot.igraph(mtc.model.graph(x), layout=layout, ...)
+  igraph::plot.igraph(mtc.model.graph(x), layout=layout, ...)
 }
 
-mtc.model.graph <- function(model) { 
-	comparisons <- mtc.comparisons(model$network)
-	g <- if (!is.null(model$tree)) model$tree else model$graph
-	g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
-	g
+mtc.model.graph <- function(model) {
+  comparisons <- mtc.comparisons(model$network)
+  g <- if (!is.null(model$tree)) model$tree else model$graph
+  g <- g + edges(as.vector(unlist(non.edges(g, comparisons))), arrow.mode=0, lty=1, color="grey")
+  g
 }
 
-# filters list of comparison by edges that are not yet present in graph g 
-non.edges <- function(g, comparisons) { 
-    sapply(1:nrow(comparisons), function(i) {
-        x <- c(comparisons$t1[i], comparisons$t2[i])
-        if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x
-    })
+# filters list of comparison by edges that are not yet present in graph g
+non.edges <- function(g, comparisons) {
+  sapply(1:nrow(comparisons), function(i) {
+    x <- c(comparisons$t1[i], comparisons$t2[i])
+    if (are.connected(g, x[1], x[2]) || are.connected(g, x[2], x[1])) c() else x
+  })
 }
 
 mtc.basic.parameters <- function(model) {
-    graph <- if (!is.null(model$tree)) model$tree else model$graph
-    sapply(E(graph), function(e) {
-        v <- get.edge(graph, e)
-        paste("d", V(graph)[v[1]]$name, V(graph)[v[2]]$name, sep=".")
-    })
+  graph <- if (!is.null(model$tree)) model$tree else model$graph
+  sapply(E(graph), function(e) {
+    v <- get.edge(graph, e)
+    paste("d", V(graph)[v[1]]$name, V(graph)[v[2]]$name, sep=".")
+  })
 }
