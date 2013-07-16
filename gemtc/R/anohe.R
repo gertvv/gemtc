@@ -266,7 +266,6 @@ summary.mtc.anohe <- function(object, ...) {
     }
   })
   incons <- apply(pairEffects, 1, function(row) {
-    data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
     has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
     if (has.indirect) {
       dir <- as.numeric(row[3:5])

@@ -5,7 +5,7 @@ mtc.arm.mle.binom.cloglog <- function(data) {
   n <- data['sampleSize'] + 1
   mu <- as.numeric(log(-log(1 - s/n)))
   sigma <- as.numeric(sqrt(1/n^2)/exp(mu))
-  x <- c('mean'=mu, 'sd'=min(1, sigma))
+  c('mean'=mu, 'sd'=min(1, sigma))
 }
 
 # Relative effect estimate (given a two-row data frame)

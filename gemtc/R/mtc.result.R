@@ -27,10 +27,12 @@ forest.mtc.result <- function(x, ...) {
   #group.labels <- paste("Relative to ", group.names)
   names(group.labels) <- group.names
   params <- list(...)
+
   data <- data.frame(
     id=paste(comps[,2], comps[,1], sep=" vs "),
     pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5],
     group=groups, style="normal")
+
   blobbogram(data,
     columns=c(), column.labels=c(),
     id.label="Comparison",
