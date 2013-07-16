@@ -9,8 +9,6 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
   lik.code <- do.call(paste("mtc.code.likelihood", model$likelihood, model$link, sep="."), list())
   template <- template.block.sub(template, 'likelihood', lik.code)
 
-  network <- model$network
-
   template <- template.block.sub(template, 'relativeEffectMatrix', relEffectMatrix)
 
   # Generate parameter priors
