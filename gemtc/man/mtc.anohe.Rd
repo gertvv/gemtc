@@ -24,6 +24,8 @@ mtc.anohe(network, likelihood=NULL, link=NULL, ...)
 \details{
 \code{mtc.anohe} returns the MCMC results for all three types of model. To get appropriate summary statistics, call \code{summary()} on the results object. The summary can be plotted.
 }
+\note{This method should not be considered stable. It is an experimental feature and heavily work in progress. The interface may change at any time.
+}
 \value{
 For \code{mtc.anohe}:
 an object of class \code{mtc.anohe}. This is a list with the following elements: 
