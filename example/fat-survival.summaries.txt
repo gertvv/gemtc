@@ -1,0 +1,17 @@
+structure(list(effectiveSize = structure(c(10530.7070067415, 
+2482.52219556713), .Names = c("d.A.B", "sd.d")), summary = structure(list(
+    statistics = structure(c(-0.0141234480358882, 0.13436354862552, 
+    0.0906947709228571, 0.120343610701573, 0.000453473854614286, 
+    0.000601718053507865, 0.000883921092761379, 0.0024835466627563
+    ), .Dim = c(2L, 4L), .Dimnames = list(c("d.A.B", "sd.d"), 
+        c("Mean", "SD", "Naive SE", "Time-series SE"))), quantiles = structure(c(-0.198130774446381, 
+    0.00438910148934555, -0.0645724563794643, 0.0481384715825642, 
+    -0.0128717777440473, 0.103118941247703, 0.0369663016038394, 
+    0.185358687695327, 0.166004998193115, 0.448168270567507), .Dim = c(2L, 
+    5L), .Dimnames = list(c("d.A.B", "sd.d"), c("2.5%", "25%", 
+    "50%", "75%", "97.5%"))), start = 5005, end = 55000, thin = 5, 
+    nchain = 4L), .Names = c("statistics", "quantiles", "start", 
+"end", "thin", "nchain"), class = "summary.mcmc"), cov = structure(0.00822554147274953, .Dim = c(1L, 
+1L)), ranks = structure(c(0.5669, 0.4331, 0.4331, 0.5669), .Dim = c(2L, 
+2L), .Dimnames = list(c("A", "B"), NULL))), .Names = c("effectiveSize", 
+"summary", "cov", "ranks"))

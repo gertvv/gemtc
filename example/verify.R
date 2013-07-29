@@ -167,7 +167,14 @@ examples <- list(
     ),
     likelihood='binom',
     link='logit',
-  type='ume'
+    type='ume'
+  ),
+  'fat-survival' = list( # NICE TSD2 program 2a
+    network = mtc.network(
+      data=dget('fat-survival.data.txt')
+    ),
+    likelihood='poisson',
+    link='log'
   )
 )
 
