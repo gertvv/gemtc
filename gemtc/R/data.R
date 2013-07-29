@@ -27,8 +27,7 @@ mtc.model.data <- function(model) {
    }
 
   data <- data.frame(
-    study=c(data.ab$study, data.re$study),
-    treatment=c(data.ab$treatment, data.re$treatment)
+    t=c(data.ab$treatment, data.re$treatment)
   )
   nrow.ab <- if (!is.null(data.ab)) nrow(data.ab) else 0
   nrow.re <- if (!is.null(data.re)) nrow(data.re) else 0
@@ -65,7 +64,6 @@ mtc.model.data <- function(model) {
     ns = length(studies),
     na = na,
     nt = nrow(model$network$treatments),
-    t = matrix(as.numeric(data$treatment[s.mat]), nrow=nrow(s.mat)),
     om.scale = model$om.scale))
 
   model.data
