@@ -181,24 +181,14 @@ write.mtc.network <- function(network, file) {
 }
 
 mtc.validate.data.ab <- function(data) {
-  columns <- colnames(data)
-  contColumns <- c('mean', 'std.dev', 'sampleSize')
-  dichColumns <- c('responders', 'sampleSize')
-
-  if (contColumns[1] %in% columns && dichColumns[1] %in% columns) {
-    stop('Ambiguous whether data is continuous or dichotomous: both "mean" and "responders" present.')
-  }
-
-  if (contColumns[1] %in% columns && !all(contColumns %in% columns)) {
-    stop(paste('Continuous data must contain columns:', paste(contColumns, collapse=', ')))
-  }
-
-  if (dichColumns[1] %in% columns && !all(dichColumns %in% columns)) {
-    stop(paste('Dichotomous data must contain columns:', paste(dichColumns, collapse=', ')))
-  }
+  # No longer validating arm-based data at this stage
+  # This is now defined at the likelihood/link level
 }
 
 mtc.validate.data.re <- function(data) {
+  # These checks are still essential, because they check more then just the presence / absence of
+  # columns.
+
   columns <- colnames(data)
   reColumns <- c('diff', 'std.err')
   if (!all(reColumns %in% columns)) {

@@ -5,7 +5,8 @@ ll.call <- function(fn, model, ...) {
 
 ll.defined <- function(model) {
   fns <- c('mtc.arm.mle', 'mtc.rel.mle', 'mtc.code.likelihood',
-    'scale.log', 'scale.name')
+    'scale.log', 'scale.name', 'scale.limit.inits',
+    'required.columns.ab', 'required.columns.re')
   fns <- paste(fns, model$likelihood, model$link, sep=".")
   all(exists(fns, mode='function'))
 }

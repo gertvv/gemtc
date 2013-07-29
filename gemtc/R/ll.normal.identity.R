@@ -1,9 +1,9 @@
 # Arm-level effect estimate (given a one-row data frame)
 mtc.arm.mle.normal.identity <- function(data) {
-  c('mean'=as.numeric(data['mean']), 'sd'=as.numeric(data['std.dev'] / sqrt(data['sampleSize'])))
+  c('mean'=as.numeric(data['mean']), 'sd'=as.numeric(data['std.err']))
 }
 
-# Relative effect estimate (given a two-row data frame)
+# Relative effect estimate (given a two-row data frame
 mtc.rel.mle.normal.identity <- function(data) {
   e1 <- mtc.arm.mle.normal.identity(data[1,])
   e2 <- mtc.arm.mle.normal.identity(data[2,])
@@ -21,4 +21,12 @@ scale.name.normal.identity <- function() { "Mean Difference" }
 
 scale.limit.inits.normal.identity <- function() {
   c(-Inf, +Inf)
+}
+
+required.columns.ab.normal.identity <- function() {
+  c('m'='mean', 'e'='std.err')
+}
+
+required.columns.re.normal.identity <- function() {
+  c('m'='diff', 'e'='std.err')
 }

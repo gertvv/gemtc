@@ -18,6 +18,23 @@ mtc.model <- function(network, type="consistency",
     stop('Given network is not an mtc.network')
   }
 
+  add.std.err <- function(data) {
+    if (!is.null(data[['std.dev']]) &&
+        !is.null(data[['sampleSize']]) &&
+        is.null(data[['std.err']])) {
+      data[['std.err']] <- data[['std.dev']] / sqrt(data[['sampleSize']])
+    }
+    data
+  }
+
+  # calculate std.err for "legacy" data sets:
+  if (!is.null(network[['data']])) {
+    network[['data']] <- add.std.err(network[['data']])
+  }
+  if (!is.null(network[['data.re']])) {
+    network[['data.re']] <- add.std.err(network[['data.re']])
+  }
+
   model <- list(
     type = type,
     network = network,

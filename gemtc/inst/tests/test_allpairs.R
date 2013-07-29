@@ -2,7 +2,7 @@
 context("rel.mle.[ab|re]")
 
 test_that("a single pair returns a one-row matrix", {
-  data <- data.frame(treatment=c("A", "B"), mean=c(1.0, 2.0), std.dev=c(0.5, 0.5), sampleSize=c(16, 16))
+  data <- data.frame(treatment=c("A", "B"), mean=c(1.0, 2.0), std.err=c(0.5/4, 0.5/4))
   fn <- "mtc.rel.mle.normal.identity"
   pairs <- data.frame(t1=data$treatment[1], t2=data$treatment[2])
   expected <- matrix(c('mean'=1.0, 'sd'=sqrt(2*0.125^2)), nrow=1, ncol=2)
@@ -11,7 +11,7 @@ test_that("a single pair returns a one-row matrix", {
 })
 
 test_that("two pairs return a two-row matrix", {
-  data <- data.frame(treatment=c("A", "B", "C"), mean=c(1.0, 2.0, 2.5), std.dev=c(0.5, 0.5, 1.0), sampleSize=c(16, 16, 16))
+  data <- data.frame(treatment=c("A", "B", "C"), mean=c(1.0, 2.0, 2.5), std.err=c(0.5/4, 0.5/4, 1.0/4))
   fn <- "mtc.rel.mle.normal.identity"
   ts <- data$treatment
   pairs <- data.frame(t1=coerce.factor(c(ts[1], ts[1]), ts), t2=coerce.factor(c(ts[2], ts[3]), ts))

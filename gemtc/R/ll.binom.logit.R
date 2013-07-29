@@ -26,3 +26,11 @@ scale.name.binom.logit <- function() { "Odds Ratio" }
 scale.limit.inits.binom.logit <- function() {
   c(-745, 36.8)
 }
+
+required.columns.ab.binom.logit <- function() {
+  c('r'='responders', 'n'='sampleSize')
+}
+
+required.columns.re.binom.logit <- function() {
+  c('m'='diff', 'e'='std.err')
+}

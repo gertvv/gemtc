@@ -28,3 +28,11 @@ scale.name.binom.cloglog <- function() { "Hazard Ratio" }
 scale.limit.inits.binom.cloglog <- function() {
   c(-37.4, 3.6)
 }
+
+required.columns.ab.binom.cloglog <- function() {
+  c('r'='responders', 'n'='sampleSize')
+}
+
+required.columns.re.binom.cloglog <- function() {
+  c('m'='diff', 'e'='std.err')
+}
