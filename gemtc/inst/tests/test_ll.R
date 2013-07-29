@@ -16,3 +16,7 @@ test_that("binom.logit is defined", {
 test_that("binom.cloglog is defined", {
   expect_true(ll.defined(list(likelihood='binom', link='cloglog')))
 })
+
+test_that("poisson.log is defined", {
+  expect_true(ll.defined(list(likelihood='poisson', link='log')))
+})

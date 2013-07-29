@@ -20,7 +20,7 @@ $(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/tests/*.R $(PKG_NA
 .PHONY: install
 
 install: $(PACKAGE)
-	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
+	#_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 	R CMD INSTALL $(PACKAGE)
 
 # Special test target since R CMD check is incredibly slow :-(
