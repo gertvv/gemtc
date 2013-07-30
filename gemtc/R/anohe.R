@@ -33,11 +33,11 @@ decompose.trials <- function(result) {
       })
     })
 
-    J <- matrix(1/na, ncol=na, nrow=na)
+    J <- matrix(1, ncol=na, nrow=na)
     # Pseudo-inverse Laplacian
     Lt <- -0.5 * (V - (1 / na) * (V %*% J + J %*% V) + (1 / na^2) * (J %*% V %*% J))
     # Laplacian
-    L <- solve(Lt - J) + J
+    L <- solve(Lt - J/na) + J/na
 
     prec <- -L
     diag(prec) <- 0
@@ -73,12 +73,6 @@ decompose.trials <- function(result) {
   # (mu1, prec1): posterior parameters
   mu1 <- lapply(decomposed, function(x) { x$m })
   sigma1 <- lapply(decomposed, function(x) { x$e })
-  #prec1 <- 1/sigma1^2
-
-  # Factor out the priors
-  #prec <- prec1 - prec0
-  #mu <- (mu1 * prec1 - mu0 * prec0) * 1/prec
-  #sigma <- sqrt(1/prec)
 
   ts <- lapply(decomposed, function(x) { x$t })
 
