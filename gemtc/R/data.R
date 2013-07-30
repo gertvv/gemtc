@@ -31,14 +31,18 @@ mtc.model.data <- function(model) {
   )
   nrow.ab <- if (!is.null(data.ab)) nrow(data.ab) else 0
   nrow.re <- if (!is.null(data.re)) nrow(data.re) else 0
-  if (!is.null(data.ab)) {
+  if (nrow.ab > 0) {
     for (column in names(columns.ab)) {
       data[[column]] <- NA
+      coldata <- data.ab[[columns.ab[column]]]
+      if (any(is.na(coldata))) {
+        stop(paste('data.ab contains NAs in column "', columns.ab[column], '"', sep=""))
+      }
       data[[column]][1:nrow.ab] <- data.ab[[columns.ab[column]]]
     }
   }
-  if (!is.null(data.re)) {
-    for (column in names(columns.ab)) {
+  if (nrow.re > 0) {
+    for (column in names(columns.re)) {
       if (!(column %in% colnames(data))) {
         data[[column]] <- NA
       }

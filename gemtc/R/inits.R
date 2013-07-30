@@ -41,7 +41,6 @@ mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model$n.c
 # Initial values for pooled effect (basic parameter) based on
 # inverse-variance random effects meta-analysis (package meta)
 mtc.init.pooled.effect <- function(model, t1, t2) {
-
   t1 <- as.treatment.factor(t1, model$network)
   t2 <- as.treatment.factor(t2, model$network)
   pair <- data.frame(t1=t1, t2=t2)
