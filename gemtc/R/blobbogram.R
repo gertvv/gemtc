@@ -346,23 +346,24 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   }
 
   # Now plot each group
-  plot.new()
   for (i in 1:length(pages)) {
     if (i > 1) {
       if (ask) {
         readline('Hit <Return> to see next plot:')
       }
-      grid.newpage()
     }
     page <- pages[[i]]
     if (length(page) > 0) {
       rowheights <- do.call(unit.c, lapply(page, function(grp) { grp$rowheight }))
       fd <- lapply(page, function(grp) { grp$forest.data })
+      dev.hold()
+      grid.newpage()
       draw.page(fd, colwidth, rowheights, ci.label,
                 grouped, columns, column.groups,
                 column.group.labels, header.labels,
                 text.fn, xrange, scale.trf,
                 left.label, right.label)
+      dev.flush()
     }
   }
 }
