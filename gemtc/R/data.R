@@ -10,7 +10,7 @@ arm.index.matrix <- function(network) {
 }
 
 mtc.model.data <- function(model) {
-  data.ab <- model$network[['data']]
+  data.ab <- model$network[['data.ab']]
   data.re <- model$network[['data.re']]
 
   columns.ab <- ll.call('required.columns.ab', model)
@@ -48,6 +48,7 @@ mtc.model.data <- function(model) {
       }
       data[[column]][(nrow.ab + 1):(nrow.ab + nrow.re)] <- data.re[[columns.re[column]]]
     }
+    mtc.validate.data.re(data.re)
   }
 
   studies.ab <- levels(data.ab$study)

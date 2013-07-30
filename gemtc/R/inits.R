@@ -10,9 +10,9 @@ mtc.init.limit <- function(model, value, offset=rep(0.0, model$n.chain)) {
 
 # Initial values for study-level absolute treatment effects based on (adjusted) MLE
 mtc.init.baseline.effect <- function(model, study, treatment) {
-  data <- model$network[['data']]
+  data.ab <- model$network[['data.ab']]
   mle <- ll.call("mtc.arm.mle", model,
-    data[data$study == study & data$treatment == treatment, ])
+    data.ab[data.ab$study == study & data.ab$treatment == treatment, ])
   mtc.init.limit(
     model,
     rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
@@ -21,7 +21,7 @@ mtc.init.baseline.effect <- function(model, study, treatment) {
 
 # Initial values for study-level relative effects based on (adjusted) MLE
 mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model$n.chain)) {
-  data <- model$network[['data']]
+  data <- model$network[['data.ab']]
   if (!is.null(data) && study %in% data$study) {
     mle <- ll.call("mtc.rel.mle", model,
       data[data$study == study &
@@ -64,9 +64,9 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
 
 
   study.mle <- NULL
-  data <- model$network[['data']]
-  if (!is.null(data)) {
-    study.mle <- calc(data, function(data) {
+  data.ab <- model$network[['data.ab']]
+  if (!is.null(data.ab)) {
+    study.mle <- calc(data.ab, function(data) {
       rel.mle.ab(data, paste("mtc.rel.mle", model$likelihood, model$link, sep="."), pair)
     })
   }
@@ -88,20 +88,20 @@ mtc.init.std.dev <- function(model) {
 
 # Generate initial values for all relevant parameters
 mtc.init <- function(model) {
-  data <- model$network[['data']]
+  data.ab <- model$network[['data.ab']]
   data.re <- model$network[['data.re']]
   s.mat <- arm.index.matrix(model$network)
-  studies <- levels(data$study)
+  studies <- levels(data.ab$study)
 
   # Generate initial values for each parameter
   mu <- sapply(studies, function(study) {
-    mtc.init.baseline.effect(model, study, data$treatment[s.mat[study, 1]])
+    mtc.init.baseline.effect(model, study, data.ab$treatment[s.mat[study, 1]])
   })
   if (!is.matrix(mu)) {
     mu <- matrix(mu, nrow=model$n.chain, ncol=length(studies))
   }
   studies <- c(studies, levels(data.re$study))
-  ts <- c(as.character(data$treatment), as.character(data.re$treatment))
+  ts <- c(as.character(data.ab$treatment), as.character(data.re$treatment))
   delta <- lapply(studies, function(study) {
     sapply(1:ncol(s.mat), function(i) {
       if (i == 1 || is.na(s.mat[study, i])) rep(NA, model$n.chain)
@@ -128,7 +128,7 @@ mtc.init <- function(model) {
   # Separate the initial values per chain
   lapply(1:model$n.chain, function(chain) {
     c(
-    if (!is.null(data)) list(mu = mu[chain, ]) else list(),
+    if (!is.null(data.ab)) list(mu = mu[chain, ]) else list(),
     list(
       delta = t(sapply(delta, function(x) { x[chain, ] })),
       sd.d = sd.d[chain]

@@ -33,17 +33,20 @@ remove.onearm <- function(data, warn=FALSE) {
   data[sel, ]
 }
 
-mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.re=NULL) {
-  if (is.null(data) && is.null(data.re)) {
-    stop("Either `data' or `data.re' (or both) must be specified")
+mtc.network <- function(
+  data.ab=data, treatments=NULL, description="Network",
+  data.re=NULL, data=NULL
+) {
+  if (is.null(data.ab) && is.null(data.re)) {
+    stop("Either `data.ab' or `data.re' (or both) must be specified")
   }
   # standardize the data
-  if (!is.null(data)) {
-    if (!is.data.frame(data)) {
-      data <- do.call(rbind, lapply(data, as.data.frame))
+  if (!is.null(data.ab)) {
+    if (!is.data.frame(data.ab)) {
+      data.ab <- do.call(rbind, lapply(data.ab, as.data.frame))
     }
-    data <- remove.onearm(data, warn=TRUE)
-    mtc.validate.data.ab(data)
+    data.ab <- remove.onearm(data.ab, warn=TRUE)
+    mtc.validate.data.ab(data.ab)
   }
   if (!is.null(data.re)) {
     if (!is.data.frame(data.re)) {
@@ -56,8 +59,8 @@ mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.
   # standardize the treatments
   if (is.null(treatments)) {
     data.treatments <- vector(mode="character")
-    if (!is.null(data)) {
-      data.treatments <- c(data.treatments, as.character(data$treatment))
+    if (!is.null(data.ab)) {
+      data.treatments <- c(data.treatments, as.character(data.ab$treatment))
     }
     if (!is.null(data.re)) {
       data.treatments <- c(data.treatments, as.character(data.re$treatment))
@@ -76,8 +79,8 @@ mtc.network <- function(data=NULL, treatments=NULL, description="Network", data.
     description=description,
     treatments=treatments)
 
-  if (!is.null(data)) {
-    network <- c(network, list(data=standardize.data(data, levels(treatments$id))))
+  if (!is.null(data.ab)) {
+    network <- c(network, list(data.ab=standardize.data(data.ab, levels(treatments$id))))
   }
   if (!is.null(data.re)) {
     network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id), re.order=TRUE)))
@@ -102,7 +105,7 @@ read.mtc.network <- function(file) {
     }
   )
   if (identical(type, "rate")) {
-    data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+    data.ab <- XML::xpathApply(doc, "/network/studies/study/measurement",
       function(node) {
         list(
           study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
@@ -113,7 +116,7 @@ read.mtc.network <- function(file) {
       }
     )
   } else if (identical(type, "continuous")) {
-    data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+    data.ab <- XML::xpathApply(doc, "/network/studies/study/measurement",
       function(node) {
         list(
           study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
@@ -125,7 +128,7 @@ read.mtc.network <- function(file) {
       }
     )
   } else if (identical(type, "none")) {
-    data <- XML::xpathApply(doc, "/network/studies/study/measurement",
+    data.ab <- XML::xpathApply(doc, "/network/studies/study/measurement",
       function(node) {
         list(
           study = XML::xmlGetAttr(XML::xmlParent(node), "id"),
@@ -134,17 +137,33 @@ read.mtc.network <- function(file) {
       }
     )
   }
-  mtc.network(data, treatments=treatments, description=description)
+  mtc.network(data.ab, treatments=treatments, description=description)
+}
+
+fix.network <- function(network) {
+  # move data into data.ab for legacy networks 
+  if (is.null(network[['data.ab']]) && !is.null(network[['data']])) {
+    network[['data.ab']] <- network[['data']]
+    network[['data']] <- NULL
+  }
+  network
 }
 
 write.mtc.network <- function(network, file) {
+  if (!is.null(network[['data.re']]) && nrow(network[['data.re']]) > 0) {
+    stop('write.mtc.network does not support data.re')
+  }
+
+  network <- fix.network(network)
+
   root <- XML::newXMLNode("network")
   XML::xmlAttrs(root)["description"] <- network$description
-  type <- if ('responders' %in% colnames(network[['data']])) {
+  type <- if (all(c('responders', 'sampleSize') %in% colnames(network[['data.ab']]))) {
     'rate'
-  } else if ('mean' %in% colnames(network[['data']])) {
+  } else if (all(c('mean', 'std.dev', 'sampleSize') %in% colnames(network[['data.ab']]))) {
     'continuous'
   } else {
+    warning('write.mtc.network only supports dichotomous or continuous data; writing structure only.')
     'none'
   }
   XML::xmlAttrs(root)["type"] <- type
@@ -157,13 +176,13 @@ write.mtc.network <- function(network, file) {
   })
 
   studies <- XML::newXMLNode("studies", parent = root)
-  study <- sapply(levels(network[['data']]$study), function(sid) {
+  study <- sapply(levels(network[['data.ab']]$study), function(sid) {
     node <- XML::newXMLNode("study", parent = studies)
     XML::xmlAttrs(node)["id"] <- sid
     node
   })
 
-  apply(network[['data']], 1, function(row) {
+  apply(network[['data.ab']], 1, function(row) {
     node <- XML::newXMLNode('measurement', parent=study[[row['study']]])
     XML::xmlAttrs(node)['treatment'] <- row['treatment']
     if (identical(type, 'rate')) {
@@ -214,10 +233,10 @@ mtc.validate.data.re <- function(data) {
 mtc.network.validate <- function(network) {
   # Check that there is some data
   stopifnot(nrow(network$treatments) > 0)
-  stopifnot(nrow(network[['data']]) > 0 || nrow(network[['data.re']]) > 0)
+  stopifnot(nrow(network[['data.ab']]) > 0 || nrow(network[['data.re']]) > 0)
 
   # Check that the treatments are correctly cross-referenced and have valid names
-  all.treatments <- c(network[['data']]$treatment, network[['data.re']]$treatment)
+  all.treatments <- c(network[['data.ab']]$treatment, network[['data.re']]$treatment)
   all.treatments <- factor(all.treatments, levels=1:nlevels(network$treatments$id), labels=levels(network$treatments$id))
   stopifnot(all(all.treatments %in% network$treatments$id))
   stopifnot(all(network$treatments$id %in% all.treatments))
@@ -228,17 +247,17 @@ mtc.network.validate <- function(network) {
       ' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
   }
 
-  # Check that studies are not duplicated between $data and $data.re
-  if (!is.null(network[['data']]) && !is.null(network[['data.re']])) {
-    dup.study <- intersect(unique(network[['data']]$study), unique(network[['data.re']]$study))
+  # Check that studies are not duplicated between $data.ab and $data.re
+  if (!is.null(network[['data.ab']]) && !is.null(network[['data.re']])) {
+    dup.study <- intersect(unique(network[['data.ab']]$study), unique(network[['data.re']]$study))
     if (length(dup.study) > 0) {
       stop(paste('Studies', paste(dup.study, collapse=", "), 'occur in both data and data.re'))
     }
   }
 
   # Check that the data frame has a sensible combination of columns
-  if (!is.null(network[['data']])) {
-    mtc.validate.data.ab(network[['data']])
+  if (!is.null(network[['data.ab']])) {
+    mtc.validate.data.ab(network[['data.ab']])
   }
 
   # Check data.re is well formed
@@ -260,10 +279,10 @@ as.treatment.factor <- function(x, network) {
 mtc.merge.data <- function(network) {
   data.frame(
     study=c(
-      as.character(network[['data']]$study),
+      as.character(network[['data.ab']]$study),
       as.character(network[['data.re']]$study)),
     treatment=as.treatment.factor(c(
-      network[['data']]$treatment,
+      network[['data.ab']]$treatment,
       network[['data.re']]$treatment), network),
     stingsAsFactors=FALSE)
 }
@@ -287,7 +306,7 @@ has.indirect.evidence <- function(network, t1, t2) {
     all(c(t1, t2) %in% mtc.study.design(network, study))
   })
 
-  data <- rbind(network[['data']], network[['data.re']])
+  data <- rbind(network[['data.ab']], network[['data.re']])
   data <- data[!has.both[data[['study']]] | (data[['treatment']] != t1 & data[['treatment']] != t2), ]
   data <- remove.onearm(data)
 
@@ -348,10 +367,11 @@ mtc.network.graph <- function(network) {
 
 ## mtc.network class methods
 print.mtc.network <- function(x, ...) {
+  x <- fix.network(x)
   cat("MTC dataset: ", x$description, "\n", sep="")
-  if (!is.null(x[['data']])) {
+  if (!is.null(x[['data.ab']])) {
     cat('Arm-level data: \n')
-    print(x[['data']])
+    print(x[['data.ab']])
   }
   if (!is.null(x[['data.re']])) {
     cat('Relative effect data: \n')
@@ -360,6 +380,7 @@ print.mtc.network <- function(x, ...) {
 }
 
 summary.mtc.network <- function(object, ...) {
+  object <- fix.network(object)
   data <- mtc.merge.data(object)
   studies <- levels(data$study)
   m <- sapply(object$treatments$id, function(treatment) {
@@ -376,5 +397,6 @@ summary.mtc.network <- function(object, ...) {
 }
 
 plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
+  x <- fix.network(x)
   igraph::plot.igraph(mtc.network.graph(x), layout=layout, ...)
 }

@@ -44,14 +44,14 @@ data.arm <- read.table(textConnection("
   s09    F"), header=TRUE)
 
 test_that("treatments for data and data.re are merged", {
-  network <- mtc.network(data=data.arm, data.re=data.re)
+  network <- mtc.network(data.ab=data.arm, data.re=data.re)
   expect_that(levels(network$treatments$id), equals(c("A", "B", "C", "D", "E", "F")))
-  expect_that(as.character(network$data$treatment), equals(as.character(data.arm$treatment)))
+  expect_that(as.character(network$data.ab$treatment), equals(as.character(data.arm$treatment)))
   expect_that(as.character(network$data.re$treatment), equals(as.character(data.re$treatment)))
 })
 
 test_that("merged list of arms is correct", {
-  network <- mtc.network(data=data.arm, data.re=data.re)
+  network <- mtc.network(data.ab=data.arm, data.re=data.re)
   expect_that(as.character(mtc.merge.data(network)$study), equals(c(as.character(data.arm$study), as.character(data.re$study))))
   expect_that(as.character(mtc.merge.data(network)$treatment), equals(c(as.character(data.arm$treatment), as.character(data.re$treatment))))
 })
@@ -59,7 +59,7 @@ test_that("merged list of arms is correct", {
 test_that("duplicate studies raise an error", {
   data <- data.arm
   data$study <- c('s07', 's07', 's09', 's09', 's09')
-  expect_error(mtc.network(data=data, data.re=data.re))
+  expect_error(mtc.network(data.ab=data, data.re=data.re))
 })
 
 test_that("data.re column names are checked", {

@@ -6,7 +6,7 @@ s01 A 0.0 1.5 12
 s01 B 1.0 2.0 31'), header=T)
   network <- mtc.network(data)
   model <- mtc.model(network, likelihood='normal', link='identity')
-  expect_that(model$network[['data']]$std.err, equals(c(1.5/sqrt(12), 2.0/sqrt(31))))
+  expect_that(model$network[['data.ab']]$std.err, equals(c(1.5/sqrt(12), 2.0/sqrt(31))))
 })
 
 test_that("normal.identity requires the right columns", {

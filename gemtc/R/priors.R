@@ -41,12 +41,12 @@ rel.mle.re <- function(data, pairs) {
 # Guess the measurement scale based on differences observed in the data set
 guess.scale <- function(model) {
   fn <- paste("mtc.rel.mle", model$likelihood, model$link, sep=".")
-  data <- model$network[['data']]
+  data.ab <- model$network[['data.ab']]
   max.ab <- 0
-  if (!is.null(data)) {
-    max.ab <- max(sapply(levels(data$study), function(study) {
+  if (!is.null(data.ab)) {
+    max.ab <- max(sapply(levels(data.ab$study), function(study) {
       pairs <- mtc.treatment.pairs(mtc.study.design(model$network, study))
-      max(abs(rel.mle.ab(data[data$study == study,], fn, pairs)[,'mean']))
+      max(abs(rel.mle.ab(data.ab[data.ab$study == study,], fn, pairs)[,'mean']))
     }))
   }
   data.re <- model$network[['data.re']]

@@ -7,8 +7,8 @@ all.pair.matrix <- function(m) {
 }
 
 filter.network <- function(network, filter, filter.ab=filter, filter.re=filter) {
-  data.ab <- if (!is.null(network[['data']])) {
-    network[['data']][apply(network[['data']], 1, filter.ab), ]
+  data.ab <- if (!is.null(network[['data.ab']])) {
+    network[['data.ab']][apply(network[['data.ab']], 1, filter.ab), ]
   }
   data.re <- if (!is.null(network[['data.re']])) {
     network[['data.re']][apply(network[['data.re']], 1, filter.re), ]
@@ -112,10 +112,12 @@ decompose.network <- function(network, result=NULL, likelihood=NULL, link=NULL) 
   }))
 
   ta.network <- filter.network(network, function(row) { !(row['study'] %in% studies) })
-  mtc.network(data=ta.network[['data']], data.re=rbind(ta.network[['data.re']], data.re))
+  mtc.network(data.ab=ta.network[['data.ab']], data.re=rbind(ta.network[['data.re']], data.re))
 }
 
 mtc.anohe <- function(network, likelihood=NULL, link=NULL, ...) {
+  network <- fix.network(network)
+
   model.use <- mtc.model(network, type='use', likelihood=likelihood, link=link)
   result.use <- mtc.run(model.use, ...)
 

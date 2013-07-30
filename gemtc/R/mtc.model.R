@@ -18,6 +18,8 @@ mtc.model <- function(network, type="consistency",
     stop('Given network is not an mtc.network')
   }
 
+  network <- fix.network(network)
+
   add.std.err <- function(data) {
     if (!is.null(data[['std.dev']]) &&
         !is.null(data[['sampleSize']]) &&
@@ -28,8 +30,8 @@ mtc.model <- function(network, type="consistency",
   }
 
   # calculate std.err for "legacy" data sets:
-  if (!is.null(network[['data']])) {
-    network[['data']] <- add.std.err(network[['data']])
+  if (!is.null(network[['data.ab']])) {
+    network[['data.ab']] <- add.std.err(network[['data.ab']])
   }
   if (!is.null(network[['data.re']])) {
     network[['data.re']] <- add.std.err(network[['data.re']])
@@ -47,14 +49,14 @@ mtc.model <- function(network, type="consistency",
 
   model$likelihood <- likelihood
   model$link <- link
-  if (!is.null(network[['data']]) && 'responders' %in% colnames(network[['data']])) {
+  if (!is.null(network[['data.ab']]) && 'responders' %in% colnames(network[['data.ab']])) {
     if (is.null(likelihood)) {
       model$likelihood = 'binom'
     }
     if (is.null(link)) {
       model$link = 'logit'
     }
-  } else if (!is.null(network[['data']]) && 'mean' %in% colnames(network[['data']])) {
+  } else if (!is.null(network[['data.ab']]) && 'mean' %in% colnames(network[['data.ab']])) {
     if (is.null(likelihood)) {
       model$likelihood = 'normal'
     }
