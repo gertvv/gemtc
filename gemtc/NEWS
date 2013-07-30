@@ -1,3 +1,25 @@
+gemtc 0.4
+===========
+
+Released 2013-??-??
+
+New features:
+
+ * poisson/log likelihood/link for survival data
+ * allow std.err instead of std.dev + sampleSize in continuous data sets
+
+Changes:
+
+ * network$data is now network$data.ab for consistency with
+   network$data.re
+ * likelihood/link implementations can now define their data
+   requirements
+
+Bugfixes:
+
+ * Fix bug: multi-arm trial decomposition sometimes resulted in NA
+   standard errors
+
 gemtc 0.3
 ===========
 
