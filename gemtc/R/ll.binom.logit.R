@@ -30,7 +30,3 @@ scale.limit.inits.binom.logit <- function() {
 required.columns.ab.binom.logit <- function() {
   c('r'='responders', 'n'='sampleSize')
 }
-
-required.columns.re.binom.logit <- function() {
-  c('m'='diff', 'e'='std.err')
-}

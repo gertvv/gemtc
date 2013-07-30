@@ -33,7 +33,3 @@ scale.limit.inits.poisson.log <- function() {
 required.columns.ab.poisson.log <- function() {
   c('r'='responders', 'E'='exposure')
 }
-
-required.columns.re.poisson.log <- function() {
-  c('m'='diff', 'e'='std.err')
-}

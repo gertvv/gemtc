@@ -11,7 +11,6 @@ s01 B 1.0 2.0 31'), header=T)
 
 test_that("normal.identity requires the right columns", {
   expect_that(required.columns.ab.normal.identity(), equals(c('m'='mean', 'e'='std.err')))
-  expect_that(required.columns.re.normal.identity(), equals(c('m'='diff', 'e'='std.err')))
 })
 
 test_that("data.ab missing sampleSize throws error", {

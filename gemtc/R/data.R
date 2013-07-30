@@ -19,7 +19,7 @@ mtc.model.data <- function(model) {
       'likelihood =', model$likelihood,
       'link =', model$link, 'requires columns:', paste(columns.ab, collapse=', '), 'on data'))
   }
-  columns.re <- ll.call('required.columns.re', model)
+  columns.re <- c('m'='diff', 'e'='std.err')
   if (!(is.null(data.re) || all(columns.re %in% colnames(data.re)))) {
     stop(paste(
       'likelihood =', model$likelihood,

@@ -32,7 +32,3 @@ scale.limit.inits.binom.cloglog <- function() {
 required.columns.ab.binom.cloglog <- function() {
   c('r'='responders', 'n'='sampleSize')
 }
-
-required.columns.re.binom.cloglog <- function() {
-  c('m'='diff', 'e'='std.err')
-}

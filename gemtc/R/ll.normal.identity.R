@@ -26,7 +26,3 @@ scale.limit.inits.normal.identity <- function() {
 required.columns.ab.normal.identity <- function() {
   c('m'='mean', 'e'='std.err')
 }
-
-required.columns.re.normal.identity <- function() {
-  c('m'='diff', 'e'='std.err')
-}
