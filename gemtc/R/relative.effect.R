@@ -73,7 +73,11 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
   nExtra <- ncol(result$samples[[1]]) - nIn
   effects <- rbind(effects, matrix(0, nrow=nExtra, ncol=nOut))
   if (preserve.extra) {
-    allNames <- c(colnames(effects), colnames(result$samples[[1]])[nIn+(1:nExtra)])
+    if (nExtra > 0) {
+      allNames <- c(colnames(effects), colnames(result$samples[[1]])[nIn+(1:nExtra)])
+    } else {
+      allNames <- colnames(effects)
+    }
     effects <- cbind(effects,
       rbind(matrix(0, nrow=nIn, ncol=nExtra), diag(nExtra)))
     colnames(effects) <- allNames

@@ -117,3 +117,13 @@ test_that("spanning.tree.mtc.result handles two-treatment case", {
   expect_that(V(h)$name, equals(V(g)$name))
   expect_that(h[,], equals(g[,]))
 })
+
+test_that("relative.effect is robust to missing sd.d", {
+  result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+
+  out <- relative.effect(result, "A", preserve.extra=FALSE)
+  expect_that(colnames(out$samples[[1]]), equals(c("d.A.B", "d.A.C", "d.A.D"))) #2
+
+  out <- relative.effect(out, "A", preserve.extra=TRUE)
+  expect_that(colnames(out$samples[[1]]), equals(c("d.A.B", "d.A.C", "d.A.D"))) #1
+})
