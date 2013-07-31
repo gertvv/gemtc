@@ -8,10 +8,10 @@ all.pair.matrix <- function(m) {
 
 filter.network <- function(network, filter, filter.ab=filter, filter.re=filter) {
   data.ab <- if (!is.null(network[['data.ab']])) {
-    network[['data.ab']][apply(network[['data.ab']], 1, filter.ab), ]
+    network[['data.ab']][apply(network[['data.ab']], 1, filter.ab), , drop=FALSE]
   }
   data.re <- if (!is.null(network[['data.re']])) {
-    network[['data.re']][apply(network[['data.re']], 1, filter.re), ]
+    network[['data.re']][apply(network[['data.re']], 1, filter.re), , drop=FALSE]
   }
   mtc.network(data=data.ab, data.re=data.re)
 }
@@ -23,13 +23,13 @@ decompose.trials <- function(result) {
     samples <- cbind(0, samples)
     mu <- sapply(1:na, function(i) {
       sapply(1:na, function(j) {
-        mean(samples[ ,i] - samples[ ,j])
+        mean(samples[ , i, drop=TRUE] - samples[ , j, drop=TRUE])
       })
     })
     # Effective variances
     V <- sapply(1:na, function(i) {
       sapply(1:na, function(j) {
-        var(samples[ ,i] - samples[ ,j])
+        var(samples[ , i, drop=TRUE] - samples[ , j, drop=TRUE])
       })
     })
 
@@ -45,8 +45,8 @@ decompose.trials <- function(result) {
 
     pairs <- all.pair.matrix(na)
     list(
-      mu = apply(pairs, 1, function(p) { mu[p[1], p[2]] }),
-      se = apply(pairs, 1, function(p) { se[p[1], p[2]] })
+      mu = apply(pairs, 1, function(p) { mu[p[1], p[2], drop=TRUE] }),
+      se = apply(pairs, 1, function(p) { se[p[1], p[2], drop=TRUE] })
     )
   }
 
@@ -61,11 +61,11 @@ decompose.trials <- function(result) {
     colIndexes <- grep(paste("delta[", i, ",", sep=""), colnames(study.samples), fixed=TRUE)
     if (na > 2) {
       data <- decompose.study(
-        study.samples[, colIndexes])
+        study.samples[, colIndexes, drop=FALSE])
       ts <- matrix(study[all.pair.matrix(na)], ncol=2)
       list(m=data$mu, e=data$se, t=ts)
     } else {
-      samples <- study.samples[ , colIndexes]
+      samples <- study.samples[ , colIndexes, drop=FALSE]
       list(m=mean(samples), e=sd(samples), t=matrix(study, nrow=1))
     }
   })
@@ -101,7 +101,7 @@ decompose.network <- function(network, result=NULL, likelihood=NULL, link=NULL) 
   data <- decompose.trials(result)
   data.re <- do.call(rbind, lapply(studies, function(study) {
     do.call(rbind, lapply(1:length(data$m[[study]]), function(j) {
-      ts <- data$t[[study]][j,]
+      ts <- data$t[[study]][j, , drop=TRUE]
       m <- data$m[[study]][j]
       e <- data$e[[study]][j]
       rbind(
@@ -187,7 +187,7 @@ summary.mtc.anohe <- function(object, ...) {
   ume.samples <- as.matrix(result.ume$samples)
   varNames <- colnames(ume.samples)
   varNames <- varNames[grep('^d\\.', varNames)]
-  ume.samples <- ume.samples[,varNames]
+  ume.samples <- ume.samples[,varNames,drop=FALSE]
   comps <- extract.comparisons(varNames)
   qs <- apply(ume.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
   pairEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,])
@@ -202,11 +202,11 @@ summary.mtc.anohe <- function(object, ...) {
   data$t1 <- as.character(data$t1)
   data$t2 <- as.character(data$t2)
   data$p <- sapply(1:nrow(data), function(i) {
-    row <- data[i,]
+    row <- data[i, , drop=TRUE]
     pairEffects$pe[pairEffects$t1 == row$t1 & pairEffects$t2 == row$t2]
   })
   data$c <- sapply(1:nrow(data), function(i) {
-    row <- studyEffects[i,]
+    row <- studyEffects[i, , drop=TRUE]
     consEffects$pe[consEffects$t1 == row$t1 & consEffects$t2 == row$t2]
   })
   data$se <- (data$ci.u - data$ci.l) / 3.92
@@ -220,7 +220,7 @@ summary.mtc.anohe <- function(object, ...) {
     if (has.indirect) {
       dir <- as.numeric(row[3:5])
       names(dir) <- c('pe', 'ci.l', 'ci.u') # sigh
-      con <- consEffects[consEffects$t1 == row['t1'] & consEffects$t2 == row['t2'], 3:5]
+      con <- consEffects[consEffects$t1 == row['t1'] & consEffects$t2 == row['t2'], 3:5, drop=]
 
       se.con <- (con['ci.u'] - con['ci.l']) / 3.92
       se.dir <- (dir['ci.u'] - dir['ci.l']) / 3.92
@@ -239,7 +239,7 @@ summary.mtc.anohe <- function(object, ...) {
 
 
   i2.pair <- apply(pairEffects, 1, function(row) {
-    data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
+    data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'], , drop=FALSE]
     if (nrow(data2) > 1) {
       i.squared(data2$pe, data2$se, data2[['p']])
     } else {
@@ -247,10 +247,10 @@ summary.mtc.anohe <- function(object, ...) {
     }
   })
   i2.cons <- apply(pairEffects, 1, function(row) {
-    data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'],]
+    data2 <- data[data$t1 == row['t1'] & data$t2 == row['t2'], , drop=FALSE]
     has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
     if (has.indirect) {
-      ind <- indEffects[indEffects$t1 == row['t1'] & indEffects$t2 == row['t2'], 3:4]
+      ind <- indEffects[indEffects$t1 == row['t1'] & indEffects$t2 == row['t2'], 3:4, drop=]
       se.ind <- unname(ind['se'])
       pe.ind <- unname(ind['pe'])
 
@@ -269,7 +269,7 @@ summary.mtc.anohe <- function(object, ...) {
       se.dir <- (dir['ci.u'] - dir['ci.l']) / 3.92
       pe.dir <- dir['pe']
 
-      ind <- indEffects[indEffects$t1 == row['t1'] & indEffects$t2 == row['t2'], 3:4]
+      ind <- indEffects[indEffects$t1 == row['t1'] & indEffects$t2 == row['t2'], 3:4, drop=]
       se.ind <- ind['se']
       pe.ind <- ind['pe']
 
@@ -333,15 +333,15 @@ plot.mtc.anohe.summary <- function(x, ...) {
     group.labels[param] <- paste(t2, 'vs', t1)
 
     # Study-level effects
-    rows <- studyEffects[studyEffects$t1 == t1 & studyEffects$t2 == t2, ]
+    rows <- studyEffects[studyEffects$t1 == t1 & studyEffects$t2 == t2, , drop=FALSE]
     data$id <- c(data$id, rows$study)
     data$group <- c(data$group, rep(param, nrow(rows)))
     data$style <- c(data$style, rep('normal', nrow(rows)))
     data <- appendEstimates(data, rows)
 
-    isq.rows <- isq[isq$t1 == t1 & isq$t2 == t2, ]
+    isq.rows <- isq[isq$t1 == t1 & isq$t2 == t2, ,drop=FALSE]
     # Pair-wise pooled effect
-    rows <- pairEffects[i, ]
+    rows <- pairEffects[i, , drop=FALSE]
     rows$i2 <- isq.rows[, 'i2.pair']
     data$id <- c(data$id, 'Pooled (pair-wise)')
     data$group <- c(data$group, param)
@@ -349,7 +349,7 @@ plot.mtc.anohe.summary <- function(x, ...) {
     data <- appendEstimates(data, rows)
 
     # Indirect effect
-    rows <- indEffects[indEffects$t1 == t1 & indEffects$t2 == t2, ]
+    rows <- indEffects[indEffects$t1 == t1 & indEffects$t2 == t2, , drop=FALSE]
     data$id <- c(data$id, 'Indirect (back-calculated)')
     data$group <- c(data$group, param)
     data$style <- c(data$style, 'indirect')
@@ -358,7 +358,7 @@ plot.mtc.anohe.summary <- function(x, ...) {
     data <- appendEstimates(data, rows)
 
     # Network pooled effect
-    rows <- consEffects[consEffects$t1 == t1 & consEffects$t2 == t2, ]
+    rows <- consEffects[consEffects$t1 == t1 & consEffects$t2 == t2, , drop=FALSE]
     rows$i2 <- isq.rows[, 'i2.cons']
     data$id <- c(data$id, 'Pooled (network)')
     data$group <- c(data$group, param)

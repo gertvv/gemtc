@@ -22,8 +22,8 @@ minimum.diameter.spanning.tree <- function(graph) {
   t2 <- l(f['e']) - t1
   v.rem <- V(graph)[!(1:length(V(graph)) %in% v)]
   pairs <- sapply(v.rem, function(u) {
-    d <- c(t1 + d[v[1], u], t2 + d[v[2], u])
-    if (d[1] < d[2] || (d[1] == d[2] && v[1] < v[2])) {
+    d2 <- c(t1 + d[v[1], u, drop=TRUE], t2 + d[v[2], u, drop=TRUE])
+    if (d2[1] < d2[2] || (d2[1] == d2[2] && v[1] < v[2])) {
       c(v[1], u)
     } else {
       c(v[2], u)
@@ -37,7 +37,7 @@ minimum.diameter.spanning.tree <- function(graph) {
   h <- h + edge(edgelist)
   if (ncol(pairs) > 0 && nrow(pairs) > 0) {
     for (i in 1:ncol(pairs)) {
-      p <- get.shortest.paths(graph, pairs[1, i], pairs[2, i], mode="all")[[1]]
+      p <- get.shortest.paths(graph, pairs[1, i, drop=TRUE], pairs[2, i, drop=TRUE], mode="all")[[1]]
       if (length(p) == 2) {
         h <- h + edge(p) # bug in one-edge paths?
       } else {
@@ -64,7 +64,7 @@ absolute.one.center <- function(g) {
   f <- sapply(E(g), function(edge) { local.center(g, edge) })
   v <- sapply(E(g), function(edge) { get.edge(g, edge) })
   i <- order(f['r',], v[1,], v[2,])[1]
-  f[, i]
+  f[, i, drop=TRUE]
 }
 
 # A few conventions:
@@ -88,8 +88,8 @@ local.center <- function(graph, edge) {
   # de(x, v): distance between point x and vertex v
   de <- function(x, v) {
     min(
-      x['t'] + d[vr(x['e']), v],
-      l(x['e']) - x['t'] + d[vs(x['e']), v]
+      x['t'] + d[vr(x['e']), v, drop=TRUE],
+      l(x['e']) - x['t'] + d[vs(x['e']), v, drop=TRUE]
     )
   }
 
@@ -99,10 +99,10 @@ local.center <- function(graph, edge) {
   intersect <- function(e, u, v) {
     e0 <- vr(e)
     e1 <- vs(e)
-    lu <- d[e0, u]
-    ru <- d[e1, u]
-    lv <- d[e0, v]
-    rv <- d[e1, v]
+    lu <- d[e0, u, drop=TRUE]
+    ru <- d[e1, u, drop=TRUE]
+    lv <- d[e0, v, drop=TRUE]
+    rv <- d[e1, v, drop=TRUE]
 
     if (lu == lv || ru == rv) { # they coincide or intersect only at the edge
       NA
@@ -125,11 +125,12 @@ local.center <- function(graph, edge) {
   step1 <- function() {
     xr <- c('e' = edge, 't' = 0)
     xs <- c('e' = edge, 't' = l(edge))
-    dr <- de(xr, L[vr(edge), 1])
-    ds <- de(xs, L[vs(edge), 1])
+    dr <- de(xr, L[vr(edge), 1, drop=TRUE])
+    ds <- de(xs, L[vs(edge), 1, drop=TRUE])
     f <- if (dr <= ds) c(xr, 'r' = dr) else c(xs, 'r' = ds)
 
-    if (L[vr(edge), 1] == L[vs(edge), 1]) f else step3(f, L[vr(edge), 1], 1)
+    if (L[vr(edge), 1, drop=TRUE] == L[vs(edge), 1, drop=TRUE]) f
+    else step3(f, L[vr(edge), 1, drop=TRUE], 1)
   }
 
   # Step 3: treatment of vertices v s.t. D_e(v, 0) = D_e(v_1, 0)
@@ -138,7 +139,7 @@ local.center <- function(graph, edge) {
   # i: Index of the last-treated vertex
   # Returns the local center
   step3 <- function(f, vm, i) {
-    v <- L[vr(f['e']), i + 1]
+    v <- L[vr(f['e']), i + 1, drop=TRUE]
     xr <- c(f['e'], 't' = 0)
     xs <- c(f['e'], 't' = l(f['e']))
     if (de(xs, v) != de(xs, vm)) {
@@ -155,14 +156,14 @@ local.center <- function(graph, edge) {
     if (i == nrow(d)) {
       step8(f, vbar)
     } else {
-      vm <- L[vr(f['e']), i]
+      vm <- L[vr(f['e']), i, drop=TRUE]
       step5(f, vm, vbar, i)
     }
   }
 
   # Step 5: find all vertices v s.t. D_e(v, 0) = D_e(v_i, 0) and find the corresponding v_m.
   step5 <- function(f, vm, vbar, i) {
-    v <- L[vr(f['e']), i + 1]
+    v <- L[vr(f['e']), i + 1, drop=TRUE]
     xr <- c(f['e'], 't' = 0)
     xs <- c(f['e'], 't' = l(f['e']))
     if (de(xr, v) != de(xr, vm)) {
@@ -201,12 +202,12 @@ local.center <- function(graph, edge) {
     if (i == nrow(d)) {
       step8(f, vbar)
     } else {
-      step5(f, L[vr(f['e']), i], vbar, i)
+      step5(f, L[vr(f['e']), i, drop=TRUE], vbar, i)
     }
   }
 
   step8 <- function(f, vbar) {
-    vn <- L[vr(f['e']), nrow(d)]
+    vn <- L[vr(f['e']), nrow(d), drop=TRUE]
     tm <- intersect(f['e'], vn, vbar)
 
     if (is.na(tm)) {

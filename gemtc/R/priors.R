@@ -1,10 +1,11 @@
 # Returns a matrix with one row for each of the given pairs,
 # and columns 'mean' and 'sd' describing their relative effect
-rel.mle.ab <- function(data, fn, pairs) {
+rel.mle.ab <- function(data, model, pairs) {
   matrix(sapply(1:nrow(pairs), function(i) {
     sel1 <- data$treatment == pairs$t1[i]
     sel2 <- data$treatment == pairs$t2[i]
-    do.call(fn, list(data[sel1 | sel2, ]))
+    columns <- ll.call("required.columns.ab", model)
+    ll.call("mtc.rel.mle", model, as.matrix(data[sel1 | sel2, columns, drop=FALSE]))
   }), ncol=2, byrow=TRUE, dimnames=list(NULL, c('mean', 'sd')))
 }
 
@@ -40,13 +41,12 @@ rel.mle.re <- function(data, pairs) {
 
 # Guess the measurement scale based on differences observed in the data set
 guess.scale <- function(model) {
-  fn <- paste("mtc.rel.mle", model$likelihood, model$link, sep=".")
   data.ab <- model$network[['data.ab']]
   max.ab <- 0
   if (!is.null(data.ab)) {
     max.ab <- max(sapply(levels(data.ab$study), function(study) {
       pairs <- mtc.treatment.pairs(mtc.study.design(model$network, study))
-      max(abs(rel.mle.ab(data.ab[data.ab$study == study,], fn, pairs)[,'mean']))
+      max(abs(rel.mle.ab(data.ab[data.ab$study == study, , drop=TRUE], model, pairs)[,'mean']))
     }))
   }
   data.re <- model$network[['data.re']]
@@ -54,7 +54,7 @@ guess.scale <- function(model) {
   if (!is.null(data.re)) {
     max.re <- max(sapply(levels(data.re$study), function(study) {
       pairs <- mtc.treatment.pairs(mtc.study.design(model$network, study))
-      max(abs(rel.mle.re(data.re[data.re$study == study,], pairs)[,'mean']))
+      max(abs(rel.mle.re(data.re[data.re$study == study, , drop=TRUE], pairs)[,'mean']))
     }))
   }
 

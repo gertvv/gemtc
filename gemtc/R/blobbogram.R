@@ -7,7 +7,7 @@ get.row.groups <- function(data, group.labels) {
     v <- groups$values[i]
     l <- groups$lengths[i]
     i0 <- if (i == 1) 1 else sum(groups$lengths[1:max(1, (i - 1))]) + 1
-    list(label=group.labels[v], data=data[i0:(i0 + l - 1),])
+    list(label=group.labels[v], data=data[i0:(i0 + l - 1), , drop=FALSE])
   })
 }
 
@@ -82,7 +82,8 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
 
 text.style  <- function(styles) {
   function(text, style) {
-    ff <- if (is.na(styles[as.character(style),]$font.weight)) "plain" else styles[as.character(style),]$font.weight
+    ff <- styles[as.character(style), ,drop=TRUE]$font.weight
+    ff <- if (is.na(ff)) "plain" else ff
     textGrob(text, x=unit(0, "npc"), just="left", gp=gpar(fontface=ff))
   }
 }
@@ -210,9 +211,9 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
   # Calculate plot range
   xrange <- if (is.null(xlim)) {
-    ci.l <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.l']}))
-    ci.u <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.u']}))
-    c(min(nice(min(ci.l,na.rm=TRUE), floor), 0), max(nice(max(ci.u,na.rm=TRUE), ceiling), 0))
+    ci.l <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.l', drop=TRUE]}))
+    ci.u <- do.call(c, lapply(data, function(datagrp) { datagrp$data[, 'ci.u', drop=TRUE]}))
+    c(min(nice(min(ci.l, na.rm=TRUE), floor), 0), max(nice(max(ci.u, na.rm=TRUE), ceiling), 0))
   } else {
     xlim
   }
@@ -230,8 +231,9 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
       ci.data <- lapply(1:nrow(datagrp$data), function(i) {
         # Create CI plots
-        fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u')]
-        ci <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange, styles[as.character(datagrp$data[i, 'style']),])
+        fmt <- datagrp$data[i, c('pe', 'ci.l', 'ci.u'), drop=TRUE]
+        ci <- grob.ci(fmt$pe, fmt$ci.l, fmt$ci.u, xrange,
+          styles[as.character(datagrp$data[i, 'style', drop=TRUE]), , drop=TRUE])
 
         # Create CI interval labels (right side)
         if (all(!is.na(fmt))) {
@@ -240,7 +242,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
         } else {
           text <- "NA"
         }
-        label <-  text.fn(text, as.character(datagrp$data[i,'style']))
+        label <-  text.fn(text, as.character(datagrp$data[i, 'style', drop=TRUE]))
 
         list(ci=ci, label=label)
       })
@@ -289,8 +291,14 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   colwidth <- unit.c(colwidth, graphwidth, colgap, ci.colwidth)
 
   groupHeight <- function(grp) {
-    if (grouped) unit(c(styles['group', 'row.height'], styles[as.character(grp$data$style), 'row.height']), "lines")
-    else unit(styles[as.character(grp$data$style), 'row.height'], "lines")
+    if (grouped) {
+      unit(
+        c(styles['group', 'row.height'],
+          styles[as.character(grp$data$style), 'row.height', drop=TRUE]
+        ), "lines")
+    } else {
+      unit(styles[as.character(grp$data$style), 'row.height', drop=TRUE], "lines")
+    }
   }
 
   groupHeightNPC <- function(grp) {
@@ -314,12 +322,12 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
           pages <- c(pages, list(list()))
           height <- 0
         }
-        while (groupHeightNPC(list(data=data[[i]]$data[i0:i1,])) < (space - height) && i1 <= nrow(data[[i]]$data)) {
+        while (groupHeightNPC(list(data=data[[i]]$data[i0:i1, , drop=FALSE])) < (space - height) && i1 <= nrow(data[[i]]$data)) {
           i1 <- i1 + 1
         }
         block <- list(list(
           forest.data=forest.data.index(forest.data[[i]], i0:(i1 - 1)),
-          rowheight=groupHeight(list(data=data[[i]]$data[i0:(i1 - 1),]))
+          rowheight=groupHeight(list(data=data[[i]]$data[i0:(i1 - 1), , drop=FALSE]))
           ))
         names(block) <- names(forest.data)[i]
         pages[[length(pages)]] <- c(pages[[length(pages)]], block)

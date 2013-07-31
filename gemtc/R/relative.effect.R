@@ -38,8 +38,7 @@ tree.relative.effect <- function(g, t1, t2) {
 # parameters and generate a two-column matrix in which each row is a comparison
 extract.comparisons <- function(parameters) {
   x <- parameters[grep("^d\\.", parameters)]
-  x <- matrix(unlist(strsplit(x, "\\.")), ncol=3, byrow=TRUE)[,-1]
-  matrix(x, ncol=2) # seriously, R?
+  matrix(unlist(strsplit(x, "\\.")), ncol=3, byrow=TRUE)[ , -1, drop=FALSE]
 }
 
 spanning.tree.mtc.result <- function(result) {

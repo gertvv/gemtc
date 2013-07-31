@@ -11,8 +11,9 @@ mtc.init.limit <- function(model, value, offset=rep(0.0, model$n.chain)) {
 # Initial values for study-level absolute treatment effects based on (adjusted) MLE
 mtc.init.baseline.effect <- function(model, study, treatment) {
   data.ab <- model$network[['data.ab']]
-  mle <- ll.call("mtc.arm.mle", model,
-    data.ab[data.ab$study == study & data.ab$treatment == treatment, ])
+  data <- data.ab[data.ab$study == study & data.ab$treatment == treatment, , drop=TRUE]
+  data <- unlist(data[ll.call("required.columns.ab", model)])
+  mle <- ll.call("mtc.arm.mle", model, data)
   mtc.init.limit(
     model,
     rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
@@ -23,12 +24,12 @@ mtc.init.baseline.effect <- function(model, study, treatment) {
 mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model$n.chain)) {
   data <- model$network[['data.ab']]
   if (!is.null(data) && study %in% data$study) {
-    mle <- ll.call("mtc.rel.mle", model,
-      data[data$study == study &
-        (data$treatment == t1 | data$treatment == t2), ])
+    columns <- ll.call("required.columns.ab", model)
+    data <- data[data$study == study & (data$treatment == t1 | data$treatment == t2), columns, drop=FALSE]
+    mle <- ll.call("mtc.rel.mle", model, as.matrix(data))
   } else { # data.re -- assumes baseline is unaltered
     data <- model$network[['data.re']]
-    data <- data[data$study == study & data$treatment == t2, ]
+    data <- data[data$study == study & data$treatment == t2, , drop=TRUE]
     mle <- c('mean'=data$diff, 'sd'=data$std.err)
   }
   mtc.init.limit(
@@ -51,7 +52,7 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
     studies <- intersect(unique(data$study[sel1]), unique(data$study[sel2]))
 
     study.mle <- sapply(studies, function(study) {
-      fun(data[data$study == study, ])
+      fun(data[data$study == study, , drop=FALSE])
     })
 
     if (!is.matrix(study.mle)) {
@@ -67,7 +68,7 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
   data.ab <- model$network[['data.ab']]
   if (!is.null(data.ab)) {
     study.mle <- calc(data.ab, function(data) {
-      rel.mle.ab(data, paste("mtc.rel.mle", model$likelihood, model$link, sep="."), pair)
+      rel.mle.ab(data, model, pair)
     })
   }
   data.re <- model$network[['data.re']]
@@ -95,7 +96,7 @@ mtc.init <- function(model) {
 
   # Generate initial values for each parameter
   mu <- sapply(studies, function(study) {
-    mtc.init.baseline.effect(model, study, data.ab$treatment[s.mat[study, 1]])
+    mtc.init.baseline.effect(model, study, data.ab$treatment[s.mat[study, 1, drop=TRUE]])
   })
   if (!is.matrix(mu)) {
     mu <- matrix(mu, nrow=model$n.chain, ncol=length(studies))
@@ -104,12 +105,12 @@ mtc.init <- function(model) {
   ts <- c(as.character(data.ab$treatment), as.character(data.re$treatment))
   delta <- lapply(studies, function(study) {
     sapply(1:ncol(s.mat), function(i) {
-      if (i == 1 || is.na(s.mat[study, i])) rep(NA, model$n.chain)
+      if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model$n.chain)
       else mtc.init.relative.effect(
            model, study,
-           ts[s.mat[study, 1]],
-           ts[s.mat[study, i]],
-           if (study %in% colnames(mu)) { mu[, study] } else { rep(0.0, model$n.chain) })
+           ts[s.mat[study, 1, drop=TRUE]],
+           ts[s.mat[study, i, drop=TRUE]],
+           if (study %in% colnames(mu)) { mu[, study, drop=TRUE] } else { rep(0.0, model$n.chain) })
     })
   })
   graph <- if(!is.null(model$tree)) model$tree else model$graph
@@ -120,7 +121,7 @@ mtc.init <- function(model) {
       mtc.init.pooled.effect(model, v[1], v[2])
     })
     sd.d <- mtc.init.std.dev(model)
-  } else { # FIXME: a more intelligent solution
+  } else {
     params <- c()
     sd.d <- c()
   }
@@ -129,19 +130,19 @@ mtc.init <- function(model) {
   lapply(1:model$n.chain, function(chain) {
     c(
       if (!is.null(data.ab)) {
-        list(mu = mu[chain, ])
+        list(mu = mu[chain, , drop=TRUE])
       } else {
         list()
       },
       if (model$linearModel == 'random') {
         list(
-          delta = t(sapply(delta, function(x) { x[chain, ] })),
+          delta = t(sapply(delta, function(x) { x[chain, , drop=TRUE] })),
           sd.d = sd.d[chain]
         )
       } else {
         list()
       },
-      sapply(params, function(p) { d[chain, which(params == p)] })
+      sapply(params, function(p) { d[chain, which(params == p), drop=TRUE] })
     )
   })
 }
@@ -154,7 +155,7 @@ inits.to.monitors <- function(inits) {
       lapply(1:(nrow(struct)*ncol(struct)), function(idx) {
         i <- (idx - 1) %/% ncol(struct) + 1
         j <- (idx - 1) %% ncol(struct) + 1
-        if (!is.na(struct[i, j])) paste(var, "[", i, ",", j, "]", sep="")
+        if (!is.na(struct[i, j, drop=TRUE])) paste(var, "[", i, ",", j, "]", sep="")
       })
     } else if (length(struct) > 1) {
       lapply(1:length(struct), function(i) {

@@ -40,7 +40,7 @@ sparse.relative.effect.matrix <- function(model) {
   nt <- length(ts)
   x <- unlist(lapply(1:nt, function(i) {
     lapply(1:nt, function(j) {
-      if (model$graph[i, j]) {
+      if (model$graph[i, j, drop=TRUE]) {
         paste("d[", i, ", ", j, "] <- d.", ts[i], ".", ts[j], sep="")
       }
     })
@@ -66,7 +66,7 @@ mtc.comparisons.baseline <- function(network) {
 
   # Ensure the output comparisons are unique and always in the same order
   comparisons <- unique(comparisons)
-  comparisons <- comparisons[order(comparisons$t1, comparisons$t2), ]
+  comparisons <- comparisons[order(comparisons$t1, comparisons$t2), , drop=FALSE]
   row.names(comparisons) <- NULL
   comparisons$t1 <- as.treatment.factor(comparisons$t1, network)
   comparisons$t2 <- as.treatment.factor(comparisons$t2, network)

@@ -2,7 +2,7 @@ standardize.treatments <- function(treatments) {
   treatments$id <- as.factor(treatments$id)
   treatments$description <- as.character(treatments$description)
   rownames(treatments) <- as.character(treatments$id)
-  treatments[order(treatments$id), ]
+  treatments[order(treatments$id), , drop=FALSE]
 }
 
 standardize.data <- function(data, treatment.levels, re.order=FALSE) {
@@ -11,9 +11,9 @@ standardize.data <- function(data, treatment.levels, re.order=FALSE) {
   if (re.order) {
     na <- sapply(data$study, function(study) { sum(data$study == study) })
     bl <- !is.na(data$diff)
-    data <- data[order(na, data$study, bl, data$treatment), ]
+    data <- data[order(na, data$study, bl, data$treatment), , drop=FALSE]
   } else {
-    data <- data[order(data$study, data$treatment), ]
+    data <- data[order(data$study, data$treatment), , drop=FALSE]
   }
   if (nrow(data) > 0) {
     rownames(data) <- seq(1:nrow(data))
@@ -30,7 +30,7 @@ remove.onearm <- function(data, warn=FALSE) {
   if (warn && !all(sel)) {
     warning(paste("Removing", sum(!sel), "one-arm studies"))
   }
-  data[sel, ]
+  data[sel, , drop=FALSE]
 }
 
 mtc.network <- function(
@@ -307,7 +307,9 @@ has.indirect.evidence <- function(network, t1, t2) {
   })
 
   data <- rbind(network[['data.ab']], network[['data.re']])
-  data <- data[!has.both[data[['study']]] | (data[['treatment']] != t1 & data[['treatment']] != t2), ]
+  not.t1ort2 <- data[['treatment']] != t1 & data[['treatment']] != t2
+  not.both <- !has.both[data[['study']]]
+  data <- data[not.both | not.t1ort2, , drop=FALSE]
   data <- remove.onearm(data)
 
   if (nrow(data) > 0) {
@@ -340,7 +342,7 @@ mtc.comparisons <- function(network) {
 
   # Ensure the output comparisons are unique and always in the same order
   comparisons <- unique(comparisons)
-  comparisons <- comparisons[order(comparisons$t1, comparisons$t2), ]
+  comparisons <- comparisons[order(comparisons$t1, comparisons$t2), ,drop=FALSE]
   row.names(comparisons) <- NULL
   comparisons$t1 <- as.treatment.factor(comparisons$t1, network)
   comparisons$t2 <- as.treatment.factor(comparisons$t2, network)

@@ -3,8 +3,8 @@
 mtc.arm.mle.binom.cloglog <- function(data) {
   s <- data['responders'] + 0.5
   n <- data['sampleSize'] + 1
-  mu <- as.numeric(log(-log(1 - s/n)))
-  sigma <- as.numeric(sqrt(1/n^2)/exp(mu))
+  mu <- unname(log(-log(1 - s/n)))
+  sigma <- unname(sqrt(1/n^2)/exp(mu))
   c('mean'=mu, 'sd'=min(1, sigma))
 }
 

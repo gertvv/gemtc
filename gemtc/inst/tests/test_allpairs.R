@@ -3,21 +3,21 @@ context("rel.mle.[ab|re]")
 
 test_that("a single pair returns a one-row matrix", {
   data <- data.frame(treatment=c("A", "B"), mean=c(1.0, 2.0), std.err=c(0.5/4, 0.5/4))
-  fn <- "mtc.rel.mle.normal.identity"
+  model <- list("likelihood"="normal", "link"="identity")
   pairs <- data.frame(t1=data$treatment[1], t2=data$treatment[2])
   expected <- matrix(c('mean'=1.0, 'sd'=sqrt(2*0.125^2)), nrow=1, ncol=2)
   colnames(expected) <- c('mean', 'sd')
-  expect_that(rel.mle.ab(data, fn, pairs), equals(expected))
+  expect_that(rel.mle.ab(data, model, pairs), equals(expected))
 })
 
 test_that("two pairs return a two-row matrix", {
   data <- data.frame(treatment=c("A", "B", "C"), mean=c(1.0, 2.0, 2.5), std.err=c(0.5/4, 0.5/4, 1.0/4))
-  fn <- "mtc.rel.mle.normal.identity"
+  model <- list("likelihood"="normal", "link"="identity")
   ts <- data$treatment
   pairs <- data.frame(t1=coerce.factor(c(ts[1], ts[1]), ts), t2=coerce.factor(c(ts[2], ts[3]), ts))
   expected <- matrix(c(1.0, sqrt(2*0.125^2), 1.5, sqrt(0.125^2 + 0.25^2)), ncol=2, byrow=TRUE)
   colnames(expected) <- c('mean', 'sd')
-  expect_that(rel.mle.ab(data, fn, pairs), equals(expected))
+  expect_that(rel.mle.ab(data, model, pairs), equals(expected))
 })
 
 test_that("calculating pairs for relative effect data transforms the mvnorm", {

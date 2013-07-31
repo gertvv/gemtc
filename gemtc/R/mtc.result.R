@@ -15,11 +15,7 @@ plot.mtc.result <- function(x, ...) {
 forest.mtc.result <- function(x, ...) {
   quantiles <- summary(x)$quantiles
   model <- x$model
-  stats <- quantiles[grep("^d\\.", rownames(quantiles)),]
-  if(class(stats) == "numeric") { # Selecting a single row returns a numeric
-    stats <- as.matrix(t(stats))
-    row.names(stats) <- row.names(quantiles)[[1]]
-  }
+  stats <- quantiles[grep("^d\\.", rownames(quantiles)), , drop=FALSE]
   comps <- extract.comparisons(rownames(stats))
   groups <- comps[,1]
   group.names <- unique(groups)
