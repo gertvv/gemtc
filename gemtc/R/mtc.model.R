@@ -13,9 +13,13 @@ mtc.model.defined <- function(model) {
 
 mtc.model <- function(network, type="consistency",
     factor=2.5, n.chain=4,
-    likelihood=NULL, link=NULL, ...) {
+    likelihood=NULL, link=NULL,
+    linearModel="random", ...) {
   if (!inherits(network, "mtc.network")) {
     stop('Given network is not an mtc.network')
+  }
+  if (!(linearModel %in% c("random", "fixed"))) {
+    stop('linearModel must be either "random" or "fixed"')
   }
 
   network <- fix.network(network)
@@ -39,6 +43,7 @@ mtc.model <- function(network, type="consistency",
 
   model <- list(
     type = type,
+    linearModel = linearModel,
     network = network,
     n.chain = n.chain,
     var.scale = factor)

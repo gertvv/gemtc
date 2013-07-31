@@ -128,11 +128,21 @@ mtc.init <- function(model) {
   # Separate the initial values per chain
   lapply(1:model$n.chain, function(chain) {
     c(
-    if (!is.null(data.ab)) list(mu = mu[chain, ]) else list(),
-    list(
-      delta = t(sapply(delta, function(x) { x[chain, ] })),
-      sd.d = sd.d[chain]
-    ), sapply(params, function(p) { d[chain, which(params == p)] }))
+      if (!is.null(data.ab)) {
+        list(mu = mu[chain, ])
+      } else {
+        list()
+      },
+      if (model$linearModel == 'random') {
+        list(
+          delta = t(sapply(delta, function(x) { x[chain, ] })),
+          sd.d = sd.d[chain]
+        )
+      } else {
+        list()
+      },
+      sapply(params, function(p) { d[chain, which(params == p)] })
+    )
   })
 }
 

@@ -16,7 +16,7 @@ mtc.model.consistency <- function(model) {
   monitors <- inits.to.monitors(model$inits[[1]])
   model$monitors <- list(
     available=monitors,
-    enabled=c(monitors[grep('^d\\.', monitors)], 'sd.d')
+    enabled=c(monitors[grep('^d\\.', monitors)], monitors[grep('^sd.d$', monitors)])
   )
 
   class(model) <- "mtc.model"
