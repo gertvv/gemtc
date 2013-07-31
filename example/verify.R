@@ -86,7 +86,10 @@ replicate.example <- function(example, sampler) {
   n.adapt <- s1$summary$start - thin
   n.iter <- s1$summary$end - n.adapt
 
-  model <- mtc.model(example$network, type=example$type, likelihood=example$likelihood, link=example$link, n.chain=4)
+  model <- mtc.model(example$network, type=example$type,
+    likelihood=example$likelihood, link=example$link,
+    linearModel=example$linearModel,
+    n.chain=4)
   result <- mtc.run(model, sampler=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
   s2 <- generate.summaries(result)
   list(s1=s1, s2=s2)
@@ -175,6 +178,12 @@ examples <- list(
     ),
     likelihood='poisson',
     link='log'
+  ),
+  'diabetes-surv.fe' = list( # NICE TSD2 program 3b
+    network = mtc.network(read.table('diabetes-surv.data.txt', header=T)),
+    likelihood='binom',
+    link='cloglog',
+    linearModel='fixed'
   )
 )
 
@@ -184,6 +193,9 @@ for (name in names(examples)) {
   }
   if (is.null(examples[[name]][['type']])) {
     examples[[name]][['type']] <- 'consistency'
+  }
+  if (is.null(examples[[name]][['linearModel']])) {
+    examples[[name]][['linearModel']] <- 'random'
   }
   examples[[name]][['name']] <- name
 }
