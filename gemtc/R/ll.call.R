@@ -1,5 +1,5 @@
-ll.call <- function(fn, model, ...) {
-  fn <- paste(fn, model$likelihood, model$link, sep=".")
+ll.call <- function(fnName, model, ...) {
+  fn <- paste(fnName, model$likelihood, model$link, sep=".")
   do.call(fn, list(...))
 }
 

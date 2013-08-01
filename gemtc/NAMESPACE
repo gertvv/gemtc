@@ -31,4 +31,5 @@ export(
 	mtc.run,
 	relative.effect, rank.probability,
 	blobbogram, forest,
-	mtc.anohe)
+	mtc.anohe,
+	ll.call)
