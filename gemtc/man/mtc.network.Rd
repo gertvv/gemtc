@@ -14,15 +14,17 @@ write.mtc.network(network, file)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{data.ab}{Arm-level data.
-A data frame defining the arms of each study, containing the columns `study' and `treatment', where `treatment' must refer to an existing treatment ID if treatments were specified.
-To specify a network with dichotomous data, the number of responders should be given in a column `responders' and the sample size in a column `sampleSize'.
-To specify a network with continuous data, the mean should be given in a column `mean', the standard deviation in a column `std.dev' and the sample size in a column `sampleSize'.}
+A data frame defining the arms of each study, containing the columns `study' and `treatment', where
+`treatment' must refer to an existing treatment ID if treatments were specified.
+Further columns define the data per arm, and depend on the likelihood/link to be used.
+See \code{\link{mtc.model}} for supported likelihood/links and their data requirements.}
   \item{data.re}{Relative effect data.
-A data frame defining the arms of each study, containing the columns `study' and `treatment', where `treatment' must refer to an existing treatment ID if treatments were specified.
+A data frame defining the arms of each study, containing the columns `study' and `treatment', where
+`treatment' must refer to an existing treatment ID if treatments were specified.
 The column `diff' specifies the mean difference between the current arm and the baseline arm; set `diff=NA' for the baseline arm.
 The column `std.err' specifies the standard error of the mean difference (for non-baseline arms).
-For trials with more than two arms, specify the standard error of the mean of the baseline arm in `std.err', as this determines the covariance of the differences.
-}
+For trials with more than two arms, specify the standard error of the mean of the baseline arm in
+`std.err', as this determines the covariance of the differences.}
   \item{treatments}{Optional.
 A data frame with columns `id' and `description' defining the treatments or a vector giving the treatment IDs.}
   \item{description}{Optional. Short description of the network.}
@@ -37,17 +39,22 @@ For \code{write.mtc.network}, if \code{file=""}, the output is printed to standa
 For \code{mtc.network} and \code{read.mtc.network}, an object of the class \code{mtc.network} which is a list containing:
   \item{description}{A short description of the network}
   \item{treatments}{A data frame describing the treatments}
-  \item{data}{A data frame containing the network data (arm-level)}
+  \item{data.ab}{A data frame containing the network data (arm-level)}
   \item{data.re}{A data frame containing the network data (relative effects)}
 These are cleaned up and standardized versions of the arguments provided, or generated defaults for `treatments' if the argument was omitted.
 }
 \details{
 One-arm trials are automatically removed, which results in a warning.
+
+\code{read.mtc.network} and \code{write.mtc.network} deal with the older GeMTC XML format.
+This format supports dichotomous data as responders/sampleSize and continuous data as mean/std.dev/sampleSize only.
+Relative effect data, or other forms of arm-based data, are not supported.
+In general, it may be more convenient to use \code{dput} and \code{dget} to read and write networks.
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
 \seealso{
-\code{\link{read.mtc.network}}
+\code{\link{mtc.model}}
 }
 \examples{
 # Create a new network by specifying all information.

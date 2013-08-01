@@ -9,9 +9,6 @@
 \description{
 The \code{mtc.model} function generates network meta-analysis models from an \code{mtc.network} object.
 }
-\details{
-The \code{mtc.model} function generates an object of S3 class \code{mtc.model}, which can be visualized by the generic \code{plot} function or summarized by the generic \code{summary} function.
-}
 \usage{
 mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
   likelihood=NULL, link=NULL, linearModel="random", ...)
@@ -40,11 +37,39 @@ The following elements are descriptive:
   \item{om.scale}{The scale for the variance parameters}
 These elements determine the model run by JAGS/BUGS:
   \item{n.chain}{The number of chains}
-  \item{code}{Model code in JAGS/BUGS syntax}
+  \item{code}{Model code in JAGS/BUGS syntax. Use \code{cat()} for proper formatting.}
   \item{data}{Data in JAGS/BUGS compatible format}
   \item{inits}{Initial values in JAGS/BUGS compatible format}
   \item{monitors}{The nodes of the JAGS/BUGS model to monitor}
 These latter fields can be modified to alter the statistical model, but such changes may break the model or assumptions made elsewhere in the package.
+}
+\details{
+The \code{mtc.model} function generates an object of S3 class \code{mtc.model}, which can be
+visualized by the generic \code{plot} function or summarized by the generic \code{summary} function.
+
+These likelihood/links are supported:
+\itemize{
+  \item{normal/identity: for continuous (mean difference) data.
+
+  Required columns: \code{[mean, std.err]} or \code{[mean, std.dev, sampleSize]}.
+
+  Result: relative mean difference.}
+  \item{binom/logit: for dichotomous data.
+
+  Required columns \code{[responders, sampleSize]}.
+
+  Result: (log) odds ratio.}
+  \item{binom/cloglog: for rate (survival) data - equal follow-up in each arm.
+
+  Required columns \code{[responders, sampleSize]}.
+
+  Result: (log) hazard ratio.}
+  \item{poisson/log: for rate (survival) data.
+
+  Required columns \code{[responders, exposure]}.
+
+  Result: (log) hazard ratio.}
+}
 }
 \note{
 Due to various issues, rJava has been removed from the gemtc package.
