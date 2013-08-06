@@ -30,9 +30,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
   }
   sampler <- found
 
-  tryCatch(
-    samples <- mtc.sample(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin),
-    error = function(e) { print(model$inits) })
+  samples <- mtc.sample(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 
   result <- list(
     samples=samples,

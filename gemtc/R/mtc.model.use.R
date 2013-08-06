@@ -1,7 +1,5 @@
 # Unrelated study effects model
 mtc.model.use <- function(model) {
-  model$code <- mtc.model.code(model, c(), '', template='gemtc.model.use.template.txt')
-
   model$data <- mtc.model.data(model)
   model$data$nt <- NULL
   model$data$t <- NULL
@@ -10,6 +8,8 @@ mtc.model.use <- function(model) {
       mu=inits$mu,
       delta=inits$delta)
   })
+
+  model$code <- mtc.model.code(model, c(), '', template='gemtc.model.use.template.txt')
 
   monitors <- inits.to.monitors(model$inits[[1]])
   model$monitors <- list(

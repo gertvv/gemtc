@@ -1,13 +1,28 @@
 mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model.template.txt') {
   template <- read.template(template)
 
-  arm.code <- read.template('gemtc.armeffect.likelihood.txt')
-  template <- template.block.sub(template, 'armeffect', arm.code)
-  rel.code <- read.template('gemtc.releffect.likelihood.txt')
-  template <- template.block.sub(template, 'releffect', rel.code)
+  if (model[['data']][['ns.a']] > 0) {
+    arm.code <- read.template('gemtc.armeffect.likelihood.txt')
+    template <- template.block.sub(template, 'armeffect', arm.code)
+    lik.code <- do.call(paste("mtc.code.likelihood", model$likelihood, model$link, sep="."), list())
+    template <- template.block.sub(template, 'likelihood', lik.code)
+  } else {
+    template <- template.block.sub(template, 'armeffect', '## OMITTED')
+  }
 
-  lik.code <- do.call(paste("mtc.code.likelihood", model$likelihood, model$link, sep="."), list())
-  template <- template.block.sub(template, 'likelihood', lik.code)
+  if (model[['data']][['ns.r2']] > 0) {
+    rel.code <- read.template('gemtc.releffect.likelihood.r2.txt')
+    template <- template.block.sub(template, 'releffect.r2', rel.code)
+  } else {
+    template <- template.block.sub(template, 'releffect.r2', '## OMITTED')
+  }
+
+  if (model[['data']][['ns.rm']] > 0) {
+    rel.code <- read.template('gemtc.releffect.likelihood.rm.txt')
+    template <- template.block.sub(template, 'releffect.rm', rel.code)
+  } else {
+    template <- template.block.sub(template, 'releffect.rm', '## OMITTED')
+  }
 
   mod.code <- if (model$linearModel == "fixed") {
     read.template('gemtc.fixedeffect.txt')
@@ -17,6 +32,13 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
   template <- template.block.sub(template, 'linearModel', mod.code)
 
   template <- template.block.sub(template, 'relativeEffectMatrix', relEffectMatrix)
+
+  if (model[['data']][['ns.a']] > 0) {
+    sbPriors <- read.template('gemtc.study.baseline.priors.txt')
+    template <- template.block.sub(template, 'studyBaselinePriors', sbPriors)
+  } else {
+    template <- template.block.sub(template, 'studyBaselinePriors', '## OMITTED')
+  }
 
   # Generate parameter priors
   priors <- paste(params, "~", "dnorm(0, prior.prec)", collapse="\n")

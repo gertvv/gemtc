@@ -9,9 +9,10 @@ mtc.model.consistency <- function(model) {
   model$tree <-
     style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model$network)))
 
-  model$code <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model))
   model$data <- mtc.model.data(model)
   model$inits <- mtc.init(model)
+
+  model$code <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model))
 
   monitors <- inits.to.monitors(model$inits[[1]])
   model$monitors <- list(

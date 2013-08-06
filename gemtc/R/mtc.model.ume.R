@@ -14,11 +14,11 @@ mtc.model.ume <- function(model) {
     mtc.comparisons.baseline(network),
     arrow.mode=2, color='black', lty=1)
 
-  model$code <- mtc.model.code(model, mtc.basic.parameters(model), sparse.relative.effect.matrix(model))
-
   model$data <- mtc.model.data(model)
   model$data$nt <- NULL
   model$inits <- mtc.init(model)
+
+  model$code <- mtc.model.code(model, mtc.basic.parameters(model), sparse.relative.effect.matrix(model))
 
   monitors <- inits.to.monitors(model$inits[[1]])
   model$monitors <- list(
