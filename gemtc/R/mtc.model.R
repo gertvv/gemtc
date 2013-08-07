@@ -24,6 +24,10 @@ mtc.model <- function(network, type="consistency",
 
   network <- fix.network(network)
 
+  if (check.duplicated.treatments(network, warn=TRUE)) {
+    stop("Studies with duplicated treatments are not supported.")
+  }
+
   add.std.err <- function(data) {
     if (!is.null(data[['std.dev']]) &&
         !is.null(data[['sampleSize']]) &&

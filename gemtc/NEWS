@@ -11,6 +11,9 @@ New features:
 
 Changes:
 
+ * refuse to generate models when treatments are duplicated in
+   multiple arms of the same study, since the code does not take this
+   into account.
  * network$data is now network$data.ab for consistency with
    network$data.re
  * likelihood/link implementations can now define their data

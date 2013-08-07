@@ -33,6 +33,20 @@ remove.onearm <- function(data, warn=FALSE) {
   data[sel, , drop=FALSE]
 }
 
+check.duplicated.treatments <- function(network, warn=FALSE) {
+  duplicates <- FALSE
+  for (study in mtc.studies.list(network)$values) {
+    design <- rle(sort(as.vector(mtc.study.design(network, study))))
+    dup.v <- design$values[design$lengths > 1]
+    dup.l <- design$lengths[design$lengths > 1]
+    if (any(design$lengths > 1)) {
+      duplicates <- TRUE
+      if (warn) warning(paste(dup.v, "occurs", dup.l, "times in", study))
+    }
+  }
+  duplicates
+}
+
 mtc.network <- function(
   data.ab=data, treatments=NULL, description="Network",
   data.re=NULL, data=NULL
@@ -264,6 +278,8 @@ mtc.network.validate <- function(network) {
   if (!is.null(network[['data.re']])) {
     mtc.validate.data.re(network[['data.re']])
   }
+
+  check.duplicated.treatments(network)
 }
 
 as.treatment.factor <- function(x, network) {

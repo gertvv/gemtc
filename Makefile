@@ -29,3 +29,4 @@ test: $(PACKAGE)
 	R CMD INSTALL -l `cat tmp.Rlib.loc` $(PACKAGE)
 	echo "library($(PKG_NAME), lib.loc='`cat tmp.Rlib.loc`'); source('$(PKG_NAME)/tests/test.R')" | R --vanilla --slave
 	rm -rf `cat tmp.Rlib.loc`
+	rm tmp.Rlib.loc
