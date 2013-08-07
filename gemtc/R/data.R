@@ -67,7 +67,7 @@ mtc.model.data <- function(model) {
     ns.r2 = sum(na.re == 2),
     ns.rm = sum(na.re > 2),
     ns = length(studies),
-    na = na,
+    na = unname(na),
     nt = nrow(model$network$treatments),
     om.scale = model$om.scale))
 
