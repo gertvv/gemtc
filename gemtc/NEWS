@@ -20,8 +20,9 @@ Changes:
 
 Bugfixes:
 
- * Fix bug: multi-arm trial decomposition sometimes resulted in NA
-   standard errors
+ * multi-arm trial decomposition sometimes resulted in NA standard
+   errors
+ * WinBUGS and OpenBUGS had complaints about the relative effect code
 
 gemtc 0.3
 ===========
