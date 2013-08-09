@@ -63,9 +63,6 @@ Dropped Java dependency by rewriting core algorithms in R.
  * Compatibility note: the argument order of mtc.network has changed
  * Compatibility note: the YADAS sampler is no longer available
 
-See [roadmap](http://mantis.drugis.org/roadmap_page.php?version_id=61)
-for details.
-
 gemtc 0.1-2
 ===========
 
@@ -79,9 +76,6 @@ Bugfix release. Addresses the following issues:
  * Make Java open tab-completed paths
  * Use correct column name for continuous data
  * When only YADAS available, run YADAS by default
- 
-See [roadmap](http://mantis.drugis.org/roadmap_page.php?version_id=65)
-for details.
 
 gemtc 0.1-1
 ===========
