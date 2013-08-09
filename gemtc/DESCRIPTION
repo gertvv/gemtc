@@ -1,6 +1,6 @@
 Package: gemtc
-Version: 0.3-1
-Date: 2013-07-16
+Version: 0.4
+Date: 2013-08-09
 Title: GeMTC network meta-analysis
 Author: Gert van Valkenhoef, Joel Kuiper 
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
