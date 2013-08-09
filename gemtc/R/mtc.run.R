@@ -42,10 +42,10 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 
 mtc.build.syntaxModel <- function(model) {
   list(
-    model = model$code,
-    data = model$data,
-    inits = model$inits,
-    vars = if (!is.null(model$monitors$enabled)) model$monitors$enabled else c(mtc.basic.parameters(model), "sd.d")
+    model = model[['code']],
+    data = model[['data']],
+    inits = model[['inits']],
+    vars = if (!is.null(model[['monitors']][['enabled']])) model[['monitors']][['enabled']] else c(mtc.basic.parameters(model), "sd.d")
   )
 }
 
@@ -59,27 +59,27 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
 
   # compile & run BUGS model
   file.model <- tempfile()
-  cat(paste(syntax$model, "\n", collapse=""), file=file.model)
+  cat(paste(syntax[['model']], "\n", collapse=""), file=file.model)
   data <- if (identical(package, 'rjags')) {
     # Note: n.iter must be specified *excluding* the n.adapt
-    jags <- jags.model(file.model, data=syntax$data,
-      inits=syntax$inits, n.chains=model$n.chain,
+    jags <- jags.model(file.model, data=syntax[['data']],
+      inits=syntax[['inits']], n.chains=model[['n.chain']],
       n.adapt=n.adapt)
-    coda.samples(jags, variable.names=syntax$vars,
+    coda.samples(jags, variable.names=syntax[['vars']],
       n.iter=n.iter, thin=thin)
   } else if (identical(package, 'BRugs')) {
     # Note: n.iter must be specified *excluding* the n.adapt
-    BRugsFit(file.model, data=syntax$data,
-      inits=syntax$inits, numChains=model$n.chain,
-      parametersToSave=syntax$vars, coda=TRUE,
+    BRugsFit(file.model, data=syntax[['data']],
+      inits=syntax[['inits']], numChains=model[['n.chain']],
+      parametersToSave=syntax[['vars']], coda=TRUE,
       nBurnin=n.adapt, nIter=n.iter, nThin=thin)
   } else if (identical(package, 'R2WinBUGS')) {
     # Note: codaPkg=TRUE does *not* return CODA objects, but rather
     # the names of written CODA output files.
     # Note: n.iter must be specified *including* the n.adapt
-    as.mcmc.list(bugs(model.file=file.model, data=syntax$data,
-      inits=syntax$inits, n.chains=model$n.chain,
-      parameters.to.save=syntax$vars, codaPkg=FALSE, DIC=FALSE,
+    as.mcmc.list(bugs(model.file=file.model, data=syntax[['data']],
+      inits=syntax[['inits']], n.chains=model[['n.chain']],
+      parameters.to.save=syntax[['vars']], codaPkg=FALSE, DIC=FALSE,
       n.burnin=n.adapt, n.iter=n.adapt+n.iter, n.thin=thin))
     # Note: does not always work on Unix systems due to a problem
     # with Wine not being able to access the R temporary path.

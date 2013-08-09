@@ -4,7 +4,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
   if (model[['data']][['ns.a']] > 0) {
     arm.code <- read.template('gemtc.armeffect.likelihood.txt')
     template <- template.block.sub(template, 'armeffect', arm.code)
-    lik.code <- do.call(paste("mtc.code.likelihood", model$likelihood, model$link, sep="."), list())
+    lik.code <- do.call(paste("mtc.code.likelihood", model[['likelihood']], model[['link']], sep="."), list())
     template <- template.block.sub(template, 'likelihood', lik.code)
   } else {
     template <- template.block.sub(template, 'armeffect', '## OMITTED')
@@ -24,7 +24,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
     template <- template.block.sub(template, 'releffect.rm', '## OMITTED')
   }
 
-  mod.code <- if (model$linearModel == "fixed") {
+  mod.code <- if (model[['linearModel']] == "fixed") {
     read.template('gemtc.fixedeffect.txt')
   } else {
     read.template('gemtc.randomeffects.txt')

@@ -42,21 +42,21 @@ extract.comparisons <- function(parameters) {
 }
 
 spanning.tree.mtc.result <- function(result) {
-  network <- result$model$network
-  pairs <- extract.comparisons(colnames(result$samples[[1]]))
+  network <- result[['model']][['network']]
+  pairs <- extract.comparisons(colnames(result[['samples']][[1]]))
   pairs <- matrix(pairs, ncol=2)
   parameters <- data.frame(
     t1=as.treatment.factor(pairs[,1], network),
     t2=as.treatment.factor(pairs[,2], network)
   )
-  graph.create(network$treatments$id, parameters, arrow.mode=2, color="black", lty=1)
+  graph.create(network[['treatments']][['id']], parameters, arrow.mode=2, color="black", lty=1)
 }
 
 relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
-  if(tolower(result$model$type) != 'consistency') stop("Cannot apply relative.effect to this model")
+  if(tolower(result[['model']][['type']]) != 'consistency') stop("Cannot apply relative.effect to this model")
 
   # Build relative effect transformation matrix
-  network <- result$model$network
+  network <- result[['model']][['network']]
   g <- spanning.tree.mtc.result(result)
   if (is.character(t1)) {
     t1 <- as.treatment.factor(t1, network)
@@ -69,11 +69,11 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
   # Add rows/columns for parameters that are not relative effects
   nOut <- ncol(effects)
   nIn <- nrow(effects)
-  nExtra <- ncol(result$samples[[1]]) - nIn
+  nExtra <- ncol(result[['samples']][[1]]) - nIn
   effects <- rbind(effects, matrix(0, nrow=nExtra, ncol=nOut))
   if (preserve.extra) {
     if (nExtra > 0) {
-      allNames <- c(colnames(effects), colnames(result$samples[[1]])[nIn+(1:nExtra)])
+      allNames <- c(colnames(effects), colnames(result[['samples']][[1]])[nIn+(1:nExtra)])
     } else {
       allNames <- colnames(effects)
     }
@@ -83,13 +83,13 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
   }
 
   # Apply tranformation to each chain
-  samples <- as.mcmc.list(lapply(result$samples, function(chain) {
+  samples <- as.mcmc.list(lapply(result[['samples']], function(chain) {
     mcmc(chain %*% effects, start=start(chain), end=end(chain), thin=thin(chain))
   }))
   effects <- list(
     samples=samples,
-    model=result$model,
-    sampler=result$sampler)
+    model=result[['model']],
+    sampler=result[['sampler']])
 
   class(effects) <- "mtc.result"
   effects

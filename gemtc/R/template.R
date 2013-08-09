@@ -9,5 +9,5 @@ template.block.sub <- function(template, var, val) {
 
 read.template <- function(file.name) {
     fileName <- system.file(file.name, package='gemtc')
-    readChar(fileName, file.info(fileName)$size)
+    readChar(fileName, file.info(fileName)[['size']])
 }

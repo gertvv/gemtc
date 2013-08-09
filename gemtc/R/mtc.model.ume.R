@@ -1,27 +1,27 @@
 # Unrelated mean effects model
 mtc.model.ume <- function(model) {
-  network <- model$network
+  network <- model[['network']]
 
   studies <- mtc.studies.list(network)
-  na <- studies$lengths
-  studies <- studies$values
+  na <- studies[['lengths']]
+  studies <- studies[['values']]
   if (any(na > 2)) {
     warning("The Unrelated Mean Effects model does not handle multi-arm trials correctly.")
   }
 
-  model$graph <- graph.create(
-    network$treatments$id,
+  model[['graph']] <- graph.create(
+    network[['treatments']][['id']],
     mtc.comparisons.baseline(network),
     arrow.mode=2, color='black', lty=1)
 
-  model$data <- mtc.model.data(model)
-  model$data$nt <- NULL
-  model$inits <- mtc.init(model)
+  model[['data']] <- mtc.model.data(model)
+  model[['data']][['nt']] <- NULL
+  model[['inits']] <- mtc.init(model)
 
-  model$code <- mtc.model.code(model, mtc.basic.parameters(model), sparse.relative.effect.matrix(model))
+  model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), sparse.relative.effect.matrix(model))
 
-  monitors <- inits.to.monitors(model$inits[[1]])
-  model$monitors <- list(
+  monitors <- inits.to.monitors(model[['inits']][[1]])
+  model[['monitors']] <- list(
     available=monitors,
     enabled=c(monitors[grep('^d\\.', monitors)], monitors[grep('^sd.d$', monitors)])
   )
@@ -36,11 +36,11 @@ mtc.model.name.ume <- function(model) {
 }
 
 sparse.relative.effect.matrix <- function(model) {
-  ts <- model$network$treatments$id
+  ts <- model[['network']][['treatments']][['id']]
   nt <- length(ts)
   x <- unlist(lapply(1:nt, function(i) {
     lapply(1:nt, function(j) {
-      if (model$graph[i, j, drop=TRUE]) {
+      if (model[['graph']][i, j, drop=TRUE]) {
         paste("d[", i, ", ", j, "] <- d.", ts[i], ".", ts[j], sep="")
       }
     })
@@ -59,16 +59,16 @@ mtc.comparisons.baseline <- function(network) {
 
   # Identify the unique "designs" (treatment combinations)
   design <- function(study) { mtc.study.design(network, study) }
-  designs <- unique(lapply(levels(data$study), design))
+  designs <- unique(lapply(levels(data[['study']]), design))
 
   # Generate all pair-wise comparisons from each "design"
   comparisons <- do.call(rbind, lapply(designs, baseline.pairs))
 
   # Ensure the output comparisons are unique and always in the same order
   comparisons <- unique(comparisons)
-  comparisons <- comparisons[order(comparisons$t1, comparisons$t2), , drop=FALSE]
+  comparisons <- comparisons[order(comparisons[['t1']], comparisons[['t2']]), , drop=FALSE]
   row.names(comparisons) <- NULL
-  comparisons$t1 <- as.treatment.factor(comparisons$t1, network)
-  comparisons$t2 <- as.treatment.factor(comparisons$t2, network)
+  comparisons[['t1']] <- as.treatment.factor(comparisons[['t1']], network)
+  comparisons[['t2']] <- as.treatment.factor(comparisons[['t2']], network)
   comparisons
 }

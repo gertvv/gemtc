@@ -1,20 +1,20 @@
 ## mtc.result class methods
 print.mtc.result <- function(x, ...) {
-  cat("MTC ", x$model$type, " results: ", x$model$description, sep="")
-  print(x$samples)
+  cat("MTC ", x[['model']][['type']], " results: ", x[['model']][['description']], sep="")
+  print(x[['samples']])
 }
 
 summary.mtc.result <- function(object, ...) {
-  summary(object$samples)
+  summary(object[['samples']])
 }
 
 plot.mtc.result <- function(x, ...) {
-  plot(x$samples, ...)
+  plot(x[['samples']], ...)
 }
 
 forest.mtc.result <- function(x, ...) {
-  quantiles <- summary(x)$quantiles
-  model <- x$model
+  quantiles <- summary(x)[['quantiles']]
+  model <- x[['model']]
   stats <- quantiles[grep("^d\\.", rownames(quantiles)), , drop=FALSE]
   comps <- extract.comparisons(rownames(stats))
   groups <- comps[,1]
@@ -35,10 +35,10 @@ forest.mtc.result <- function(x, ...) {
     ci.label=paste(ll.call('scale.name', model), "(95% CrI)"),
     log.scale=ll.call('scale.log', model),
     grouped=length(group.labels)>1, group.labels=group.labels,
-    left.label=params$left.label, right.label=params$right.label,
-    xlim=params$xlim)
+    left.label=params[['left.label']], right.label=params[['right.label']],
+    xlim=params[['xlim']])
 }
 
 as.mcmc.list.mtc.result <- function(x, ...) {
-  x$samples
+  x[['samples']]
 }

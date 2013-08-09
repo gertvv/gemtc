@@ -1,5 +1,5 @@
 # Limit initial values to allowed range
-mtc.init.limit <- function(model, value, offset=rep(0.0, model$n.chain)) {
+mtc.init.limit <- function(model, value, offset=rep(0.0, model[['n.chain']])) {
   limits <- ll.call("scale.limit.inits", model)
   too.small <- (value + offset) < limits[1]
   too.large <- (value + offset) > limits[2]
@@ -10,31 +10,31 @@ mtc.init.limit <- function(model, value, offset=rep(0.0, model$n.chain)) {
 
 # Initial values for study-level absolute treatment effects based on (adjusted) MLE
 mtc.init.baseline.effect <- function(model, study, treatment) {
-  data.ab <- model$network[['data.ab']]
-  data <- data.ab[data.ab$study == study & data.ab$treatment == treatment, , drop=TRUE]
+  data.ab <- model[['network']][['data.ab']]
+  data <- data.ab[data.ab[['study']] == study & data.ab[['treatment']] == treatment, , drop=TRUE]
   data <- unlist(data[ll.call("required.columns.ab", model)])
   mle <- ll.call("mtc.arm.mle", model, data)
   mtc.init.limit(
     model,
-    rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd'])
+    rnorm(model[['n.chain']], mle['mean'], model[['var.scale']] * mle['sd'])
   )
 }
 
 # Initial values for study-level relative effects based on (adjusted) MLE
-mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model$n.chain)) {
-  data <- model$network[['data.ab']]
-  if (!is.null(data) && study %in% data$study) {
+mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model[['n.chain']])) {
+  data <- model[['network']][['data.ab']]
+  if (!is.null(data) && study %in% data[['study']]) {
     columns <- ll.call("required.columns.ab", model)
-    data <- data[data$study == study & (data$treatment == t1 | data$treatment == t2), columns, drop=FALSE]
+    data <- data[data[['study']] == study & (data[['treatment']] == t1 | data[['treatment']] == t2), columns, drop=FALSE]
     mle <- ll.call("mtc.rel.mle", model, as.matrix(data))
   } else { # data.re -- assumes baseline is unaltered
-    data <- model$network[['data.re']]
-    data <- data[data$study == study & data$treatment == t2, , drop=TRUE]
-    mle <- c('mean'=data$diff, 'sd'=data$std.err)
+    data <- model[['network']][['data.re']]
+    data <- data[data[['study']] == study & data[['treatment']] == t2, , drop=TRUE]
+    mle <- c('mean'=data[['diff']], 'sd'=data[['std.err']])
   }
   mtc.init.limit(
     model,
-    rnorm(model$n.chain, mle['mean'], model$var.scale * mle['sd']),
+    rnorm(model[['n.chain']], mle['mean'], model[['var.scale']] * mle['sd']),
     mu
   )
 }
@@ -42,17 +42,17 @@ mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model$n.c
 # Initial values for pooled effect (basic parameter) based on
 # inverse-variance random effects meta-analysis (package meta)
 mtc.init.pooled.effect <- function(model, t1, t2) {
-  t1 <- as.treatment.factor(t1, model$network)
-  t2 <- as.treatment.factor(t2, model$network)
+  t1 <- as.treatment.factor(t1, model[['network']])
+  t2 <- as.treatment.factor(t2, model[['network']])
   pair <- data.frame(t1=t1, t2=t2)
 
   calc <- function(data, fun) {
-    sel1 <- data$treatment == t1
-    sel2 <- data$treatment == t2
-    studies <- intersect(unique(data$study[sel1]), unique(data$study[sel2]))
+    sel1 <- data[['treatment']] == t1
+    sel2 <- data[['treatment']] == t2
+    studies <- intersect(unique(data[['study']][sel1]), unique(data[['study']][sel2]))
 
     study.mle <- sapply(studies, function(study) {
-      fun(data[data$study == study, , drop=FALSE])
+      fun(data[data[['study']] == study, , drop=FALSE])
     })
 
     if (!is.matrix(study.mle)) {
@@ -65,13 +65,13 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
 
 
   study.mle <- NULL
-  data.ab <- model$network[['data.ab']]
+  data.ab <- model[['network']][['data.ab']]
   if (!is.null(data.ab)) {
     study.mle <- calc(data.ab, function(data) {
       rel.mle.ab(data, model, pair)
     })
   }
-  data.re <- model$network[['data.re']]
+  data.re <- model[['network']][['data.re']]
   if (!is.null(data.re)) {
     study.mle <- cbind(study.mle, calc(data.re, function(data) {
       rel.mle.re(data, pair)
@@ -79,41 +79,41 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
   }
   meta <- meta::metagen(unlist(study.mle['mean', ]), unlist(study.mle['sd', ]))
 
-  rnorm(model$n.chain, meta$TE.random, model$var.scale * meta$seTE.random)
+  rnorm(model[['n.chain']], meta[['TE.random']], model[['var.scale']] * meta[['seTE.random']])
 }
 
 # Initial values for random effects standard deviation from prior
 mtc.init.std.dev <- function(model) {
-  runif(model$n.chain, 0, model$om.scale)
+  runif(model[['n.chain']], 0, model[['om.scale']])
 }
 
 # Generate initial values for all relevant parameters
 mtc.init <- function(model) {
-  data.ab <- model$network[['data.ab']]
-  data.re <- model$network[['data.re']]
-  s.mat <- arm.index.matrix(model$network)
-  studies <- levels(data.ab$study)
+  data.ab <- model[['network']][['data.ab']]
+  data.re <- model[['network']][['data.re']]
+  s.mat <- arm.index.matrix(model[['network']])
+  studies <- levels(data.ab[['study']])
 
   # Generate initial values for each parameter
   mu <- sapply(studies, function(study) {
-    mtc.init.baseline.effect(model, study, data.ab$treatment[s.mat[study, 1, drop=TRUE]])
+    mtc.init.baseline.effect(model, study, data.ab[['treatment']][s.mat[study, 1, drop=TRUE]])
   })
   if (!is.matrix(mu)) {
-    mu <- matrix(mu, nrow=model$n.chain, ncol=length(studies))
+    mu <- matrix(mu, nrow=model[['n.chain']], ncol=length(studies))
   }
-  studies <- c(studies, levels(data.re$study))
-  ts <- c(as.character(data.ab$treatment), as.character(data.re$treatment))
+  studies <- c(studies, levels(data.re[['study']]))
+  ts <- c(as.character(data.ab[['treatment']]), as.character(data.re[['treatment']]))
   delta <- lapply(studies, function(study) {
     sapply(1:ncol(s.mat), function(i) {
-      if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model$n.chain)
+      if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model[['n.chain']])
       else mtc.init.relative.effect(
            model, study,
            ts[s.mat[study, 1, drop=TRUE]],
            ts[s.mat[study, i, drop=TRUE]],
-           if (study %in% colnames(mu)) { mu[, study, drop=TRUE] } else { rep(0.0, model$n.chain) })
+           if (study %in% colnames(mu)) { mu[, study, drop=TRUE] } else { rep(0.0, model[['n.chain']]) })
     })
   })
-  graph <- if(!is.null(model$tree)) model$tree else model$graph
+  graph <- if(!is.null(model[['tree']])) model[['tree']] else model[['graph']]
   if (!is.null(graph)) {
     params <- mtc.basic.parameters(model)
     d <- sapply(E(graph), function(e) {
@@ -127,14 +127,14 @@ mtc.init <- function(model) {
   }
 
   # Separate the initial values per chain
-  lapply(1:model$n.chain, function(chain) {
+  lapply(1:model[['n.chain']], function(chain) {
     c(
       if (!is.null(data.ab)) {
         list(mu = mu[chain, , drop=TRUE])
       } else {
         list()
       },
-      if (model$linearModel == 'random') {
+      if (model[['linearModel']] == 'random') {
         list(
           delta = t(sapply(delta, function(x) { x[chain, , drop=TRUE] })),
           sd.d = sd.d[chain]

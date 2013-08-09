@@ -1,5 +1,5 @@
 rank.probability <- function(result) {
-  treatments <- sort(unique(as.vector(extract.comparisons(colnames(result$samples[[1]])))))
+  treatments <- sort(unique(as.vector(extract.comparisons(colnames(result[['samples']][[1]])))))
 
   n.alt <- length(treatments)
 
@@ -9,15 +9,15 @@ rank.probability <- function(result) {
     .C("gemtc_rank_count",
       as.double(d), as.integer(n.iter), as.integer(n.alt),
       counts=matrix(0.0, nrow=n.alt, ncol=n.alt),
-      NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")$counts
+      NAOK=FALSE, DUP=FALSE, PACKAGE="gemtc")[['counts']]
   }
 
-  d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)$samples
+  d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)[['samples']]
   counts <- lapply(d, function(chain) { rank.count(t(chain)) })
   ranks <- Reduce(function(a, b) { a + b }, counts)
   colnames(ranks) <- treatments
 
-  data <- result$samples
+  data <- result[['samples']]
   n.iter <- nchain(data) * (end(data) - start(data) + thin(data)) / thin(data)
 
   t(ranks / n.iter)

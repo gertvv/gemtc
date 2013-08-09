@@ -1,19 +1,19 @@
 standardize.treatments <- function(treatments) {
-  treatments$id <- as.factor(treatments$id)
-  treatments$description <- as.character(treatments$description)
-  rownames(treatments) <- as.character(treatments$id)
-  treatments[order(treatments$id), , drop=FALSE]
+  treatments[['id']] <- as.factor(treatments[['id']])
+  treatments[['description']] <- as.character(treatments[['description']])
+  rownames(treatments) <- as.character(treatments[['id']])
+  treatments[order(treatments[['id']]), , drop=FALSE]
 }
 
 standardize.data <- function(data, treatment.levels, re.order=FALSE) {
-  data$study <- factor(as.factor(data$study))
-  data$treatment <- factor(as.character(data$treatment), levels=treatment.levels)
+  data[['study']] <- factor(as.factor(data[['study']]))
+  data[['treatment']] <- factor(as.character(data[['treatment']]), levels=treatment.levels)
   if (re.order) {
-    na <- sapply(data$study, function(study) { sum(data$study == study) })
-    bl <- !is.na(data$diff)
-    data <- data[order(na, data$study, bl, data$treatment), , drop=FALSE]
+    na <- sapply(data[['study']], function(study) { sum(data[['study']] == study) })
+    bl <- !is.na(data[['diff']])
+    data <- data[order(na, data[['study']], bl, data[['treatment']]), , drop=FALSE]
   } else {
-    data <- data[order(data$study, data$treatment), , drop=FALSE]
+    data <- data[order(data[['study']], data[['treatment']]), , drop=FALSE]
   }
   if (nrow(data) > 0) {
     rownames(data) <- seq(1:nrow(data))
@@ -35,11 +35,11 @@ remove.onearm <- function(data, warn=FALSE) {
 
 check.duplicated.treatments <- function(network, warn=FALSE) {
   duplicates <- FALSE
-  for (study in mtc.studies.list(network)$values) {
+  for (study in mtc.studies.list(network)[['values']]) {
     design <- rle(sort(as.vector(mtc.study.design(network, study))))
-    dup.v <- design$values[design$lengths > 1]
-    dup.l <- design$lengths[design$lengths > 1]
-    if (any(design$lengths > 1)) {
+    dup.v <- design[['values']][design[['lengths']] > 1]
+    dup.l <- design[['lengths']][design[['lengths']] > 1]
+    if (any(design[['lengths']] > 1)) {
       duplicates <- TRUE
       if (warn) warning(paste(dup.v, "occurs", dup.l, "times in", study))
     }
@@ -74,10 +74,10 @@ mtc.network <- function(
   if (is.null(treatments)) {
     data.treatments <- vector(mode="character")
     if (!is.null(data.ab)) {
-      data.treatments <- c(data.treatments, as.character(data.ab$treatment))
+      data.treatments <- c(data.treatments, as.character(data.ab[['treatment']]))
     }
     if (!is.null(data.re)) {
-      data.treatments <- c(data.treatments, as.character(data.re$treatment))
+      data.treatments <- c(data.treatments, as.character(data.re[['treatment']]))
     }
     treatments <- unique(data.treatments)
   }
@@ -94,10 +94,10 @@ mtc.network <- function(
     treatments=treatments)
 
   if (!is.null(data.ab)) {
-    network <- c(network, list(data.ab=standardize.data(data.ab, levels(treatments$id))))
+    network <- c(network, list(data.ab=standardize.data(data.ab, levels(treatments[['id']]))))
   }
   if (!is.null(data.re)) {
-    network <- c(network, list(data.re=standardize.data(data.re, levels(treatments$id), re.order=TRUE)))
+    network <- c(network, list(data.re=standardize.data(data.re, levels(treatments[['id']]), re.order=TRUE)))
   }
 
   mtc.network.validate(network)
@@ -171,7 +171,7 @@ write.mtc.network <- function(network, file) {
   network <- fix.network(network)
 
   root <- XML::newXMLNode("network")
-  XML::xmlAttrs(root)["description"] <- network$description
+  XML::xmlAttrs(root)["description"] <- network[['description']]
   type <- if (all(c('responders', 'sampleSize') %in% colnames(network[['data.ab']]))) {
     'rate'
   } else if (all(c('mean', 'std.dev', 'sampleSize') %in% colnames(network[['data.ab']]))) {
@@ -183,14 +183,14 @@ write.mtc.network <- function(network, file) {
   XML::xmlAttrs(root)["type"] <- type
 
   treatments <- XML::newXMLNode("treatments", parent = root)
-  apply(network$treatments, 1, function(row) {
+  apply(network[['treatments']], 1, function(row) {
     node <- XML::newXMLNode("treatment", parent = treatments)
     XML::xmlAttrs(node)["id"] <- row['id']
     XML::xmlValue(node) <- row['description']
   })
 
   studies <- XML::newXMLNode("studies", parent = root)
-  study <- sapply(levels(network[['data.ab']]$study), function(sid) {
+  study <- sapply(levels(network[['data.ab']][['study']]), function(sid) {
     node <- XML::newXMLNode("study", parent = studies)
     XML::xmlAttrs(node)["id"] <- sid
     node
@@ -228,42 +228,42 @@ mtc.validate.data.re <- function(data) {
     stop(paste('data.re must contain columns: ', paste(reColumns, collapse=', ')))
   }
 
-  baselineCount <- sapply(unique(data$study), function(study) { sum(is.na(data$diff[data$study == study])) })
+  baselineCount <- sapply(unique(data[['study']]), function(study) { sum(is.na(data[['diff']][data[['study']] == study])) })
   if (!all(baselineCount == 1)) {
     stop('Each study in data.re must have a unique baseline arm (diff=NA)')
   }
-  if (!all(!is.na(data$std.err[!is.na(data$diff)]))) {
+  if (!all(!is.na(data[['std.err']][!is.na(data[['diff']])]))) {
     stop('All non-baseline arms in data.re must have std.err specified')
   }
 
-  studies <- unique(data$study)
-  ma <- sapply(studies, function(study) { sum(data$study == study) > 2 })
+  studies <- unique(data[['study']])
+  ma <- sapply(studies, function(study) { sum(data[['study']] == study) > 2 })
   ma <- studies[ma]
-  if (!all(!is.na(data$std.err[data$study %in% ma]))) {
+  if (!all(!is.na(data[['std.err']][data[['study']] %in% ma]))) {
     stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
   }
 }
 
 mtc.network.validate <- function(network) {
   # Check that there is some data
-  stopifnot(nrow(network$treatments) > 0)
+  stopifnot(nrow(network[['treatments']]) > 0)
   stopifnot(nrow(network[['data.ab']]) > 0 || nrow(network[['data.re']]) > 0)
 
   # Check that the treatments are correctly cross-referenced and have valid names
-  all.treatments <- c(network[['data.ab']]$treatment, network[['data.re']]$treatment)
-  all.treatments <- factor(all.treatments, levels=1:nlevels(network$treatments$id), labels=levels(network$treatments$id))
-  stopifnot(all(all.treatments %in% network$treatments$id))
-  stopifnot(all(network$treatments$id %in% all.treatments))
-  idok <- regexpr("^[A-Za-z0-9_]+$", network$treatment$id) != -1
+  all.treatments <- c(network[['data.ab']][['treatment']], network[['data.re']][['treatment']])
+  all.treatments <- factor(all.treatments, levels=1:nlevels(network[['treatments']][['id']]), labels=levels(network[['treatments']][['id']]))
+  stopifnot(all(all.treatments %in% network[['treatments']][['id']]))
+  stopifnot(all(network[['treatments']][['id']] %in% all.treatments))
+  idok <- regexpr("^[A-Za-z0-9_]+$", network[['treatment']][['id']]) != -1
   if(!all(idok)) {
     stop(paste('Treatment name "',
-      network$treatment$id[which(!idok)], '" invalid.\n',
+      network[['treatment']][['id']][which(!idok)], '" invalid.\n',
       ' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
   }
 
-  # Check that studies are not duplicated between $data.ab and $data.re
+  # Check that studies are not duplicated between [['data.ab']] and [['data.re']]
   if (!is.null(network[['data.ab']]) && !is.null(network[['data.re']])) {
-    dup.study <- intersect(unique(network[['data.ab']]$study), unique(network[['data.re']]$study))
+    dup.study <- intersect(unique(network[['data.ab']][['study']]), unique(network[['data.re']][['study']]))
     if (length(dup.study) > 0) {
       stop(paste('Studies', paste(dup.study, collapse=", "), 'occur in both data and data.re'))
     }
@@ -283,7 +283,7 @@ mtc.network.validate <- function(network) {
 }
 
 as.treatment.factor <- function(x, network) {
-  v <- network$treatments$id
+  v <- network[['treatments']][['id']]
   if (is.numeric(x)) {
     factor(x, levels=1:nlevels(v), labels=levels(v))
   } else if (is.factor(x) || is.character(x)) {
@@ -295,21 +295,21 @@ as.treatment.factor <- function(x, network) {
 mtc.merge.data <- function(network) {
   data.frame(
     study=c(
-      as.character(network[['data.ab']]$study),
-      as.character(network[['data.re']]$study)),
+      as.character(network[['data.ab']][['study']]),
+      as.character(network[['data.re']][['study']])),
     treatment=as.treatment.factor(c(
-      network[['data.ab']]$treatment,
-      network[['data.re']]$treatment), network),
+      network[['data.ab']][['treatment']],
+      network[['data.re']][['treatment']]), network),
     stingsAsFactors=FALSE)
 }
 
 mtc.studies.list <- function(network) {
-  rle(as.character(mtc.merge.data(network)$study))
+  rle(as.character(mtc.merge.data(network)[['study']]))
 }
 
 mtc.study.design <- function(network, study) {
   data <- mtc.merge.data(network)
-  data$treatment[data$study == study]
+  data[['treatment']][data[['study']] == study]
 }
 
 coerce.factor <- function(x, prototype) {
@@ -318,7 +318,7 @@ coerce.factor <- function(x, prototype) {
 
 # See nodesplit-auto draft for definition
 has.indirect.evidence <- function(network, t1, t2) {
-  has.both <- sapply(mtc.studies.list(network)$values, function(study) {
+  has.both <- sapply(mtc.studies.list(network)[['values']], function(study) {
     all(c(t1, t2) %in% mtc.study.design(network, study))
   })
 
@@ -351,22 +351,22 @@ mtc.comparisons <- function(network) {
 
   # Identify the unique "designs" (treatment combinations)
   design <- function(study) { mtc.study.design(network, study) }
-  designs <- unique(lapply(levels(data$study), design))
+  designs <- unique(lapply(levels(data[['study']]), design))
 
   # Generate all pair-wise comparisons from each "design"
   comparisons <- do.call(rbind, lapply(designs, mtc.treatment.pairs))
 
   # Ensure the output comparisons are unique and always in the same order
   comparisons <- unique(comparisons)
-  comparisons <- comparisons[order(comparisons$t1, comparisons$t2), ,drop=FALSE]
+  comparisons <- comparisons[order(comparisons[['t1']], comparisons[['t2']]), ,drop=FALSE]
   row.names(comparisons) <- NULL
-  comparisons$t1 <- as.treatment.factor(comparisons$t1, network)
-  comparisons$t2 <- as.treatment.factor(comparisons$t2, network)
+  comparisons[['t1']] <- as.treatment.factor(comparisons[['t1']], network)
+  comparisons[['t2']] <- as.treatment.factor(comparisons[['t2']], network)
   comparisons
 }
 
 edges.create <- function(e, ...) {
-  e <- t(matrix(c(e$t1, e$t2), ncol=2))
+  e <- t(matrix(c(e[['t1']], e[['t2']]), ncol=2))
   edges(as.vector(e), ...)
 }
 
@@ -379,14 +379,14 @@ graph.create <- function(v, e, ...) {
 
 mtc.network.graph <- function(network) {
   comparisons <- mtc.comparisons(network)
-  treatments <- network$treatments$id
+  treatments <- network[['treatments']][['id']]
   graph.create(treatments, comparisons, arrow.mode=0)
 }
 
 ## mtc.network class methods
 print.mtc.network <- function(x, ...) {
   x <- fix.network(x)
-  cat("MTC dataset: ", x$description, "\n", sep="")
+  cat("MTC dataset: ", x[['description']], "\n", sep="")
   if (!is.null(x[['data.ab']])) {
     cat('Arm-level data: \n')
     print(x[['data.ab']])
@@ -400,16 +400,16 @@ print.mtc.network <- function(x, ...) {
 summary.mtc.network <- function(object, ...) {
   object <- fix.network(object)
   data <- mtc.merge.data(object)
-  studies <- levels(data$study)
-  m <- sapply(object$treatments$id, function(treatment) {
+  studies <- levels(data[['study']])
+  m <- sapply(object[['treatments']][['id']], function(treatment) {
     sapply(studies, function(study) {
-      any(data$study == study & data$treatment == treatment)
+      any(data[['study']] == study & data[['treatment']] == treatment)
     })
   })
-  colnames(m) <- object$treatments$id
+  colnames(m) <- object[['treatments']][['id']]
   x <- as.factor(apply(m, 1, sum))
   levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
-  list("Description"=paste("MTC dataset: ", object$description, sep=""),
+  list("Description"=paste("MTC dataset: ", object[['description']], sep=""),
      "Studies per treatment"=apply(m, 2, sum),
      "Number of n-arm studies"=summary(x))
 }

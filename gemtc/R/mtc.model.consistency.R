@@ -6,16 +6,16 @@ mtc.model.consistency <- function(model) {
     tree <- set.edge.attribute(tree, 'lty', value=1)
     tree
   }
-  model$tree <-
-    style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model$network)))
+  model[['tree']] <-
+    style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model[['network']])))
 
-  model$data <- mtc.model.data(model)
-  model$inits <- mtc.init(model)
+  model[['data']] <- mtc.model.data(model)
+  model[['inits']] <- mtc.init(model)
 
-  model$code <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model))
+  model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model))
 
-  monitors <- inits.to.monitors(model$inits[[1]])
-  model$monitors <- list(
+  monitors <- inits.to.monitors(model[['inits']][[1]])
+  model[['monitors']] <- list(
     available=monitors,
     enabled=c(monitors[grep('^d\\.', monitors)], monitors[grep('^sd.d$', monitors)])
   )
@@ -32,7 +32,7 @@ mtc.model.name.consistency <- function(model) {
 consistency.relative.effect.matrix <- function(model) {
   # Generate list of linear expressions
   params <- mtc.basic.parameters(model)
-  tree <- model$tree
+  tree <- model[['tree']]
   re <- tree.relative.effect(tree, V(tree)[1], t2=NULL)
   expr <- apply(re, 2, function(col) { paste(sapply(which(col != 0), function(i) {
     paste(if (col[i] == -1) "-" else "", params[i], sep="")
