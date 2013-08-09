@@ -172,13 +172,13 @@ examples <- list(
     link='logit',
     type='ume'
   ),
-  'fat-survival' = list( # NICE TSD2 program 2a
-    network = mtc.network(
-      data=dget('fat-survival.data.txt')
-    ),
-    likelihood='poisson',
-    link='log'
-  ),
+#  'fat-survival' = list( # NICE TSD2 program 2a
+#    network = mtc.network(
+#      data=dget('fat-survival.data.txt')
+#    ),
+#    likelihood='poisson',
+#    link='log'
+#  ),
   'diabetes-surv.fe' = list( # NICE TSD2 program 3b
     network = mtc.network(read.table('diabetes-surv.data.txt', header=T)),
     likelihood='binom',
