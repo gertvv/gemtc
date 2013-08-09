@@ -1,13 +1,15 @@
 model {
+	# Likelihood for arm-based data
 	$armeffect$
-	$releffect$
+	# Likelihood for contrast-based data (univariate for 2-arm trials)
+	$releffect.r2$
+	# Likelihood for contrast-based data (multivariate for multi-arm trials)
+	$releffect.rm$
 
 	prior.prec <- pow(15 * om.scale, -2)
 
 	# Study baseline priors
-	for (i in 1:ns.a) {
-		mu[i] ~ dnorm(0, prior.prec)
-	}
+	$studyBaselinePriors$
 
 	for (i in 1:ns) {
 		delta[i, 1] <- 0
@@ -15,4 +17,6 @@ model {
 			delta[i, k] ~ dnorm(0, prior.prec)
 		}
 	}
+
+	foo <- ns.a + ns.r2 + ns.rm # to please WinBUGS
 }
