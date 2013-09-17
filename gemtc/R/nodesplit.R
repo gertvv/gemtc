@@ -16,6 +16,7 @@ cob.matrix <- function(old, new) {
 }
 
 nodesplit.rewrite.data.ab <- function(data, t1, t2) {
+  if (is.null(data)) return(NULL);
   t1 <- as.character(t1)
   t2 <- as.character(t2)
   studies <- unique(data$study)
@@ -38,6 +39,7 @@ nodesplit.rewrite.data.ab <- function(data, t1, t2) {
 }
 
 nodesplit.rewrite.data.re <- function(data, t1, t2) {
+  if (is.null(data)) return(NULL);
   t1 <- as.character(t1)
   t2 <- as.character(t2)
   cob <- function(study, data, ts) {
