@@ -1,47 +1,54 @@
 # Node-split model
 mtc.model.nodesplit <- function(model, t1, t2) {
-  # Rewrite the dataset
-  print("Rewriting data...")
-
+  # Make sure t1 and t2 are 'character' and t1 < t2
   network <- model[['network']]
+  ts <- factor(c(t1, t2), levels=levels(network[['treatments']][['id']]))
+  if (as.numeric(ts[1]) > as.numeric(ts[2])) {
+    ts <- rev(ts)
+  }
+  t1 <- as.character(ts[1])
+  t2 <- as.character(ts[2])
+
+  # Rewrite the dataset
   data.ab <- nodesplit.rewrite.data.ab(network[['data.ab']], t1, t2)
   data.re <- nodesplit.rewrite.data.re(network[['data.re']], t1, t2)
-  print("Constructing network...")
   network <- mtc.network(data.ab=data.ab,
                          data.re=data.re,
                          treatments=model[['network']][['treatments']])
   model[['network']] <- network
 
-  print("Constructing indirect network...")
-  print(network)
+  # Construct indirect network
   has.both <- sapply(mtc.studies.list(network)$values,
          function(study) {
            all(c(t1, t2) %in% mtc.study.design(network, study))
          })
-  print(has.both)
   network.indirect <- filter.network(network,
                                      function(row) {
                                        !has.both[row['study']]
                                      })
 
-  print("Constructing basic parameters...")
+  # Generate tree for indirect evidence
   style.tree <- function(tree) {
     tree <- set.edge.attribute(tree, 'arrow.mode', value=2)
     tree <- set.edge.attribute(tree, 'color', value='black')
     tree <- set.edge.attribute(tree, 'lty', value=1)
     tree
   }
-
-  # FIXME: this needs to be a graph that includes the 'direct' node
-  model[['tree']] <-
-    style.tree(minimum.diameter.spanning.tree(mtc.network.graph(network.indirect)))
+  tree.indirect <- minimum.diameter.spanning.tree(mtc.network.graph(network.indirect))
+  model[['graph']] <- style.tree(tree.indirect)
+  model[['graph']] <- model[['graph']] + edge(c(t1, t2))
+  model[['graph']] <- set.edge.attribute(model[['graph']], 'arrow.mode', index=length(E(model[['graph']])), value=2)
+  model[['graph']] <- set.edge.attribute(model[['graph']], 'color', index=length(E(model[['graph']])), value='black')
+  model[['graph']] <- set.edge.attribute(model[['graph']], 'lty', index=length(E(model[['graph']])), value=2)
 
   model[['data']] <- mtc.model.data(model)
+  model[['data']][['split']] <- as.numeric(ts)
+  model[['split']] <- ts
   model[['inits']] <- mtc.init(model)
 
-  model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), nodesplit.relative.effect.matrix(model))
+  model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), nodesplit.relative.effect.matrix(model, tree.indirect))
 
-  monitors <- inits.to.monitors(model[['inits']][[1]])
+  monitors <- c(inits.to.monitors(model[['inits']][[1]]), 'd.direct', 'd.indirect')
   model[['monitors']] <- list(
     available=monitors,
     enabled=c(monitors[grep('^d\\.', monitors)], monitors[grep('^sd.d$', monitors)])
@@ -57,15 +64,16 @@ mtc.model.name.nodesplit <- function(model) {
 }
 
 # FIXME: add the split node
-nodesplit.relative.effect.matrix <- function(model) {
+nodesplit.relative.effect.matrix <- function(model, tree) {
   # Generate list of linear expressions
   params <- mtc.basic.parameters(model)
-  tree <- model[['tree']]
   re <- tree.relative.effect(tree, V(tree)[1], t2=NULL)
   expr <- apply(re, 2, function(col) { paste(sapply(which(col != 0), function(i) {
     paste(if (col[i] == -1) "-" else "", params[i], sep="")
   }), collapse = " + ") })
-  expr <- sapply(1:length(expr), function(i) { paste('d[1, ', i + 1, '] <- ', expr[i], sep='') })
-  expr <- c('d[1, 1] <- 0', expr, 'for (i in 2:nt) {\n\tfor (j in 1:nt) {\n\t\td[i, j] <- d[1, j] - d[1, i]\n\t}\n}')
+  expr <- sapply(1:length(expr), function(i) { paste('d1[', i + 1, '] <- ', expr[i], sep='') })
+  expr <- c('d1[1] <- 0', expr, 'for (i in 1:nt) {\n\tfor (j in 1:nt) {\n\t\tis.split[i, j] <- equals(i, split[1]) * equals(j, split[2]) + equals(i, split[2]) * equals(j, split[1])\n\t\td[i, j] <- (1 - is.split[i, j]) * (d1[j] - d1[i]) + is.split[i, j] * (2 * equals(i, split[1]) - 1) * d.direct\n\t}\n}')
+  expr <- c(expr, paste('d.direct <- d', model[['split']][1], model[['split']][2], sep='.'))
+  expr <- c(expr, 'd.indirect <- d1[split[2]] - d1[split[1]]')
   paste(expr, collapse="\n")
 }
