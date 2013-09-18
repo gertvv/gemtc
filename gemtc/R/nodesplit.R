@@ -81,3 +81,121 @@ nodesplit.rewrite.data.re <- function(data, t1, t2) {
   print(data)
   data
 }
+
+mtc.nodesplit.comparisons <- function(network) {
+  comparisons <- as.data.frame(mtc.comparisons(network))
+  as.data.frame(do.call(rbind, apply(comparisons, 1, function(comparison) {
+    if (has.indirect.evidence(network, comparison['t1'], comparison['t2'])) comparison else NULL
+  })))
+}
+
+mtc.nodesplit <- function(network, comparisons=mtc.nodesplit.comparisons(network), ...) {
+  results <- apply(comparisons, 1, function(comparison) {
+        mtc.model.run(network, type='nodesplit', t1=comparison['t1'], t2=comparison['t2'], ...)
+  })
+  params <- apply(comparisons, 1, function(comparison) {
+        paste('d', comparison['t1'], comparison['t2'], sep='.')
+  })
+  names(results) <- params
+  results$consistency <- mtc.model.run(network, type='consistency', ...)
+  class(results) <- "mtc.nodesplit"
+  results
+}
+
+print.mtc.nodesplit <- function(x, ...) {
+  cat("Node-splitting analysis of inconsistency (mtc.nodesplit) object\n")
+  for (name in names(x)) {
+    cat(paste("$", name, ": ", class(x[[name]]), "\n", sep=""))
+  }
+}
+
+plot.mtc.nodesplit <- function(x, ask=dev.interactive(orNone=TRUE), ...) {
+  cat("Node-splitting -- convergence plots\n")
+  for (name in names(x)) {
+    cat(if (name == "consistency") "Consistency model:\n" else paste("Split-node ", name, ":\n", sep=""))
+    plot(x[[name]], ask=ask, ...)
+    if (ask && name != names(x)[length(x)]) {
+      readline('Hit <Return> to see next plot:')
+    }
+  }
+}
+
+summary.mtc.nodesplit <- function(object, ...) {
+  params <- names(object)
+  params <- params[params != 'consistency']
+  p.value <- do.call(rbind, lapply(params, function(param) {
+    samples <- object[[param]][['samples']]
+    split <- object[[param]][['model']][['split']]
+    samples.dir <- as.matrix(samples[ , 'd.direct', drop=FALSE])
+    samples.ind <- as.matrix(samples[ , 'd.indirect', drop=FALSE])
+    p <- sum(samples.dir > samples.ind) / length(samples.dir)
+    data.frame(t1=split[1], t2=split[2], p=2 * min(p, 1 - p))
+  }))
+  dir.effect <- do.call(rbind, lapply(params, function(param) {
+    samples <- object[[param]][['samples']]
+    split <- object[[param]][['model']][['split']]
+    samples.dir <- as.matrix(samples[ , 'd.direct', drop=FALSE])
+    qs <- quantile(as.numeric(samples.dir), c(0.025, 0.5, 0.975))
+    data.frame(t1=split[1], t2=split[2], pe=qs[2], ci.l=qs[1], ci.u=qs[3])
+  }))
+  ind.effect <- do.call(rbind, lapply(params, function(param) {
+    samples <- object[[param]][['samples']]
+    split <- object[[param]][['model']][['split']]
+    samples.ind <- as.matrix(samples[ , 'd.indirect', drop=FALSE])
+    qs <- quantile(as.numeric(samples.ind), c(0.025, 0.5, 0.975))
+    data.frame(t1=split[1], t2=split[2], pe=qs[2], ci.l=qs[1], ci.u=qs[3])
+  }))
+  cons.effect <- do.call(rbind, lapply(params, function(param) {
+    split <- object[[param]][['model']][['split']]
+    samples <- relative.effect(object[['consistency']], t1=split[1], t2=split[2], preserve.extra=FALSE)$samples
+    qs <- quantile(as.matrix(samples), c(0.025, 0.5, 0.975))
+    data.frame(t1=split[1], t2=split[2], pe=qs[2], ci.l=qs[1], ci.u=qs[3])
+  }))
+  result <- list(dir.effect=dir.effect,
+                 ind.effect=ind.effect,
+                 cons.effect=cons.effect,
+                 p.value=p.value,
+                 cons.model=object[['consistency']][['model']])
+  class(result) <- 'mtc.nodesplit.summary'
+  result
+}
+
+print.mtc.nodesplit.summary <- function(x, ...) {
+  cat("Node-splitting analysis of inconsistency\n")
+  cat("========================================\n\n")
+  data <- do.call(rbind, lapply(1:length(x[['p.value']][['t1']]), function(i) {
+    data.frame(comparison=c(paste('d', x$p.value[i,'t1'], x$p.value[i,'t2'], sep='.'), '-> direct', '-> indirect', '-> network'),
+               p.value=c(x$p.value[i, 'p'], NA, NA, NA),
+               CrI=c(NA,
+                     formatCI(x$dir.effect[i,c('pe', 'ci.l', 'ci.u')]),
+                     formatCI(x$ind.effect[i,c('pe', 'ci.l', 'ci.u')]),
+                     formatCI(x$cons.effect[i,c('pe', 'ci.l', 'ci.u')])))
+
+  }))
+  formatted <- as.matrix(format.data.frame(data))
+  formatted[is.na(data)] <- NA
+  print(formatted, na.print="", quote=FALSE, row.names=FALSE)
+}
+
+plot.mtc.nodesplit.summary <- function(x, ...) {
+  data <- list(id=character(), group=character(), p=c(), pe=c(), ci.l=c(), ci.u=c(), style=factor(levels=c('normal','pooled')))
+  t1 <- x[['p.value']][['t1']]
+  t2 <- x[['p.value']][['t2']]
+  params <- paste('d', t1, t2, sep='.')
+  group.labels <- paste(t1, 'vs', t2)
+  names(group.labels) <- params
+
+  data <- do.call(rbind, lapply(1:length(params), function(i) {
+    data.frame(id=c('direct', 'indirect', 'network'),
+               group=rep(params[i], 3),
+               style=rep('normal', 3),
+               p=c(NA, x$p.value[i, 'p'], NA),
+               pe=c(x$dir.effect[i,'pe'], x$ind.effect[i,'pe'], x$cons.effect[i,'pe']),
+               ci.l=c(x$dir.effect[i,'ci.l'], x$ind.effect[i,'ci.l'], x$cons.effect[i,'ci.l']),
+               ci.u=c(x$dir.effect[i,'ci.u'], x$ind.effect[i,'ci.u'], x$cons.effect[i,'ci.u']))
+  }))
+
+  blobbogram(data, group.labels=group.labels, columns=c('p'), column.labels='P-value',
+    ci.label=paste(ll.call("scale.name", x[['cons.model']]), "(95% CrI)"),
+    log.scale=ll.call("scale.log", x[['cons.model']]), ...)
+}

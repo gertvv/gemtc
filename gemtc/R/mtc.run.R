@@ -1,3 +1,20 @@
+mtc.model.run <- function(network, type, ...) {
+  runNames <- names(formals(mtc.run))
+  runNames <- runNames[runNames != 'model']
+  args <- list(...)
+
+  # Call mtc.model with any arguments not intended for mtc.run
+  modelArgs <- args[!(names(args) %in% runNames)]
+  modelArgs$network <- network
+  modelArgs$type <- type
+  model <- do.call(mtc.model, modelArgs)
+
+  # Call mtc.run with all arguments intended for mtc.run
+  runArgs <- args[names(args) %in% runNames]
+  runArgs$model <- model
+  do.call(mtc.run, runArgs)
+}
+
 # If is.na(sampler), a sampler will be chosen based on availability, in this order:
 # JAGS, BUGS. When the sampler is BUGS, BRugs or R2WinBUGS will be used.
 mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {

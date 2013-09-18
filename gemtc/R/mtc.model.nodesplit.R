@@ -63,7 +63,6 @@ mtc.model.name.nodesplit <- function(model) {
   paste("node-split (", model$t1, " / ", model$t2, ")", sep="")
 }
 
-# FIXME: add the split node
 nodesplit.relative.effect.matrix <- function(model, tree) {
   # Generate list of linear expressions
   params <- mtc.basic.parameters(model)

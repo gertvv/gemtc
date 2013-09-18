@@ -25,6 +25,13 @@ S3method(summary, mtc.anohe)
 S3method(print, mtc.anohe.summary)
 S3method(plot, mtc.anohe.summary)
 
+S3method(print, mtc.nodesplit)
+S3method(plot, mtc.nodesplit)
+S3method(summary, mtc.nodesplit)
+
+S3method(print, mtc.nodesplit.summary)
+S3method(plot, mtc.nodesplit.summary)
+
 export(
 	read.mtc.network, write.mtc.network, mtc.network,
 	mtc.model,
@@ -32,4 +39,5 @@ export(
 	relative.effect, rank.probability,
 	blobbogram, forest,
 	mtc.anohe,
+  mtc.nodesplit, mtc.nodesplit.comparisons,
 	ll.call)

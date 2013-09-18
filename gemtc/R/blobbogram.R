@@ -170,6 +170,15 @@ blobbogram.styles.default <- function() {
   styles
 }
 
+formatCI <- function(ci, scale.trf=identity) {
+  if (all(!is.na(ci))) {
+    fmt <- lapply(ci, function(x) { formatC(scale.trf(x), digits=3, zero.print="0") })
+    paste(fmt[['pe']], " (", fmt[['ci.l']], ", ", fmt[['ci.u']], ")", sep="")
+  } else {
+    "NA"
+  }
+}
+
 blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   left.label=NULL, right.label=NULL,
   log.scale=FALSE, xlim=NULL, styles=NULL,
@@ -236,12 +245,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
           styles[as.character(datagrp[['data']][i, 'style', drop=TRUE]), , drop=TRUE])
 
         # Create CI interval labels (right side)
-        if (all(!is.na(fmt))) {
-          fmt <- lapply(fmt, function(x) { formatC(scale.trf(x), digits=3, zero.print="0") })
-          text <- paste(fmt[['pe']], " (", fmt[['ci.l']], ", ", fmt[['ci.u']], ")", sep="")
-        } else {
-          text <- "NA"
-        }
+        text <- formatCI(fmt, scale.trf)
         label <-  text.fn(text, as.character(datagrp[['data']][i, 'style', drop=TRUE]))
 
         list(ci=ci, label=label)
