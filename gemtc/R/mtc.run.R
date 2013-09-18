@@ -79,16 +79,26 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
   cat(paste(syntax[['model']], "\n", collapse=""), file=file.model)
   data <- if (identical(package, 'rjags')) {
     # Note: n.iter must be specified *excluding* the n.adapt
+    load.module('dic')
     jags <- jags.model(file.model, data=syntax[['data']],
       inits=syntax[['inits']], n.chains=model[['n.chain']],
       n.adapt=n.adapt)
-    coda.samples(jags, variable.names=syntax[['vars']],
+    samples <- jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
       n.iter=n.iter, thin=thin)
+    samples <- lapply(samples, as.mcmc.list)
+    varNames <- names(samples)
+    samples <- lapply(1:model[['n.chain']], function(i) {
+      chain <- lapply(samples, function(x) { x[[(i - 1) %% length(x) + 1]] })
+      chain <- do.call(cbind, chain)
+      colnames(chain) <- varNames
+      mcmc(chain, start=n.adapt+1, thin=thin)
+    })
+    as.mcmc.list(samples)
   } else if (identical(package, 'BRugs')) {
     # Note: n.iter must be specified *excluding* the n.adapt
     BRugsFit(file.model, data=syntax[['data']],
       inits=syntax[['inits']], numChains=model[['n.chain']],
-      parametersToSave=syntax[['vars']], coda=TRUE,
+      parametersToSave=syntax[['vars']], coda=TRUE, DIC=TRUE,
       nBurnin=n.adapt, nIter=n.iter, nThin=thin)
   } else if (identical(package, 'R2WinBUGS')) {
     # Note: codaPkg=TRUE does *not* return CODA objects, but rather
@@ -96,7 +106,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
     # Note: n.iter must be specified *including* the n.adapt
     as.mcmc.list(bugs(model.file=file.model, data=syntax[['data']],
       inits=syntax[['inits']], n.chains=model[['n.chain']],
-      parameters.to.save=syntax[['vars']], codaPkg=FALSE, DIC=FALSE,
+      parameters.to.save=syntax[['vars']], codaPkg=FALSE, DIC=TRUE,
       n.burnin=n.adapt, n.iter=n.adapt+n.iter, n.thin=thin))
     # Note: does not always work on Unix systems due to a problem
     # with Wine not being able to access the R temporary path.

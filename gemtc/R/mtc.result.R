@@ -5,7 +5,9 @@ print.mtc.result <- function(x, ...) {
 }
 
 summary.mtc.result <- function(object, ...) {
-  summary(object[['samples']])
+  Dbar <- mean(as.matrix(object$samples[,'deviance',drop=FALSE]))
+  pD <- mean(as.matrix(object$samples[[1]][,'pD',drop=FALSE]))
+  list('summaries'=summary(object[['samples']]), 'DIC'=c('Mean deviance'=Dbar, 'Penalty'=pD, 'DIC'=Dbar+pD))
 }
 
 plot.mtc.result <- function(x, ...) {
