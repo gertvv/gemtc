@@ -5,7 +5,11 @@ print.mtc.result <- function(x, ...) {
 }
 
 summary.mtc.result <- function(object, ...) {
-  list('summaries'=summary(object[['samples']]), 'DIC'=object[['dic']])
+  scale.log <- if (ll.call('scale.log', object[['model']])) 'Log ' else ''
+  scale.name <- ll.call('scale.name', object[['model']])
+  list('measure'=paste(scale.log, scale.name, sep=''),
+       'summaries'=summary(object[['samples']]),
+       'DIC'=object[['dic']])
 }
 
 plot.mtc.result <- function(x, ...) {
