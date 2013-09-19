@@ -84,9 +84,14 @@ nodesplit.rewrite.data.re <- function(data, t1, t2) {
 
 mtc.nodesplit.comparisons <- function(network) {
   comparisons <- as.data.frame(mtc.comparisons(network))
-  as.data.frame(do.call(rbind, apply(comparisons, 1, function(comparison) {
+  comparisons <- apply(comparisons, 1, function(comparison) {
     if (has.indirect.evidence(network, comparison['t1'], comparison['t2'])) comparison else NULL
-  })))
+  })
+  if (is.list(comparisons)) {
+    as.data.frame(do.call(rbind, comparisons))
+  } else {
+    as.data.frame(t(comparisons))
+  }
 }
 
 mtc.nodesplit <- function(network, comparisons=mtc.nodesplit.comparisons(network), ...) {
