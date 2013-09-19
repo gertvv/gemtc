@@ -47,10 +47,11 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
   }
   sampler <- found
 
-  samples <- mtc.sample(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
+  result <- mtc.sample(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 
   result <- list(
-    samples=samples,
+    samples=result$samples,
+    dic=result$dic,
     model=model,
     sampler=sampler)
   class(result) <- "mtc.result"
@@ -85,26 +86,35 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
       n.adapt=n.adapt)
     samples <- jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
       n.iter=n.iter, thin=thin)
+
+    # Calculate DIC
+    Dbar <- mean(as.numeric(samples$deviance))
+    pD <- mean(as.numeric(samples$pD))
+
+    # Convert samples to mcmc.list
     samples <- lapply(samples, as.mcmc.list)
+    samples$pD <- NULL
     varNames <- names(samples)
     samples <- lapply(1:model[['n.chain']], function(i) {
-      chain <- lapply(samples, function(x) { x[[(i - 1) %% length(x) + 1]] })
+      chain <- lapply(samples, function(x) { x[[i]] })
       chain <- do.call(cbind, chain)
       colnames(chain) <- varNames
       mcmc(chain, start=n.adapt+1, thin=thin)
     })
-    as.mcmc.list(samples)
+    list(samples=as.mcmc.list(samples),
+         dic=c('Mean deviance'=Dbar, 'Penalty (pD)'=pD, 'DIC'=Dbar+pD))
   } else if (identical(package, 'BRugs')) {
     # Note: n.iter must be specified *excluding* the n.adapt
-    BRugsFit(file.model, data=syntax[['data']],
+    samples <- BRugsFit(file.model, data=syntax[['data']],
       inits=syntax[['inits']], numChains=model[['n.chain']],
-      parametersToSave=syntax[['vars']], coda=TRUE, DIC=TRUE,
+      parametersToSave=c(syntax[['vars']]), coda=TRUE, DIC=TRUE,
       nBurnin=n.adapt, nIter=n.iter, nThin=thin)
+    list(samples=samples, dic=NULL)
   } else if (identical(package, 'R2WinBUGS')) {
     # Note: codaPkg=TRUE does *not* return CODA objects, but rather
     # the names of written CODA output files.
     # Note: n.iter must be specified *including* the n.adapt
-    as.mcmc.list(bugs(model.file=file.model, data=syntax[['data']],
+    samples <- as.mcmc.list(bugs(model.file=file.model, data=syntax[['data']],
       inits=syntax[['inits']], n.chains=model[['n.chain']],
       parameters.to.save=syntax[['vars']], codaPkg=FALSE, DIC=TRUE,
       n.burnin=n.adapt, n.iter=n.adapt+n.iter, n.thin=thin))
@@ -117,6 +127,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
     #   working.directory='~/.wine/drive_c/bugstmp', clearWD=TRUE
     # Or alternatively invoke R as:
     #   TMPDIR=~/.wine/drive_c/bugstmp R
+    list(samples=samples, DIC=NULL)
   }
   unlink(file.model)
 
