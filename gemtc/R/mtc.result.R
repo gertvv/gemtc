@@ -17,7 +17,7 @@ plot.mtc.result <- function(x, ...) {
 }
 
 forest.mtc.result <- function(x, ...) {
-  quantiles <- summary(x)[['quantiles']]
+  quantiles <- summary(x[['samples']])[['quantiles']]
   model <- x[['model']]
   stats <- quantiles[grep("^d\\.", rownames(quantiles)), , drop=FALSE]
   comps <- extract.comparisons(rownames(stats))
