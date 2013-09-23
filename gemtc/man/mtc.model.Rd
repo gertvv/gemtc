@@ -16,7 +16,7 @@ mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{network}{An object of S3 class \code{mtc.network}}
-  \item{type}{A string literal indicating the type of model (either "consistency", "ume", or "use").}
+  \item{type}{A string literal indicating the type of model (either "consistency", "nodesplit", "ume", or "use").}
   \item{factor}{Variance scaling factor for the starting values}
   \item{n.chain}{Number of chains in the model}
   \item{likelihood}{The likelihood to be used. If unspecified, a suitable likelihood will be inferred for the given data.}
@@ -70,10 +70,14 @@ These likelihood/links are supported:
 
   Result: (log) hazard ratio.}
 }
+
+The following model types are supported:
+\itemize{
+  \item{\code{consistency}: ordinary consistency model. No additional parameters.}
+  \item{\code{nodesplit}: node-splitting model. Removes both arms used to estimate the direct evidence from the network of indirect evidence, rather than just one of those arms. This means that three-arm trials do not contribute any evidence in the network of indirect evidence. When relative effect data are present, these are transformed appropriately (using an assumption of normality) to enable this direct/indirect evidence split. Additional parameters: \code{t1} and \code{t2}, which indicate the comparison to be split.}
+  \item{\code{use}: unrelated study effects. Models the effects within each study as if they are independent. No additional parameters.}
+  \item{\code{ume}: unrelated mean effects. Models the effects within each comparison as if they are independent. Does not properly handle multi-arm trials, and warns when they are present in the network. No additional parameters.}
 }
-\note{
-Due to various issues, rJava has been removed from the gemtc package.
-Unfortunately, inconsistency models have not been re-implemented, and are unsupported by the current version of the package.
 }
 
 \section{Visualization}{Calling the generic plot method on an S3 \code{mtc.model} object
