@@ -16,6 +16,19 @@ filter.network <- function(network, filter, filter.ab=filter, filter.re=filter) 
   mtc.network(data=data.ab, data.re=data.re)
 }
 
+decompose.variance <- function(V) {
+  na <- ncol(V)
+  J <- matrix(1, ncol=na, nrow=na)
+  # Pseudo-inverse Laplacian
+  Lt <- -0.5 * (V - (1 / na) * (V %*% J + J %*% V) + (1 / na^2) * (J %*% V %*% J))
+  # Laplacian
+  L <- solve(Lt - J/na) + J/na
+
+  prec <- -L
+  diag(prec) <- Inf
+  1/prec
+}
+
 # Decompose trials based on a consistency model and study.samples
 decompose.trials <- function(result) {
   decompose.study <- function(samples) {
@@ -33,15 +46,10 @@ decompose.trials <- function(result) {
       })
     })
 
-    J <- matrix(1, ncol=na, nrow=na)
-    # Pseudo-inverse Laplacian
-    Lt <- -0.5 * (V - (1 / na) * (V %*% J + J %*% V) + (1 / na^2) * (J %*% V %*% J))
-    # Laplacian
-    L <- solve(Lt - J/na) + J/na
-
-    prec <- -L
-    diag(prec) <- 0
-    se <- sqrt(1/prec)
+    print(mu)
+    se <- sqrt(decompose.variance(V))
+    print(V)
+    print(se^2)
 
     pairs <- all.pair.matrix(na)
     list(
