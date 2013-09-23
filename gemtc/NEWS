@@ -8,6 +8,8 @@ New features:
  * node-splitting models
  * mtc.nodesplit() wrapper to run multiple node-splitting models
  * calculate DIC model fit (JAGS only)
+ * add preferredDirection to rank.probability()
+ * default plot() for rank.probability()
 
 gemtc 0.4
 ===========
