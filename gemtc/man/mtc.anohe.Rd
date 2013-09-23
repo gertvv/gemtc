@@ -13,16 +13,18 @@
 Generate an analysis of heterogeneity for the given network. Three types of model are estimated: unrelated study effects, unrelated mean effects, and consistency. Output of the \code{summary} function can passed to \code{plot} for a visual representation.
 }
 \usage{
-mtc.anohe(network, likelihood=NULL, link=NULL, ...)
+mtc.anohe(network, ...)
 }
 \arguments{
   \item{network}{An object of S3 class \code{\link{mtc.network}}.}
-  \item{likelihood}{The likelihood to be used (see \code{\link{mtc.model}}).}
-  \item{link}{The link function to be used (see \code{\link{mtc.model}}).}
-  \item{...}{Arguments to be passed to \code{\link{mtc.run}}.}
+  \item{...}{Arguments to be passed to \code{\link{mtc.run}} or \code{\link{mtc.model}}. This can be used to set the likelihood/link or the number of iterations, for example.}
 }
 \details{
 \code{mtc.anohe} returns the MCMC results for all three types of model. To get appropriate summary statistics, call \code{summary()} on the results object. The summary can be plotted.
+
+To control parameters of the MCMC estimation, see \code{\link{mtc.run}}.
+To specify the likelihood/link or to control other model parameters, see \code{\link{mtc.model}}.
+The \code{...} arguments are first matched against \code{\link{mtc.run}}, and those that do not match are passed to \code{\link{mtc.model}}.
 }
 \note{This method should not be considered stable. It is an experimental feature and heavily work in progress. The interface may change at any time.
 }
@@ -45,5 +47,6 @@ an object of class \code{mtc.anohe.summary}. This is a list with the following e
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 \seealso{
+\code{\link{mtc.model}}
 \code{\link{mtc.run}}
 }

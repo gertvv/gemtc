@@ -94,17 +94,11 @@ decompose.trials <- function(result) {
 
 # decomposes the given network's multi-arm trials into
 # a series of (approximately) equivalent two-arm trials
-decompose.network <- function(network, result=NULL, likelihood=NULL, link=NULL) {
+decompose.network <- function(network, result) {
   # find all multi-arm trials
   data <- mtc.merge.data(network)
   studies <- unique(data[['study']])
   studies <- studies[sapply(studies, function(study) { sum(data[['study']] == study) > 2 })]
-
-  if (is.null(result)) {
-    ma.network <- filter.network(network, function(row) { row['study'] %in% studies })
-    model <- mtc.model(ma.network, type='use', likelihood=likelihood, link=link)
-    result <- mtc.run(model)
-  }
 
   data <- decompose.trials(result)
   data.re <- do.call(rbind, lapply(studies, function(study) {
@@ -133,7 +127,7 @@ mtc.anohe <- function(network, ...) {
 
   result.use <- mtc.model.run(network, type='use', ...)
 
-  network.decomp <- decompose.network(network, result=result.use, likelihood=likelihood, link=link)
+  network.decomp <- decompose.network(network, result=result.use)
   result.ume <- mtc.model.run(network.decomp, type='ume', ...)
 
   result.cons <- mtc.model.run(network, type='consistency', ...)
