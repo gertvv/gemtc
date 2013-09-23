@@ -26,7 +26,7 @@ test_that("relative.effect outputs the correct parameters", {
 
 test_that("relative.effect generates the expected statistics", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  stats <- summary(relative.effect(result, "B"))
+  stats <- summary(relative.effect(result, "B"))$summaries
 
   expected <- textConnection('
            Mean     SD  Naive.SE Time-series.SE
@@ -77,7 +77,7 @@ test_that("tree.relative.effect handles two-treatment case", {
 test_that("relative.effect can be applied recursively", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
   result <- relative.effect(result, "C")
-  stats <- summary(relative.effect(result, "B"))
+  stats <- summary(relative.effect(result, "B"))$summaries
 
   expected <- textConnection('
            Mean     SD  Naive.SE Time-series.SE

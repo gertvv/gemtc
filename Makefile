@@ -17,10 +17,12 @@ $(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/tests/*.R $(PKG_NA
 	rm -f $(PKG_NAME)/src/*.o $(PKG_NAME)/src/*.so
 	R CMD build $(PKG_NAME)
 
-.PHONY: install
+.PHONY: install check
+
+check: $(PACKAGE)
+	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 
 install: $(PACKAGE)
-	#_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 	R CMD INSTALL $(PACKAGE)
 
 # Special test target since R CMD check is incredibly slow :-(
