@@ -1,4 +1,6 @@
-rank.probability <- function(result) {
+rank.probability <- function(result, preferredDirection=1) {
+  stopifnot(preferredDirection %in% c(1, -1))
+
   treatments <- sort(unique(as.vector(extract.comparisons(colnames(result[['samples']][[1]])))))
 
   n.alt <- length(treatments)
@@ -20,5 +22,21 @@ rank.probability <- function(result) {
   data <- result[['samples']]
   n.iter <- nchain(data) * (end(data) - start(data) + thin(data)) / thin(data)
 
-  t(ranks / n.iter)
+  result <- t(ranks / n.iter)
+  if (identical(preferredDirection, -1)) {
+    result <- result[,ncol(result):1]
+  }
+  class(result) <- "mtc.rank.probability"
+  attr(result, "direction") <- preferredDirection
+  result
+}
+
+print.mtc.rank.probability <- function(x, ...) {
+  cat(paste("Rank probability; preferred direction = ", attr(x, "direction"), "\n", sep=""))
+  attr(x, "direction") <- NULL
+  print(unclass(x), ...)
+}
+
+plot.mtc.rank.probability <- function(x, ...) { 
+  barplot(t(x), ...)
 }

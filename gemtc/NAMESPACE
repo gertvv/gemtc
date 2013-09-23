@@ -32,6 +32,9 @@ S3method(summary, mtc.nodesplit)
 S3method(print, mtc.nodesplit.summary)
 S3method(plot, mtc.nodesplit.summary)
 
+S3method(print, mtc.rank.probability)
+S3method(plot, mtc.rank.probability)
+
 export(
 	read.mtc.network, write.mtc.network, mtc.network,
 	mtc.model,
