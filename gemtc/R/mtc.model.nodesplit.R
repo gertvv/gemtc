@@ -9,6 +9,8 @@ mtc.model.nodesplit <- function(model, t1, t2) {
   t1 <- as.character(ts[1])
   t2 <- as.character(ts[2])
 
+  stopifnot(has.indirect.evidence(network, t1, t2))
+
   # Rewrite the dataset
   data.ab <- nodesplit.rewrite.data.ab(network[['data.ab']], t1, t2)
   data.re <- nodesplit.rewrite.data.re(network[['data.re']], t1, t2)

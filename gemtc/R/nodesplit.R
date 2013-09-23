@@ -78,7 +78,6 @@ nodesplit.rewrite.data.re <- function(data, t1, t2) {
   })
   data <- do.call(rbind, per.study)
   data$study <- as.factor(data$study)
-  print(data)
   data
 }
 
@@ -89,12 +88,15 @@ mtc.nodesplit.comparisons <- function(network) {
   })
   if (is.list(comparisons)) {
     as.data.frame(do.call(rbind, comparisons))
+  } else if (is.null(comparisons)) {
+    data.frame(t1=character(), t2=character())
   } else {
     as.data.frame(t(comparisons))
   }
 }
 
 mtc.nodesplit <- function(network, comparisons=mtc.nodesplit.comparisons(network), ...) {
+  stopifnot(nrow(comparisons) > 0)
   results <- apply(comparisons, 1, function(comparison) {
         mtc.model.run(network, type='nodesplit', t1=comparison['t1'], t2=comparison['t2'], ...)
   })
