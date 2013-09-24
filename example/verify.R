@@ -11,14 +11,14 @@ generate.summaries <- function(result) {
   if (result$model$type == "consistency") {
     list(
       effectiveSize = effectiveSize(samples),
-      summary       = summary(samples)$summaries,
+      summary       = summary(samples),
       cov           = cov(as.matrix(data)),
       ranks         = rank.probability(result)
     )
   } else {
     list(
       effectiveSize = effectiveSize(samples),
-      summary       = summary(samples)$summaries,
+      summary       = summary(samples),
       cov           = cov(as.matrix(data))
     )
   }
