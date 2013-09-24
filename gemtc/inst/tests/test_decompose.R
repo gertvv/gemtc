@@ -23,6 +23,6 @@ test_that("Fixed effects MA recovers variances", {
   d12 <- fe.3arm(1, 2, 3)
   d13 <- fe.3arm(1, 3, 2)
   d23 <- fe.3arm(2, 3, 1)
-  expect_that(c(d12$mu, d13$mu, d23$mu), equals(c(mu[1,2], mu[1,3], mu[2,3])))
-  expect_that(c(d12$V, d13$V, d23$V), equals(c(V[1,2], V[1,3], V[2,3])))
+  expect_that(c(d12$mu, d13$mu, d23$mu), equals(c(mu[1,2], mu[1,3], mu[2,3]), tolerance=1E-7))
+  expect_that(c(d12$V, d13$V, d23$V), equals(c(V[1,2], V[1,3], V[2,3]), tolerance=1E-7))
 });
