@@ -1,19 +1,24 @@
 library(gemtc)
 
 generate.summaries <- function(result) {
-  data <- as.matrix(result$samples)
+  sel <- colnames(result$samples[[1]]) != 'deviance'
+  samples <- as.mcmc.list(lapply(result$samples, function(chain) {
+    chain[ , sel]
+  }))
+
+  data <- as.matrix(samples)
   data <- data[, grep("^d\\.", colnames(data))]
   if (result$model$type == "consistency") {
     list(
-      effectiveSize = effectiveSize(result$samples),
-      summary       = summary(result$samples),
+      effectiveSize = effectiveSize(samples),
+      summary       = summary(samples)$summaries,
       cov           = cov(as.matrix(data)),
       ranks         = rank.probability(result)
     )
   } else {
     list(
-      effectiveSize = effectiveSize(result$samples),
-      summary       = summary(result$samples),
+      effectiveSize = effectiveSize(samples),
+      summary       = summary(samples)$summaries,
       cov           = cov(as.matrix(data))
     )
   }
