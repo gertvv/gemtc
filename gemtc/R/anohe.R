@@ -46,10 +46,7 @@ decompose.trials <- function(result) {
       })
     })
 
-    print(mu)
     se <- sqrt(decompose.variance(V))
-    print(V)
-    print(se^2)
 
     pairs <- all.pair.matrix(na)
     list(
