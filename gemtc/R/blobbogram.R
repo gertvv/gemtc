@@ -213,9 +213,10 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
 
   # Round to a single significant digit, according to round.fun
   nice <- function(x, round.fun) {
-    x <- scale.trf(x)
-    p <- 10^floor(log10(abs(x)))
-    scale.inv(round.fun(x / p) * p)
+    y <- scale.trf(x)
+    p <- 10^floor(log10(abs(y)))
+    l <- scale.inv(round.fun(y / p) * p)
+    if (is.na(l) || !is.finite(l)) x else l
   }
 
   # Calculate plot range
