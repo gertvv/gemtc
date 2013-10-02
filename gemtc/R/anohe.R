@@ -71,7 +71,7 @@ decompose.trials <- function(result) {
       list(m=data[['mu']], e=data[['se']], t=ts)
     } else {
       samples <- study.samples[ , colIndexes, drop=FALSE]
-      list(m=mean(samples), e=sd(samples), t=matrix(study, nrow=1))
+      list(m=apply(samples, 2, mean), e=apply(samples, 2, sd), t=matrix(study, nrow=1))
     }
   })
 
