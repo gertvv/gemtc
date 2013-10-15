@@ -146,15 +146,11 @@ plot.mtc.anohe <- function(x, ask=dev.interactive(orNone=TRUE), ...) {
 
   cat("Unrelated Study Effects (USE) model:\n")
   plot(x[['result.use']], ask=ask, ...)
-  cat("Unrelated Mean Effects (UME) model: ")
-  if (ask) {
-    readline('Hit <Return> to see next plot:')
-  }
+  cat("Unrelated Mean Effects (UME) model:\n")
+  par(ask=ask)
   plot(x[['result.ume']], ask=ask, ...)
-  cat("Consistency model: ")
-  if (ask) {
-    readline('Hit <Return> to see next plot:')
-  }
+  cat("Consistency model:\n")
+  par(ask=ask)
   plot(x[['result.cons']], ask=ask, ...)
 }
 

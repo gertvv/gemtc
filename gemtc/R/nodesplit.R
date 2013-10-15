@@ -120,10 +120,8 @@ plot.mtc.nodesplit <- function(x, ask=dev.interactive(orNone=TRUE), ...) {
   cat("Node-splitting -- convergence plots\n")
   for (name in names(x)) {
     cat(if (name == "consistency") "Consistency model:\n" else paste("Split-node ", name, ":\n", sep=""))
+    if(name != names(x)[1]) par(ask=ask)
     plot(x[[name]], ask=ask, ...)
-    if (ask && name != names(x)[length(x)]) {
-      readline('Hit <Return> to see next plot:')
-    }
   }
 }
 
