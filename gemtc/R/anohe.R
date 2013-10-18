@@ -94,6 +94,7 @@ decompose.trials <- function(result) {
 decompose.network <- function(network, result) {
   # find all multi-arm trials
   data <- mtc.merge.data(network)
+  data[['study']] <- as.character(data[['study']])
   studies <- unique(data[['study']])
   studies <- studies[sapply(studies, function(study) { sum(data[['study']] == study) > 2 })]
 
@@ -104,8 +105,8 @@ decompose.network <- function(network, result) {
       m <- data[['m']][[study]][j]
       e <- data[['e']][[study]][j]
       rbind(
-        data.frame(study=paste(study, ts[1], ts[2], sep="__"), treatment=ts[1], diff=NA, std.err=NA),
-        data.frame(study=paste(study, ts[1], ts[2], sep="__"), treatment=ts[2], diff=m, std.err=e)
+        data.frame(study=paste(study, ts[1], ts[2], sep="__"), treatment=ts[1], diff=NA, std.err=NA, stringsAsFactors=FALSE),
+        data.frame(study=paste(study, ts[1], ts[2], sep="__"), treatment=ts[2], diff=m, std.err=e, stringsAsFactors=FALSE)
       )
     }))
   }))
@@ -225,15 +226,17 @@ summary.mtc.anohe <- function(object, ...) {
       pe.dir <- dir['pe']
 
       # Back-calculate indirect estimate (see Dias et al. 2010)
-      se.ind <- sqrt(1 / (1 / se.con^2 - 1 / se.dir^2))
-      pe.ind <- (pe.con / se.con^2 - pe.dir / se.dir^2) * se.ind^2
-
-      unlist(list('pe'=unname(pe.ind), 'se'=unname(se.ind)))
+      if (se.con < se.dir) {
+        se.ind <- sqrt(1 / (1 / se.con^2 - 1 / se.dir^2))
+        pe.ind <- (pe.con / se.con^2 - pe.dir / se.dir^2) * se.ind^2
+        unlist(list('pe'=unname(pe.ind), 'se'=unname(se.ind)))
+      } else {
+        unlist(list('pe'=NA, 'se'=NA))
+      }
     } else {
       unlist(list('pe'=NA, 'se'=NA))
     }
   })))
-
 
   i2.pair <- apply(pairEffects, 1, function(row) {
     data2 <- data[data[['t1']] == row['t1'] & data[['t2']] == row['t2'], , drop=FALSE]
@@ -245,13 +248,11 @@ summary.mtc.anohe <- function(object, ...) {
   })
   i2.cons <- apply(pairEffects, 1, function(row) {
     data2 <- data[data[['t1']] == row['t1'] & data[['t2']] == row['t2'], , drop=FALSE]
-    has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
-    if (has.indirect) {
-      ind <- indEffects[indEffects[['t1']] == row['t1'] & indEffects[['t2']] == row['t2'], 3:4, drop=]
-      se.ind <- unname(ind['se'])
-      pe.ind <- unname(ind['pe'])
-
-      i.squared(unlist(c(data2[['pe']], pe.ind)), unlist(c(data2[['se']], se.ind)), c(data2[['c']], data2[['c']][1]), df.adj=-1 + has.indirect)
+    ind <- indEffects[indEffects[['t1']] == row['t1'] & indEffects[['t2']] == row['t2'], 3:4, drop=]
+    se.ind <- unname(ind['se'])
+    pe.ind <- unname(ind['pe'])
+    if (!is.na(se.ind)) {
+      i.squared(unlist(c(data2[['pe']], pe.ind)), unlist(c(data2[['se']], se.ind)), c(data2[['c']], data2[['c']][1]), df.adj=0)
     } else if (nrow(data2) > 1) {
       i.squared(data2[['pe']], data2[['se']], data2[['c']])
     } else {
@@ -259,17 +260,15 @@ summary.mtc.anohe <- function(object, ...) {
     }
   })
   incons <- apply(pairEffects, 1, function(row) {
-    has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
-    if (has.indirect) {
-      dir <- as.numeric(row[3:5])
-      names(dir) <- c('pe', 'ci.l', 'ci.u') # sigh
-      se.dir <- (dir['ci.u'] - dir['ci.l']) / 3.92
-      pe.dir <- dir['pe']
+    dir <- as.numeric(row[3:5])
+    names(dir) <- c('pe', 'ci.l', 'ci.u') # sigh
+    se.dir <- (dir['ci.u'] - dir['ci.l']) / 3.92
+    pe.dir <- dir['pe']
 
-      ind <- indEffects[indEffects[['t1']] == row['t1'] & indEffects[['t2']] == row['t2'], 3:4, drop=]
-      se.ind <- ind['se']
-      pe.ind <- ind['pe']
-
+    ind <- indEffects[indEffects[['t1']] == row['t1'] & indEffects[['t2']] == row['t2'], 3:4, drop=]
+    se.ind <- ind['se']
+    pe.ind <- ind['pe']
+    if (!is.na(se.ind)) {
       pe.inc <- (pe.dir - pe.ind)
       se.inc <- sqrt(se.dir^2 + se.ind^2)
       p.inc <- pnorm(as.numeric(pe.inc / se.inc))
