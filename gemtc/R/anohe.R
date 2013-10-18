@@ -368,10 +368,17 @@ plot.mtc.anohe.summary <- function(x, ...) {
   rownames(my.styles) <- my.styles[['style']]
   styles <- rbind(styles, my.styles)
 
+
   data <- as.data.frame(data)
-  blobbogram(data, group.labels=group.labels,
-    columns=c('i2'), column.labels=c('I^2'),
-    ci.label=paste(ll.call("scale.name", x[['cons.model']]), "(95% CrI)"),
-    log.scale=ll.call("scale.log", x[['cons.model']]),
-    styles=styles, ...)
+  om.scale <- x[['cons.model']][['om.scale']]
+  log.scale <- ll.call("scale.log", x[['cons.model']])
+  default.xlim=c(nice.value(-om.scale, floor, log.scale), nice.value(om.scale, ceiling, log.scale))
+  do.plot <- function(xlim=default.xlim, ...) {
+    blobbogram(data, group.labels=group.labels,
+      columns=c('i2'), column.labels=c('I^2'),
+      ci.label=paste(ll.call("scale.name", x[['cons.model']]), "(95% CrI)"),
+      log.scale=log.scale,
+      styles=styles, xlim=xlim, ...)
+  }
+  do.plot(...)
 }

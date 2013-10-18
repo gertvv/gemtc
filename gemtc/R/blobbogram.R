@@ -179,6 +179,18 @@ formatCI <- function(ci, scale.trf=identity) {
   }
 }
 
+nice.value <- function(x, round.fun, log.scale) {
+  # Scale transform and its inverse
+  scale.trf <- if (log.scale) exp else identity
+  scale.inv <- if (log.scale) log else identity
+
+  # Round to a single significant digit, according to round.fun
+  y <- scale.trf(x)
+  p <- 10^floor(log10(abs(y)))
+  l <- scale.inv(round.fun(y / p) * p)
+  if (is.na(l) || !is.finite(l)) x else l
+}
+
 blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   left.label=NULL, right.label=NULL,
   log.scale=FALSE, xlim=NULL, styles=NULL,
@@ -209,17 +221,14 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   # Add default ('id') column
   columns <- c('id', columns)
   column.labels <- c(id.label, column.labels)
-
+  
   # Scale transform and its inverse
   scale.trf <- if (log.scale) exp else identity
   scale.inv <- if (log.scale) log else identity
 
   # Round to a single significant digit, according to round.fun
   nice <- function(x, round.fun) {
-    y <- scale.trf(x)
-    p <- 10^floor(log10(abs(y)))
-    l <- scale.inv(round.fun(y / p) * p)
-    if (is.na(l) || !is.finite(l)) x else l
+    nice.value(x, round.fun, log.scale)
   }
 
   # Calculate plot range
