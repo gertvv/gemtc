@@ -1,3 +1,26 @@
+gemtc 0.5-1
+===========
+
+Release 2013-??-??
+
+Improvements:
+
+ * Converted several plots to use the standard R mechanism of asking for
+   the next page, rather than our own hack.
+ * The plot() for the summary() of mtc.anohe() now has a nicer default
+   scale range.
+
+Bugfixes:
+
+ * mtc.anohe() mixed up treatments or studies in some extraordinary
+   circumstances, due to automatic conversions to/from factor.
+ * blobbogram() would crash when it could not find reasonable scales and
+   none were specified.
+ * blobbogram() created an empty first page when plotting to off-screen
+   devices
+ * mtc.anohe() called sd() on a matrix, which is deprecated.
+
+
 gemtc 0.5
 ===========
 
