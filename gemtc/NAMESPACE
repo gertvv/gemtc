@@ -42,5 +42,5 @@ export(
 	relative.effect, rank.probability,
 	blobbogram, forest,
 	mtc.anohe,
-  mtc.nodesplit, mtc.nodesplit.comparisons,
+	mtc.nodesplit, mtc.nodesplit.comparisons,
 	ll.call)
