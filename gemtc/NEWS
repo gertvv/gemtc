@@ -9,6 +9,7 @@ Improvements:
    the next page, rather than our own hack.
  * The plot() for the summary() of mtc.anohe() now has a nicer default
    scale range.
+ * Import Matrix package because of igraph changes
 
 Bugfixes:
 
@@ -19,6 +20,8 @@ Bugfixes:
  * blobbogram() created an empty first page when plotting to off-screen
    devices
  * mtc.anohe() called sd() on a matrix, which is deprecated.
+ * mtc.nodesplit() used "A vs B" for d.A.B instead of "B vs A" like the
+   other plots.
 
 
 gemtc 0.5
