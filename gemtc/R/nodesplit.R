@@ -187,7 +187,7 @@ plot.mtc.nodesplit.summary <- function(x, ...) {
   t1 <- x[['p.value']][['t1']]
   t2 <- x[['p.value']][['t2']]
   params <- paste('d', t1, t2, sep='.')
-  group.labels <- paste(t1, 'vs', t2)
+  group.labels <- paste(t2, 'vs', t1)
   names(group.labels) <- params
 
   data <- do.call(rbind, lapply(1:length(params), function(i) {
