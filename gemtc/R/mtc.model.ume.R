@@ -40,7 +40,7 @@ sparse.relative.effect.matrix <- function(model) {
   nt <- length(ts)
   x <- unlist(lapply(1:nt, function(i) {
     lapply(1:nt, function(j) {
-      if (model[['graph']][i, j, drop=TRUE]) {
+      if (model[['graph']][i, j, sparse=FALSE, drop=TRUE]) {
         paste("d[", i, ", ", j, "] <- d.", ts[i], ".", ts[j], sep="")
       }
     })
