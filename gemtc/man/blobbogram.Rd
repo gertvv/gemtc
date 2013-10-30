@@ -85,6 +85,7 @@ data$ci.u <- log(data$ci.u)
 
 blobbogram(data, group.labels=c('GROUP 1', 'GROUP 2'),
     columns=c('value.A', 'value.B'), column.labels=c('r/n', 'r/n'),
-    column.groups=c(1, 2), grouped=TRUE, column.group.labels=c('Intervention', 'Control'),
+    column.groups=c(1, 2), grouped=TRUE,
+    column.group.labels=c('Intervention', 'Control'),
     id.label="Trial", ci.label="Odds Ratio (95\% CrI)", log.scale=TRUE)
 }
