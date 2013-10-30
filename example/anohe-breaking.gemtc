@@ -1,0 +1,118 @@
+<network description="Network" type="rate">
+  <treatments>
+    <treatment id="control">control</treatment>
+    <treatment id="treatA">treatA</treatment>
+    <treatment id="treatB">treatB</treatment>
+    <treatment id="treatC">treatC</treatment>
+    <treatment id="treatD">treatD</treatment>
+    <treatment id="treatE">treatE</treatment>
+    <treatment id="treatF">treatF</treatment>
+    <treatment id="treatG">treatG</treatment>
+    <treatment id="treatH">treatH</treatment>
+  </treatments>
+  <studies>
+    <study id="1">
+      <measurement treatment="treatF" responders=" 4" sample=" 99"/>
+      <measurement treatment="treatG" responders=" 5" sample=" 78"/>
+    </study>
+    <study id="3">
+      <measurement treatment="treatA" responders=" 4" sample=" 97"/>
+      <measurement treatment="treatB" responders="10" sample=" 72"/>
+      <measurement treatment="treatF" responders=" 5" sample=" 58"/>
+    </study>
+    <study id="4">
+      <measurement treatment="treatA" responders=" 9" sample="119"/>
+      <measurement treatment="treatB" responders=" 2" sample=" 72"/>
+      <measurement treatment="treatF" responders=" 3" sample=" 45"/>
+    </study>
+    <study id="6">
+      <measurement treatment="treatA" responders=" 3" sample=" 46"/>
+      <measurement treatment="treatC" responders=" 1" sample=" 61"/>
+      <measurement treatment="treatE" responders=" 4" sample=" 43"/>
+      <measurement treatment="treatG" responders=" 4" sample=" 41"/>
+    </study>
+    <study id="8">
+      <measurement treatment="control" responders=" 9" sample=" 77"/>
+      <measurement treatment="treatE" responders=" 8" sample=" 59"/>
+    </study>
+    <study id="9">
+      <measurement treatment="treatA" responders=" 2" sample=" 78"/>
+      <measurement treatment="treatH" responders=" 1" sample=" 63"/>
+    </study>
+    <study id="13">
+      <measurement treatment="treatC" responders=" 5" sample=" 56"/>
+      <measurement treatment="treatE" responders=" 0" sample=" 68"/>
+    </study>
+    <study id="16">
+      <measurement treatment="control" responders=" 3" sample=" 50"/>
+      <measurement treatment="treatF" responders=" 2" sample=" 74"/>
+    </study>
+    <study id="17">
+      <measurement treatment="treatB" responders=" 4" sample=" 95"/>
+      <measurement treatment="treatE" responders=" 3" sample=" 68"/>
+    </study>
+    <study id="18">
+      <measurement treatment="treatB" responders=" 9" sample="106"/>
+      <measurement treatment="treatH" responders=" 8" sample=" 73"/>
+    </study>
+    <study id="20">
+      <measurement treatment="treatA" responders=" 5" sample=" 66"/>
+      <measurement treatment="treatB" responders=" 4" sample=" 97"/>
+      <measurement treatment="treatE" responders=" 7" sample=" 65"/>
+    </study>
+    <study id="22">
+      <measurement treatment="treatA" responders=" 1" sample=" 94"/>
+      <measurement treatment="treatC" responders=" 7" sample=" 98"/>
+      <measurement treatment="treatE" responders=" 9" sample="105"/>
+    </study>
+    <study id="23">
+      <measurement treatment="treatA" responders=" 9" sample=" 90"/>
+      <measurement treatment="treatH" responders=" 4" sample=" 76"/>
+    </study>
+    <study id="26">
+      <measurement treatment="treatA" responders=" 9" sample="104"/>
+      <measurement treatment="treatC" responders=" 3" sample=" 88"/>
+      <measurement treatment="treatE" responders=" 9" sample=" 74"/>
+    </study>
+    <study id="28">
+      <measurement treatment="treatB" responders=" 5" sample=" 90"/>
+      <measurement treatment="treatE" responders=" 7" sample=" 79"/>
+      <measurement treatment="treatF" responders=" 1" sample=" 71"/>
+    </study>
+    <study id="32">
+      <measurement treatment="treatB" responders=" 2" sample=" 44"/>
+      <measurement treatment="treatD" responders=" 1" sample=" 56"/>
+      <measurement treatment="treatE" responders=" 0" sample=" 42"/>
+    </study>
+    <study id="33">
+      <measurement treatment="control" responders=" 9" sample=" 99"/>
+      <measurement treatment="treatF" responders=" 6" sample=" 63"/>
+    </study>
+    <study id="35">
+      <measurement treatment="control" responders=" 3" sample=" 48"/>
+      <measurement treatment="treatF" responders=" 4" sample=" 85"/>
+    </study>
+    <study id="37">
+      <measurement treatment="treatA" responders=" 6" sample="110"/>
+      <measurement treatment="treatB" responders=" 8" sample="117"/>
+      <measurement treatment="treatE" responders="10" sample=" 83"/>
+    </study>
+    <study id="38">
+      <measurement treatment="treatE" responders=" 5" sample=" 66"/>
+      <measurement treatment="treatF" responders=" 6" sample="108"/>
+    </study>
+    <study id="39">
+      <measurement treatment="treatB" responders=" 2" sample=" 73"/>
+      <measurement treatment="treatC" responders=" 2" sample=" 43"/>
+      <measurement treatment="treatH" responders=" 6" sample=" 76"/>
+    </study>
+    <study id="40">
+      <measurement treatment="treatB" responders=" 1" sample=" 63"/>
+      <measurement treatment="treatH" responders=" 5" sample=" 50"/>
+    </study>
+    <study id="41">
+      <measurement treatment="treatE" responders=" 1" sample=" 90"/>
+      <measurement treatment="treatH" responders=" 1" sample=" 64"/>
+    </study>
+  </studies>
+</network>
