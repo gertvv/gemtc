@@ -22,6 +22,9 @@ $(PACKAGE): $(PKG_NAME)/src/*.c $(PKG_NAME)/R/*.R $(PKG_NAME)/tests/*.R $(PKG_NA
 check: $(PACKAGE)
 	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 
+check-cran: $(PACKAGE)
+	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check --as-cran $(PACKAGE)
+
 install: $(PACKAGE)
 	R CMD INSTALL $(PACKAGE)
 
