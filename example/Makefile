@@ -3,7 +3,7 @@ PREFIX:=$(addprefix verify.example.,$(SAMPLERS))
 all: regression_test.txt $(addsuffix .txt,$(PREFIX))
 .PHONY: all
 
-BUGSTMP:=~/.wine/c_drive/bugstmp
+BUGSTMP:=~/.wine/drive_c/bugstmp
 
 verify.example.%.txt: verify.example.%.R verify.R
 	mkdir -p $(BUGSTMP)
