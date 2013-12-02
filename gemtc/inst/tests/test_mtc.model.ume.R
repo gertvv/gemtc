@@ -65,6 +65,6 @@ test_that("Edges are consistent for ume model$graph", {
     suppressWarnings(model <- mtc.model(network, type='ume', likelihood='normal', link='identity'))
 
   expect_that(length(E(model$graph)), equals(2))
-  expect_that(model$graph['B', 'A'], equals(1))
-  expect_that(model$graph['B', 'C'], equals(1))
+  expect_that(model$graph['B', 'A', sparse=FALSE], equals(1))
+  expect_that(model$graph['B', 'C', sparse=FALSE], equals(1))
 })
