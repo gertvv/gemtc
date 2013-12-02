@@ -16,7 +16,7 @@ typedef struct Matrix {
  * @param i Row index.
  * @param j Column index.
  */
-inline double *get(Matrix *m, int i, int j) {
+static inline double *get(Matrix *m, int i, int j) {
     return m->data + j * (m->nRow) + i;
 }
 
@@ -25,7 +25,7 @@ inline double *get(Matrix *m, int i, int j) {
  * The rank of t[i] is the number of elements greater than t[i].
  * Assumes that n is small (complexity O(n^2)).
  */
-inline void rank(double const *t, int *r, int n) {
+static inline void rank(double const *t, int *r, int n) {
 	for (int i = 0; i < n; ++i) {
 		r[i] = 0;
 		for (int j = 0; j < n; ++j) {
