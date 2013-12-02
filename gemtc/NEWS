@@ -1,7 +1,16 @@
+gemtc 0.5-2
+===========
+
+Released 2013-12-02
+
+ * Remove Matrix dependency by not using the Matrix-dependent parts of
+   igraph.
+ * Correctly use C99 "inline" facility
+
 gemtc 0.5-1
 ===========
 
-Release 2013-10-30
+Released 2013-10-30
 
 Improvements:
 
