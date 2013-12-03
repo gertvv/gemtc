@@ -91,8 +91,8 @@ test_that("absolute.one.center of complex graph is correct", {
     'ASPAC'=3, 'AtPA'=4, 'Ret'=0, 'SK'=0, 'SKtPA'=0, 'Ten'=0, 'UK'=0, 'tPA'=0)))
   expect_that(degree(tree, mode="in"), equals(c(
     'ASPAC'=0, 'AtPA'=1, 'Ret'=1, 'SK'=1, 'SKtPA'=1, 'Ten'=1, 'UK'=1, 'tPA'=1)))
-  expect_that(tree['AtPA', 'SK', sparse=FALSE], equals(0))
-  expect_that(tree['ASPAC', 'AtPA', sparse=FALSE], equals(1))
+  expect_that(tree['AtPA', 'SK'], equals(0))
+  expect_that(tree['ASPAC', 'AtPA'], equals(1))
 })
 
 Sys.setlocale("LC_COLLATE", lc_collate)

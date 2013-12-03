@@ -115,7 +115,7 @@ test_that("spanning.tree.mtc.result handles two-treatment case", {
   h <- spanning.tree.mtc.result(result)
 
   expect_that(V(h)$name, equals(V(g)$name))
-  expect_that(h[,,sparse=FALSE], equals(g[,,sparse=FALSE]))
+  expect_that(h[,], equals(g[,]))
 })
 
 test_that("relative.effect is robust to missing sd.d", {
