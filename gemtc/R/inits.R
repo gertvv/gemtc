@@ -118,7 +118,7 @@ mtc.init <- function(model) {
     params <- mtc.basic.parameters(model)
     d <- sapply(E(graph), function(e) {
       v <- get.edge(graph, e)
-      mtc.init.pooled.effect(model, v[1], v[2])
+      mtc.init.pooled.effect(model, V(graph)[v[1]]$name, V(graph)[v[2]]$name)
     })
     sd.d <- mtc.init.std.dev(model)
   } else {
