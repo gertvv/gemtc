@@ -112,7 +112,7 @@ decompose.network <- function(network, result) {
   }))
 
   ta.network <- filter.network(network, function(row) { !(row['study'] %in% studies) })
-  mtc.network(data.ab=ta.network[['data.ab']], data.re=rbind(ta.network[['data.re']], data.re))
+  mtc.network(data.ab=ta.network[['data.ab']], data.re=rbind(ta.network[['data.re']], data.re), treatments=network$treatments)
 }
 
 mtc.anohe <- function(network, ...) {
@@ -188,12 +188,12 @@ summary.mtc.anohe <- function(object, ...) {
   ume.samples <- ume.samples[,varNames,drop=FALSE]
   comps <- extract.comparisons(varNames)
   qs <- apply(ume.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
-  pairEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,])
+  pairEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,], stringsAsFactors=FALSE)
   rownames(pairEffects) <- NULL
 
   cons.samples <- as.matrix(relative.effect(result.cons, t1=comps[,1], t2=comps[,2], preserve.extra=FALSE)[['samples']])
   qs <- apply(cons.samples, 2, function(samples) { quantile(samples, c(0.025, 0.5, 0.975)) })
-  consEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,])
+  consEffects <- data.frame(t1=comps[,1], t2=comps[,2], pe=qs[2,], ci.l=qs[1,], ci.u=qs[3,], stringsAsFactors=FALSE)
   rownames(consEffects) <- NULL
 
   data <- studyEffects
@@ -212,7 +212,7 @@ summary.mtc.anohe <- function(object, ...) {
   pairEffects[['t1']] <- as.character(pairEffects[['t1']])
   pairEffects[['t2']] <- as.character(pairEffects[['t2']])
 
-  indEffects <- data.frame(t1=pairEffects[['t1']], t2=pairEffects[['t2']])
+  indEffects <- data.frame(t1=pairEffects[['t1']], t2=pairEffects[['t2']], stringsAsFactors=FALSE)
   indEffects <- cbind(indEffects, t(apply(pairEffects, 1, function(row) {
     has.indirect <- has.indirect.evidence(network, row['t1'], row['t2'])
     if (has.indirect) {
@@ -246,6 +246,7 @@ summary.mtc.anohe <- function(object, ...) {
       NA
     }
   })
+
   i2.cons <- apply(pairEffects, 1, function(row) {
     data2 <- data[data[['t1']] == row['t1'] & data[['t2']] == row['t2'], , drop=FALSE]
     ind <- indEffects[indEffects[['t1']] == row['t1'] & indEffects[['t2']] == row['t2'], 3:4, drop=]
@@ -259,6 +260,7 @@ summary.mtc.anohe <- function(object, ...) {
       NA
     }
   })
+
   incons <- apply(pairEffects, 1, function(row) {
     dir <- as.numeric(row[3:5])
     names(dir) <- c('pe', 'ci.l', 'ci.u') # sigh
@@ -279,7 +281,7 @@ summary.mtc.anohe <- function(object, ...) {
     }
   })
 
-  i.sq <- data.frame(t1=pairEffects[['t1']], t2=pairEffects[['t2']], i2.pair=i2.pair, i2.cons=i2.cons, incons.p=incons)
+  i.sq <- data.frame(t1=pairEffects[['t1']], t2=pairEffects[['t2']], i2.pair=i2.pair, i2.cons=i2.cons, incons.p=incons, stringsAsFactors=FALSE)
   total <- list(i2.pair=i.squared(data[['pe']], data[['se']], data[['p']]), i2.cons=i.squared(data[['pe']], data[['se']], data[['c']]))
   result <- list(studyEffects=studyEffects, pairEffects=pairEffects, consEffects=consEffects, indEffects=indEffects,
     isquared.comp=i.sq, isquared.glob=total, cons.model=result.cons[['model']])
