@@ -113,3 +113,27 @@ s01** C         NA   0.2
 s01** D         -0.4 0.5"), header=T)
   expect_that(nodesplit.rewrite.data.re(data.re, "A", "B"), equals(data.re.rewrite))
 })
+
+## Regression test for issue #10
+test_that("non-lexicographical treatment order works correctly", {
+  data.ab <- read.table(textConnection("
+study treatment mean std.err
+1     1         1    0.5
+1     10        1    0.5
+2     1         1    0.5
+2     11        1    0.5
+3     2         1    0.5
+3     10        1    0.5
+4     10        1    0.5
+4     11        1    0.5
+"), header=T)
+  treatments <- read.table(textConnection("
+id description
+1  A
+2  B
+10 C
+11 D
+"), header=T)
+  network <- mtc.network(data.ab=data.ab, treatments=treatments)
+  mtc.model(network, type="nodesplit", t1=10, t2=11)
+})
