@@ -37,7 +37,8 @@ minimum.diameter.spanning.tree <- function(graph) {
   h <- h + edge(edgelist)
   if (ncol(pairs) > 0 && nrow(pairs) > 0) {
     for (i in 1:ncol(pairs)) {
-      p <- get.shortest.paths(graph, pairs[1, i, drop=TRUE], pairs[2, i, drop=TRUE], mode="all")[[1]]
+      p <- get.shortest.paths(graph, pairs[1, i, drop=TRUE], pairs[2, i, drop=TRUE], mode="all")
+      if (is.list(p) && "vpath" %in% names(p)) { p <- p$vpath[[1]] } else { p <- p[[1]] }
       if (length(p) == 2) {
         h <- h + edge(p) # bug in one-edge paths?
       } else {

@@ -6,7 +6,9 @@ tree.relative.effect <- function(g, t1, t2) {
   if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
   pairs <- matrix(c(t1, t2), ncol=2)
   paths <- apply(pairs, 1, function(rel) {
-    p <- unlist(suppressWarnings(get.shortest.paths(g, rel[1], rel[2], mode='all')))
+    p <- suppressWarnings(get.shortest.paths(g, rel[1], rel[2], mode='all'))
+    if (is.list(p) && "vpath" %in% names(p)) { p <- p$vpath }
+    p <- unlist(p)
     if (length(p) == 0) {
       stop(paste("The requested comparison ",
              V(g)[rel[2]]$name, " vs ", V(g)[rel[1]]$name,
