@@ -13,7 +13,7 @@ filter.network <- function(network, filter, filter.ab=filter, filter.re=filter) 
   data.re <- if (!is.null(network[['data.re']])) {
     network[['data.re']][apply(network[['data.re']], 1, filter.re), , drop=FALSE]
   }
-  mtc.network(data=data.ab, data.re=data.re, treatments=network$treatments)
+  mtc.network(data=data.ab, data.re=data.re)
 }
 
 decompose.variance <- function(V) {
@@ -57,7 +57,6 @@ decompose.trials <- function(result) {
 
   study.samples <- as.matrix(result[['samples']])
   studies <- unique(mtc.merge.data(result[['model']][['network']])[['study']])
-
 
   decomposed <- lapply(1:length(studies), function(i) {
     study <- mtc.study.design(result[['model']][['network']], studies[i])
