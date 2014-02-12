@@ -12,6 +12,7 @@ blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
     grouped=TRUE, group.labels=NULL,
     columns=NULL, column.labels=NULL,
     column.groups=NULL, column.group.labels=NULL,
+    digits=2,
     ask=dev.interactive(orNone=TRUE))
 }
 \arguments{
@@ -30,6 +31,7 @@ blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
   \item{column.labels}{A vector of labels for the user-defined columns.}
   \item{column.groups}{Column groups, a numeric vector specifying the column group for each column.}
   \item{column.group.labels}{A vector of labels for the column groups.}
+  \item{digits}{The number of (significant) digits to print.}
   \item{ask}{If TRUE, a prompt will be displayed before generating the next page of a multi-page plot.}
 }
 \details{
