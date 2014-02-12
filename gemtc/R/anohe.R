@@ -115,11 +115,6 @@ decompose.network <- function(network, result) {
 }
 
 mtc.anohe <- function(network, ...) {
-  args <- list(...)
-  if ('linearModel' %in% names(args)) {
-    stop('mtc.anohe currently does not support specifying "linearModel"')
-  }
-
   network <- fix.network(network)
 
   result.use <- mtc.model.run(network, type='use', ...)
