@@ -199,7 +199,8 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   column.groups=NULL, column.group.labels=NULL,
   ask=dev.interactive(orNone=TRUE)) {
 
-  grid.newpage()
+  devAskNewPage(FALSE)
+  plot.new()
   devAskNewPage(ask)
 
   grouped <- !is.null(group.labels) && isTRUE(grouped)
