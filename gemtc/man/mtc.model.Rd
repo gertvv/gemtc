@@ -73,10 +73,10 @@ These likelihood/links are supported:
 
 The following model types are supported:
 \itemize{
-  \item{\code{consistency}: ordinary consistency model. No additional parameters.}
-  \item{\code{nodesplit}: node-splitting model. Removes both arms used to estimate the direct evidence from the network of indirect evidence, rather than just one of those arms. This means that three-arm trials do not contribute any evidence in the network of indirect evidence. When relative effect data are present, these are transformed appropriately (using an assumption of normality) to enable this direct/indirect evidence split. Additional parameters: \code{t1} and \code{t2}, which indicate the comparison to be split.}
-  \item{\code{use}: unrelated study effects. Models the effects within each study as if they are independent. No additional parameters.}
-  \item{\code{ume}: unrelated mean effects. Models the effects within each comparison as if they are independent. Does not properly handle multi-arm trials, and warns when they are present in the network. No additional parameters.}
+  \item{\code{consistency}: ordinary consistency model. No additional parameters. \link[=gemtc-package]{[Dias et al. 2013a, van Valkenhoef et al. 2012.]}}
+  \item{\code{nodesplit}: node-splitting model. Removes both arms used to estimate the direct evidence from the network of indirect evidence, rather than just one of those arms. This means that three-arm trials do not contribute any evidence in the network of indirect evidence. When relative effect data are present, these are transformed appropriately (using an assumption of normality) to enable this direct/indirect evidence split. Additional parameters: \code{t1} and \code{t2}, which indicate the comparison to be split. \link[=gemtc-package]{[Dias et al. 2010, van Valkenhoef et al. 2014a (draft)]}}
+  \item{\code{use}: unrelated study effects. Models the effects within each study as if the studies are independent. No additional parameters. \link[=gemtc-package]{[van Valkenhoef et al. 2014b (draft)]}}
+  \item{\code{ume}: unrelated mean effects. Models the effects within each comparison as if they are independent. Does not properly handle multi-arm trials, and warns when they are present in the network. No additional parameters. \link[=gemtc-package]{[Dias et al. 2013b, van Valkenhoef et al. 2014b (draft)]}}
 }
 }
 

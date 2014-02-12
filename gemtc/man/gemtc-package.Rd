@@ -9,10 +9,10 @@
 An R package for performing network meta-analyses (mixed treatment comparisons).
 }
 \details{
-Network meta-analysis, or mixed treatment comparison (MTC) is a technique to meta-analyze networks of trials comparing two or more treatments at the same time (Dias et al. 2013).
+Network meta-analysis, or mixed treatment comparison (MTC) is a technique to meta-analyze networks of trials comparing two or more treatments at the same time [Dias et al. 2013].
 Using a Bayesian hierarchical model, all direct and indirect comparisons are taken into account to arrive at a single consistent estimate of the effect of all included treatments based on all included studies.
 
-This package allows the automated generation of network meta-analysis models that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package) or WinBUGS (using the R2WinBUGS package).
+This package allows the automated generation of network meta-analysis models [van Valkenhoef et al. 2012] that can be run using JAGS (using the rjags package), OpenBUGS (using the BRugs package) or WinBUGS (using the R2WinBUGS package).
 Furthermore it allows interoperability with GeMTC files that were created by the GeMTC GUI or exported from \href{http://drugis.org/addis}{ADDIS}.
 The source for GeMTC is available under GPL3 on \href{https://github.com/gertvv/gemtc}{Github}.
 
@@ -22,14 +22,33 @@ See \url{http://drugis.org/gemtc} for more information.
 \author{Gert van Valkenhoef}
 
 \references{
-G. van Valkenhoef, G. Lu, B. de Brock, H. Hillege, A.E. Ades, and N.J. Welton (2012), \emph{Automating network meta-analysis},
-Research Synthesis Methods 3(4):285-299.
-[\href{http://dx.doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
+S. Dias, N.J. Welton, D.M. Caldwell, and A.E. Ades (2010),
+\emph{Checking consistency in mixed treatment comparison meta-analysis},
+Statistics in Medicine 29(7-8, Sp. Iss. SI):932-944.\cr
+[\href{http://dx.doi.org/10.1002/sim.3767}{doi:10.1002/sim.3767}]
 
-S. Dias, A.J. Sutton, A.E. Ades, and N.J. Welton (2013),
+S. Dias, A.J. Sutton, A.E. Ades, and N.J. Welton (2013a),
 \emph{A Generalized Linear Modeling Framework for Pairwise and Network Meta-analysis of Randomized Controlled Trials},
 Medical Decision Making 33(5):607-617.
 [\href{http://dx.doi.org/10.1177/0272989X12458724}{doi:10.1177/0272989X12458724}]
+
+S. Dias, N.J. Welton, A.J. Sutton, D.M. Caldwell, G. Lu, and A.E. Ades (2013b),
+\emph{Inconsistency in Networks of Evidence Based on Randomized Controlled Trials},
+Medical Decision Making 33(5):641-656.
+[\href{http://dx.doi.org/10.1177/0272989X12455847}{doi:10.1177/0272989X12455847}]
+
+G. van Valkenhoef, G. Lu, B. de Brock, H. Hillege, A.E. Ades, and N.J. Welton (2012),
+\emph{Automating network meta-analysis},
+Research Synthesis Methods 3(4):285-299.
+[\href{http://dx.doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
+
+G. van Valkenhoef, S. Dias, A.E. Ades, and N.J. Welton (2014a),
+\emph{Automated generation of node-splitting models for the assessment of inconsistency in network meta-analysis},
+draft manuscript.
+
+G. van Valkenhoef et al. (2014b),
+\emph{Modeling inconsistency as heterogeneity in network meta-analysis},
+draft manuscript.
 }
 \seealso{
 \code{\link{mtc.network}},

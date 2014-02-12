@@ -20,6 +20,8 @@ mtc.anohe(network, ...)
   \item{...}{Arguments to be passed to \code{\link{mtc.run}} or \code{\link{mtc.model}}. This can be used to set the likelihood/link or the number of iterations, for example.}
 }
 \details{
+Analysis of heterogeneity is intended to be a unified set of statistics and a visual display that allows the simultaneous assessment of both heterogeneity and inconsistency in network meta-analysis \link[=gemtc-package]{[van Valkenhoef et al. 2014b (draft)]}.
+
 \code{mtc.anohe} returns the MCMC results for all three types of model. To get appropriate summary statistics, call \code{summary()} on the results object. The summary can be plotted.
 
 To control parameters of the MCMC estimation, see \code{\link{mtc.run}}.

@@ -1,3 +1,12 @@
+gemtc 0.6
+=========
+
+Released 2014-??-??
+
+ * Change handling of 4+-arm trials in node-splitting models and ANOHE summary
+ * Enable linearModel='fixed' for mtc.anohe()
+ * Add literature references for various methods to gemtc-package
+
 gemtc 0.5-3
 ===========
 

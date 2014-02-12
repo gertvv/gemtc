@@ -22,7 +22,7 @@ mtc.nodesplit.comparisons(network)
   \item{...}{Arguments to be passed to \code{\link{mtc.run}} or \code{\link{mtc.model}}. This can be used to set the likelihood/link or the number of iterations, for example.}
 }
 \details{
-\code{mtc.nodesplit} returns the MCMC results for all node-splitting models. To get appropriate summary statistics, call \code{summary()} on the results object. The summary can be plotted.
+\code{mtc.nodesplit} returns the MCMC results for all relevant node-splitting models \link[=gemtc-package]{[van Valkenhoef et al. 2014a (draft)]}. To get appropriate summary statistics, call \code{summary()} on the results object. The summary can be plotted.
 See \code{\link{mtc.model}} for details on how the node-splitting models are generated.
 
 To control parameters of the MCMC estimation, see \code{\link{mtc.run}}.
