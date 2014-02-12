@@ -323,10 +323,8 @@ has.indirect.evidence <- function(network, t1, t2) {
   })
 
   data <- rbind(network[['data.ab']], network[['data.re']])
-  not.t1ort2 <- data[['treatment']] != t1 & data[['treatment']] != t2
   not.both <- !has.both[data[['study']]]
-  data <- data[not.both | not.t1ort2, , drop=FALSE]
-  data <- remove.onearm(data)
+  data <- data[not.both, , drop=FALSE]
 
   if (nrow(data) > 0) {
     n <- mtc.network(data)

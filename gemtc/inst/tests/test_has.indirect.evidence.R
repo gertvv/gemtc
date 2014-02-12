@@ -78,7 +78,7 @@ s02 C
 s03 A
 s03 D'), header=T)
   network <- mtc.network(data)
-  expect_that(has.indirect.evidence(network, 'A', 'B'), equals(TRUE))
+  expect_that(has.indirect.evidence(network, 'A', 'B'), equals(FALSE)) # used to be TRUE pre-0.6
 })
 
 test_that("data.re is incorporated", {
