@@ -1,0 +1,5 @@
+structure(list(study = c(1L, 1L, 2L, 2L, 3L, 3L, 3L), treatment = c(1L, 
+3L, 1L, 2L, 1L, 2L, 4L), mean = c(-1.22, -1.53, -0.7, -2.4, -0.3, 
+-2.6, -1.2), std.err = c(0.504, 0.439, 0.282, 0.258, 0.505, 0.51, 
+0.478)), .Names = c("study", "treatment", "mean", "std.err"), row.names = c(NA, 
+-7L), class = "data.frame")

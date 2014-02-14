@@ -50,10 +50,13 @@ One-arm trials are automatically removed, which results in a warning.
 This format supports dichotomous data as responders/sampleSize and continuous data as mean/std.dev/sampleSize only.
 Relative effect data, or other forms of arm-based data, are not supported.
 In general, it may be more convenient to use \code{dput} and \code{dget} to read and write networks.
+
+Also see \code{\link{mtc.data.studyrow}} for a convenient way to import data from the one-study-per-row format, which is very popular for BUGS code.
 }
 \author{Gert van Valkenhoef, Joël Kuiper}
 
 \seealso{
+\code{\link{mtc.data.studyrow}}
 \code{\link{mtc.model}}
 }
 \examples{

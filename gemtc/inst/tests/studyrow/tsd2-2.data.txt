@@ -1,0 +1,11 @@
+t[,1]	t[,2]	t[,3]	E[,1]	E[,2]	E[,3]	r[,1]	r[,2]	r[,3]	na[]	#	ID	
+1	2	NA	1917	1925	NA	113	111	NA	2	#	2	DART
+1	2	2	43.6	41.3	38	1	5	3	3	#	10	London Corn /Olive
+1	2	NA	393.5	373.9	NA	24	20	NA	2	#	11	London Low Fat
+1	2	NA	4715	4823	NA	248	269	NA	2	#	14	Minnesota Coronary
+1	2	NA	715	751	NA	31	28	NA	2	#	15	MRC Soya
+1	2	NA	885	895	NA	65	48	NA	2	#	18	Oslo Diet-Heart
+1	2	NA	87.8	91	NA	3	1	NA	2	#	22	STARS
+1	2	NA	1011	939	NA	28	39	NA	2	#	23	Sydney Diet-Heart
+1	2	NA	1544	1588	NA	177	174	NA	2	#	26	Veterans Administration
+1	2	NA	125	123	NA	2	1	NA	2	#	27	Veterans Diet & Skin CA
