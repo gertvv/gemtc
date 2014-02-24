@@ -51,8 +51,8 @@ mtc.model.data <- function(model) {
     mtc.validate.data.re(data.re)
   }
 
-  studies.ab <- levels(data.ab[['study']])
-  studies.re <- levels(data.re[['study']])
+  studies.ab <- rle(as.character(data.ab[['study']]))[['values']]
+  studies.re <- rle(as.character(data.re[['study']]))[['values']]
   studies <- c(studies.ab, studies.re)
   study.arms <- c(as.character(data.ab[['study']]), as.character(data.re[['study']]))
   na <- sapply(studies, function(study) { sum(study.arms == study) })

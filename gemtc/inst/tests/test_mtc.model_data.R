@@ -194,7 +194,7 @@ study treatment diff std.err
   )))
 })
 
-test_that("mtc.model.data has correct (2)", {
+test_that("mtc.model.data has correct values (2)", {
   data.ab <- read.table(textConnection('
 study treatment mean std.err
 1     A         10.5 0.18
@@ -226,7 +226,7 @@ study treatment diff std.err
   expect_that(data[['ns.rm']], equals(2))
   expect_that(data[['ns']], equals(8))
   expect_that(data[['nt']], equals(3))
-  expect_that(data[['na']], equals(c(2,2,2,3,2,3,2,2)))
+  expect_that(data[['na']], equals(c(2,2,2,2,2,2,3,3)))
   expect_that(data[['t']], equals(rbind(
     c(  1,  2, NA), # 1
     c(  2,  3, NA), # 2
