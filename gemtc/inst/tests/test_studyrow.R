@@ -13,7 +13,10 @@ test_that("TSD2 example 2 (count data, poisson/log)", {
     read.table('studyrow/tsd2-2.data.txt', header=TRUE),
     armVars=c('treatment'='t', 'responders'='r', 'exposure'='E'),
     treatmentNames=treatments, studyNames=studies)
-  expect_that(data, equals(dget('studyrow/tsd2-2.out.txt')))
+
+  # Needs check.attributes=FALSE because locales may sort upper/lower case differently
+  # This leads to differences in levels(data$studies)
+  expect_that(data, equals(dget('studyrow/tsd2-2.out.txt'), check.attributes=FALSE))
 })
 
 test_that("TSD2 example 3 (count data, binomial/cloglog)", {
