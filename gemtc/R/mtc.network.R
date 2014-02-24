@@ -322,7 +322,7 @@ has.indirect.evidence <- function(network, t1, t2) {
     all(c(t1, t2) %in% mtc.study.design(network, study))
   })
 
-  data <- rbind(network[['data.ab']], network[['data.re']])
+  data <- mtc.merge.data(network)
   not.both <- !has.both[data[['study']]]
   data <- data[not.both, , drop=FALSE]
 
