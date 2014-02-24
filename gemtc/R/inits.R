@@ -92,7 +92,7 @@ mtc.init <- function(model) {
   data.ab <- model[['network']][['data.ab']]
   data.re <- model[['network']][['data.re']]
   s.mat <- arm.index.matrix(model[['network']])
-  studies <- levels(data.ab[['study']])
+  studies <- rle(as.character(data.ab[['study']]))[['values']]
 
   # Generate initial values for each parameter
   mu <- sapply(studies, function(study) {
@@ -101,7 +101,7 @@ mtc.init <- function(model) {
   if (!is.matrix(mu)) {
     mu <- matrix(mu, nrow=model[['n.chain']], ncol=length(studies))
   }
-  studies <- c(studies, levels(data.re[['study']]))
+  studies <- c(studies, rle(as.character(data.re[['study']]))[['values']])
   ts <- c(as.character(data.ab[['treatment']]), as.character(data.re[['treatment']]))
   delta <- lapply(studies, function(study) {
     sapply(1:ncol(s.mat), function(i) {
