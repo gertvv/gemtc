@@ -64,7 +64,7 @@ s01** D"), header=T)
 
 test_that("rewrite RE: 2-arm trials untouched", {
   data.re <- read.table(textConnection("
-study treatment mean std.err
+study treatment diff std.err
 s01   A         NA   NA
 s01   B         1.0  0.4
 s02   A         -1.5 0.3
@@ -76,7 +76,7 @@ s03   C         0.8  0.4"), header=T)
 
 test_that("rewrite RE: 3-arm trials arm removed, baseline changed", {
   data.re <- read.table(textConnection("
-study treatment mean std.err
+study treatment diff std.err
 s01   A         NA   0.2
 s01   B         1.0  0.4
 s01   C         -1.5 0.3
@@ -87,7 +87,7 @@ s03   C         NA   0.1
 s03   A         -1.2 0.3
 s03   B         0.8  0.4"), header=T)
   data.re.rewrite <- read.table(textConnection("
-study treatment mean std.err
+study treatment diff std.err
 s01   A         NA   0.2
 s01   B         1.0  0.4
 s02   A         NA   0.2
@@ -100,13 +100,13 @@ s03   B         2.0  0.5"), header=T)
 
 test_that("rewrite RE: 4+-arm trials split, baseline changed", {
   data.re <- read.table(textConnection("
-study treatment mean std.err
+study treatment diff std.err
 s01   B         NA   0.3
 s01   A         0.7  0.6
 s01   C         0.9  0.5
 s01   D         0.5  0.6"), header=T)
   data.re.rewrite <- read.table(textConnection("
-study treatment mean std.err
+study treatment diff std.err
 s01*  A         NA   0.3
 s01*  B         -0.7 0.6
 s01** C         NA   0.2
@@ -136,4 +136,15 @@ id description
 "), header=T)
   network <- mtc.network(data.ab=data.ab, treatments=treatments)
   mtc.model(network, type="nodesplit", t1=10, t2=11)
+})
+
+## Regression test for issue #22
+test_that("study names do not mess up nodesplit with RE data", {
+  data <- read.csv("ns-complex.csv")
+  network <- mtc.network(data.re=data)
+  expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("B", "D"), t2=c("D", "H"))))
+  data$study <- data$Study
+  data$Study <- NULL
+  network <- mtc.network(data.re=data)
+  expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("B", "D"), t2=c("D", "H"))))
 })

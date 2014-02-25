@@ -300,7 +300,7 @@ mtc.merge.data <- function(network) {
     treatment=as.treatment.factor(c(
       network[['data.ab']][['treatment']],
       network[['data.re']][['treatment']]), network),
-    stingsAsFactors=FALSE)
+    stringsAsFactors=FALSE)
 }
 
 mtc.studies.list <- function(network) {
@@ -349,7 +349,7 @@ mtc.comparisons <- function(network) {
 
   # Identify the unique "designs" (treatment combinations)
   design <- function(study) { mtc.study.design(network, study) }
-  designs <- unique(lapply(levels(data[['study']]), design))
+  designs <- unique(lapply(unique(data[['study']]), design))
 
   # Generate all pair-wise comparisons from each "design"
   comparisons <- do.call(rbind, lapply(designs, mtc.treatment.pairs))

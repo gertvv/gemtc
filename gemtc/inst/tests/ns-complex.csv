@@ -1,0 +1,67 @@
+study,Study,treatment,diff,std.err
+s01,Li et al (1999),A,NA,NA
+s01,Li et al (1999),H,-0.72,0.71
+s02,Wein et al (1999),A,NA,NA
+s02,Wein et al (1999),B,-0.46,0.3
+s03,Heymsfield et al (2000),A,NA,NA
+s03,Heymsfield et al (2000),I,-0.95,0.35
+s04,Liao et al (2002),A,NA,NA
+s04,Liao et al (2002),D,-0.66,1.22
+s05,STOP-NIDDM (2002),A,NA,NA
+s05,STOP-NIDDM (2002),F,-0.29,0.09
+s06,Pan et al (2003),A,NA,NA
+s06,Pan et al (2003),F,-0.51,0.48
+s07,Xendos (2004),D,NA,NA
+s07,Xendos (2004),P,-0.73,0.31
+s08,Kosaka et al (2005),A,NA,NA
+s08,Kosaka et al (2005),D,-1.24,0.6
+s09,DREAM Trial Investigators (2006a),A,NA,NA
+s09,DREAM Trial Investigators (2006a),J,-0.09431,0.064464886
+s10,DREAM Trial Investigators (2006b),A,NA,NA
+s10,DREAM Trial Investigators (2006b),K,-0.967584026,0.073388284
+s11,Eriksson et al (2006),A,NA,NA
+s11,Eriksson et al (2006),G,-1.74,1.1
+s12,Roumen et al (2008),A,NA,NA
+s12,Roumen et al (2008),D,-0.8675,0.427
+s13,Kawamori et al (2009),D,NA,NA
+s13,Kawamori et al (2009),S,-0.5192,0.1623
+s14,Lindahl et al (2009),A,NA,NA
+s14,Lindahl et al (2009),D,-1.204,0.4758
+s15,Penn et al (2009),A,NA,NA
+s15,Penn et al (2009),D,-0.7985,0.4571
+s16,Ramachandran et al (2009),D,NA,NA
+s16,Ramachandran et al (2009),Q,-0.0161,0.1949
+s17,DeFronzo et al (2011),B,NA,NA
+s17,DeFronzo et al (2011),L,-1.2729,0.2856
+s18,NAVIGATOR (2010b),D,NA,NA
+s18,NAVIGATOR (2010b),O,0.0676,0.0367
+s19,NAVIGATOR (2010a),D,NA,NA
+s19,NAVIGATOR (2010a),R,-0.1508,0.0344
+s20,Lindblad (2010),D,NA,NA
+s20,Lindblad (2010),M,-0.352398387,0.204124145
+s21,Lindstrom (2013),A,NA,NA
+s21,Lindstrom (2013),D,-0.487760351,0.126568343
+s22,Saito (2011),A,NA,NA
+s22,Saito (2011),D,-0.579818495,0.222845032
+s23,Sakane (2011),A,NA,NA
+s23,Sakane (2011),D,-0.62735944,0.384900179
+s24,Xu (2013),A,NA,NA
+s24,Xu (2013),D,-0.198450939,0.554700196
+s25,Zinman (2010),D,NA,NA
+s25,Zinman (2010),T,-1.171182982,0.31000362
+s26,Jarrett et al (1979),A,NA,NA
+s26,Jarrett et al (1979),B,-0.3687,0.54
+s27,DPPRG (2009),A,NA,0.0453
+s27,DPPRG (2009),D,-0.3864,0.0662
+s27,DPPRG (2009),H,-0.1978,0.0655
+s28,Yates (2011),A,NA,0.466981803
+s28,Yates (2011),D,-0.338273859,0.632455532
+s28,Yates (2011),E,-1.123930097,0.707106781
+s29,Ramachandran et al (2006),A,NA,0.1724
+s29,Ramachandran et al (2006),D,-0.473,0.2514
+s29,Ramachandran et al (2006),H,-0.429,0.2388
+s29,Ramachandran et al (2006),N,-0.463,0.2513
+s30,Li et al (2008),A,NA,0.1666
+s30,Li et al (2008),B,-0.545,0.217
+s30,Li et al (2008),C,-0.673,0.251
+s30,Li et al (2008),D,-0.416,0.25
