@@ -398,7 +398,7 @@ print.mtc.network <- function(x, ...) {
 summary.mtc.network <- function(object, ...) {
   object <- fix.network(object)
   data <- mtc.merge.data(object)
-  studies <- levels(data[['study']])
+  studies <- unique(data[['study']])
   m <- sapply(object[['treatments']][['id']], function(treatment) {
     sapply(studies, function(study) {
       any(data[['study']] == study & data[['treatment']] == treatment)
