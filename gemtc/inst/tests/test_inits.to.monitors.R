@@ -21,3 +21,13 @@ test_that("inits.to.monitors removes NAs from matrices", {
   expect_that(inits.to.monitors(list(delta=matrix(c(NA, 3, NA, NA, 4, 5), ncol=3, byrow=TRUE))),
     equals(c("delta[1,2]", "delta[2,2]", "delta[2,3]")))
 })
+
+test_that("inits.to.monitors adds sd.d if var.d is present", {
+  expect_that(inits.to.monitors(list(var.d=2)),
+    equals(c("var.d", "sd.d")))
+})
+
+test_that("inits.to.monitors adds sd.d if tau.d is present", {
+  expect_that(inits.to.monitors(list(tau.d=2)),
+    equals(c("tau.d", "sd.d")))
+})

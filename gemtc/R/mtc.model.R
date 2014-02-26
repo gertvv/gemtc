@@ -1,5 +1,51 @@
 ## mtc.model class methods
 
+as.character.mtc.hy.prior <- function(x, ...) {
+  type <- x[['type']]
+  distr <- x[['distr']]
+  args <- x[['args']]
+  
+  expr <- paste0(distr, "(", paste(args, collapse=", "), ")")
+  if (type == "std.dev") {
+    paste0("sd.d ~ ", expr, "\ntau.d <- pow(sd.d, -2)")
+  } else if (type == "var") {
+    paste0("var.d ~ ", expr, "\nsd.d <- sqrt(var.d)\ntau.d <- 1 / var.d")
+  } else {
+    paste0("tau.d ~ ", expr, "\nsd.d <- sqrt(1 / tau.d)")
+  }
+}
+
+mtc.hy.prior <- function(type, distr, ...) {
+  stopifnot(class(type) == "character")
+  stopifnot(length(type) == 1)
+  stopifnot(type %in% c('std.dev', 'var', 'prec'))
+
+  obj <- list(type=type, distr=distr, args=list(...))
+  class(obj) <- "mtc.hy.prior"
+  obj
+}
+
+hy.lor.outcomes <- c('mortality', 'semi-objective', 'subjective')
+hy.lor.comparisons <- c('pharma-control', 'pharma-pharma', 'non-pharma')
+
+hy.lor.mu <- matrix(
+  c(-4.06, -3.02, -2.13, -4.27, -3.23, -2.34, -3.93, -2.89, -2.01),
+  ncol=3, nrow=3,
+  dimnames=list(hy.lor.outcomes, hy.lor.comparisons))
+
+hy.lor.sigma <- matrix(
+  c(1.45, 1.85, 1.58, 1.48, 1.88, 1.62, 1.51, 1.91, 1.64),
+  ncol=3, nrow=3,
+  dimnames=list(hy.lor.outcomes, hy.lor.comparisons))
+
+mtc.hy.empirical.lor <- function(outcome.type, comparison.type) {
+  stopifnot(outcome.type %in% hy.lor.outcomes)
+  stopifnot(comparison.type %in% hy.lor.comparisons)
+  mtc.hy.prior("var", "dlnorm",
+    hy.lor.mu[outcome.type, comparison.type],
+    signif(hy.lor.sigma[outcome.type, comparison.type]^-2, digits=3))
+}
+
 mtc.model.call <- function(fn, model, ...) {
   fn <- paste(fn, model[['type']], sep='.')
   do.call(fn, c(list(model), list(...)))
@@ -14,7 +60,9 @@ mtc.model.defined <- function(model) {
 mtc.model <- function(network, type="consistency",
     factor=2.5, n.chain=4,
     likelihood=NULL, link=NULL,
-    linearModel="random", ...) {
+    linearModel="random",
+    om.scale=NULL, hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+    ...) {
   if (!inherits(network, "mtc.network")) {
     stop('Given network is not an mtc.network')
   }
@@ -87,7 +135,8 @@ mtc.model <- function(network, type="consistency",
       ', link = ', model[['link']], ' not found!', sep=''))
   }
 
-  model[['om.scale']] <- guess.scale(model)
+  model[['om.scale']] <- if (!is.null(om.scale)) om.scale else guess.scale(model)
+  model[['hy.prior']] <- hy.prior
 
   mtc.model.call('mtc.model', model, ...)
 }

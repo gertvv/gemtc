@@ -31,6 +31,10 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
   }
   template <- template.block.sub(template, 'linearModel', mod.code)
 
+  # substitute in heterogeneity prior
+  template <- template.block.sub(template, 'hy.prior', as.character(model[['hy.prior']]))
+
+
   template <- template.block.sub(template, 'relativeEffectMatrix', relEffectMatrix)
 
   if (model[['data']][['ns.a']] > 0) {

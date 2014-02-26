@@ -5,6 +5,13 @@ Released 2014-??-??
 
 New features:
 
+ * Customizable prior distribution for heterogeneity. The prior can be
+   set on the standard deviation, variance, or precision. It can use any
+   distribution supported by BUGS/JAGS. Informative priors for the log
+   odds ratio (based on Turner et al. 2012) are also available.
+ * Variance of the vague normal distributions for all other parameters
+   can be controlled using 'om.scale'. By default it is still
+   heuristically determined.
  * Change handling of 4+-arm trials in node-splitting models and ANOHE
    summary
  * Enable linearModel='fixed' for mtc.anohe()

@@ -11,7 +11,9 @@ The \code{mtc.model} function generates network meta-analysis models from an \co
 }
 \usage{
 mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
-  likelihood=NULL, link=NULL, linearModel="random", ...)
+  likelihood=NULL, link=NULL, linearModel="random",
+  om.scale=NULL, hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+  ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,6 +25,8 @@ mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
   \item{link}{The link function to be used. If unspecified, a suitable link function will be inferred for the given data.}
   \item{linearModel}{The type of linear model to be generated. Can be "random" for a random effects
 model, or "fixed" for a fixed effect model.}
+  \item{om.scale}{Outcome measure scale. Represents a "very large" difference on the analysis' outcome scale. This is used to set vague priors. For the log odds-ratio, values between 2 and 5 are considered reasonable. For continuous outcomes, this depends heavily on the specific outcome. If left unspecified, it is determined from the data.}
+  \item{hy.prior}{Heterogeneity prior. See \code{\link{mtc.hy.prior}}.}
   \item{...}{Additional arguments to be passed to the type-specific model generation function.}
 }
 \value{
@@ -73,7 +77,7 @@ These likelihood/links are supported:
 
 The following model types are supported:
 \itemize{
-  \item{\code{consistency}: ordinary consistency model. No additional parameters. \link[=gemtc-package]{[Dias et al. 2013a, van Valkenhoef et al. 2012.]}}
+  \item{\code{consistency}: ordinary consistency model. No additional parameters. \link[=gemtc-package]{[Dias et al. 2013a, van Valkenhoef et al. 2012]}}
   \item{\code{nodesplit}: node-splitting model. Removes both arms used to estimate the direct evidence from the network of indirect evidence, rather than just one of those arms. This means that three-arm trials do not contribute any evidence in the network of indirect evidence. When relative effect data are present, these are transformed appropriately (using an assumption of normality) to enable this direct/indirect evidence split. Additional parameters: \code{t1} and \code{t2}, which indicate the comparison to be split. \link[=gemtc-package]{[Dias et al. 2010, van Valkenhoef et al. 2014a (draft)]}}
   \item{\code{use}: unrelated study effects. Models the effects within each study as if the studies are independent. No additional parameters. \link[=gemtc-package]{[van Valkenhoef et al. 2014b (draft)]}}
   \item{\code{ume}: unrelated mean effects. Models the effects within each comparison as if they are independent. Does not properly handle multi-arm trials, and warns when they are present in the network. No additional parameters. \link[=gemtc-package]{[Dias et al. 2013b, van Valkenhoef et al. 2014b (draft)]}}

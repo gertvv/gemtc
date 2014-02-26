@@ -13,5 +13,4 @@ for (i in 1:ns) {
 }
 
 # Random effects variance prior
-sd.d ~ dunif(0, om.scale)
-tau.d <- pow(sd.d, -2)
+$hy.prior$

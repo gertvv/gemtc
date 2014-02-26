@@ -35,9 +35,11 @@ S3method(plot, mtc.nodesplit.summary)
 S3method(print, mtc.rank.probability)
 S3method(plot, mtc.rank.probability)
 
+S3method(as.character, mtc.hy.prior)
+
 export(
 	read.mtc.network, write.mtc.network, mtc.network, mtc.data.studyrow,
-	mtc.model,
+	mtc.model, mtc.hy.prior, mtc.hy.empirical.lor,
 	mtc.run,
 	relative.effect, rank.probability,
 	blobbogram, forest,

@@ -82,9 +82,13 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
   rnorm(model[['n.chain']], meta[['TE.random']], model[['var.scale']] * meta[['seTE.random']])
 }
 
-# Initial values for random effects standard deviation from prior
-mtc.init.std.dev <- function(model) {
-  runif(model[['n.chain']], 0, model[['om.scale']])
+# Initial values for heterogeneity from prior
+mtc.init.hy <- function(hy.prior, om.scale, n.chain) {
+  fn <- hy.prior[['distr']]
+  substr(fn, 1, 1) <- "r"
+  args <- c(n.chain, hy.prior[['args']])
+  args[args == 'om.scale'] <- om.scale
+  do.call(fn, args)
 }
 
 # Generate initial values for all relevant parameters
@@ -120,10 +124,10 @@ mtc.init <- function(model) {
       v <- get.edge(graph, e)
       mtc.init.pooled.effect(model, V(graph)[v[1]]$name, V(graph)[v[2]]$name)
     })
-    sd.d <- mtc.init.std.dev(model)
+    hy <- mtc.init.hy(model[['hy.prior']], model[['om.scale']], model[['n.chain']])
   } else {
     params <- c()
-    sd.d <- c()
+    hy <- c()
   }
 
   # Separate the initial values per chain
@@ -135,9 +139,18 @@ mtc.init <- function(model) {
         list()
       },
       if (model[['linearModel']] == 'random') {
-        list(
-          delta = t(sapply(delta, function(x) { x[chain, , drop=TRUE] })),
-          sd.d = sd.d[chain]
+        type <- model[['hy.prior']][['type']]
+        c(
+          list(delta = t(sapply(delta, function(x) { x[chain, , drop=TRUE] }))),
+          if (type == 'std.dev') {
+            list(sd.d=hy[chain])
+          } else if (type == 'var') {
+            list(var.d=hy[chain])
+          } else if (type == 'prec') {
+            list(tau.d=hy[chain])
+          } else {
+            stop("Invalid heterogeneity prior type")
+          }
         )
       } else {
         list()
@@ -161,6 +174,8 @@ inits.to.monitors <- function(inits) {
       lapply(1:length(struct), function(i) {
         if (!is.na(struct[i])) paste(var, "[", i, "]", sep="")
       })
+    } else if (var == "var.d" || var == "tau.d") {
+      c(var, "sd.d")
     } else {
       var
     }
