@@ -3,9 +3,21 @@ gemtc 0.6
 
 Released 2014-??-??
 
- * Change handling of 4+-arm trials in node-splitting models and ANOHE summary
+New features:
+
+ * Change handling of 4+-arm trials in node-splitting models and ANOHE
+   summary
  * Enable linearModel='fixed' for mtc.anohe()
  * Add literature references for various methods to gemtc-package
+ * Add mtc.data.studyrow() to convert the one-study-per-row format often
+   used in BUGS models to the one-arm-per-row format used by GeMTC
+
+Bugfixes:
+
+ * Fix empty first page on PDF output of some plots (#12)
+ * Fix ordering of generated data / initial values in models for
+   relative effect data (#21)
+ * Fix generating node-splitting models for relative effect data (#22)
 
 gemtc 0.5-3
 ===========
