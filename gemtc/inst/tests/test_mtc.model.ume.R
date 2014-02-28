@@ -62,9 +62,26 @@ test_that("Edges are consistent for ume model$graph", {
         s01    B          NA    0.3
         s01    C          1.5   0.6'), header=T)
   network <- mtc.network(data.re=data)
-    suppressWarnings(model <- mtc.model(network, type='ume', likelihood='normal', link='identity'))
+  suppressWarnings(model <- mtc.model(network, type='ume', likelihood='normal', link='identity'))
 
   expect_that(length(E(model$graph)), equals(2))
   expect_that(model$graph['B', 'A'], equals(1))
+  expect_that(model$graph['B', 'C'], equals(1))
+})
+
+## Regression test for #26
+test_that("RE data will not introduce duplicate basic parameters", {
+  data.ab <- data.frame(
+    study=c('1', '1', '2', '2', '3', '3'),
+    treatment=c('A', 'B', 'A', 'C', 'B', 'C'),
+    mean=rep(1,6), std.err=rep(0.5,6))
+  data.re <- data.re <- data.frame(study=c('4', '4'), treatment=c('C', 'A'), diff=c(NA, 1), std.err=c(0.3, 0.5))
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+
+  model <- mtc.model(network, type='ume', likelihood='normal', link='identity')
+
+  expect_that(length(E(model$graph)), equals(3))
+  expect_that(model$graph['A', 'B'], equals(1))
+  expect_that(model$graph['A', 'C'], equals(1))
   expect_that(model$graph['B', 'C'], equals(1))
 })
