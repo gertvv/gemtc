@@ -142,9 +142,17 @@ id description
 test_that("study names do not mess up nodesplit with RE data", {
   data <- read.csv("ns-complex.csv")
   network <- mtc.network(data.re=data)
-  expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("B", "D"), t2=c("D", "H"))))
+  expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("B", "D"), t2=c("D", "H"), stringsAsFactors=FALSE)))
   data$study <- data$Study
   data$Study <- NULL
   network <- mtc.network(data.re=data)
-  expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("B", "D"), t2=c("D", "H"))))
+  expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("B", "D"), t2=c("D", "H"), stringsAsFactors=FALSE)))
+})
+
+## Regression test for issue #25
+test_that("mixing AB and RE data will not duplicate comparisons", {
+  data.ab <- data.frame(study=c('1', '1', '2', '2', '4', '4'), treatment=c('A', 'B', 'A', 'C', 'B', 'C'))
+  data.re <- data.frame(study=c('3', '3', '3'), treatment=c('C', 'A', 'B'), diff=c(NA, 1, 1), std.err=c(0.5, 1, 1))
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+  expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("A", "A", "B"), t2=c("B", "C", "C"), stringsAsFactors=FALSE)))
 })

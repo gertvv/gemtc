@@ -87,11 +87,11 @@ mtc.nodesplit.comparisons <- function(network) {
     if (has.indirect.evidence(network, comparison['t1'], comparison['t2'])) comparison else NULL
   })
   if (is.list(comparisons)) {
-    as.data.frame(do.call(rbind, comparisons))
+    as.data.frame(do.call(rbind, comparisons), stringsAsFactors=FALSE)
   } else if (is.null(comparisons)) {
-    data.frame(t1=character(), t2=character())
+    data.frame(t1=character(), t2=character(), stringsAsFactors=FALSE)
   } else {
-    as.data.frame(t(comparisons))
+    as.data.frame(t(comparisons), stringsAsFactors=FALSE)
   }
 }
 

@@ -354,6 +354,12 @@ mtc.comparisons <- function(network) {
   # Generate all pair-wise comparisons from each "design"
   comparisons <- do.call(rbind, lapply(designs, mtc.treatment.pairs))
 
+  # Make sure we include each comparison in only one direction
+  swp <- as.character(comparisons[['t1']]) > as.character(comparisons[['t2']])
+  tmp <- comparisons[['t1']]
+  comparisons[['t1']][swp] <- comparisons[['t2']][swp]
+  comparisons[['t2']][swp] <- tmp[swp]
+
   # Ensure the output comparisons are unique and always in the same order
   comparisons <- unique(comparisons)
   comparisons <- comparisons[order(comparisons[['t1']], comparisons[['t2']]), ,drop=FALSE]
