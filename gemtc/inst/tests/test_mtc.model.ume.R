@@ -65,7 +65,7 @@ test_that("Edges are consistent for ume model$graph", {
   suppressWarnings(model <- mtc.model(network, type='ume', likelihood='normal', link='identity'))
 
   expect_that(length(E(model$graph)), equals(2))
-  expect_that(model$graph['B', 'A'], equals(1))
+  expect_that(model$graph['A', 'B'], equals(1))
   expect_that(model$graph['B', 'C'], equals(1))
 })
 
@@ -84,4 +84,12 @@ test_that("RE data will not introduce duplicate basic parameters", {
   expect_that(model$graph['A', 'B'], equals(1))
   expect_that(model$graph['A', 'C'], equals(1))
   expect_that(model$graph['B', 'C'], equals(1))
+
+  # check that the relative effects matrix has the correct entries
+  expect_that(grep("d\\[1, 2\\] <- d.A.B", model$code), equals(1))
+  expect_that(grep("d\\[1, 3\\] <- d.A.C", model$code), equals(1))
+  expect_that(grep("d\\[2, 3\\] <- d.B.C", model$code), equals(1))
+  expect_that(grep("d\\[3, 1\\] <- -d.A.C", model$code), equals(1))
+
+  cat(model$code)
 })

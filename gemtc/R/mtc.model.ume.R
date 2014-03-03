@@ -8,17 +8,33 @@ mtc.model.ume <- function(model) {
   if (any(na > 2)) {
     warning("The Unrelated Mean Effects model does not handle multi-arm trials correctly.")
   }
+  
+  # these comparisons may contain duplicates due to the baselines of the RE data
+  comparisons <- mtc.comparisons.baseline(network)
+  # the basic parameters are the comparisons without duplicates
+  basicParameters <- unique(apply(comparisons, 1, function(comparison) {
+    t1 <- as.character(comparison['t1'])
+    t2 <- as.character(comparison['t2'])
+    if (t1 < t2) {
+      data.frame('t1'=t1, 't2'=t2, stringsAsFactors=FALSE)
+    } else {
+      data.frame('t1'=t2, 't2'=t1, stringsAsFactors=FALSE)
+    }
+  }))
+  basicParameters <- do.call(rbind, basicParameters)
+  basicParameters[['t1']] <- as.treatment.factor(basicParameters[['t1']], network)
+  basicParameters[['t2']] <- as.treatment.factor(basicParameters[['t2']], network)
 
   model[['graph']] <- graph.create(
     network[['treatments']][['id']],
-    mtc.comparisons.baseline(network),
+    basicParameters,
     arrow.mode=2, color='black', lty=1)
 
   model[['data']] <- mtc.model.data(model)
   model[['data']][['nt']] <- NULL
   model[['inits']] <- mtc.init(model)
 
-  model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), sparse.relative.effect.matrix(model))
+  model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), sparse.relative.effect.matrix(model, comparisons))
 
   monitors <- inits.to.monitors(model[['inits']][[1]])
   model[['monitors']] <- list(
@@ -35,16 +51,18 @@ mtc.model.name.ume <- function(model) {
   "unrelated mean effects"
 }
 
-sparse.relative.effect.matrix <- function(model) {
+sparse.relative.effect.matrix <- function(model, comparisons) {
   ts <- model[['network']][['treatments']][['id']]
   nt <- length(ts)
-  x <- unlist(lapply(1:nt, function(i) {
-    lapply(1:nt, function(j) {
-      if (model[['graph']][i, j, sparse=FALSE, drop=TRUE]) {
-        paste("d[", i, ", ", j, "] <- d.", ts[i], ".", ts[j], sep="")
-      }
-    })
-  }))
+  x <- sapply(1:nrow(comparisons), function(k) {
+    i <- as.numeric(comparisons[k, 't1'])
+    j <- as.numeric(comparisons[k, 't2'])
+    if (model[['graph']][i, j, sparse=FALSE, drop=TRUE]) {
+      paste("d[", i, ", ", j, "] <- d.", ts[i], ".", ts[j], sep="")
+    } else {
+      paste("d[", i, ", ", j, "] <- -d.", ts[j], ".", ts[i], sep="")
+    }
+  })
   paste(x, collapse="\n")
 }
 
