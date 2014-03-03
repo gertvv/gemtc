@@ -63,7 +63,7 @@ decompose.trials <- function(result) {
     study <- study[!is.na(study)]
     na <- length(study)
     colIndexes <- grep(paste("delta[", i, ",", sep=""), colnames(study.samples), fixed=TRUE)
-    if (na > 2) {
+    effects <- if (na > 2) {
       data <- decompose.study(
         study.samples[, colIndexes, drop=FALSE])
       ts <- matrix(study[all.pair.matrix(na)], ncol=2)
@@ -72,6 +72,19 @@ decompose.trials <- function(result) {
       samples <- study.samples[ , colIndexes, drop=FALSE]
       list(m=apply(samples, 2, mean), e=apply(samples, 2, sd), t=matrix(study, nrow=1))
     }
+
+    # make the baseline treatment consistent (i.e. in the same order as the
+    # basic parameters)
+    for (k in 1:length(effects[['m']])) {
+      t1 <- effects$t[k, 1]
+      t2 <- effects$t[k, 2]
+      if (t1 > t2) {
+        effects$t[k, 1] <- t2
+        effects$t[k, 2] <- t1
+        effects$m[k] <- -effects$m[k]
+      }
+    }
+    effects
   })
 
   # (mu1, prec1): posterior parameters
