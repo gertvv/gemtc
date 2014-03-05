@@ -1,4 +1,6 @@
 rank.probability <- function(result, preferredDirection=1) {
+  if (result[['model']][['type']] != 'consistency') stop("Can only apply rank.probability to consistency models")
+
   stopifnot(preferredDirection %in% c(1, -1))
 
   treatments <- sort(unique(as.vector(extract.comparisons(colnames(result[['samples']][[1]])))))
