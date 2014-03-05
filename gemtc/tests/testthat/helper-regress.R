@@ -3,7 +3,7 @@ test.regress <- function(network, likelihood, link, t1, t2) {
 
   # consistency model, random effects
   model <- mtc.model(network, likelihood=likelihood, link=link)
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   forest(result)
   s <- summary(result)
@@ -13,7 +13,7 @@ test.regress <- function(network, likelihood, link, t1, t2) {
 
   # consistency model, fixed effect
   model <- mtc.model(network, likelihood=likelihood, link=link, linearModel="fixed")
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   forest(result)
   s <- summary(result)
@@ -23,7 +23,7 @@ test.regress <- function(network, likelihood, link, t1, t2) {
 
   # node-splitting, random effects
   model <- mtc.model(network, likelihood=likelihood, link=link, type="nodesplit", t1=t1, t2=t2)
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   expect_error(forest(result))
   s <- summary(result)
@@ -35,7 +35,7 @@ test.regress <- function(network, likelihood, link, t1, t2) {
 
   # node-splitting, fixed effect
   model <- mtc.model(network, likelihood=likelihood, link=link, type="nodesplit", t1=t2, t2=t1, linearModel="fixed")
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   s <- summary(result)
   expect_false("sd.d" %in% rownames(s$summaries$quantiles))
@@ -44,25 +44,25 @@ test.regress <- function(network, likelihood, link, t1, t2) {
 
   # ume, random effects
   expect_warning(model <- mtc.model(network, likelihood=likelihood, link=link, type="ume"))
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   s <- summary(result)
 
   # ume, fixed effect
   expect_warning(model <- mtc.model(network, likelihood=likelihood, link=link, type="ume", linearModel="fixed"))
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   s <- summary(result)
 
   # anohe, random effects
-  capture.output(anohe <- mtc.anohe(network, likelihood=likelihood, link=link, n.adapt=100, n.iter=500))
+  capture.output(anohe <- mtc.anohe(network, likelihood=likelihood, link=link, n.adapt=100, n.iter=500, sampler=get.sampler()))
   capture.output(plot(anohe))
   anohe.s <- summary(anohe)
   plot(anohe.s)
   capture.output(print(anohe.s))
 
   # anohe, fixed effect
-  capture.output(anohe <- mtc.anohe(network, likelihood=likelihood, link=link, linearModel="fixed", n.adapt=100, n.iter=500))
+  capture.output(anohe <- mtc.anohe(network, likelihood=likelihood, link=link, linearModel="fixed", n.adapt=100, n.iter=500, sampler=get.sampler()))
   capture.output(plot(anohe))
   anohe.s <- summary(anohe)
   plot(anohe.s)
