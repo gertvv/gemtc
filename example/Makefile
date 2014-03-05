@@ -18,3 +18,6 @@ regression_test.txt: regression_test.R
 
 regression_test.R: regression_test_*.R
 	cat $^ > $@
+
+clean:
+	rm -f regression_test.txt $(addsuffix .txt,$(PREFIX))
