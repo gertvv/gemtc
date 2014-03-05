@@ -23,6 +23,24 @@ test_that("luades-thrombolytic", {
   test.regress(network, likelihood="binom", link="logit", t1="SK", t2="UK")
 })
 
+test_that("tsd2-2", {
+  data.ab <- dget("../data/studyrow/tsd2-2.out.txt")
+  network <- mtc.network(data.ab=data.ab)
+
+  # Note: the network contains a duplicated arm, so won't generate any models
+})
+
+test_that("tsd2-3", {
+  data.ab <- dget("../data/studyrow/tsd2-3.out.txt")
+  network <- mtc.network(data.ab=data.ab)
+  
+  # TODO: check nodesplit comparisons
+
+  # all the models run
+  test.regress(network, likelihood="binom", link="cloglog", t1="ARB", t2="BetaB")
+})
+
+
 test_that("tsd2-8", {
   data.ab <- dget("../data/studyrow/tsd2-8.out1.txt")
   data.re <- dget("../data/studyrow/tsd2-8.out2.txt")
