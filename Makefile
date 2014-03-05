@@ -36,3 +36,12 @@ validate-winbugs: $(PACKAGE)
 
 validate-openbugs: $(PACKAGE)
 	./run-tests.sh $(PACKAGE) validate BRugs
+
+regress-jags: $(PACKAGE)
+	./run-tests.sh $(PACKAGE) regress rjags
+
+regress-winbugs: $(PACKAGE)
+	./run-tests.sh $(PACKAGE) regress R2WinBUGS
+
+regress-openbugs: $(PACKAGE)
+	./run-tests.sh $(PACKAGE) regress BRugs
