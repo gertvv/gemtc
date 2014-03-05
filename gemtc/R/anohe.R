@@ -46,7 +46,11 @@ decompose.trials <- function(result) {
       })
     })
 
-    se <- sqrt(decompose.variance(V))
+    var <- decompose.variance(V)
+    se <- sqrt(var)
+    if (any(is.nan(se))) {
+      stop(paste("Decomposed variance ill-defined. Most likely the USE did not converge:", paste(capture.output(print(var)), collapse="\n"), sep="\n"))
+    }
 
     pairs <- all.pair.matrix(na)
     list(
