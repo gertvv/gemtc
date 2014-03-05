@@ -26,8 +26,13 @@ install: $(PACKAGE)
 
 # Special test target since R CMD check is incredibly slow :-(
 test: $(PACKAGE)
-	mktemp -d > tmp.Rlib.loc
-	R CMD INSTALL -l `cat tmp.Rlib.loc` --install-tests $(PACKAGE)
-	echo "library($(PKG_NAME), lib.loc='`cat tmp.Rlib.loc`'); library(testthat); setwd('`cat tmp.Rlib.loc`/gemtc/tests'); test_check('gemtc')" | R --vanilla --slave
-	rm -rf `cat tmp.Rlib.loc`
-	rm tmp.Rlib.loc
+	./run-tests.sh $(PACKAGE) unit rjags
+
+validate-jags: $(PACKAGE)
+	./run-tests.sh $(PACKAGE) validate rjags
+
+validate-winbugs: $(PACKAGE)
+	./run-tests.sh $(PACKAGE) validate R2WinBUGS
+
+validate-openbugs: $(PACKAGE)
+	./run-tests.sh $(PACKAGE) validate BRugs

@@ -1,2 +1,2 @@
 library(testthat)
-test_check('gemtc')
+test_check('gemtc', filter="unit")
