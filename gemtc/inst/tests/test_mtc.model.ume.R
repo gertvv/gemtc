@@ -90,6 +90,4 @@ test_that("RE data will not introduce duplicate basic parameters", {
   expect_that(grep("d\\[1, 3\\] <- d.A.C", model$code), equals(1))
   expect_that(grep("d\\[2, 3\\] <- d.B.C", model$code), equals(1))
   expect_that(grep("d\\[3, 1\\] <- -d.A.C", model$code), equals(1))
-
-  cat(model$code)
 })
