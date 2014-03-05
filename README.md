@@ -8,10 +8,37 @@ Meta-Analysis.
 Building
 --------
 
-The build has only been tested on Ubuntu GNU/Linux. You need R and make.
-To build and install the R package, simply 'make install'.
+Use `R CMD build gemtc` to build the R package. The `Makefile` offers a
+number of targets for convenience, but is entirely optional. Use `make
+install` to both build and install the package.
 
 You will need a working installation of rjags, BRugs, or R2WinBUGS.
+
+Testing
+-------
+
+The `testthat` package is used for testing. Tests reside in the
+`tests/testthat` directory. There are three levels of tests:
+
+ - `unit`: unit tests - these test relatively isolated pieces of
+   functionality and should be fast to run. They will be run by `make
+   test` or `R CMD check`.
+
+ - `regress`: regression tests exercise full code paths, and typically
+   run all code that an analyst would run on a given dataset. They aim
+   to catch bugs in existing functionality due to the introduction of
+   new code. They should not take very long to run, and do not aim to
+   produce reasonable posterior estimates. These can be run using `make
+   regress-jags`, `make regress-winbugs`, and `make regress-openbugs`.
+
+ - `validate`: valition tests verify the posterior summaries obtained by
+   the R package against results that were previously (manually) checked
+   against results published in the literature. They typically take very
+   long to run, and are probabilistic in nature. Many individual
+   comparisons are made, so a couple of failures over the entire test
+   suite are to be expected. However, these should not be systematic.
+   These tests can be run using `make validate-jags`, `make
+   validate-winbugs`, and `make validate-openbugs`.
 
 License
 -------
