@@ -1,2 +1,2 @@
 library(testthat)
-test_package('gemtc')
+test_check('gemtc')

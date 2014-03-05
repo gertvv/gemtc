@@ -140,7 +140,7 @@ id description
 
 ## Regression test for issue #22
 test_that("study names do not mess up nodesplit with RE data", {
-  data <- read.csv("ns-complex.csv")
+  data <- read.csv("../data/ns-complex.csv")
   network <- mtc.network(data.re=data)
   expect_that(mtc.nodesplit.comparisons(network), equals(data.frame(t1=c("B", "D"), t2=c("D", "H"), stringsAsFactors=FALSE)))
   data$study <- data$Study
