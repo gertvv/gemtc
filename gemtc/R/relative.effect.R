@@ -68,25 +68,15 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
   }
   effects <- tree.relative.effect(g, t1, t2)
 
-  # Add rows/columns for parameters that are not relative effects
-  nOut <- ncol(effects)
-  nIn <- nrow(effects)
-  nExtra <- ncol(result[['samples']][[1]]) - nIn
-  effects <- rbind(effects, matrix(0, nrow=nExtra, ncol=nOut))
-  if (preserve.extra) {
-    if (nExtra > 0) {
-      allNames <- c(colnames(effects), colnames(result[['samples']][[1]])[nIn+(1:nExtra)])
-    } else {
-      allNames <- colnames(effects)
-    }
-    effects <- cbind(effects,
-      rbind(matrix(0, nrow=nIn, ncol=nExtra), diag(nExtra)))
-    colnames(effects) <- allNames
-  }
+  parameters <- grep("^d\\.", colnames(result[['samples']][[1]]))
 
   # Apply tranformation to each chain
   samples <- as.mcmc.list(lapply(result[['samples']], function(chain) {
-    mcmc(chain %*% effects, start=start(chain), end=end(chain), thin=thin(chain))
+    samples <- chain[,parameters] %*% effects
+    if (preserve.extra) {
+      samples <- cbind(samples, chain[,-parameters,drop=FALSE])
+    }
+    mcmc(samples, start=start(chain), end=end(chain), thin=thin(chain))
   }))
   effects <- list(
     samples=samples,
