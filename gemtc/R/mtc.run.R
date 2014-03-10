@@ -67,6 +67,13 @@ mtc.build.syntaxModel <- function(model) {
   )
 }
 
+# Winbugs has a crazy bug where if you monitor delta[1,2] and delta[1,3], it
+# will monitor *all of* delta *twice*. This is a workaround that should
+# hopefully work most of the time. 
+filterWinBugsParameters <- function(params) {
+  unique(sub("([a-zA-Z0-9._]*)\\[.*", "\\1", params))
+}
+
 mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
   if (is.na(package) || !(package %in% c("rjags", "BRugs", "R2WinBUGS"))) {
     stop(paste("Package", package, "not supported"))
@@ -116,7 +123,8 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
     # Note: n.iter must be specified *including* the n.adapt
     samples <- as.mcmc.list(bugs(model.file=file.model, data=syntax[['data']],
       inits=syntax[['inits']], n.chains=model[['n.chain']],
-      parameters.to.save=syntax[['vars']], codaPkg=FALSE, DIC=TRUE,
+      parameters.to.save=filterWinBugsParameters(syntax[['vars']]),
+      codaPkg=FALSE, DIC=TRUE,
       n.burnin=n.adapt, n.iter=n.adapt+n.iter, n.thin=thin))
     # Note: does not always work on Unix systems due to a problem
     # with Wine not being able to access the R temporary path.

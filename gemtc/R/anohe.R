@@ -67,6 +67,7 @@ decompose.trials <- function(result) {
     study <- study[!is.na(study)]
     na <- length(study)
     colIndexes <- grep(paste("delta[", i, ",", sep=""), colnames(study.samples), fixed=TRUE)
+    stopifnot(length(colIndexes) == (na - 1)) # A bug in WinBUGS caused this to happen -- repeated variables
     effects <- if (na > 2) {
       data <- decompose.study(
         study.samples[, colIndexes, drop=FALSE])
