@@ -19,12 +19,23 @@ New features:
  * Add mtc.data.studyrow() to convert the one-study-per-row format often
    used in BUGS models to the one-arm-per-row format used by GeMTC
 
+Enhancements:
+
+ * Upgrade unit testing infrastructure to testthat >= 0.8
+ * Move validation tests into testthat infrastructure
+ * Add regression test suite that tries all summaries and plots on all
+   models to check whether they crash.
+ * General clean up of example and test data files
+
 Bugfixes:
 
  * Fix empty first page on PDF output of some plots (#12)
  * Fix ordering of generated data / initial values in models for
    relative effect data (#21)
  * Fix generating node-splitting models for relative effect data (#22)
+ * Fix mtc.nodesplit.comparisons getting confused when both relative
+   effect and arm-based data are present (#25)
+ * Fix duplicated parameters in UME models (#26)
 
 gemtc 0.5-3
 ===========
