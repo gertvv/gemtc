@@ -17,7 +17,7 @@ plot.mtc.result <- function(x, ...) {
 }
 
 forest.mtc.result <- function(x, ...) {
-  if (x[['model']][['type']] != 'consistency') stop("Can only apply forest.mtc.result to consistency models")
+  if (tolower(x[['model']][['type']]) != 'consistency') stop("Can only apply forest.mtc.result to consistency models")
 
   quantiles <- summary(x[['samples']])[['quantiles']]
   model <- x[['model']]

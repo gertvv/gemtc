@@ -1,5 +1,5 @@
 rank.probability <- function(result, preferredDirection=1) {
-  if (result[['model']][['type']] != 'consistency') stop("Can only apply rank.probability to consistency models")
+  if (tolower(result[['model']][['type']]) != 'consistency') stop("Can only apply rank.probability to consistency models")
 
   stopifnot(preferredDirection %in% c(1, -1))
 

@@ -2,7 +2,6 @@ context("relative.effect and rank.probability")
 
 test_that("relative.effect outputs the correct parameters", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  result[['model']][['type']] <- 'consistency'
 
   expect_that(colnames(result$samples[[1]]), equals(c("d.A.B", "d.A.C", "d.A.D", "sd.d")))
 
@@ -27,7 +26,6 @@ test_that("relative.effect outputs the correct parameters", {
 
 test_that("relative.effect generates the expected statistics", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  result[['model']][['type']] <- 'consistency'
   stats <- summary(relative.effect(result, "B"))$summaries
 
   expected <- textConnection('
@@ -78,7 +76,6 @@ test_that("tree.relative.effect handles two-treatment case", {
 
 test_that("relative.effect can be applied recursively", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  result[['model']][['type']] <- 'consistency'
   result <- relative.effect(result, "C")
   stats <- summary(relative.effect(result, "B"))$summaries
 
@@ -97,7 +94,6 @@ test_that("relative.effect can be applied recursively", {
 
 test_that("rank.probability can be applied to a subset of parameters", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  result[['model']][['type']] <- 'consistency'
   result <- relative.effect(result, "A", c("B", "C"))
   rank.probability(result)
 })
@@ -111,7 +107,6 @@ test_that("relative.effect.tree throws an error if requested comparison is not c
 
 test_that("spanning.tree.mtc.result handles two-treatment case", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  result[['model']][['type']] <- 'consistency'
   result <- relative.effect(result, t1="A", t2="B")
   
   g <- graph.edgelist(matrix(c("A", "B"), ncol=2))
@@ -125,7 +120,6 @@ test_that("spanning.tree.mtc.result handles two-treatment case", {
 
 test_that("relative.effect is robust to missing sd.d", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  result[['model']][['type']] <- 'consistency'
 
   out <- relative.effect(result, "A", preserve.extra=FALSE)
   expect_that(colnames(out$samples[[1]]), equals(c("d.A.B", "d.A.C", "d.A.D"))) #2
@@ -136,7 +130,6 @@ test_that("relative.effect is robust to missing sd.d", {
 
 test_that("relative.effect is robust to leading columns", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
-  result[['model']][['type']] <- 'consistency'
   leading <- matrix(rep(255,nrow(result[['samples']][[1]])), dimnames=list(NULL, "deviance"))
   for (i in 1:4) {
     result[['samples']][[i]] <- as.mcmc(cbind(leading, result[['samples']][[i]]))
