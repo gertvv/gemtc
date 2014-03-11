@@ -27,6 +27,12 @@ Enhancements:
    models to check whether they crash.
  * General clean up of example and test data files
 
+Known issues:
+
+ * Models with relative-effect data from trials with 4 or more arms
+   can't be run using WinBUGS or OpenBUGS (#28). This seems to be due to
+   a BUGS-bug. A warning is produced, saying to use JAGS instead.
+
 Bugfixes:
 
  * Fix empty first page on PDF output of some plots (#12)
