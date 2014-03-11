@@ -129,7 +129,8 @@ decompose.network <- function(network, result) {
   }))
 
   ta.network <- filter.network(network, function(row) { !(row['study'] %in% studies) })
-  mtc.network(data.ab=ta.network[['data.ab']], data.re=rbind(ta.network[['data.re']], data.re), treatments=network$treatments)
+  ta.data.re <- ta.network[['data.re']][ , c('study','treatment','diff','std.err')]
+  mtc.network(data.ab=ta.network[['data.ab']], data.re=rbind(ta.data.re, data.re), treatments=network$treatments)
 }
 
 mtc.anohe <- function(network, ...) {
