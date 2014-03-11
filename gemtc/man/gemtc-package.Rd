@@ -37,6 +37,12 @@ S. Dias, N.J. Welton, A.J. Sutton, D.M. Caldwell, G. Lu, and A.E. Ades (2013b),
 Medical Decision Making 33(5):641-656.
 [\href{http://dx.doi.org/10.1177/0272989X12455847}{doi:10.1177/0272989X12455847}]
 
+R.M. Turner, J. Davey, M.J. Clarke, S.G. Thompson, J.P.T. Higgins (2012),
+\emph{Predicting the extent of heterogeneity in meta-analysis, using empirical data from the Cochrane Database of Systematic Reviews},
+International Journal of Epidemiology 41(3):818-827.
+[\href{http://dx.doi.org/10.1093/ije/dys041}{doi:10.1093/ije/dys041}]
+
+
 G. van Valkenhoef, G. Lu, B. de Brock, H. Hillege, A.E. Ades, and N.J. Welton (2012),
 \emph{Automating network meta-analysis},
 Research Synthesis Methods 3(4):285-299.
