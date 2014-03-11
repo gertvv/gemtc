@@ -1,4 +1,4 @@
-test.regress <- function(network, likelihood, link, t1, t2) {
+test.regress <- function(network, likelihood, link, t1=NULL, t2=NULL) {
   n.trt <- nrow(network$treatments)
 
   # consistency model, random effects
@@ -21,35 +21,37 @@ test.regress <- function(network, likelihood, link, t1, t2) {
   summary(relative.effect(result, t1=network$treatments$id[2]))
   expect_equal(dim(rank.probability(result)), c(n.trt, n.trt))
 
-  # node-splitting, random effects
-  model <- mtc.model(network, likelihood=likelihood, link=link, type="nodesplit", t1=t1, t2=t2)
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
-  plot(result)
-  expect_error(forest(result))
-  s <- summary(result)
-  expect_true("sd.d" %in% rownames(s$summaries$quantiles))
-  expect_true("d.direct" %in% rownames(s$summaries$quantiles))
-  expect_true("d.indirect" %in% rownames(s$summaries$quantiles))
-  expect_error(relative.effect(result, t1="C"))
-  expect_error(rank.probability(result))
+  if (!is.null(t1) && !is.null(t2)) {
+    # node-splitting, random effects
+    model <- mtc.model(network, likelihood=likelihood, link=link, type="nodesplit", t1=t1, t2=t2)
+    capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
+    plot(result)
+    expect_error(forest(result))
+    s <- summary(result)
+    expect_true("sd.d" %in% rownames(s$summaries$quantiles))
+    expect_true("d.direct" %in% rownames(s$summaries$quantiles))
+    expect_true("d.indirect" %in% rownames(s$summaries$quantiles))
+    expect_error(relative.effect(result, t1="C"))
+    expect_error(rank.probability(result))
 
-  # node-splitting, fixed effect
-  model <- mtc.model(network, likelihood=likelihood, link=link, type="nodesplit", t1=t2, t2=t1, linearModel="fixed")
-  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
-  plot(result)
-  s <- summary(result)
-  expect_false("sd.d" %in% rownames(s$summaries$quantiles))
-  expect_true("d.direct" %in% rownames(s$summaries$quantiles))
-  expect_true("d.indirect" %in% rownames(s$summaries$quantiles))
+    # node-splitting, fixed effect
+    model <- mtc.model(network, likelihood=likelihood, link=link, type="nodesplit", t1=t2, t2=t1, linearModel="fixed")
+    capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
+    plot(result)
+    s <- summary(result)
+    expect_false("sd.d" %in% rownames(s$summaries$quantiles))
+    expect_true("d.direct" %in% rownames(s$summaries$quantiles))
+    expect_true("d.indirect" %in% rownames(s$summaries$quantiles))
+  }
 
   # ume, random effects
-  expect_warning(model <- mtc.model(network, likelihood=likelihood, link=link, type="ume"))
+  suppressWarnings(model <- mtc.model(network, likelihood=likelihood, link=link, type="ume"))
   capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   s <- summary(result)
 
   # ume, fixed effect
-  expect_warning(model <- mtc.model(network, likelihood=likelihood, link=link, type="ume", linearModel="fixed"))
+  suppressWarnings(model <- mtc.model(network, likelihood=likelihood, link=link, type="ume", linearModel="fixed"))
   capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500, sampler=get.sampler()))
   plot(result)
   s <- summary(result)

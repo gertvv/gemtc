@@ -2,7 +2,7 @@ context("Regressions previously observed for ANOHE")
 
 test_that("anohe-breaking.gemtc does not break summary.mtc.anohe", {
   network <- read.mtc.network("../data/anohe-breaking.gemtc")
-  capture.output(anohe <- mtc.anohe(network, n.adapt=200, n.iter=2000, sampler=get.sampler()))
+  capture.output(anohe <- mtc.anohe(network, n.adapt=200, n.iter=500, sampler=get.sampler()))
   x <- summary(anohe)
   expect_true('studyEffects' %in% names(x))
 })
