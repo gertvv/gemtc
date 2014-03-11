@@ -67,11 +67,18 @@ mtc.build.syntaxModel <- function(model) {
   )
 }
 
-# Winbugs has a crazy bug where if you monitor delta[1,2] and delta[1,3], it
+# WinBUGS has a crazy bug where if you monitor delta[1,2] and delta[1,3], it
 # will monitor *all of* delta *twice*. This is a workaround that should
 # hopefully work most of the time. 
 filterWinBugsParameters <- function(params) {
   unique(sub("([a-zA-Z0-9._]*)\\[.*", "\\1", params))
+}
+
+# Tell the user to use JAGS for data.re with 4+-arm trials
+detectBugsBug <- function(data) {
+  if (data[['ns.rm']] > 0 && any(data$na[(data[['ns.a']] + data[['ns.r2']]):data[['ns']]] > 3)) {
+    warning("A bug in WinBUGS and OpenBUGS prevents models with relative-effect data that have 4+-arm trials from being estimated. Please use JAGS instead. See https://github.com/gertvv/gemtc/issues/28 for more information.", immediate.=TRUE)
+  }
 }
 
 mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
@@ -111,6 +118,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
     list(samples=as.mcmc.list(samples),
          dic=c('Mean deviance'=Dbar, 'Penalty (pD)'=pD, 'DIC'=Dbar+pD))
   } else if (identical(package, 'BRugs')) {
+    detectBugsBug(syntax[['data']])
     # Note: n.iter must be specified *excluding* the n.adapt
     samples <- BRugsFit(file.model, data=syntax[['data']],
       inits=syntax[['inits']], numChains=model[['n.chain']],
@@ -118,6 +126,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
       nBurnin=n.adapt, nIter=n.iter, nThin=thin)
     list(samples=samples, dic=NULL)
   } else if (identical(package, 'R2WinBUGS')) {
+    detectBugsBug(syntax[['data']])
     # Note: codaPkg=TRUE does *not* return CODA objects, but rather
     # the names of written CODA output files.
     # Note: n.iter must be specified *including* the n.adapt
