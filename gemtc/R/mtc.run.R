@@ -114,7 +114,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
     # Note: n.iter must be specified *excluding* the n.adapt
     samples <- BRugsFit(file.model, data=syntax[['data']],
       inits=syntax[['inits']], numChains=model[['n.chain']],
-      parametersToSave=c(syntax[['vars']]), coda=TRUE, DIC=TRUE,
+      parametersToSave=c(syntax[['vars']], 'deviance'), coda=TRUE, DIC=TRUE,
       nBurnin=n.adapt, nIter=n.iter, nThin=thin)
     list(samples=samples, dic=NULL)
   } else if (identical(package, 'R2WinBUGS')) {
