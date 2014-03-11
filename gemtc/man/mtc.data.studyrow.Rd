@@ -5,7 +5,13 @@
 \title{Convert one-study-per-row datasets}
 \description{Converts datasets in the one-study-per-row format to one-arm-per-row format used by GeMTC}
 \usage{
-mtc.data.studyrow(data, armVars=c('treatment'='t', 'responders'='r', 'sampleSize'='n'), nArmsVar='na', studyVars=c(), studyNames=1:nrow(data), treatmentNames=NA, patterns=c('\%s..', '\%s..\%d.'))
+mtc.data.studyrow(data,
+  armVars=c('treatment'='t', 'responders'='r', 'sampleSize'='n'),
+  nArmsVar='na',
+  studyVars=c(),
+  studyNames=1:nrow(data),
+  treatmentNames=NA,
+  patterns=c('\%s..', '\%s..\%d.'))
 }
 \arguments{
   \item{data}{Data in one-study-per-row format.}
