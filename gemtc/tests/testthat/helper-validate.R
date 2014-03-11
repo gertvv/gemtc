@@ -79,7 +79,7 @@ compare.summaries <- function(s1, s2) {
       c('statistic'=unname(test$statistic), 'p.value'=test$p.value)
     })
     get_reporter()$add_result(
-      expectation(all(test > 0.025), formatError("Rank probabilities were not equal", s1$ranks, s2$ranks, test)))
+      expectation(all(test['p.value',] > 0.025), formatError("Rank probabilities were not equal", s1$ranks, s2$ranks, test)))
   }
 }
 
