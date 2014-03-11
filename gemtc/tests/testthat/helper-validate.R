@@ -22,6 +22,17 @@ generate.summaries <- function(result) {
   }
 }
 
+formatError <- function(name, s1, s2, test) {
+  str.s1 <- paste(capture.output(print(s1)), collapse="\n")
+  str.s2 <- paste(capture.output(print(s2)), collapse="\n")
+  str.test <- paste(capture.output(print(test)), collapse="\n")
+
+  paste(name,
+        "=========== Expected:       ===========", str.s1,
+        "=========== Actual:         ===========", str.s2,
+        "=========== Test statistic: ===========", str.test, sep="\n\n")
+}
+
 compare.summaries <- function(s1, s2) {
   stopifnot(names(s1$effectiveSize) == names(s2$effectiveSize))
   d.idx <- grep("^d\\.", names(s1$effectiveSize))
@@ -33,13 +44,8 @@ compare.summaries <- function(s1, s2) {
   se1 <- s1$summary$statistics[, 'Time-series SE']
   se2 <- s2$summary$statistics[, 'Time-series SE']
   test <- pnorm(mu1 - mu2, 0, sqrt(se1^2 + se2^2))
-  cat("Test equality of means: \n")
-  print(test)
   get_reporter()$add_result(
-    expectation(all(test > 0.025), "Means were not equal"))
-  if(!all(test > 0.025)) {
-    print("!!! TEST FAILED")
-  }
+    expectation(all(test > 0.025), formatError("Means were not equal", mu1, mu2, test)))
 
   # Test equality of variance
   sd1 <- s1$summary$statistics[d.idx, 'SD']
@@ -47,13 +53,8 @@ compare.summaries <- function(s1, s2) {
   en1 <- s1$effectiveSize[d.idx]
   en2 <- s2$effectiveSize[d.idx]
   test <- pf(sd1^2 / sd2^2, en1, en2)
-  cat("Test equality of variances: \n")
-  print(test)
   get_reporter()$add_result(
-    expectation(all(test > 0.025), "Variances were not equal"))
-  if (!all(test > 0.025)) {
-    print("!!! TEST FAILED")
-  }
+    expectation(all(test > 0.025), formatError("Variances were not equal", sd1^2, sd2^2, test)))
 
   # TODO: multivariate test for equality of means
   # TODO: compare covariance matrices
@@ -77,13 +78,8 @@ compare.summaries <- function(s1, s2) {
       test <- chisq.test(x, p=p, rescale.p=TRUE, simulate.p.value=TRUE)
       c('statistic'=unname(test$statistic), 'p.value'=test$p.value)
     })
-    cat("Test equality of rank probabilities (Chi-squared based on effective sample size): \n")
-    print(test)
     get_reporter()$add_result(
-      expectation(all(test > 0.025), "Rank probabilities were not equal"))
-    if (!all(test['p.value', ] > 0.025)) {
-      print("!!! TEST FAILED")
-    }
+      expectation(all(test > 0.025), formatError("Rank probabilities were not equal", s1$ranks, s2$ranks, test)))
   }
 }
 
