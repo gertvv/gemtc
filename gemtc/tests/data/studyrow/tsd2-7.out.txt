@@ -3,9 +3,9 @@ structure(list(study = c(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, 5L,
 0.079593023, 0.0703125, 0.0703125, 0.1125, 0.1125, 0.038949635, 
 0.038949635, 0.039937662, 0.039937662, 0.254736842, 0.254736842, 
 0.254736842), treatment = c(1L, 3L, 1L, 2L, 3L, 4L, 3L, 4L, 4L, 
-5L, 4L, 5L, 1L, 2L, 4L), mean = c(NA, -0.31, NA, -1.7, NA, -0.35, 
+5L, 4L, 5L, 1L, 2L, 4L), diff = c(NA, -0.31, NA, -1.7, NA, -0.35, 
 NA, 0.55, NA, -0.3, NA, -0.3, NA, -2.3, -0.9), std.err = c(NA, 
 0.668089651, NA, 0.382640605, NA, 0.441941738, NA, 0.555114559, 
 NA, 0.274276316, NA, 0.320087245, NA, 0.71774604, 0.694988091
-)), .Names = c("study", "var", "treatment", "mean", "std.err"
+)), .Names = c("study", "var", "treatment", "diff", "std.err"
 ), row.names = c(NA, -15L), class = "data.frame")

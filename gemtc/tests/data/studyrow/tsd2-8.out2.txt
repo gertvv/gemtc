@@ -1,5 +1,5 @@
 structure(list(study = c(4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L), treatment = c(3L, 
-4L, 3L, 4L, 4L, 5L, 4L, 5L), mean = c(NA, -0.35, NA, 0.55, NA, 
+4L, 3L, 4L, 4L, 5L, 4L, 5L), diff = c(NA, -0.35, NA, 0.55, NA, 
 -0.3, NA, -0.3), std.err = c(NA, 0.441941738, NA, 0.555114559, 
 NA, 0.274276316, NA, 0.320087245)), .Names = c("study", "treatment", 
-"mean", "std.err"), row.names = c(NA, -8L), class = "data.frame")
+"diff", "std.err"), row.names = c(NA, -8L), class = "data.frame")

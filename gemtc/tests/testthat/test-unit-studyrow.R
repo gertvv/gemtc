@@ -47,7 +47,7 @@ test_that("TSD2 example 5 (continuous data, normal/identity)", {
 test_that("TSD2 example 7 (relative effect data)", {
   data <- mtc.data.studyrow(
     read.table(studyrow_file('tsd2-7.data.txt'), header=TRUE),
-    armVars=c('treatment'='t', 'mean'='y', 'std.err'='se'),
+    armVars=c('treatment'='t', 'diff'='y', 'std.err'='se'),
     studyVars=c('var'='V'))
   expect_that(data, equals(dget(studyrow_file('tsd2-7.out.txt'))))
 })
@@ -55,13 +55,13 @@ test_that("TSD2 example 7 (relative effect data)", {
 test_that("TSD2 example 8 (mixed data)", {
   data1 <- mtc.data.studyrow(
     read.table(studyrow_file('tsd2-8.data1.txt'), header=TRUE),
-    armVars=c('treatment'='t.a', mean='y.a', 'std.err'='se.a'),
+    armVars=c('treatment'='t.a', 'mean'='y.a', 'std.err'='se.a'),
     nArmsVar='na.a')
   expect_that(data1, equals(dget(studyrow_file('tsd2-8.out1.txt'))))
 
   data2 <- mtc.data.studyrow(
     read.table(studyrow_file('tsd2-8.data2.txt'), header=TRUE),
-    armVars=c('treatment'='t', mean='y', 'std.err'='se'),
+    armVars=c('treatment'='t', 'diff'='y', 'std.err'='se'),
     nArmsVar='na',
     studyNames=4:7)
   expect_that(data2, equals(dget(studyrow_file('tsd2-8.out2.txt'))))
