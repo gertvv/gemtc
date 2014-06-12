@@ -11,7 +11,7 @@ typedef struct Matrix {
  * @param i Row index.
  * @param j Column index.
  */
-static inline double *get(Matrix *m, int i, int j) {
+static inline int *get(Matrix *m, int i, int j) {
     return m->data + j * (m->nRow) + i;
 }
 
