@@ -87,6 +87,7 @@ mtc.network <- function(
   if (is.character(treatments) || is.factor(treatments)) {
     treatments <- data.frame(id=treatments, description=treatments)
   }
+
   treatments <- standardize.treatments(treatments)
 
   network <- list(
@@ -254,11 +255,11 @@ mtc.network.validate <- function(network) {
   all.treatments <- factor(all.treatments, levels=1:nlevels(network[['treatments']][['id']]), labels=levels(network[['treatments']][['id']]))
   stopifnot(all(all.treatments %in% network[['treatments']][['id']]))
   stopifnot(all(network[['treatments']][['id']] %in% all.treatments))
-  idok <- regexpr("^[A-Za-z0-9_]+$", network[['treatment']][['id']]) != -1
-  if(!all(idok)) {
-    stop(paste('Treatment name "',
-      network[['treatment']][['id']][which(!idok)], '" invalid.\n',
-      ' Treatment names may only contain letters, digits, and underscore (_).'), sep='')
+  invalidId <- grep('^[a-zA-Z0-9_]*$', network[['treatments']][['id']], invert=TRUE)
+  if (length(invalidId) > 0) {
+    stop(paste0("\n", paste0(' Treatment name "',
+      network[['treatments']][['id']][invalidId], '" invalid.', collapse="\n"),
+      '\nTreatment names may only contain letters, digits, and underscore (_).'))
   }
 
   # Check that studies are not duplicated between [['data.ab']] and [['data.re']]
