@@ -106,21 +106,21 @@ mtc.model <- function(network, type="consistency",
 
   model[['likelihood']] <- likelihood
   model[['link']] <- link
-  if (!is.null(network[['data.ab']]) && 'responders' %in% colnames(network[['data.ab']])) {
+  if (!is.null(network[['data.ab']]) && all(required.columns.ab.binom.logit() %in% colnames(network[['data.ab']]))) {
     if (is.null(likelihood)) {
       model[['likelihood']] = 'binom'
     }
     if (is.null(link)) {
       model[['link']] = 'logit'
     }
-  } else if (!is.null(network[['data.ab']]) && 'mean' %in% colnames(network[['data.ab']])) {
+  } else if (!is.null(network[['data.ab']]) && all(required.columns.ab.normal.identity() %in% colnames(network[['data.ab']]))) {
     if (is.null(likelihood)) {
       model[['likelihood']] = 'normal'
     }
     if (is.null(link)) {
       model[['link']] = 'identity'
     }
-  } else {
+  } else if (is.null(network[['data.ab']])) {
     if (is.null(likelihood)) {
       warning('Likelihood can not be inferred. Defaulting to normal.')
       model[['likelihood']] = 'normal'
@@ -128,6 +128,13 @@ mtc.model <- function(network, type="consistency",
     if (is.null(link)) {
       warning('Link can not be inferred. Defaulting to identity.')
       model[['link']] = 'identity'
+    }
+  } else {
+    if (is.null(likelihood)) {
+      stop('No appropriate likelihood could be inferred. Please specify one.')
+    }
+    if (is.null(link)) {
+      stop('No appropriate link could be inferred. Please specify one.')
     }
   }
   if (!ll.defined(model)) {
