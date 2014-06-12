@@ -254,7 +254,7 @@ mtc.network.validate <- function(network) {
   all.treatments <- c(network[['data.ab']][['treatment']], network[['data.re']][['treatment']])
   all.treatments <- factor(all.treatments, levels=1:nlevels(network[['treatments']][['id']]), labels=levels(network[['treatments']][['id']]))
   stopifnot(all(all.treatments %in% network[['treatments']][['id']]))
-  stopifnot(all(network[['treatments']][['id']] %in% all.treatments))
+  # stopifnot(all(network[['treatments']][['id']] %in% all.treatments)) -- disabled for node-splitting
   invalidId <- grep('^[a-zA-Z0-9_]*$', network[['treatments']][['id']], invert=TRUE)
   if (length(invalidId) > 0) {
     stop(paste0("\n", paste0(' Treatment name "',

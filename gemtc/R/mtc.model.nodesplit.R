@@ -36,7 +36,7 @@ mtc.model.nodesplit <- function(model, t1, t2) {
     tree <- set.edge.attribute(tree, 'lty', value=1)
     tree
   }
-  tree.indirect <- minimum.diameter.spanning.tree(mtc.network.graph(network.indirect))
+  tree.indirect <- connect.mds.forest(mtc.network.graph(network.indirect))
   model[['graph']] <- style.tree(tree.indirect)
   model[['graph']] <- model[['graph']] + edge(c(t1, t2))
   model[['graph']] <- set.edge.attribute(model[['graph']], 'arrow.mode', index=length(E(model[['graph']])), value=2)

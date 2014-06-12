@@ -13,7 +13,7 @@ filter.network <- function(network, filter, filter.ab=filter, filter.re=filter) 
   data.re <- if (!is.null(network[['data.re']])) {
     network[['data.re']][apply(network[['data.re']], 1, filter.re), , drop=FALSE]
   }
-  mtc.network(data=data.ab, data.re=data.re)
+  mtc.network(data=data.ab, data.re=data.re, treatments=network$treatments)
 }
 
 decompose.variance <- function(V) {

@@ -1,3 +1,33 @@
+# connect the MDST of disconnected components of the graph
+connect.mds.forest <- function(g) {
+  clu <- clusters(g)
+  trees <- lapply(1:clu$no, function(i) {
+    sg <- induced.subgraph(g, which(clu$membership == i))
+    if (clu$csize[i] == 1) {
+      list(root=V(sg)$name, edges=matrix(NA,nrow=0,ncol=2))
+    } else {
+      tree <- minimum.diameter.spanning.tree(sg)
+      vnames <- V(tree)$name
+      edges <- matrix(vnames[get.edges(tree, E(tree))], ncol=2)
+      root <- vnames[degree(tree, mode="in")==0]
+      list(root=root, edges=edges)
+    }
+  })
+
+  root <- trees[[1]]$root
+  h <- graph.empty()
+  h <- h + vertex(V(g)$name)
+  for (tree in trees) {
+    h <- h + edges(t(tree$edges))
+    if (tree$root != root) {
+      h <- h + edge(root, tree$root)
+    }
+  }
+
+  h
+}
+
+
 edge.length <- function(g, e) {
   w <- get.edge.attribute(g, 'weight', e)
   if (is.null(w)) 1 else w

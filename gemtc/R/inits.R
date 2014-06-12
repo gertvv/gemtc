@@ -41,7 +41,7 @@ mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model[['n
 
 # Initial values for pooled effect (basic parameter) based on
 # inverse-variance random effects meta-analysis (package meta)
-mtc.init.pooled.effect <- function(model, t1, t2) {
+mtc.init.pooled.effect <- function(model, t1, t2, om.scale) {
   t1 <- as.treatment.factor(t1, model[['network']])
   t2 <- as.treatment.factor(t2, model[['network']])
   pair <- data.frame(t1=t1, t2=t2)
@@ -77,7 +77,12 @@ mtc.init.pooled.effect <- function(model, t1, t2) {
       rel.mle.re(data, pair)
     }))
   }
-  meta <- meta::metagen(unlist(study.mle['mean', ]), unlist(study.mle['sd', ]))
+  meta <- 
+    if (ncol(study.mle) != 0) {
+      meta::metagen(unlist(study.mle['mean', ]), unlist(study.mle['sd', ]))
+    } else {
+      list('TE.random'=0, seTE.random=om.scale)
+    }
 
   rnorm(model[['n.chain']], meta[['TE.random']], model[['var.scale']] * meta[['seTE.random']])
 }
@@ -122,7 +127,7 @@ mtc.init <- function(model) {
     params <- mtc.basic.parameters(model)
     d <- sapply(E(graph), function(e) {
       v <- get.edge(graph, e)
-      mtc.init.pooled.effect(model, V(graph)[v[1]]$name, V(graph)[v[2]]$name)
+      mtc.init.pooled.effect(model, V(graph)[v[1]]$name, V(graph)[v[2]]$name, model[['om.scale']])
     })
     hy <- mtc.init.hy(model[['hy.prior']], model[['om.scale']], model[['n.chain']])
   } else {
