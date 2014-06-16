@@ -50,3 +50,25 @@ an object of class \code{mtc.nodesplit.summary}. This is a list with the followi
 \code{\link{mtc.model}}
 \code{\link{mtc.run}}
 }
+\examples{
+# Read the network
+fileName <- system.file('extdata/parkinson.gemtc', package='gemtc')
+network <- read.mtc.network(fileName)
+
+# Run all relevant node-splitting models
+\dontrun{ result.ns <- mtc.nodesplit(network, thin=50) }
+# (read results from file instead of running:)
+result.ns <- readRDS(system.file('extdata/parkinson.ns.rds', package='gemtc'))
+
+# List the individual models 
+names(result.ns)
+
+# Time series plots and convergence diagnostics for d.A.C model
+plot(result.ns$d.A.C)
+gelman.diag(result.ns$d.A.C, multivariate=FALSE)
+
+# Overall summary and plot
+summary.ns <- summary(result.ns)
+print(summary.ns)
+plot(summary.ns)
+}
