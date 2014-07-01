@@ -40,6 +40,11 @@ SEXP gemtc_rank_count(SEXP _t) {
 
 	SEXP _result = PROTECT(allocMatrix(INTSXP, nAlt, nAlt));
 	Matrix c = { INTEGER(_result), nAlt, nAlt };
+	for (int i = 0; i < nAlt; ++i) {
+		for (int j = 0; j < nAlt; ++j) {
+			*get(&c, i, j) = 0;
+		}
+	}
 
 	int r[nAlt]; // alternative ranks
 	for (int k = 0; k < nIter; ++k) {

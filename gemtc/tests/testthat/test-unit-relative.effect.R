@@ -92,6 +92,17 @@ test_that("relative.effect can be applied recursively", {
   expect_that(stats$statistics, equals(expected, tolerance=0.0001, scale=1))
 })
 
+test_that("rank.probability returns the right results", {
+  expected <- structure(c(0, 0.058, 0.22825, 0.71375, 0.0025, 0.176, 0.60075, 
+                          0.22075, 0.105125, 0.66175, 0.170625, 0.0625, 0.892375, 0.10425, 
+                          0.000375, 0.003),
+                        .Dim = c(4L, 4L),
+                        .Dimnames = list(c("A", "B", "C", "D"), NULL),
+                        class = "mtc.rank.probability", direction = 1)
+  result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+  expect_that(rank.probability(result), equals(expected))
+})
+
 test_that("rank.probability can be applied to a subset of parameters", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
   result <- relative.effect(result, "A", c("B", "C"))
