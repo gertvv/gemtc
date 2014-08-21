@@ -342,36 +342,52 @@ mtc.treatment.pairs <- function(treatments) {
   data.frame(t1=coerce.factor(t1, treatments), t2=coerce.factor(t2, treatments))
 }
 
-# Get all comparisons with direct evidence from the data set.
-# Returns a (sorted) data frame with two columns (t1 and t2).
-mtc.comparisons <- function(network) {
+mtc.all.comparisons <- function(network) {
+  ## Generate all pair-wise comparisons from each "design"
   data <- mtc.merge.data(network)
-
-  # Identify the unique "designs" (treatment combinations)
+  ## Identify the unique "designs" (treatment combinations)
   design <- function(study) { mtc.study.design(network, study) }
   designs <- unique(lapply(unique(data[['study']]), design))
-
-  # Generate all pair-wise comparisons from each "design"
   comparisons <- do.call(rbind, lapply(designs, mtc.treatment.pairs))
-
-  # Make sure we include each comparison in only one direction
+  ## Make sure we include each comparison in only one direction
   swp <- as.character(comparisons[['t1']]) > as.character(comparisons[['t2']])
   tmp <- comparisons[['t1']]
   comparisons[['t1']][swp] <- comparisons[['t2']][swp]
   comparisons[['t2']][swp] <- tmp[swp]
 
-  # Ensure the output comparisons are unique and always in the same order
-  comparisons <- unique(comparisons)
+  ## Ensure the output comparisons are always in the same order
   comparisons <- comparisons[order(comparisons[['t1']], comparisons[['t2']]), ,drop=FALSE]
-  row.names(comparisons) <- NULL
   comparisons[['t1']] <- as.treatment.factor(comparisons[['t1']], network)
   comparisons[['t2']] <- as.treatment.factor(comparisons[['t2']], network)
+  row.names(comparisons) <- NULL
+  comparisons
+}
+
+## Get all direct comparisons with the number of studies
+## measuring the direct comparison. This is like mtc.comparisons
+## but in addition the numbers are appended as an additional column.
+mtc.nr.comparisons <- function(network) {
+  ac <- mtc.all.comparisons(network)
+  nr <- apply(unique(ac), 1, function(row) {sum(apply(ac, 1, function(x) { all(x == row)}))})
+  comp <- cbind(unique(ac), nr)
+  row.names(comp) <- NULL
+  comp
+}
+
+# Get all comparisons with direct evidence from the data set.
+# Returns a (sorted) data frame with two columns (t1 and t2).
+mtc.comparisons <- function(network) {
+  ## generate all comparisons
+  comparisons <- mtc.all.comparisons(network)
+  ## Ensure the output comparisons are unique
+  comparisons <- unique(comparisons)
+  row.names(comparisons) <- NULL
   comparisons
 }
 
 edges.create <- function(e, ...) {
-  e <- t(matrix(c(e[['t1']], e[['t2']]), ncol=2))
-  edges(as.vector(e), ...)
+  ed <- t(matrix(c(e[['t1']], e[['t2']]), ncol=2))
+  edges(as.vector(ed), weight=e[['nr']], ...)
 }
 
 graph.create <- function(v, e, ...) {
@@ -382,7 +398,7 @@ graph.create <- function(v, e, ...) {
 }
 
 mtc.network.graph <- function(network) {
-  comparisons <- mtc.comparisons(network)
+  comparisons <- mtc.nr.comparisons(network)
   treatments <- network[['treatments']][['id']]
   graph.create(treatments, comparisons, arrow.mode=0)
 }
@@ -420,5 +436,6 @@ summary.mtc.network <- function(object, ...) {
 
 plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
   x <- fix.network(x)
-  igraph::plot.igraph(mtc.network.graph(x), layout=layout, ...)
+  g <- mtc.network.graph(x)
+  igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, ...)
 }
