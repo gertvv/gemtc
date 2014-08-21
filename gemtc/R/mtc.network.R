@@ -342,7 +342,20 @@ mtc.treatment.pairs <- function(treatments) {
   data.frame(t1=coerce.factor(t1, treatments), t2=coerce.factor(t2, treatments))
 }
 
-mtc.all.comparisons <- function(network) {
+## Get all direct comparisons with the number of studies
+## measuring the direct comparison. This is like mtc.comparisons
+## but in addition the numbers are appended as an additional column.
+mtc.nr.comparisons <- function(network) {
+  m <- mtc.study.treatment.matrix(network)
+  comp <- mtc.comparisons(network)
+  cm <- as.matrix(comp)
+  nr <- aaply(cm, 1, function(co) {sum(rowSums(m[,co]) == 2)})
+  cbind(comp, nr)
+}
+
+# Get all comparisons with direct evidence from the data set.
+# Returns a (sorted) data frame with two columns (t1 and t2).
+mtc.comparisons <- function(network) {
   ## Generate all pair-wise comparisons from each "design"
   data <- mtc.merge.data(network)
   ## Identify the unique "designs" (treatment combinations)
@@ -359,26 +372,6 @@ mtc.all.comparisons <- function(network) {
   comparisons <- comparisons[order(comparisons[['t1']], comparisons[['t2']]), ,drop=FALSE]
   comparisons[['t1']] <- as.treatment.factor(comparisons[['t1']], network)
   comparisons[['t2']] <- as.treatment.factor(comparisons[['t2']], network)
-  row.names(comparisons) <- NULL
-  comparisons
-}
-
-## Get all direct comparisons with the number of studies
-## measuring the direct comparison. This is like mtc.comparisons
-## but in addition the numbers are appended as an additional column.
-mtc.nr.comparisons <- function(network) {
-  ac <- mtc.all.comparisons(network)
-  nr <- apply(unique(ac), 1, function(row) {sum(apply(ac, 1, function(x) { all(x == row)}))})
-  comp <- cbind(unique(ac), nr)
-  row.names(comp) <- NULL
-  comp
-}
-
-# Get all comparisons with direct evidence from the data set.
-# Returns a (sorted) data frame with two columns (t1 and t2).
-mtc.comparisons <- function(network) {
-  ## generate all comparisons
-  comparisons <- mtc.all.comparisons(network)
   ## Ensure the output comparisons are unique
   comparisons <- unique(comparisons)
   row.names(comparisons) <- NULL
@@ -417,8 +410,8 @@ print.mtc.network <- function(x, ...) {
   }
 }
 
-summary.mtc.network <- function(object, ...) {
-  object <- fix.network(object)
+mtc.study.treatment.matrix <- function(network) {
+  object <- fix.network(network)
   data <- mtc.merge.data(object)
   studies <- unique(data[['study']])
   m <- sapply(object[['treatments']][['id']], function(treatment) {
@@ -427,17 +420,23 @@ summary.mtc.network <- function(object, ...) {
     })
   })
   colnames(m) <- object[['treatments']][['id']]
+  m
+}
+
+summary.mtc.network <- function(object, ...) {
+  object <- fix.network(object)
+  m <- mtc.study.treatment.matrix(object)
   x <- as.factor(apply(m, 1, sum))
   levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
   list("Description"=paste("MTC dataset: ", object[['description']], sep=""),
        "Studies per treatment"=apply(m, 2, sum),
        "Number of n-arm studies"=summary(x),
-       "Number of treatment comparisons"=mtc.nr.comparisons(object)
+       "Studies per treatment comparison"=mtc.nr.comparisons(object)
        )
 }
 
 plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
   x <- fix.network(x)
   g <- mtc.network.graph(x)
-  igraph::plot.igraph(g, layout=layout, edge.width=1 + (E(g)$weight*2 - 1), ...)
+  igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, ...)
 }
