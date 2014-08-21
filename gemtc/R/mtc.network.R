@@ -430,8 +430,10 @@ summary.mtc.network <- function(object, ...) {
   x <- as.factor(apply(m, 1, sum))
   levels(x) <- sapply(levels(x), function(y) { paste(y, "arm", sep="-") })
   list("Description"=paste("MTC dataset: ", object[['description']], sep=""),
-     "Studies per treatment"=apply(m, 2, sum),
-     "Number of n-arm studies"=summary(x))
+       "Studies per treatment"=apply(m, 2, sum),
+       "Number of n-arm studies"=summary(x),
+       "Number of treatment comparisons"=mtc.nr.comparisons(object)
+       )
 }
 
 plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
