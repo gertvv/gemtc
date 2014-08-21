@@ -439,5 +439,5 @@ summary.mtc.network <- function(object, ...) {
 plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
   x <- fix.network(x)
   g <- mtc.network.graph(x)
-  igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, ...)
+  igraph::plot.igraph(g, layout=layout, edge.width=1 + (E(g)$weight*2 - 1), ...)
 }
