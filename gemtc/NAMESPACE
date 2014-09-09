@@ -1,7 +1,8 @@
 useDynLib(gemtc)
 import(grid)
 import(coda)
-import(igraph) # Get rid of this
+import(igraph)
+import(plyr)
 importFrom(meta, forest)
 
 S3method(print, mtc.network)
