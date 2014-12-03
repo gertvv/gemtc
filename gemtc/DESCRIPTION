@@ -1,10 +1,10 @@
 Package: gemtc
 Version: 0.6-1
 Date: 2014-XX-YY
-Title: GeMTC network meta-analysis
+Title: Network Meta-Analysis
 Author: Gert van Valkenhoef, Joel Kuiper 
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
-Description: An R package for performing network meta-analyses (mixed treatment comparisons).
+Description: Network meta-analyses (mixed treatment comparisons) in the Bayesian framework. You need either BUGS or JAGS to use this package, preferably JAGS (through the rjags package). Includes methods to assess heterogeneity and inconsistency, and a number of standard visualizations.
 Depends: coda (>= 0.13)
 Imports: igraph (>= 0.6.4), meta (>= 2.1), XML (>= 3.6), plyr (>= 1.8.1)
 Suggests: rjags (>= 3-0), BRugs (>= 0.8), R2WinBUGS (>= 2.1), testthat (>= 0.8), Matrix
