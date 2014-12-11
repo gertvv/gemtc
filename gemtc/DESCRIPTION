@@ -1,7 +1,7 @@
 Package: gemtc
 Version: 0.6-1
-Date: 2014-XX-YY
-Title: Network Meta-Analysis
+Date: 2014-12-11
+Title: Network Meta-Analysis Using Bayesian Methods
 Author: Gert van Valkenhoef, Joel Kuiper 
 Maintainer: Gert van Valkenhoef <g.h.m.van.valkenhoef@rug.nl>
 Description: Network meta-analyses (mixed treatment comparisons) in the Bayesian framework. You need either BUGS or JAGS to use this package, preferably JAGS (through the rjags package). Includes methods to assess heterogeneity and inconsistency, and a number of standard visualizations.
