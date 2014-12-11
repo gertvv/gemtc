@@ -1,11 +1,17 @@
 gemtc 0.6-1
 ===========
 
-Released 2014-XX-YY
+Released 2014-12-11
 
 Enhancements:
 
  * Use the '.Call' interface for C code
+ * Better detect invalid treatment names
+ * Better detect the likelihood / link
+
+Bugfixes:
+
+ * Fix node-splitting models in sparse networks (#31)
 
 gemtc 0.6
 =========
