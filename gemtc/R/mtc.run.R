@@ -30,14 +30,10 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
     c(sampler)
   }
 
-  have.package <- function(name) {
-    suppressWarnings(do.call(library, list(name, logical.return=TRUE, quietly=TRUE)))
-  }
-
   found <- NA
   i <- 1
   while (is.na(found) && i <= length(available)) {
-    if (have.package(available[i])) {
+    if (requireNamespace(available[i], quietly=TRUE)) {
       found <- available[i]
     }
     i <- i + 1
@@ -94,11 +90,11 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
   cat(paste(syntax[['model']], "\n", collapse=""), file=file.model)
   data <- if (identical(package, 'rjags')) {
     # Note: n.iter must be specified *excluding* the n.adapt
-    load.module('dic')
-    jags <- jags.model(file.model, data=syntax[['data']],
+    rjags::load.module('dic')
+    jags <- rjags::jags.model(file.model, data=syntax[['data']],
       inits=syntax[['inits']], n.chains=model[['n.chain']],
       n.adapt=n.adapt)
-    samples <- jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
+    samples <- rjags::jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
       n.iter=n.iter, thin=thin)
 
     # Calculate DIC
@@ -120,7 +116,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
   } else if (identical(package, 'BRugs')) {
     detectBugsBug(syntax[['data']])
     # Note: n.iter must be specified *excluding* the n.adapt
-    samples <- BRugsFit(file.model, data=syntax[['data']],
+    samples <- BRugs::BRugsFit(file.model, data=syntax[['data']],
       inits=syntax[['inits']], numChains=model[['n.chain']],
       parametersToSave=c(syntax[['vars']], 'deviance'), coda=TRUE, DIC=TRUE,
       nBurnin=n.adapt, nIter=n.iter, nThin=thin)
@@ -130,7 +126,7 @@ mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin
     # Note: codaPkg=TRUE does *not* return CODA objects, but rather
     # the names of written CODA output files.
     # Note: n.iter must be specified *including* the n.adapt
-    samples <- as.mcmc.list(bugs(model.file=file.model, data=syntax[['data']],
+    samples <- as.mcmc.list(R2WinBUGS::bugs(model.file=file.model, data=syntax[['data']],
       inits=syntax[['inits']], n.chains=model[['n.chain']],
       parameters.to.save=filterWinBugsParameters(syntax[['vars']]),
       codaPkg=FALSE, DIC=TRUE,
