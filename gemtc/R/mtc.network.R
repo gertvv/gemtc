@@ -350,7 +350,9 @@ mtc.nr.comparisons <- function(network) {
   m <- mtc.study.treatment.matrix(network)
   comp <- mtc.comparisons(network)
   cm <- as.matrix(comp)
-  nr <- aaply(cm, 1, function(co) {sum(rowSums(m[,co]) == 2)})
+  nr <- aaply(cm, 1, function(co) {
+    sum(rowSums(m[,co, drop=FALSE]) == 2)
+  })
   cbind(comp, nr)
 }
 
@@ -415,11 +417,12 @@ mtc.study.treatment.matrix <- function(network) {
   object <- fix.network(network)
   data <- mtc.merge.data(object)
   studies <- unique(data[['study']])
-  m <- sapply(object[['treatments']][['id']], function(treatment) {
-    sapply(studies, function(study) {
+  m <- laply(object[['treatments']][['id']], function(treatment) {
+    laply(studies, function(study) {
       any(data[['study']] == study & data[['treatment']] == treatment)
-    })
-  })
+    }, .drop=TRUE)
+  }, .drop=FALSE)
+  m <- t(m)
   colnames(m) <- object[['treatments']][['id']]
   m
 }
