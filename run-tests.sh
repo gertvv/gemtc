@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR=`mktemp -d -t gemtc`
+DIR=`mktemp -d -t gemtc-XXX`
 R CMD INSTALL -l $DIR --install-tests $1
 
 if [[ $3 == "R2WinBUGS" ]]; then export TMPDIR="$HOME/.wine/drive_c/bugstmp/"; fi
