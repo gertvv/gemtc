@@ -94,10 +94,10 @@ mtc.network <- function(
     description=description,
     treatments=treatments)
 
-  if (!is.null(data.ab)) {
+  if (!is.null(data.ab) && nrow(data.ab) > 0) {
     network <- c(network, list(data.ab=standardize.data(data.ab, levels(treatments[['id']]))))
   }
-  if (!is.null(data.re)) {
+  if (!is.null(data.re) && nrow(data.re) > 0) {
     network <- c(network, list(data.re=standardize.data(data.re, levels(treatments[['id']]), re.order=TRUE)))
   }
 
