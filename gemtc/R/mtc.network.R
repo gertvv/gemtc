@@ -28,7 +28,8 @@ remove.onearm <- function(data, warn=FALSE) {
   }))
 
   if (warn && !all(sel)) {
-    warning(paste("Removing", sum(!sel), "one-arm studies"))
+    warning(paste("Removing", sum(!sel), "one-arm studies:",
+                  paste(data[!sel,'study'], collapse=", ")))
   }
   data[sel, , drop=FALSE]
 }
@@ -240,8 +241,12 @@ mtc.validate.data.re <- function(data) {
   studies <- unique(data[['study']])
   ma <- sapply(studies, function(study) { sum(data[['study']] == study) > 2 })
   ma <- studies[ma]
-  if (!all(!is.na(data[['std.err']][data[['study']] %in% ma]))) {
-    stop('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified')
+  ma.studies <- data[['study']] %in% ma
+  nobaseline <- is.na(data[['std.err']][ma.studies])
+  if (!all(!nobaseline)) {
+    stop(paste('All multi-arm trials (> 2 arms) must have the std.err of the baseline specified.',
+               'Constraint violated by:',
+               paste(data[['study']][ma.studies][nobaseline], collapse=", ")))
   }
 }
 
