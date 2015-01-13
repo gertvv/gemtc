@@ -31,7 +31,7 @@ decompose.variance <- function(V) {
 
 # Decompose trials based on a consistency model and study.samples
 decompose.trials <- function(result) {
-  decompose.study <- function(samples) {
+  decompose.study <- function(samples, study) {
     na <- ncol(samples) + 1
     samples <- cbind(0, samples)
     mu <- sapply(1:na, function(i) {
@@ -49,7 +49,7 @@ decompose.trials <- function(result) {
     var <- decompose.variance(V)
     se <- sqrt(var)
     if (any(is.nan(se))) {
-      stop(paste("Decomposed variance ill-defined. Most likely the USE did not converge:", paste(capture.output(print(var)), collapse="\n"), sep="\n"))
+      stop(paste(paste0("Decomposed variance ill-defined for ", study, ". Most likely the USE did not converge:"), paste(capture.output(print(var)), collapse="\n"), sep="\n"))
     }
 
     pairs <- all.pair.matrix(na)
@@ -70,7 +70,7 @@ decompose.trials <- function(result) {
     stopifnot(length(colIndexes) == (na - 1)) # A bug in WinBUGS caused this to happen -- repeated variables
     effects <- if (na > 2) {
       data <- decompose.study(
-        study.samples[, colIndexes, drop=FALSE])
+        study.samples[, colIndexes, drop=FALSE], studies[i])
       ts <- matrix(study[all.pair.matrix(na)], ncol=2)
       list(m=data[['mu']], e=data[['se']], t=ts)
     } else {
