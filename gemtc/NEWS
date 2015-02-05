@@ -3,6 +3,11 @@ gemtc 0.6-1
 
 Released 2014-12-12
 
+New features:
+
+ * Network plot: line width is now proportional to the number of
+   studies.
+
 Enhancements:
 
  * Use the '.Call' interface for C code

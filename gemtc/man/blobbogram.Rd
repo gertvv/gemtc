@@ -7,13 +7,14 @@
 }
 \usage{
 blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
-    left.label=NULL, right.label=NULL,
+    left.label=NULL, right.label=NULL, center.label=NULL,
     log.scale=FALSE, xlim=NULL, styles=NULL,
     grouped=TRUE, group.labels=NULL,
     columns=NULL, column.labels=NULL,
     column.groups=NULL, column.group.labels=NULL,
     digits=2,
-    ask=dev.interactive(orNone=TRUE))
+    ask=dev.interactive(orNone=TRUE),
+    draw.no.effect=TRUE)
 }
 \arguments{
   \item{data}{A data frame containing one row for each confidence interval to be visualized.
@@ -22,6 +23,7 @@ blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
   \item{ci.label}{Label to show above the confidence intervals.}
   \item{left.label}{Label to show on the left-hand side of the no-difference line.}
   \item{right.label}{Label to show on the right-hand side of the no-difference line.}
+  \item{center.label}{Label to show center-aligned with the no-difference line.}
   \item{log.scale}{If TRUE, the confidence intervals are given on a log scale, and axis labels will be \code{exp()} transformed.}
   \item{xlim}{The scale limits of the plot, if the confidence interval exceeds these limits an arrow will be shown at the limit. If unspecified, limits will be chosen that encompass all confidence intervals.}
   \item{styles}{A data frame describing the different row styles. By default, the styles "normal", "pooled" and "group" are defined.}
@@ -32,7 +34,9 @@ blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
   \item{column.groups}{Column groups, a numeric vector specifying the column group for each column.}
   \item{column.group.labels}{A vector of labels for the column groups.}
   \item{digits}{The number of (significant) digits to print.}
-  \item{ask}{If TRUE, a prompt will be displayed before generating the next page of a multi-page plot.}
+  \item{ask}{If TRUE, a prompt will be displayed before generating the
+    next page of a multi-page plot.}
+  \item{draw.no.effect}{If TRUE, draw the no-effect line.}
 }
 \details{
 The \code{blobbogram} function creates a blobbogram (forest plot) from the given data (point estimates and confidence intervals) and meta-data (labels, column specifications, column groups, row groups, styles) using the \code{grid} package.
