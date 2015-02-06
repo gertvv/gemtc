@@ -88,8 +88,10 @@ text.style  <- function(styles) {
   }
 }
 
-draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns, column.groups,
-                      column.group.labels, header.labels, text.fn, xrange, scale.trf, left.label, right.label) {
+draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped,
+                      columns, column.groups, column.group.labels,
+                      header.labels, text.fn, xrange, scale.trf, left.label,
+                      right.label, center.label, draw.no.effect=TRUE) {
   columns.grouped <- !is.null(column.groups)
   row.offset <- if (columns.grouped) 2 else 1
 
@@ -131,10 +133,12 @@ draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns,
   }
   nr <- layout.row
 
-  # No-effect line
-  pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=(row.offset+1):(nr), xscale=xrange))
-  grid.lines(x=unit(c(0, 0), "native"), y=unit(c(0, 1), "npc"))
-  popViewport()
+  if (draw.no.effect) {
+      ## No-effect line
+      pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=(row.offset+1):(nr), xscale=xrange))
+      grid.lines(x=unit(c(0, 0), "native"), y=unit(c(0, 1), "npc"))
+      popViewport()
+  }
 
   # Axis and ticks
   pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr, xscale=xrange))
@@ -145,16 +149,22 @@ draw.page <- function(ci.data, colwidth, rowheights, ci.label, grouped, columns,
 
   # Tick labels
   pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+1, xscale=xrange))
-  grid.draw(textGrob(scale.trf(0), just="center", x=unit(0, "native")))
+  if(draw.no.effect) {
+      grid.draw(textGrob(scale.trf(0), just="center", x=unit(0, "native")))
+  }
   grid.draw(textGrob(scale.trf(xrange[1]), just="center", x=unit(0, "npc")))
   grid.draw(textGrob(scale.trf(xrange[2]), just="center", x=unit(1, "npc")))
   popViewport()
 
+  x.offset <- if(draw.no.effect) 0 else mean(xrange)
+
   pushViewport(viewport(layout.pos.col=2*nc+1, layout.pos.row=nr+3, xscale=xrange))
   if (!is.null(left.label))
-    grid.draw(textGrob(left.label, just="right", x=sum(unit(0, "native"), unit(-0.2, "npc"))))
+    grid.draw(textGrob(left.label, just="right", x=sum(unit(x.offset, "native"), unit(-0.2, "npc"))))
   if (!is.null(right.label))
-    grid.draw(textGrob(right.label, just="left", x=sum(unit(0, "native"), unit(0.2, "npc"))))
+    grid.draw(textGrob(right.label, just="left", x=sum(unit(x.offset, "native"), unit(0.2, "npc"))))
+  if (!is.null(center.label))
+    grid.draw(textGrob(center.label, just="center", x=sum(unit(x.offset, "native"), unit(0, "npc"))))  
   popViewport()
 }
 
@@ -192,13 +202,14 @@ nice.value <- function(x, round.fun, log.scale) {
 }
 
 blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
-  left.label=NULL, right.label=NULL,
-  log.scale=FALSE, xlim=NULL, styles=NULL,
-  grouped=TRUE, group.labels=NULL,
-  columns=NULL, column.labels=NULL,
-  column.groups=NULL, column.group.labels=NULL,
-  digits=2,
-  ask=dev.interactive(orNone=TRUE)) {
+                       left.label=NULL, right.label=NULL, center.label=NULL,
+                       log.scale=FALSE, xlim=NULL, styles=NULL,
+                       grouped=TRUE, group.labels=NULL,
+                       columns=NULL, column.labels=NULL,
+                       column.groups=NULL, column.group.labels=NULL,
+                       digits=2,
+                       ask=dev.interactive(orNone=TRUE),
+                       draw.no.effect=TRUE) {
 
   devAskNewPage(FALSE)
   plot.new()
@@ -384,7 +395,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
                 grouped, columns, column.groups,
                 column.group.labels, header.labels,
                 text.fn, xrange, scale.trf,
-                left.label, right.label)
+                left.label, right.label, center.label, draw.no.effect)
       dev.flush()
     }
   }
