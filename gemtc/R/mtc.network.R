@@ -393,10 +393,11 @@ graph.create <- function(v, e, ...) {
   g
 }
 
-mtc.network.graph <- function(network) {
-  comparisons <- mtc.nr.comparisons(network)
-  treatments <- network[['treatments']][['id']]
-  graph.create(treatments, comparisons, arrow.mode=0)
+mtc.network.graph <- function(network, include.nr.comparisons=FALSE) {
+    comp <- if (include.nr.comparisons) mtc.nr.comparisons else mtc.comparisons
+    comparisons <- comp(network)
+    treatments <- network[['treatments']][['id']]
+    graph.create(treatments, comparisons, arrow.mode=0)
 }
 
 ## mtc.network class methods
@@ -441,6 +442,6 @@ summary.mtc.network <- function(object, ...) {
 
 plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
   x <- fix.network(x)
-  g <- mtc.network.graph(x)
+  g <- mtc.network.graph(x, TRUE)
   igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, ...)
 }
