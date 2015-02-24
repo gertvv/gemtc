@@ -93,7 +93,12 @@ mtc.init.hy <- function(hy.prior, om.scale, n.chain) {
   substr(fn, 1, 1) <- "r"
   args <- c(n.chain, hy.prior[['args']])
   args[args == 'om.scale'] <- om.scale
-  do.call(fn, args)
+  values <- do.call(fn, args)
+  if (hy.prior$type == "prec") {
+    pmax(values, 1E-232) # prevent underflow in JAGS/BUGS (precision 0 is variance \infty)
+  } else {
+    values
+  }
 }
 
 # Generate initial values for all relevant parameters
