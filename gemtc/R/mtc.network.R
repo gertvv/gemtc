@@ -109,6 +109,13 @@ mtc.network <- function(
 }
 
 read.mtc.network <- function(file) {
+  # Check that the file exists and can be read.
+  # This is not best practice, but the XML parser throws an incredibly cryptic
+  # error if it can't read the file, so this seems better.
+  if (file.access(file, 4) == -1) {
+    stop(paste0("The file \"", file, "\" does not exist or can not be read."))
+  }
+
   doc <- XML::xmlInternalTreeParse(file)
   description <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "description"))
   type <- unlist(XML::xpathApply(doc, "/network", XML::xmlGetAttr, "type", "rate"))
