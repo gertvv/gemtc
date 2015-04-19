@@ -1,7 +1,7 @@
 gemtc 0.6-2
 ===========
 
-Released 2015-02-??
+Released 2015-04-18
 
 New features:
 
@@ -14,7 +14,9 @@ Enhancements:
    ?blobbogram for documentation.
  * Better validation of network properties and more helpful reporting of
    validation failures.
-
+ * Prevent zero prior heterogeneity variance (because it causes JAGS
+   errors).
+ * Clear error when asked to parse non-existant XML file.
 
 gemtc 0.6-1
 ===========
