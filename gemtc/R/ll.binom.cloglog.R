@@ -32,3 +32,9 @@ scale.limit.inits.binom.cloglog <- function() {
 required.columns.ab.binom.cloglog <- function() {
   c('r'='responders', 'n'='sampleSize')
 }
+
+validate.data.binom.cloglog <- function(data.ab) {
+  stopifnot(all(data.ab[['sampleSize']] >= data.ab[['responders']]))
+  stopifnot(all(data.ab[['sampleSize']] > 0))
+  stopifnot(all(data.ab[['responders']] >= 0))
+}
