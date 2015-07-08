@@ -131,7 +131,7 @@ mtc.init <- function(model) {
   if (!is.null(graph)) {
     params <- mtc.basic.parameters(model)
     d <- sapply(E(graph), function(e) {
-      v <- get.edge(graph, e)
+      v <- ends(graph, e, names=FALSE)
       mtc.init.pooled.effect(model, V(graph)[v[1]]$name, V(graph)[v[2]]$name, model[['om.scale']])
     })
     hy <- mtc.init.hy(model[['hy.prior']], model[['om.scale']], model[['n.chain']])

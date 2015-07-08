@@ -39,7 +39,7 @@ minimum.diameter.spanning.tree <- function(graph) {
   # Determine the center of the graph
   f <- absolute.one.center(graph)
   dc <- f['t'] - 0.5 * l(f['e'])
-  v <- get.edge(graph, f['e'])
+  v <- ends(graph, f['e'], names=FALSE)
   if (dc < 0 || (dc == 0 && v[1] < v[2])) {
     edgelist <- v
   } else {
@@ -93,7 +93,7 @@ minimum.diameter.spanning.tree <- function(graph) {
 # Only the vertex-unweighted algorithm is implemented. Edge-weighted graphs are supported, however.)
 absolute.one.center <- function(g) {
   f <- sapply(E(g), function(edge) { local.center(g, edge) })
-  v <- sapply(E(g), function(edge) { get.edge(g, edge) })
+  v <- sapply(E(g), function(edge) { ends(g, edge, names=FALSE) })
   i <- order(f['r',], v[1,], v[2,])[1]
   f[, i, drop=TRUE]
 }
@@ -113,8 +113,8 @@ local.center <- function(graph, edge) {
   l <- function(edge) { edge.length(graph, edge) }
 
   # left and right vertices of an edge
-  vr <- function(edge) { get.edge(graph, edge)[1] }
-  vs <- function(edge) { get.edge(graph, edge)[2] }
+  vr <- function(edge) { ends(graph, edge, names=FALSE)[1] }
+  vs <- function(edge) { ends(graph, edge, names=FALSE)[2] }
 
   # de(x, v): distance between point x and vertex v
   de <- function(x, v) {

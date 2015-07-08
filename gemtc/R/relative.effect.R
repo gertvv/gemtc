@@ -18,7 +18,7 @@ tree.relative.effect <- function(g, t1, t2) {
     p <- matrix(c(p[1:length(p)-1], p[-1]), ncol=2)
 
     sapply(E(g), function(e) {
-      v <- get.edge(g, e)
+      v <- ends(g, e, names=FALSE)
       if (sum(p[,1] == v[1] & p[,2] == v[2])) 1
       else if (sum(p[,1] == v[2] & p[,2] == v[1])) -1
       else 0
