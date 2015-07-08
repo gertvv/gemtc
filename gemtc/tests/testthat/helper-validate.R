@@ -38,6 +38,10 @@ compare.summaries <- function(s1, s2) {
   d.idx <- grep("^d\\.", names(s1$effectiveSize))
   sd.idx <- grep("^sd\\.", names(s1$effectiveSize))
 
+  # Force statistics to be matrix
+  if (is.vector(s1$summary$statistics)) s1$summary$statistics <- t(s1$summary$statistics)
+  if (is.vector(s2$summary$statistics)) s2$summary$statistics <- t(s2$summary$statistics)
+
   # Test equality of means
   mu1 <- s1$summary$statistics[, 'Mean']
   mu2 <- s2$summary$statistics[, 'Mean']

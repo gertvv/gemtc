@@ -1,0 +1,11 @@
+structure(list(effectiveSize = structure(17353.7151177326, .Names = "var1"), 
+    summary = structure(list(statistics = structure(c(-0.0905785901265748, 
+    0.0275019781587034, 9.72341762603175e-05, 0.000208889376331796
+    ), .Names = c("Mean", "SD", "Naive SE", "Time-series SE")), 
+        quantiles = structure(c(-0.144369725686598, -0.109146058702042, 
+        -0.0906741416473852, -0.0720521541534026, -0.0366082503487515
+        ), .Names = c("2.5%", "25%", "50%", "75%", "97.5%")), 
+        start = 5001, end = 25000, thin = 1, nchain = 4L), .Names = c("statistics", 
+    "quantiles", "start", "end", "thin", "nchain"), class = "summary.mcmc"), 
+    cov = structure(numeric(0), .Dim = c(0L, 0L))), .Names = c("effectiveSize", 
+"summary", "cov"))
