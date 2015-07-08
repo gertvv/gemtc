@@ -142,6 +142,8 @@ mtc.model <- function(network, type="consistency",
       ', link = ', model[['link']], ' not found!', sep=''))
   }
 
+  ll.call('validate.data', model, network[['data.ab']])
+
   model[['om.scale']] <- if (!is.null(om.scale)) om.scale else guess.scale(model)
   model[['hy.prior']] <- hy.prior
 

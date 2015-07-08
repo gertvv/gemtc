@@ -26,3 +26,7 @@ scale.limit.inits.normal.identity <- function() {
 required.columns.ab.normal.identity <- function() {
   c('m'='mean', 'e'='std.err')
 }
+
+validate.data.normal.identity <- function(data.ab) {
+  stopifnot(all(data.ab[['std.err']] > 0))
+}

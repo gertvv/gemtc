@@ -30,3 +30,9 @@ scale.limit.inits.binom.logit <- function() {
 required.columns.ab.binom.logit <- function() {
   c('r'='responders', 'n'='sampleSize')
 }
+
+validate.data.binom.logit <- function(data.ab) {
+  stopifnot(all(data.ab[['sampleSize']] >= data.ab[['responders']]))
+  stopifnot(all(data.ab[['sampleSize']] > 0))
+  stopifnot(all(data.ab[['responders']] >= 0))
+}

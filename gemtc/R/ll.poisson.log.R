@@ -33,3 +33,8 @@ scale.limit.inits.poisson.log <- function() {
 required.columns.ab.poisson.log <- function() {
   c('r'='responders', 'E'='exposure')
 }
+
+validate.data.poisson.log <- function(data.ab) {
+  stopifnot(all(data.ab[['responders']] >= 0))
+  stopifnot(all(data.ab[['exposure']] >= 0))
+}
