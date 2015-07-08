@@ -452,8 +452,12 @@ summary.mtc.network <- function(object, ...) {
        )
 }
 
-plot.mtc.network <- function(x, layout=igraph::layout.circle, ...) {
+plot.mtc.network <- function(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, ...) {
   x <- fix.network(x)
   g <- mtc.network.graph(x, TRUE)
-  igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, ...)
+  if (dynamic.edge.width) {
+    igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, ...)
+  } else {
+    igraph::plot.igraph(g, layout=layout, ...)
+  }
 }

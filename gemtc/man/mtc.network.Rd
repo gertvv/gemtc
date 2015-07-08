@@ -3,6 +3,7 @@
 \alias{mtc.network}
 \alias{read.mtc.network}
 \alias{write.mtc.network}
+\alias{plot.mtc.network}
 
 \title{Create an mtc.network}
 \description{Creates an object of class \code{mtc.network}}
@@ -10,6 +11,8 @@
 mtc.network(data.ab, treatments, description, data.re, data)
 read.mtc.network(file)
 write.mtc.network(network, file)
+
+\method{plot}{mtc.network}(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -34,6 +37,11 @@ Present for compatibility with older versions.}
   \item{network}{An object of the S3 class \code{mtc.network}.}
   \item{file}{Path to the file to read (\code{read.mtc.network}) or write (\code{write.mtc.network}).
 For \code{write.mtc.network}, if \code{file=""}, the output is printed to standard output.  If it is \code{file="|cmd"}, the output is piped to the command given by \code{cmd}. See \code{base::cat} for further details.}
+  
+  \item{x}{An mtc.network object.}
+  \item{layout}{An igraph-compatible layout.}
+  \item{dynamic.edge.width}{If set to TRUE, dynamically set the edge width based on the number of studies.}
+  \item{...}{Additional arguments passed to \code{plot.igraph}.}
 }
 \value{
 For \code{mtc.network} and \code{read.mtc.network}, an object of the class \code{mtc.network} which is a list containing:
