@@ -47,9 +47,12 @@ The \code{\link{rank.probability}} function calculates rank probabilities for co
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 \seealso{
-\code{\link{mtc.model}},
+\code{\link{mtc.model}}
+
+\code{\link{relative.effect.table}},
 \code{\link{relative.effect}},
-\code{\link{rank.probability}},
+\code{\link{rank.probability}}
+
 \code{coda::gelman.diag},
 \code{coda::gelman.plot}
 }

@@ -7,7 +7,7 @@ print.mtc.result <- function(x, ...) {
 summary.mtc.result <- function(object, ...) {
   scale.log <- if (ll.call('scale.log', object[['model']])) 'Log ' else ''
   scale.name <- ll.call('scale.name', object[['model']])
-  list('measure'=paste(scale.log, scale.name, sep=''),
+  list('measure'=paste0(scale.log, scale.name),
        'summaries'=summary(object[['samples']]),
        'DIC'=object[['dic']])
 }
