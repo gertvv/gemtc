@@ -43,21 +43,28 @@ print.mtc.relative.effect.table <- function(x, ...) {
   write.table(format(y, justify="centre"), quote=FALSE, row.names=FALSE, col.names=FALSE)
 }
 
-
-forest.mtc.relative.effect.table <- function(x, t1=rownames(x)[1], ...) {
+forest.mtc.relative.effect.table <- function(x, t1=rownames(x)[1], use.description=FALSE, ...) {
   i1 <- which(rownames(x) == t1)
   stats <- x[i1, -i1,]
 
-  data <- data.frame(id=paste(rownames(stats), t1, sep=" vs "),
+  model <- attr(x, 'model')
+  network <- model[['network']]
+
+  ts <- rownames(stats)
+  if (use.description) {
+    ts <- treatment.id.to.description(network, ts)
+    t1 <- treatment.id.to.description(network, t1)
+  }
+
+  data <- data.frame(id=ts,
                      pe=stats[,2], ci.l=stats[,1], ci.u=stats[,3],
                      style="normal")
 
-  model <- attr(x, 'model')
-
   blobbogram(data,
     columns=c(), column.labels=c(),
-    id.label="Comparison",
+    id.label="",
     ci.label=paste(ll.call('scale.name', model), "(95% CrI)"),
     log.scale=ll.call('scale.log', model),
+    center.label=paste("Compared with", t1),
     ...)
 }

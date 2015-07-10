@@ -288,7 +288,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   }
 
   if (columns.grouped) {
-    group.labels <- rowToGrobs(column.group.labels)
+    column.group.labels.grob <- rowToGrobs(column.group.labels)
   }
 
   # Calculate column widths
@@ -299,19 +299,26 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
     unit.c(max(unit(rep(1, length(col)), "grobwidth", col)), colgap)
   }))
 
-  # Adjust column widths so group labels fit
+  # Adjust column widths so column group labels fit
   if (columns.grouped) {
     groups <- names(column.group.labels)
     if (is.null(groups)) {
       groups <- 1:length(column.group.labels)
     }
     for (group in groups) {
-      gl <- group.labels[group]
+      gl <- column.group.labels.grob[group]
       select <- column.groups == group
       for (i in which(select)) {
-        colwidth[[2 * i + 1]] = max(unit(1.0 / sum(select), "grobwidth", gl), colwidth[2 * i + 1])
+        colwidth[[2 * i + 1]] <- max(unit(1.0 / sum(select), "grobwidth", gl), colwidth[[2 * i + 1]])
       }
     }
+  }
+
+  # Adjust column widths so row group labels fit
+  if (grouped) {
+    labels <- lapply(group.labels, text.fn, 'group')
+    for (i in 1:length(columns))
+    colwidth[[2 * i - 1]] <- max(max(unit(rep(1.0 / length(columns), length(labels)), "grobwidth", labels)), colwidth[[2 * i - 1]])
   }
 
   graphwidth <- unit(5, "cm")

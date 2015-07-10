@@ -11,13 +11,14 @@
 relative.effect.table(result)
 
 \method{print}{mtc.relative.effect.table}(x, ...)
-\method{forest}{mtc.relative.effect.table}(x, t1, ...)
+\method{forest}{mtc.relative.effect.table}(x, t1, use.description=FALSE, ...)
 \method{as.data.frame}{mtc.relative.effect.table}(x, ...)
 }
 \arguments{
   \item{result}{An object of S3 class \code{mtc.result} to derive the relative effects from.}
   \item{x}{An object of S3 class \code{mtc.relative.effect.table}.}
   \item{t1}{Baseline treatment for the Forest plot.}
+  \item{use.description}{Display treatment descriptions instead of treatment IDs.}
   \item{...}{Additional arguments.}
 }
 \value{

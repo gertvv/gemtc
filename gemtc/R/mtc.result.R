@@ -16,31 +16,31 @@ plot.mtc.result <- function(x, ...) {
   plot(x[['samples']], ...)
 }
 
-forest.mtc.result <- function(x, ...) {
+forest.mtc.result <- function(x, use.description=FALSE, ...) {
   if (tolower(x[['model']][['type']]) != 'consistency') stop("Can only apply forest.mtc.result to consistency models")
 
   quantiles <- summary(x[['samples']])[['quantiles']]
   model <- x[['model']]
+  network <- model[['network']]
   stats <- quantiles[grep("^d\\.", rownames(quantiles)), , drop=FALSE]
   comps <- extract.comparisons(rownames(stats))
   groups <- comps[,1]
   group.names <- unique(groups)
-  group.labels <- rep("", length(group.names))
-  #group.labels <- paste("Relative to ", group.names)
+  group.labels <- paste("Compared with", if (use.description) treatment.id.to.description(network, group.names) else group.names)
   names(group.labels) <- group.names
   params <- list(...)
 
   data <- data.frame(
-    id=paste(comps[,2], comps[,1], sep=" vs "),
+    id=if (use.description) treatment.id.to.description(network, comps[,2]) else comps[,2],
     pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5],
     group=groups, style="normal")
 
   blobbogram(data,
     columns=c(), column.labels=c(),
-    id.label="Comparison",
+    id.label="",
     ci.label=paste(ll.call('scale.name', model), "(95% CrI)"),
     log.scale=ll.call('scale.log', model),
-    grouped=length(group.labels)>1, group.labels=group.labels,
+    grouped=TRUE, group.labels=group.labels,
     ...)
 }
 

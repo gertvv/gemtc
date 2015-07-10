@@ -5,6 +5,12 @@ standardize.treatments <- function(treatments) {
   treatments[order(treatments[['id']]), , drop=FALSE]
 }
 
+treatment.id.to.description <- function(network, ids) {
+  all.ts <- network[['treatments']][['description']]
+  names(all.ts) <- as.character(network[['treatments']][['id']])
+  all.ts[ids]
+}
+
 standardize.data <- function(data, treatment.levels, re.order=FALSE) {
   data[['study']] <- factor(as.factor(data[['study']]))
   data[['treatment']] <- factor(as.character(data[['treatment']]), levels=treatment.levels)
