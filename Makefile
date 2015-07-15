@@ -9,17 +9,21 @@ PACKAGE := $(PKG_NAME)_$(PKG_VERSION).tar.gz
 
 all: $(PACKAGE)
 
-$(PACKAGE):
+$(PACKAGE): collate
 	rm -f $(PKG_NAME)/src/*.o $(PKG_NAME)/src/*.so
 	R CMD build $(PKG_NAME)
 
-.PHONY: $(PACKAGE) install check
+.PHONY: $(PACKAGE) install check collate
 
 check: $(PACKAGE)
 	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check $(PACKAGE)
 
 check-cran: $(PACKAGE)
 	_R_CHECK_FORCE_SUGGESTS_=FALSE R CMD check --as-cran $(PACKAGE)
+
+# Note: the tryCatch is a workaround for https://github.com/klutometis/roxygen/issues/358
+collate:
+	cd $(PKG_NAME) && R --vanilla --slave -e "library(roxygen2); tryCatch(roxygenize(roclets='collate'), error=function(e) {});"
 
 install: $(PACKAGE)
 	R CMD INSTALL $(PACKAGE)
