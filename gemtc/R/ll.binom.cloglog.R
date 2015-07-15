@@ -1,17 +1,19 @@
 # Arm-level effect estimate (given a one-row data frame)
 # Returns mean, standard deviation.
-mtc.arm.mle.binom.cloglog <- function(data) {
-  s <- data['responders'] + 0.5
-  n <- data['sampleSize'] + 1
+mtc.arm.mle.binom.cloglog <- function(data, k=0.5) {
+  s <- data['responders'] + k
+  n <- data['sampleSize'] + 2*k
   mu <- unname(log(-log(1 - s/n)))
   sigma <- unname(sqrt(1/n^2)/exp(mu))
   c('mean'=mu, 'sd'=min(1, sigma))
 }
 
 # Relative effect estimate (given a two-row data frame)
-mtc.rel.mle.binom.cloglog <- function(data) {
-  e1 <- mtc.arm.mle.binom.cloglog(data[1,])
-  e2 <- mtc.arm.mle.binom.cloglog(data[2,])
+mtc.rel.mle.binom.cloglog <- function(data, correction.force=TRUE, correction.type="constant", correction.magnitude=1) {
+  correction <- correction.counts(data, correction.force, correction.type, correction.magnitude)
+
+  e1 <- mtc.arm.mle.binom.cloglog(data[1,], correction[1])
+  e2 <- mtc.arm.mle.binom.cloglog(data[2,], correction[2])
   c(e2['mean'] - e1['mean'], sqrt(e1['sd']^2 + e2['sd']^2))
 }
 
@@ -29,12 +31,5 @@ scale.limit.inits.binom.cloglog <- function() {
   c(-37.4, 3.6)
 }
 
-required.columns.ab.binom.cloglog <- function() {
-  c('r'='responders', 'n'='sampleSize')
-}
-
-validate.data.binom.cloglog <- function(data.ab) {
-  stopifnot(all(data.ab[['sampleSize']] >= data.ab[['responders']]))
-  stopifnot(all(data.ab[['sampleSize']] > 0))
-  stopifnot(all(data.ab[['responders']] >= 0))
-}
+required.columns.ab.binom.cloglog <- required.columns.counts
+validate.data.binom.cloglog <- validate.data.counts

@@ -1,7 +1,7 @@
 # Arm-level effect estimate (given a one-row data frame)
 # Returns mean, standard deviation.
-mtc.arm.mle.poisson.log <- function(data) {
-  r <- data['responders'] + 0.5
+mtc.arm.mle.poisson.log <- function(data, k=0.5) {
+  r <- data['responders'] + k
   E <- data['exposure']
   mu <- as.numeric(log(r/E))
   sigma <- as.numeric(sqrt(1/E))
@@ -9,9 +9,23 @@ mtc.arm.mle.poisson.log <- function(data) {
 }
 
 # Relative effect estimate (given a two-row data frame)
-mtc.rel.mle.poisson.log <- function(data) {
-  e1 <- mtc.arm.mle.poisson.log(data[1,])
-  e2 <- mtc.arm.mle.poisson.log(data[2,])
+mtc.rel.mle.poisson.log <- function(data, correction.force=TRUE, correction.type="constant", correction.magnitude=1) {
+  correction.need <- data[1,"responders"] == 0 || data[2,"responders"] == 0
+
+  groupRatio <- if (correction.type == "reciprocal") {
+    data[1,'exposure'] / data[2,'exposure']
+  } else {
+    1
+  }
+
+  correction <- if (correction.force || correction.need) {
+    correction.magnitude * c(groupRatio/(groupRatio+1), 1/(groupRatio+1))
+  } else {
+    c(0, 0)
+  }
+
+  e1 <- mtc.arm.mle.poisson.log(data[1,], correction[1])
+  e2 <- mtc.arm.mle.poisson.log(data[2,], correction[2])
   c(e2['mean'] - e1['mean'], sqrt(e1['sd']^2 + e2['sd']^2))
 }
 
