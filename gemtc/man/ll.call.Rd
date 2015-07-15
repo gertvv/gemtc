@@ -34,6 +34,7 @@ The following methods currently need to be implemented to implement a likelihood
   some initial values might trigger boundary conditions such as probability 0 or 1 for the binomial.}
   \item{\code{required.columns.ab}: returns the required columns for arm-based data.}
 }
+The first two methods can now also be used to selectively apply continuity corrections in case the maximum likelihood estimates are used for other purposes. \code{mtc.arm.mle} has an additional \code{k=0.5} argument to specify the correction factor. \code{mtc.rel.mle} has arguments \code{correction.force=TRUE} to force application of the continuity correction even if unnecessary, \code{correction.type="constant"} to specify the type of correction (specify \code{"reciprocal"}) for a correction proportional to the reciprocal of the size of the other arm, and \code{correction.magnitude=1} to specify the (total) magnitude of the correction. These corrections apply only for count data, and will be ignored for continuous likelihood/links.
 }
 \author{Gert van Valkenhoef}
 \seealso{
