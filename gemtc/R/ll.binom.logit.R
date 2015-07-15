@@ -1,3 +1,5 @@
+#' @include ll-helper.counts.R
+
 # Arm-level effect estimate (given a one-row data frame)
 # Returns mean, standard deviation.
 mtc.arm.mle.binom.logit <- function(data, k=0.5) {
@@ -8,21 +10,7 @@ mtc.arm.mle.binom.logit <- function(data, k=0.5) {
 
 # Relative effect estimate (given a two-row data frame)
 mtc.rel.mle.binom.logit <- function(data, correction.force=TRUE, correction.type="constant", correction.magnitude=1) {
-  correction.need <-
-    data[1,'responders'] == 0 || data[1,'responders'] == data[1,'sampleSize'] ||
-    data[2,'responders'] == 0 || data[2,'responders'] == data[2,'sampleSize']
-
-  groupRatio <- if (correction.type == "reciprocal") {
-    data[1,'sampleSize'] / data[2,'sampleSize']
-  } else {
-    1
-  }
-
-  correction <- if (correction.force || correction.need) {
-    correction.magnitude * c(groupRatio/(groupRatio+1), 1/(groupRatio+1))
-  } else {
-    c(0, 0)
-  }
+  correction <- correction.counts(data, correction.force, correction.type, correction.magnitude)
 
   e1 <- mtc.arm.mle.binom.logit(data[1,], k=correction[1])
   e2 <- mtc.arm.mle.binom.logit(data[2,], k=correction[2])
@@ -44,12 +32,5 @@ scale.limit.inits.binom.logit <- function() {
   c(-745, 36.8)
 }
 
-required.columns.ab.binom.logit <- function() {
-  c('r'='responders', 'n'='sampleSize')
-}
-
-validate.data.binom.logit <- function(data.ab) {
-  stopifnot(all(data.ab[['sampleSize']] >= data.ab[['responders']]))
-  stopifnot(all(data.ab[['sampleSize']] > 0))
-  stopifnot(all(data.ab[['responders']] >= 0))
-}
+required.columns.ab.binom.logit <- required.columns.counts
+validate.data.binom.logit <- validate.data.counts

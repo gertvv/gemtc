@@ -1,15 +1,19 @@
+#' @include ll-helper.counts.R
+
 # Arm-level effect estimate (given a one-row data frame)
 # Returns mean, standard deviation.
-mtc.arm.mle.binom.log <- function(data) {
-  s <- unname(data['responders'] + 0.5)
-  f <- unname(data['sampleSize'] + 1)
+mtc.arm.mle.binom.log <- function(data, k=0.5) {
+  s <- unname(data['responders'] + k)
+  f <- unname(data['sampleSize'] + 2 * k)
   c('mean'=log(s/f), 'sd'=sqrt(1/s - 1/f))
 }
 
 # Relative effect estimate (given a two-row data frame)
-mtc.rel.mle.binom.log <- function(data) {
-  e1 <- mtc.arm.mle.binom.log(data[1,])
-  e2 <- mtc.arm.mle.binom.log(data[2,])
+mtc.rel.mle.binom.log <- function(data, correction.force=TRUE, correction.type="constant", correction.magnitude=1) {
+  correction <- correction.counts(data, correction.force, correction.type, correction.magnitude)
+
+  e1 <- mtc.arm.mle.binom.log(data[1,], correction[1])
+  e2 <- mtc.arm.mle.binom.log(data[2,], correction[2])
   c(e2['mean'] - e1['mean'], sqrt(e1['sd']^2 + e2['sd']^2))
 }
 
@@ -27,12 +31,5 @@ scale.limit.inits.binom.log <- function() {
   c(-745, -1E-7)
 }
 
-required.columns.ab.binom.log <- function() {
-  c('r'='responders', 'n'='sampleSize')
-}
-
-validate.data.binom.log <- function(data.ab) {
-  stopifnot(all(data.ab[['sampleSize']] >= data.ab[['responders']]))
-  stopifnot(all(data.ab[['sampleSize']] > 0))
-  stopifnot(all(data.ab[['responders']] >= 0))
-}
+required.columns.ab.binom.log <- required.columns.counts
+validate.data.binom.log <- validate.data.counts
