@@ -19,7 +19,9 @@ mtc.rel.mle.binom.log <- function(data, correction.force=TRUE, correction.type="
 
 mtc.code.likelihood.binom.log <- function() {
 "r[i, k] ~ dbin(p[i, k], n[i, k])
-log(p[i, k]) <- mu[i] + delta[i, k]"
+log(p[i, k]) <- mu[i] + delta.bound[i, k]
+delta.bound[i,k] <- equals(k, 1) * delta[i, k] + (1 - equals(k, 1)) * min(delta[i, k], -mu[i])
+"
 }
 
 scale.log.binom.log <- function() { TRUE }
