@@ -45,19 +45,24 @@ R.M. Turner, J. Davey, M.J. Clarke, S.G. Thompson, J.P.T. Higgins (2012),
 International Journal of Epidemiology 41(3):818-827.
 [\href{http://dx.doi.org/10.1093/ije/dys041}{doi:10.1093/ije/dys041}]
 
-
 G. van Valkenhoef, G. Lu, B. de Brock, H. Hillege, A.E. Ades, and N.J. Welton (2012),
 \emph{Automating network meta-analysis},
 Research Synthesis Methods 3(4):285-299.
 [\href{http://dx.doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
 
-G. van Valkenhoef, S. Dias, A.E. Ades, and N.J. Welton (2014a),
-\emph{Automated generation of node-splitting models for the assessment of inconsistency in network meta-analysis},
-draft manuscript.
+G. van Valkenhoef, S. Dias, A.E. Ades, and N.J. Welton (2015),
+\emph{Automated generation of node-splitting models for assessment of inconsistency in network meta-analysis},
+Research Synthesis Methods, accepted manuscript.
 
 G. van Valkenhoef et al. (2014b),
 \emph{Modeling inconsistency as heterogeneity in network meta-analysis},
 draft manuscript.
+
+D.E. Warn, S.G. Thompson, and D.J. Spiegelhalter (2002),
+\emph{Bayesian random effects meta-analysis of trials with binary outcomes: methods for the absolute risk difference and relative risk scales},
+Statistics in Medicine 21(11):1601-1623.
+[\href{http://dx.doi.org/10.1002/sim.1189}{doi:10.1002/sim.1189}]
+
 }
 \seealso{
 \code{\link{mtc.network}},

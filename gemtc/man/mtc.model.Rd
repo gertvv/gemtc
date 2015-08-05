@@ -63,6 +63,11 @@ These likelihood/links are supported:
   Required columns \code{[responders, sampleSize]}.
 
   Result: (log) odds ratio.}
+  \item{binom/log: for dichotomous data.
+
+  Required columns \code{[responders, sampleSize]}.
+
+  Result: (log) risk ratio.}
   \item{binom/cloglog: for rate (survival) data - equal follow-up in each arm.
 
   Required columns \code{[responders, sampleSize]}.
@@ -74,6 +79,7 @@ These likelihood/links are supported:
 
   Result: (log) hazard ratio.}
 }
+Most likelihood/links follow \link[=gemtc-package]{[Dias et al. 2013a]}, and the binom/log model follows \link[=gemtc-package]{[Warn et al. 2002]}.
 
 The following model types are supported:
 \itemize{
