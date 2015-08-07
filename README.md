@@ -1,9 +1,9 @@
 GeMTC R package
 ===============
 
-[GeMTC](http://drugis.org/gemtc) is an R package for Mixed Treatment
-Comparison (MTC) model generation. MTC is also known as Network
-Meta-Analysis.
+[GeMTC](http://drugis.org/gemtc) is an R package for Network
+Meta-Analysis (also know as Mixed Treatment Comparison, MTC) model
+generation.
 
 Building
 --------
@@ -12,7 +12,8 @@ Use `R CMD build gemtc` to build the R package. The `Makefile` offers a
 number of targets for convenience, but is entirely optional. Use `make
 install` to both build and install the package.
 
-You will need a working installation of rjags, BRugs, or R2WinBUGS.
+You will need a working installation of rjags, which in turn requires a
+working installation of JAGS.
 
 Testing
 -------
@@ -29,7 +30,7 @@ The `testthat` package is used for testing. Tests reside in the
    to catch bugs in existing functionality due to the introduction of
    new code. They should not take very long to run, and do not aim to
    produce reasonable posterior estimates. These can be run using `make
-   regress-jags`, `make regress-winbugs`, and `make regress-openbugs`.
+   regress`.
 
  - `validate`: valition tests verify the posterior summaries obtained by
    the R package against results that were previously (manually) checked
@@ -37,8 +38,7 @@ The `testthat` package is used for testing. Tests reside in the
    long to run, and are probabilistic in nature. Many individual
    comparisons are made, so a couple of failures over the entire test
    suite are to be expected. However, these should not be systematic.
-   These tests can be run using `make validate-jags`, `make
-   validate-winbugs`, and `make validate-openbugs`.
+   These tests can be run using `make validate`.
 
 License
 -------

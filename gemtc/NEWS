@@ -1,3 +1,29 @@
+gemtc 0.7
+=========
+
+Released ????
+
+Removed features:
+
+ * Support for WinBUGS and OpenBUGS was removed due to their various problems
+   (lack of portability, lack of support for selecting blocks  from arrays,
+   bugs in setting monitors, and the constant need to track minor differences
+   in syntax between JAGS and BUGS).
+
+New features:
+
+ * Added binom/log (risk ratio) support.
+
+ * Ability to generate n * n relative effects table, and to generate plots
+   directly from the table, bypassing the time-consuming computation of the
+   quantiles.
+
+Enhancements:
+
+ * Forest plots: allow treatment descriptions to be displayed instead of IDs.
+
+ * Network plot: make proportional line width optional.
+
 gemtc 0.6-2
 ===========
 

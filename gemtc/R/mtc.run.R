@@ -18,32 +18,15 @@ mtc.model.run <- function(network, type, ...) {
 # If is.na(sampler), a sampler will be chosen based on availability, in this order:
 # JAGS, BUGS. When the sampler is BUGS, BRugs or R2WinBUGS will be used.
 mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
-  bugs <- c('BRugs', 'R2WinBUGS')
-  jags <- c('rjags')
-  available <- if (is.na(sampler)) {
-    c(jags, bugs)
-  } else if (sampler == 'BUGS') {
-    bugs
-  } else if (sampler == 'JAGS') {
-    jags
-  } else {
-    c(sampler)
-  }
-
-  found <- NA
-  i <- 1
-  while (is.na(found) && i <= length(available)) {
-    if (requireNamespace(available[i], quietly=TRUE)) {
-      found <- available[i]
+  if (!is.na(sampler)) {
+    if (sampler %in% c("JAGS", "rjags")) {
+      warning("Setting the sampler is deprecated.")
+    } else {
+      stop("Setting the sampler is deprecated, only JAGS is supported.")
     }
-    i <- i + 1
   }
-  if (is.na(found)) {
-    stop(paste("Could not find a suitable sampler for", sampler))
-  }
-  sampler <- found
 
-  result <- mtc.sample(model, package=sampler, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
+  result <- mtc.sample(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 
   result <- list(
     samples=result$samples,
@@ -63,85 +46,39 @@ mtc.build.syntaxModel <- function(model) {
   )
 }
 
-# WinBUGS has a crazy bug where if you monitor delta[1,2] and delta[1,3], it
-# will monitor *all of* delta *twice*. This is a workaround that should
-# hopefully work most of the time. 
-filterWinBugsParameters <- function(params) {
-  unique(sub("([a-zA-Z0-9._]*)\\[.*", "\\1", params))
-}
-
-# Tell the user to use JAGS for data.re with 4+-arm trials
-detectBugsBug <- function(data) {
-  if (data[['ns.rm']] > 0 && any(data$na[(data[['ns.a']] + data[['ns.r2']]):data[['ns']]] > 3)) {
-    warning("A bug in WinBUGS and OpenBUGS prevents models with relative-effect data that have 4+-arm trials from being estimated. Please use JAGS instead. See https://github.com/gertvv/gemtc/issues/28 for more information.", immediate.=TRUE)
-  }
-}
-
-mtc.sample <- function(model, package, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
-  if (is.na(package) || !(package %in% c("rjags", "BRugs", "R2WinBUGS"))) {
-    stop(paste("Package", package, "not supported"))
-  }
-
-  # generate BUGS model
+mtc.sample <- function(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
+  # generate JAGS model
   syntax <- mtc.build.syntaxModel(model)
 
-  # compile & run BUGS model
+  # compile & run JAGS model
   file.model <- tempfile()
   cat(paste(syntax[['model']], "\n", collapse=""), file=file.model)
-  data <- if (identical(package, 'rjags')) {
-    # Note: n.iter must be specified *excluding* the n.adapt
-    rjags::load.module('dic')
-    jags <- rjags::jags.model(file.model, data=syntax[['data']],
-      inits=syntax[['inits']], n.chains=model[['n.chain']],
-      n.adapt=n.adapt)
-    samples <- rjags::jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
-      n.iter=n.iter, thin=thin)
 
-    # Calculate DIC
-    Dbar <- mean(as.numeric(samples$deviance))
-    pD <- mean(as.numeric(samples$pD))
+  # Note: n.iter must be specified *excluding* the n.adapt
+  rjags::load.module('dic')
+  jags <- rjags::jags.model(file.model, data=syntax[['data']],
+    inits=syntax[['inits']], n.chains=model[['n.chain']],
+    n.adapt=n.adapt)
+  samples <- rjags::jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
+    n.iter=n.iter, thin=thin)
 
-    # Convert samples to mcmc.list
-    samples <- lapply(samples, as.mcmc.list)
-    samples$pD <- NULL
-    varNames <- names(samples)
-    samples <- lapply(1:model[['n.chain']], function(i) {
-      chain <- lapply(samples, function(x) { x[[i]] })
-      chain <- do.call(cbind, chain)
-      colnames(chain) <- varNames
-      mcmc(chain, start=n.adapt+1, thin=thin)
-    })
-    list(samples=as.mcmc.list(samples),
-         dic=c('Mean deviance'=Dbar, 'Penalty (pD)'=pD, 'DIC'=Dbar+pD))
-  } else if (identical(package, 'BRugs')) {
-    detectBugsBug(syntax[['data']])
-    # Note: n.iter must be specified *excluding* the n.adapt
-    samples <- BRugs::BRugsFit(file.model, data=syntax[['data']],
-      inits=syntax[['inits']], numChains=model[['n.chain']],
-      parametersToSave=c(syntax[['vars']], 'deviance'), coda=TRUE, DIC=TRUE,
-      nBurnin=n.adapt, nIter=n.iter, nThin=thin)
-    list(samples=samples, dic=NULL)
-  } else if (identical(package, 'R2WinBUGS')) {
-    detectBugsBug(syntax[['data']])
-    # Note: codaPkg=TRUE does *not* return CODA objects, but rather
-    # the names of written CODA output files.
-    # Note: n.iter must be specified *including* the n.adapt
-    samples <- as.mcmc.list(R2WinBUGS::bugs(model.file=file.model, data=syntax[['data']],
-      inits=syntax[['inits']], n.chains=model[['n.chain']],
-      parameters.to.save=filterWinBugsParameters(syntax[['vars']]),
-      codaPkg=FALSE, DIC=TRUE,
-      n.burnin=n.adapt, n.iter=n.adapt+n.iter, n.thin=thin))
-    # Note: does not always work on Unix systems due to a problem
-    # with Wine not being able to access the R temporary path.
-    # Can be fixed by creating a temporary directory in the Wine
-    # C: drive:
-    #   mkdir ~/.wine/drive_c/bugstmp
-    # And then adding these arguments to the BUGS call:
-    #   working.directory='~/.wine/drive_c/bugstmp', clearWD=TRUE
-    # Or alternatively invoke R as:
-    #   TMPDIR=~/.wine/drive_c/bugstmp R
-    list(samples=samples, DIC=NULL)
-  }
+  # Calculate DIC
+  Dbar <- mean(as.numeric(samples$deviance))
+  pD <- mean(as.numeric(samples$pD))
+
+  # Convert samples to mcmc.list
+  samples <- lapply(samples, as.mcmc.list)
+  samples$pD <- NULL
+  varNames <- names(samples)
+  samples <- lapply(1:model[['n.chain']], function(i) {
+    chain <- lapply(samples, function(x) { x[[i]] })
+    chain <- do.call(cbind, chain)
+    colnames(chain) <- varNames
+    mcmc(chain, start=n.adapt+1, thin=thin)
+  })
+  data <- list(samples=as.mcmc.list(samples),
+        dic=c('Mean deviance'=Dbar, 'Penalty (pD)'=pD, 'DIC'=Dbar+pD))
+
   unlink(file.model)
 
   # return
