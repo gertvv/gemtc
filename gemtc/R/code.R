@@ -38,7 +38,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
   template <- template.block.sub(template, 'relativeEffectMatrix', relEffectMatrix)
 
   if (model[['data']][['ns.a']] > 0) {
-    sbPriors <- read.template('gemtc.study.baseline.priors.txt')
+    sbPriors <- ll.call('study.baseline.priors', model)
     template <- template.block.sub(template, 'studyBaselinePriors', sbPriors)
   } else {
     template <- template.block.sub(template, 'studyBaselinePriors', '## OMITTED')

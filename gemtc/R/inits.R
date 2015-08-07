@@ -63,7 +63,6 @@ mtc.init.pooled.effect <- function(model, t1, t2, om.scale) {
     study.mle
   }
 
-
   study.mle <- NULL
   data.ab <- model[['network']][['data.ab']]
   if (!is.null(data.ab)) {
@@ -143,11 +142,11 @@ mtc.init <- function(model) {
   # Separate the initial values per chain
   lapply(1:model[['n.chain']], function(chain) {
     c(
-      if (!is.null(data.ab)) {
-        list(mu = mu[chain, , drop=TRUE])
-      } else {
-        list()
-      },
+      # if (!is.null(data.ab)) {
+      #   list(mu = mu[chain, , drop=TRUE])
+      # } else {
+      #   list()
+      # },
       if (model[['linearModel']] == 'random') {
         type <- model[['hy.prior']][['type']]
         c(

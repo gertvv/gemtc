@@ -33,3 +33,10 @@ scale.limit.inits.binom.cloglog <- function() {
 
 required.columns.ab.binom.cloglog <- required.columns.counts
 validate.data.binom.cloglog <- validate.data.counts
+study.baseline.priors.binom.cloglog <- function() {
+"for (i in 1:ns.a) {
+  mu[i] <- cloglog(p.base[i])
+  p.base[i] ~ dunif(0, 1)
+}
+"
+}

@@ -52,3 +52,11 @@ validate.data.poisson.log <- function(data.ab) {
   stopifnot(all(data.ab[['responders']] >= 0))
   stopifnot(all(data.ab[['exposure']] >= 0))
 }
+
+study.baseline.priors.poisson.log <- function() {
+"for (i in 1:ns.a) {
+  mu[i] <- log(lambda.base[i])
+  lambda.base[i] ~ dgamma(0.001, 0.001)
+}
+"
+}

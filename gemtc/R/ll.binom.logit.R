@@ -34,3 +34,11 @@ scale.limit.inits.binom.logit <- function() {
 
 required.columns.ab.binom.logit <- required.columns.counts
 validate.data.binom.logit <- validate.data.counts
+
+study.baseline.priors.binom.logit <- function() {
+"for (i in 1:ns.a) {
+  mu[i] <- logit(p.base[i])
+  p.base[i] ~ dunif(0, 1)
+}
+"
+}

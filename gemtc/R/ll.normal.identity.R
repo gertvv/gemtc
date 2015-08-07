@@ -30,3 +30,10 @@ required.columns.ab.normal.identity <- function() {
 validate.data.normal.identity <- function(data.ab) {
   stopifnot(all(data.ab[['std.err']] > 0))
 }
+
+study.baseline.priors.normal.identity <- function() {
+"for (i in 1:ns.a) {
+  mu[i] ~ dnorm(0, prior.prec)
+}
+"
+}

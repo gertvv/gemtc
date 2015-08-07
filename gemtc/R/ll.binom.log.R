@@ -19,8 +19,7 @@ mtc.rel.mle.binom.log <- function(data, correction.force=TRUE, correction.type="
 
 mtc.code.likelihood.binom.log <- function() {
 "r[i, k] ~ dbin(p[i, k], n[i, k])
-log(p[i, k]) <- mu[i] + delta.bound[i, k]
-delta.bound[i,k] <- equals(k, 1) * delta[i, k] + (1 - equals(k, 1)) * min(delta[i, k], -mu[i])
+log(p[i, k]) <- min(mu[i] + delta[i, k], -1E-16)
 "
 }
 
@@ -35,3 +34,11 @@ scale.limit.inits.binom.log <- function() {
 
 required.columns.ab.binom.log <- required.columns.counts
 validate.data.binom.log <- validate.data.counts
+
+study.baseline.priors.binom.log <- function() {
+"for (i in 1:ns.a) {
+  mu[i] <- log(p.base[i])
+  p.base[i] ~ dunif(0, 1)
+}
+"
+}
