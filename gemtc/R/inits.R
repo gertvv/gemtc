@@ -1,27 +1,27 @@
-# Limit initial values to allowed range
-mtc.init.limit <- function(model, value, offset=rep(0.0, model[['n.chain']])) {
-  limits <- ll.call("scale.limit.inits", model)
-  too.small <- (value + offset) < limits[1]
-  too.large <- (value + offset) > limits[2]
-  value[too.small] <- limits[1] - offset[too.small]
-  value[too.large] <- limits[2] - offset[too.large]
-  value
+# Find upper and lower bounds for the baseline value given the delta values
+mtc.init.baseline.limit <- function(model, delta) {
+  limits <- ll.call("inits.info", model)[['limits']]
+  c(max(limits[1] - c(0, delta), na.rm=TRUE),
+    min(limits[2] - c(0, delta), na.rm=TRUE))
 }
 
 # Initial values for study-level absolute treatment effects based on (adjusted) MLE
-mtc.init.baseline.effect <- function(model, study, treatment) {
+mtc.init.baseline.effect <- function(model, study, treatment, delta) {
   data.ab <- model[['network']][['data.ab']]
   data <- data.ab[data.ab[['study']] == study & data.ab[['treatment']] == treatment, , drop=TRUE]
   data <- unlist(data[ll.call("required.columns.ab", model)])
   mle <- ll.call("mtc.arm.mle", model, data)
-  mtc.init.limit(
-    model,
-    rnorm(model[['n.chain']], mle['mean'], model[['var.scale']] * mle['sd'])
-  )
+
+  limits <- sapply(1:model[['n.chain']], function(i) {
+    mtc.init.baseline.limit(
+      model, delta[i, ]
+    )
+  })
+  truncnorm::rtruncnorm(n=model[['n.chain']], mean=mle['mean'], sd=model[['var.scale']] * mle['sd'], a=limits[1,], b=limits[2,])
 }
 
 # Initial values for study-level relative effects based on (adjusted) MLE
-mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model[['n.chain']])) {
+mtc.init.relative.effect <- function(model, study, t1, t2) {
   data <- model[['network']][['data.ab']]
   if (!is.null(data) && study %in% data[['study']]) {
     columns <- ll.call("required.columns.ab", model)
@@ -32,11 +32,7 @@ mtc.init.relative.effect <- function(model, study, t1, t2, mu=rep(0.0, model[['n
     data <- data[data[['study']] == study & data[['treatment']] == t2, , drop=TRUE]
     mle <- c('mean'=data[['diff']], 'sd'=data[['std.err']])
   }
-  mtc.init.limit(
-    model,
-    rnorm(model[['n.chain']], mle['mean'], model[['var.scale']] * mle['sd']),
-    mu
-  )
+  rnorm(model[['n.chain']], mle['mean'], model[['var.scale']] * mle['sd'])
 }
 
 # Initial values for pooled effect (basic parameter) based on
@@ -107,25 +103,7 @@ mtc.init <- function(model) {
   s.mat <- arm.index.matrix(model[['network']])
   studies <- rle(as.character(data.ab[['study']]))[['values']]
 
-  # Generate initial values for each parameter
-  mu <- sapply(studies, function(study) {
-    mtc.init.baseline.effect(model, study, data.ab[['treatment']][s.mat[study, 1, drop=TRUE]])
-  })
-  if (!is.matrix(mu)) {
-    mu <- matrix(mu, nrow=model[['n.chain']], ncol=length(studies))
-  }
-  studies <- c(studies, rle(as.character(data.re[['study']]))[['values']])
-  ts <- c(as.character(data.ab[['treatment']]), as.character(data.re[['treatment']]))
-  delta <- lapply(studies, function(study) {
-    sapply(1:ncol(s.mat), function(i) {
-      if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model[['n.chain']])
-      else mtc.init.relative.effect(
-           model, study,
-           ts[s.mat[study, 1, drop=TRUE]],
-           ts[s.mat[study, i, drop=TRUE]],
-           if (study %in% colnames(mu)) { mu[, study, drop=TRUE] } else { rep(0.0, model[['n.chain']]) })
-    })
-  })
+  # initial values for the relative effects and heterogeneity
   graph <- if(!is.null(model[['tree']])) model[['tree']] else model[['graph']]
   if (!is.null(graph)) {
     params <- mtc.basic.parameters(model)
@@ -139,14 +117,52 @@ mtc.init <- function(model) {
     hy <- c()
   }
 
+  # precompute all relative effects (for fixed effect models)
+  ts <- model[['network']][['treatments']][['id']]
+  effects <- d %*% tree.relative.effect(model[['tree']], t1=rep(ts, each=length(ts)), t2=rep(ts, times=length(ts)))
+  # initial values for the random effects
+  studies <- c(studies, rle(as.character(data.re[['study']]))[['values']])
+  ts <- c(as.character(data.ab[['treatment']]), as.character(data.re[['treatment']]))
+  delta <- lapply(studies, function(study) {
+    sapply(1:ncol(s.mat), function(i) {
+      if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model[['n.chain']])
+      else if (model[['linearModel']] == "random") {
+        mtc.init.relative.effect(
+           model, study,
+           ts[s.mat[study, 1, drop=TRUE]],
+           ts[s.mat[study, i, drop=TRUE]])
+      } else {
+        t1 <- ts[s.mat[study, 1, drop=TRUE]]
+        t2 <- ts[s.mat[study, i, drop=TRUE]]
+        if (is.na(t2)) {
+          rep(NA, model[['n.chain']])
+        } else {
+          effects[, paste('d', t1, t2, sep='.'), drop=TRUE]
+        }
+      }
+    })
+  })
+
+  # Generate initial values for the baseline effect
+  # These must be restricted so as not to generate invalid values for the likelihood
+  mu <- sapply(studies, function(study) {
+    mtc.init.baseline.effect(model, study, data.ab[['treatment']][s.mat[study, 1, drop=TRUE]], delta[[which(studies==study)]])
+  })
+  if (!is.matrix(mu)) {
+    mu <- matrix(mu, nrow=model[['n.chain']], ncol=length(studies))
+  }
+
   # Separate the initial values per chain
   lapply(1:model[['n.chain']], function(chain) {
     c(
-      # if (!is.null(data.ab)) {
-      #   list(mu = mu[chain, , drop=TRUE])
-      # } else {
-      #   list()
-      # },
+      if (!is.null(data.ab)) {
+        info <- ll.call('inits.info', model)
+        rval <- list()
+        rval[[info[['param']]]] <- info[['transform']](mu[chain, , drop=TRUE])
+        rval
+      } else {
+        list()
+      },
       if (model[['linearModel']] == 'random') {
         type <- model[['hy.prior']][['type']]
         c(

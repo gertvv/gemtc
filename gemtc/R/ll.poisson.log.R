@@ -40,8 +40,12 @@ scale.name.poisson.log <- function() { "Hazard Ratio" }
 
 # Initial values outside this range result in rate 0 for the
 # poisson, which may lead to BUGS/JAGS rejecting the data
-scale.limit.inits.poisson.log <- function() {
-  c(-745, +Inf)
+scale.limit.inits.poisson.log <- function() { c(-745, +Inf) }
+inits.info.poisson.log <- function() {
+  list(
+    limits=c(-745, +Inf),
+    param='lambda.base',
+    transform=exp)
 }
 
 required.columns.ab.poisson.log <- function() {

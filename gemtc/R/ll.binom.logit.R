@@ -28,8 +28,11 @@ scale.name.binom.logit <- function() { "Odds Ratio" }
 
 # Initial values outside this range result in probability 0 or 1 for the
 # binomial, which may lead to BUGS/JAGS rejecting the data
-scale.limit.inits.binom.logit <- function() {
-  c(-745, 36.8)
+inits.info.binom.logit <- function() {
+  list(
+    limits=c(-745, 36.8),
+    param='mu',
+    transform=identity)
 }
 
 required.columns.ab.binom.logit <- required.columns.counts
@@ -37,8 +40,7 @@ validate.data.binom.logit <- validate.data.counts
 
 study.baseline.priors.binom.logit <- function() {
 "for (i in 1:ns.a) {
-  mu[i] <- logit(p.base[i])
-  p.base[i] ~ dunif(0, 1)
+  mu[i] ~ dnorm(0, prior.prec)
 }
 "
 }

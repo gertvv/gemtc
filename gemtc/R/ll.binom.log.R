@@ -28,8 +28,11 @@ scale.name.binom.log <- function() { "Risk Ratio" }
 
 # Initial values outside this range result in probability 0 or 1 for the
 # binomial, which may lead to BUGS/JAGS rejecting the data
-scale.limit.inits.binom.log <- function() {
-  c(-745, -1E-7)
+inits.info.binom.log <- function() {
+  list(
+    limits=c(-745, -1E-7),
+    param='p.base',
+    transform=exp)
 }
 
 required.columns.ab.binom.log <- required.columns.counts

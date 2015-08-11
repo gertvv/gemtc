@@ -19,7 +19,8 @@ Imports:
     stats,
     utils,
     grid,
-    rjags (>= 3-0)
+    rjags (>= 3-0),
+    truncnorm
 Suggests:
     testthat (>= 0.8),
     Matrix

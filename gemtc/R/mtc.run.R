@@ -57,7 +57,7 @@ mtc.sample <- function(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
   # Note: n.iter must be specified *excluding* the n.adapt
   rjags::load.module('dic')
   jags <- rjags::jags.model(file.model, data=syntax[['data']],
-    #inits=syntax[['inits']],
+    inits=syntax[['inits']],
     n.chains=model[['n.chain']],
     n.adapt=n.adapt)
   samples <- rjags::jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
