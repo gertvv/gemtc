@@ -37,8 +37,8 @@ mtc.model.nodesplit <- function(model, t1, t2) {
     tree
   }
   tree.indirect <- connect.mds.forest(mtc.network.graph(network.indirect))
-  model[['graph']] <- style.tree(tree.indirect)
-  model[['graph']] <- model[['graph']] + edge(c(t1, t2))
+  model[['tree.indirect']] <- style.tree(tree.indirect)
+  model[['graph']] <- model[['tree.indirect']] + edge(c(t1, t2))
   model[['graph']] <- set.edge.attribute(model[['graph']], 'arrow.mode', index=length(E(model[['graph']])), value=2)
   model[['graph']] <- set.edge.attribute(model[['graph']], 'color', index=length(E(model[['graph']])), value='black')
   model[['graph']] <- set.edge.attribute(model[['graph']], 'lty', index=length(E(model[['graph']])), value=2)
@@ -62,7 +62,21 @@ mtc.model.nodesplit <- function(model, t1, t2) {
 }
 
 mtc.model.name.nodesplit <- function(model) {
-  paste("node-split (", model$t1, " / ", model$t2, ")", sep="")
+  paste("node-split (", model[['t1']], " / ", model[['t2']], ")", sep="")
+}
+
+func.param.matrix.nodesplit <- function(model, t1, t2) {
+  base <- tree.relative.effect(model[['tree.indirect']], t1, t2)
+  m <- rbind(base, rep(0, ncol(base)))
+  param.pos <- paste("d", model[['split']][1], model[['split']][2], sep=".")
+  param.neg <- paste("d", model[['split']][2], model[['split']][1], sep=".")
+  if (param.pos %in% colnames(base)) {
+    m[, param.pos] <- c(rep(0, nrow(base)), 1)
+  }
+  if (param.neg %in% colnames(base)) {
+    m[, param.neg] <- c(rep(0, nrow(base)), -1)
+  }
+  m
 }
 
 nodesplit.relative.effect.matrix <- function(model, tree) {

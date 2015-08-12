@@ -51,6 +51,38 @@ mtc.model.name.ume <- function(model) {
   "unrelated mean effects"
 }
 
+func.param.matrix.ume <- function(model, t1, t2) {
+  g <- model[['graph']]
+  if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
+    t2 <- V(g)[V(g) != as.numeric(t1)]
+  }
+  if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
+  if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
+  pairs <- matrix(c(t1, t2), ncol=2)
+  paths <- apply(pairs, 1, function(rel) {
+    edge_pos <- igraph::get.edge.ids(model[['graph']], rel)
+    edge_neg <- igraph::get.edge.ids(model[['graph']], rev(rel))
+    edge <- max(edge_pos, edge_neg)
+    if (!edge) {
+      stop(paste("The requested comparison ",
+             V(g)[rel[2]]$name, " vs ", V(g)[rel[1]]$name,
+             " is not present in the UME model."))
+    }
+    expr <- rep(0, length(igraph::E(g)))
+    expr[edge] <- if (edge_pos) 1 else -1
+    expr})
+
+  # Ensure paths is a matrix, since apply() will simplify to a vector if
+  # either ncol==1 or nrow==1
+  paths <- matrix(as.numeric(paths), ncol=length(t1), nrow=length(E(g)))
+
+  colnames(paths) <-  apply(pairs, 1, function(pair) {
+    pair <- V(g)[pair]$name
+    paste('d', pair[1], pair[2], sep='.')
+  })
+  paths
+}
+
 sparse.relative.effect.matrix <- function(model, comparisons) {
   ts <- model[['network']][['treatments']][['id']]
   nt <- length(ts)

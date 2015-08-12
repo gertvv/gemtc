@@ -117,12 +117,11 @@ mtc.init <- function(model) {
     hy <- c()
   }
 
-  # precompute all relative effects (for fixed effect models)
-  ts <- model[['network']][['treatments']][['id']]
-  effects <- d %*% tree.relative.effect(model[['tree']], t1=rep(ts, each=length(ts)), t2=rep(ts, times=length(ts)))
   # initial values for the random effects
   studies <- c(studies, rle(as.character(data.re[['study']]))[['values']])
   ts <- c(as.character(data.ab[['treatment']]), as.character(data.re[['treatment']]))
+  comparisons <- mtc.comparisons.baseline(model[['network']])
+  effects <- d %*% mtc.model.call('func.param.matrix', model, t1=comparisons[['t1']], t2=comparisons[['t2']])
   delta <- lapply(studies, function(study) {
     sapply(1:ncol(s.mat), function(i) {
       if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model[['n.chain']])

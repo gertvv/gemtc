@@ -29,6 +29,10 @@ mtc.model.name.consistency <- function(model) {
   "consistency"
 }
 
+func.param.matrix.consistency <- function(model, t1, t2) {
+  tree.relative.effect(model[['tree']], t1, t2)
+}
+
 consistency.relative.effect.matrix <- function(model) {
   # Generate list of linear expressions
   params <- mtc.basic.parameters(model)

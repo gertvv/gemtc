@@ -52,7 +52,7 @@ mtc.model.call <- function(fn, model, ...) {
 }
 
 mtc.model.defined <- function(model) {
-  fns <- c('mtc.model', 'mtc.model.name')
+  fns <- c('mtc.model', 'mtc.model.name', 'func.param.matrix')
   fns <- paste(fns, model[['type']], sep='.')
   all(exists(fns, mode='function'))
 }
