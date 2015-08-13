@@ -110,10 +110,14 @@ mtc.init <- function(model) {
       v <- ends(graph, e, names=FALSE)
       mtc.init.pooled.effect(model, V(graph)[v[1]]$name, V(graph)[v[2]]$name, model[['om.scale']])
     })
-    hy <- mtc.init.hy(model[['hy.prior']], model[['om.scale']], model[['n.chain']])
   } else {
     params <- c()
-    hy <- c()
+  }
+
+  hy <- if (model[['linearModel']] == 'random') {
+    mtc.init.hy(model[['hy.prior']], model[['om.scale']], model[['n.chain']])
+  } else {
+    c()
   }
 
   studies.ab <- rle(as.character(data.ab[['study']]))[['values']]
