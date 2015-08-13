@@ -25,12 +25,14 @@ study treatment diff std.err
 8     C         4.0  0.19'), header=T)
   network <- mtc.network(data.ab, data.re=data.re)
   model <- list(network=network,
+                type='consistency',
                 likelihood='normal',
                 link='identity',
                 om.scale=2.5,
                 n.chain=4,
                 var.scale=2.5,
                 linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
                 hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
   inits <- mtc.init(model)
   whereNA <- rbind(
@@ -47,6 +49,10 @@ study treatment diff std.err
   expect_that(is.na(inits[[2]]$delta), equals(is.na(whereNA)))
   expect_that(is.na(inits[[3]]$delta), equals(is.na(whereNA)))
   expect_that(is.na(inits[[4]]$delta), equals(is.na(whereNA)))
+  expect_equal(3, length(inits[[1]]$mu))
+  expect_equal(3, length(inits[[2]]$mu))
+  expect_equal(3, length(inits[[3]]$mu))
+  expect_equal(3, length(inits[[4]]$mu))
 })
 
 test_that("mtc.model.inits has correct heterogeneity parameter", {
@@ -60,6 +66,7 @@ study treatment mean std.err
 3     C         14.2 0.20'), header=T)
   network <- mtc.network(data.ab)
   model <- list(network=network,
+                type='consistency',
                 likelihood='normal',
                 link='identity',
                 om.scale=0.1,

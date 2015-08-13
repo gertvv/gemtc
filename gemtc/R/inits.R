@@ -101,7 +101,6 @@ mtc.init <- function(model) {
   data.ab <- model[['network']][['data.ab']]
   data.re <- model[['network']][['data.re']]
   s.mat <- arm.index.matrix(model[['network']])
-  studies <- rle(as.character(data.ab[['study']]))[['values']]
 
   # initial values for the relative effects and heterogeneity
   graph <- if(!is.null(model[['tree']])) model[['tree']] else model[['graph']]
@@ -117,34 +116,50 @@ mtc.init <- function(model) {
     hy <- c()
   }
 
+  studies.ab <- rle(as.character(data.ab[['study']]))[['values']]
+  studies.re <- rle(as.character(data.re[['study']]))[['values']]
+  studies <- c(studies.ab, studies.re)
+
   # initial values for the random effects
-  studies <- c(studies, rle(as.character(data.re[['study']]))[['values']])
+  # the fixed effect models don't need initial values for the random effects,
+  # but the values must be computed from the basic parameters to be able to
+  # restrict the initial values for the baseline effect correctly.
   ts <- c(as.character(data.ab[['treatment']]), as.character(data.re[['treatment']]))
-  comparisons <- mtc.comparisons.baseline(model[['network']])
-  effects <- d %*% mtc.model.call('func.param.matrix', model, t1=comparisons[['t1']], t2=comparisons[['t2']])
-  delta <- lapply(studies, function(study) {
-    sapply(1:ncol(s.mat), function(i) {
-      if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model[['n.chain']])
-      else if (model[['linearModel']] == "random") {
-        mtc.init.relative.effect(
-           model, study,
-           ts[s.mat[study, 1, drop=TRUE]],
-           ts[s.mat[study, i, drop=TRUE]])
-      } else {
-        t1 <- ts[s.mat[study, 1, drop=TRUE]]
-        t2 <- ts[s.mat[study, i, drop=TRUE]]
-        if (is.na(t2)) {
-          rep(NA, model[['n.chain']])
-        } else {
-          effects[, paste('d', t1, t2, sep='.'), drop=TRUE]
-        }
-      }
+  delta <- if (model[['linearModel']] == 'random') {
+    lapply(studies, function(study) {
+      sapply(1:ncol(s.mat), function(i) {
+        if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model[['n.chain']])
+        else
+          mtc.init.relative.effect(
+            model, study,
+            ts[s.mat[study, 1, drop=TRUE]],
+            ts[s.mat[study, i, drop=TRUE]])
+      })
     })
-  })
+  } else if (model[['linearModel']] == 'fixed' && !is.null(graph)) {
+    comparisons <- mtc.comparisons.baseline(model[['network']])
+    effects <- d %*% mtc.model.call('func.param.matrix', model, t1=comparisons[['t1']], t2=comparisons[['t2']])
+    lapply(studies, function(study) {
+      sapply(1:ncol(s.mat), function(i) {
+        if (i == 1 || is.na(s.mat[study, i, drop=TRUE])) rep(NA, model[['n.chain']])
+        else {
+          t1 <- ts[s.mat[study, 1, drop=TRUE]]
+          t2 <- ts[s.mat[study, i, drop=TRUE]]
+          if (is.na(t2)) {
+            rep(NA, model[['n.chain']])
+          } else {
+            effects[, paste('d', t1, t2, sep='.'), drop=TRUE]
+          }
+        }
+      })
+    })
+  } else {
+    c()
+  }
 
   # Generate initial values for the baseline effect
   # These must be restricted so as not to generate invalid values for the likelihood
-  mu <- sapply(studies, function(study) {
+  mu <- sapply(studies.ab, function(study) {
     mtc.init.baseline.effect(model, study, data.ab[['treatment']][s.mat[study, 1, drop=TRUE]], delta[[which(studies==study)]])
   })
   if (!is.matrix(mu)) {
