@@ -6,4 +6,7 @@ for(i in (ns.a + ns.r2 + 1):(ns.a + ns.r2 + ns.rm)) {
 	}
 	Omega[i,1:(na[i]-1),1:(na[i]-1)] <- inverse(Sigma[i,1:(na[i]-1),1:(na[i]-1)])
 	m[i,2:na[i]] ~ dmnorm(delta[i,2:na[i]],Omega[i,1:(na[i]-1),1:(na[i]-1)])
+
+	mdiff[i, 2:na[i]] <- m[i, 2:na[i]] - delta[i, 2:na[i]]
+	dev[i, 1] <- t(mdiff[i, 2:na[i]]) %*% Omega[i, 1:(na[i]-1),1:(na[i]-1)] %*% mdiff[i, 2:na[i]]
 }

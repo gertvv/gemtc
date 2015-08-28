@@ -1,4 +1,5 @@
 #' @include ll-helper.counts.R
+#' @include likelihoods.R
 
 # Arm-level effect estimate (given a one-row data frame)
 # Returns mean, standard deviation.
@@ -18,9 +19,8 @@ mtc.rel.mle.binom.log <- function(data, correction.force=TRUE, correction.type="
 }
 
 mtc.code.likelihood.binom.log <- function() {
-"r[i, k] ~ dbin(p[i, k], n[i, k])
-log(p[i, k]) <- min(mu[i] + delta[i, k], -1E-16)
-"
+paste("r[i, k] ~ dbin(p[i, k], n[i, k])
+log(p[i, k]) <- min(mu[i] + delta[i, k], -1E-16)", deviance.binom, sep="\n")
 }
 
 scale.log.binom.log <- function() { TRUE }

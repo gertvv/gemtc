@@ -1,4 +1,6 @@
 for(i in (ns.a + 1):(ns.a + ns.r2)) {
-	m[i,2] ~ dnorm(delta[i,2], prec[i,2])
-	prec[i,2] <- pow(e[i,2], -2)
+	m[i, 2] ~ dnorm(delta[i, 2], prec[i, 2])
+	prec[i, 2] <- pow(e[i, 2], -2)
+
+	dev[i, 1] <- pow(m[i, 2] - delta[i, 2], 2) * prec[i, 2]
 }

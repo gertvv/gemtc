@@ -1,3 +1,6 @@
+#' @include ll-helper.counts.R
+#' @include likelihoods.R
+
 # Arm-level effect estimate (given a one-row data frame)
 # Returns mean, standard deviation.
 mtc.arm.mle.binom.cloglog <- function(data, k=0.5) {
@@ -18,8 +21,8 @@ mtc.rel.mle.binom.cloglog <- function(data, correction.force=TRUE, correction.ty
 }
 
 mtc.code.likelihood.binom.cloglog <- function() {
-"r[i, k] ~ dbin(p[i, k], n[i, k])
-cloglog(p[i, k]) <- mu[i] + delta[i, k]"
+paste("r[i, k] ~ dbin(p[i, k], n[i, k])
+cloglog(p[i, k]) <- mu[i] + delta[i, k]", deviance.binom, sep="\n")
 }
 
 scale.log.binom.cloglog <- function() { TRUE }

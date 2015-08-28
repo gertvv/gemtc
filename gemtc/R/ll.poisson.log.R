@@ -1,3 +1,5 @@
+#' @include likelihoods.R
+
 # Arm-level effect estimate (given a one-row data frame)
 # Returns mean, standard deviation.
 mtc.arm.mle.poisson.log <- function(data, k=0.5) {
@@ -30,9 +32,9 @@ mtc.rel.mle.poisson.log <- function(data, correction.force=TRUE, correction.type
 }
 
 mtc.code.likelihood.poisson.log <- function() {
-"r[i, k] ~ dpois(theta[i, k])
+paste("r[i, k] ~ dpois(theta[i, k])
 theta[i, k] <- E[i, k] * lambda[i, k]
-log(lambda[i, k]) <- mu[i] + delta[i, k]"
+log(lambda[i, k]) <- mu[i] + delta[i, k]", deviance.poisson, sep="\n")
 }
 
 scale.log.poisson.log <- function() { TRUE }

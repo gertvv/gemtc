@@ -32,6 +32,7 @@ Collate:
     'code.R'
     'data.R'
     'inits.R'
+    'likelihoods.R'
     'll-helper.counts.R'
     'll.binom.cloglog.R'
     'll.binom.log.R'

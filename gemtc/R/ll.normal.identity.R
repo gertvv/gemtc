@@ -1,3 +1,5 @@
+#' @include likelihoods.R
+
 # Arm-level effect estimate (given a one-row data frame)
 mtc.arm.mle.normal.identity <- function(data, k=0.5) {
   c('mean'=as.numeric(data['mean']), 'sd'=as.numeric(data['std.err']))
@@ -11,9 +13,9 @@ mtc.rel.mle.normal.identity <- function(data, correction.force=TRUE, correction.
 }
 
 mtc.code.likelihood.normal.identity <- function() {
-"m[i, k] ~ dnorm(theta[i, k], prec[i, k])
+paste("m[i, k] ~ dnorm(theta[i, k], prec[i, k])
 theta[i, k] <- mu[i] + delta[i, k]
-prec[i, k] <- pow(e[i, k], -2)"
+prec[i, k] <- pow(e[i, k], -2)", deviance.normal, sep="\n")
 }
 
 scale.log.normal.identity <- function() { FALSE }
