@@ -61,7 +61,9 @@ mtc.model <- function(network, type="consistency",
     factor=2.5, n.chain=4,
     likelihood=NULL, link=NULL,
     linearModel="random",
-    om.scale=NULL, hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+    om.scale=NULL,
+    hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+    dic=TRUE,
     ...) {
   if (!inherits(network, "mtc.network")) {
     stop('Given network is not an mtc.network')
@@ -98,7 +100,8 @@ mtc.model <- function(network, type="consistency",
     linearModel = linearModel,
     network = network,
     n.chain = n.chain,
-    var.scale = factor)
+    var.scale = factor,
+    dic = dic)
 
   if (!mtc.model.defined(model)) {
     stop(paste(type, 'is not an MTC model type.'))

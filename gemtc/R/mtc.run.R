@@ -1,3 +1,5 @@
+#' @include deviance.R
+
 mtc.model.run <- function(network, type, ...) {
   runNames <- names(formals(mtc.run))
   runNames <- runNames[runNames != 'model']
@@ -28,11 +30,7 @@ mtc.run <- function(model, sampler=NA, n.adapt=5000, n.iter=20000, thin=1) {
 
   result <- mtc.sample(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
 
-  result <- list(
-    samples=result$samples,
-    dic=result$dic,
-    model=model,
-    sampler=sampler)
+  result <- c(result, list(model = model))
   class(result) <- "mtc.result"
   result
 }
@@ -54,34 +52,27 @@ mtc.sample <- function(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
   file.model <- tempfile()
   cat(paste(syntax[['model']], "\n", collapse=""), file=file.model)
 
+  vars <- syntax[['vars']]
+  if (model$dic) {
+    dic.vars <- deviance.monitors(model)
+    dic.vars <- dic.vars[!(dic.vars %in% vars)] # jags complains about redundant variables
+    vars <- c(vars, dic.vars)
+  }
+
   # Note: n.iter must be specified *excluding* the n.adapt
-  rjags::load.module('dic')
   jags <- rjags::jags.model(file.model, data=syntax[['data']],
     inits=syntax[['inits']],
     n.chains=model[['n.chain']],
     n.adapt=n.adapt)
-  samples <- rjags::jags.samples(jags, variable.names=c(syntax[['vars']], 'deviance', 'pD'),
-    n.iter=n.iter, thin=thin)
-
-  # Calculate DIC
-  Dbar <- mean(as.numeric(samples$deviance))
-  pD <- mean(as.numeric(samples$pD))
-
-  # Convert samples to mcmc.list
-  samples <- lapply(samples, as.mcmc.list)
-  samples$pD <- NULL
-  varNames <- names(samples)
-  samples <- lapply(1:model[['n.chain']], function(i) {
-    chain <- lapply(samples, function(x) { x[[i]] })
-    chain <- do.call(cbind, chain)
-    colnames(chain) <- varNames
-    mcmc(chain, start=n.adapt+1, thin=thin)
-  })
-  data <- list(samples=as.mcmc.list(samples),
-        dic=c('Mean deviance'=Dbar, 'Penalty (pD)'=pD, 'DIC'=Dbar+pD))
-
+  samples <- rjags::coda.samples(jags, variable.names=vars,
+                                 n.iter=n.iter, thin=thin)
   unlink(file.model)
 
+  deviance.stats <- if (model[['dic']]) {
+    apply(as.matrix(samples[, deviance.monitors(model), drop=FALSE]), 2, mean)
+  }
+  samples <- samples[, syntax[['vars']], drop=FALSE]
+
   # return
-  data
+  list(samples=samples, deviance=computeDeviance(model, deviance.stats))
 }

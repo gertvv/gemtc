@@ -31,6 +31,7 @@ Collate:
     'blobbogram.R'
     'code.R'
     'data.R'
+    'deviance.R'
     'inits.R'
     'likelihoods.R'
     'll-helper.counts.R'

@@ -22,8 +22,11 @@ mtc.rel.mle.binom.cloglog <- function(data, correction.force=TRUE, correction.ty
 
 mtc.code.likelihood.binom.cloglog <- function() {
 paste("r[i, k] ~ dbin(p[i, k], n[i, k])
-cloglog(p[i, k]) <- mu[i] + delta[i, k]", deviance.binom, sep="\n")
+cloglog(p[i, k]) <- mu[i] + delta[i, k]", deviance.code.binom, sep="\n")
 }
+
+fitted.values.parameter.binom.cloglog <- fitted.values.parameter.binom
+deviance.binom.cloglog <- deviance.binom
 
 scale.log.binom.cloglog <- function() { TRUE }
 scale.name.binom.cloglog <- function() { "Hazard Ratio" }

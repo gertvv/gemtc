@@ -34,8 +34,11 @@ mtc.rel.mle.poisson.log <- function(data, correction.force=TRUE, correction.type
 mtc.code.likelihood.poisson.log <- function() {
 paste("r[i, k] ~ dpois(theta[i, k])
 theta[i, k] <- E[i, k] * lambda[i, k]
-log(lambda[i, k]) <- mu[i] + delta[i, k]", deviance.poisson, sep="\n")
+log(lambda[i, k]) <- mu[i] + delta[i, k]", deviance.code.poisson, sep="\n")
 }
+
+fitted.values.parameter.poisson.log <- fitted.values.parameter.poisson
+deviance.poisson.log <- deviance.poisson
 
 scale.log.poisson.log <- function() { TRUE }
 scale.name.poisson.log <- function() { "Hazard Ratio" }

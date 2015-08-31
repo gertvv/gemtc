@@ -15,8 +15,11 @@ mtc.rel.mle.normal.identity <- function(data, correction.force=TRUE, correction.
 mtc.code.likelihood.normal.identity <- function() {
 paste("m[i, k] ~ dnorm(theta[i, k], prec[i, k])
 theta[i, k] <- mu[i] + delta[i, k]
-prec[i, k] <- pow(e[i, k], -2)", deviance.normal, sep="\n")
+prec[i, k] <- pow(e[i, k], -2)", deviance.code.normal, sep="\n")
 }
+
+fitted.values.parameter.normal.identity <- fitted.values.parameter.normal
+deviance.normal.identity <- deviance.normal
 
 scale.log.normal.identity <- function() { FALSE }
 scale.name.normal.identity <- function() { "Mean Difference" }

@@ -23,6 +23,9 @@ paste("r[i, k] ~ dbin(p[i, k], n[i, k])
 log(p[i, k]) <- min(mu[i] + delta[i, k], -1E-16)", deviance.binom, sep="\n")
 }
 
+fitted.values.parameter.binom.log <- fitted.values.parameter.binom
+deviance.binom.log <- deviance.binom
+
 scale.log.binom.log <- function() { TRUE }
 scale.name.binom.log <- function() { "Risk Ratio" }
 

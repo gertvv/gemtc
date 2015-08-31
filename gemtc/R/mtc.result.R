@@ -7,9 +7,19 @@ print.mtc.result <- function(x, ...) {
 summary.mtc.result <- function(object, ...) {
   scale.log <- if (ll.call('scale.log', object[['model']])) 'Log ' else ''
   scale.name <- ll.call('scale.name', object[['model']])
-  list('measure'=paste0(scale.log, scale.name),
+  rval <- list('measure'=paste0(scale.log, scale.name),
        'summaries'=summary(object[['samples']]),
-       'DIC'=object[['dic']])
+       'DIC'=unlist(object[['deviance']][c('Dbar', 'pD', 'DIC')]))
+  class(rval) <- 'summary.mtc.result'
+  rval
+}
+
+print.summary.mtc.result <- function(x, ...) {
+  cat(paste("\nResults on the", x[['measure']], "scale\n"))
+  print(x[['summaries']])
+  cat("3. Model fit (residual deviance):\n\n")
+  print(x[['DIC']])
+  cat("\n")
 }
 
 plot.mtc.result <- function(x, ...) {
