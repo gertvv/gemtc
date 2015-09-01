@@ -83,3 +83,52 @@ print(result$deviance)
 # plot(w, leverage, xlim=c(-3,3), ylim=c(0, 4.5))
 # x <- seq(from=-3, to=3, by=0.05)
 # for (c in 1:4) { lines(x, c - x^2) }
+
+## residual deviance plot
+if (model$data$ns.r2 + model$data$ns.rm == 0) {
+  tpl <- model$data$t
+  study <- matrix(rep(1:nrow(tpl), times=ncol(tpl)), nrow=nrow(tpl), ncol=ncol(tpl))
+  study <- t(study)[t(!is.na(tpl))]
+  devbar <- t(result$deviance$dev.ab)[t(!is.na(tpl))]
+  title <- "Per-arm residual deviance"
+  xlab <- "Arm"
+} else {
+  nd <- model$data$na
+  nd[-(1:model$data$ns.a)] <- nd[-(1:model$data$ns.a)] - 1
+  devbar <- c(apply(result$deviance$dev.ab, 1, sum, na.rm=TRUE), result$deviance$dev.re) / nd
+  study <- 1:length(devbar)
+  title <- "Per-study mean per-datapoint residual deviance"
+  xlab <- "Study"
+}
+
+plot(devbar, ylim=c(0,max(devbar, na.rm=TRUE)),
+     ylab="Residual deviance", xlab=xlab,
+     main=title, pch=c(1, 22)[(study%%2)+1])
+
+for (i in 1:length(devbar)) {
+  lines(c(i, i), c(0, devbar[i]))
+}
+
+# w <- sign(r - rfit) * sqrt(devbar)
+
+# plot(w, leverage, xlim=c(-3,3), ylim=c(0, 4.5))
+# x <- seq(from=-3, to=3, by=0.05)
+# for (c in 1:4) { lines(x, c - x^2) }
+fit.ab <- apply(result$deviance$fit.ab, 1, sum, na.rm=TRUE)
+dev.ab <- apply(result$deviance$dev.ab, 1, sum, na.rm=TRUE)
+lev.ab <- dev.ab - fit.ab
+fit.re <- result$deviance$fit.re
+dev.re <- result$deviance$dev.re
+lev.re <- dev.re - fit.re
+nd <- model$data$na
+nd[-(1:model$data$ns.a)] <- nd[-(1:model$data$ns.a)] - 1
+w <- sqrt(c(dev.ab, dev.re) / nd)
+lev <- c(lev.ab, lev.re) / nd
+
+plot(w, lev, xlim=c(0, max(c(w, 2.5))), ylim=c(0, max(c(lev, 4))),
+     xlab="Square root of residual deviance", ylab="Leverage",
+     main="Leverage versus residual deviance")
+mtext("Per-study mean per-datapoint contribution")
+
+x <- seq(from=0, to=3, by=0.05)
+for (c in 1:4) { lines(x, c - x^2) }
