@@ -29,11 +29,12 @@ plot.mtc.result <- function(x, ...) {
 forest.mtc.result <- function(x, use.description=FALSE, ...) {
   if (tolower(x[['model']][['type']]) != 'consistency') stop("Can only apply forest.mtc.result to consistency models")
 
-  quantiles <- summary(x[['samples']])[['quantiles']]
+  varnames <- colnames(x[['samples']][[1]])
+  samples <- as.matrix(x[['samples']][, grep("^d\\.", varnames)])
+  stats <- t(apply(samples, 2, quantile, probs=c(0.025, 0.5, 0.975)))
   model <- x[['model']]
   network <- model[['network']]
-  stats <- quantiles[grep("^d\\.", rownames(quantiles)), , drop=FALSE]
-  comps <- extract.comparisons(rownames(stats))
+  comps <- extract.comparisons(varnames)
   groups <- comps[,1]
   group.names <- unique(groups)
   group.labels <- paste("Compared with", if (use.description) treatment.id.to.description(network, group.names) else group.names)
@@ -42,7 +43,7 @@ forest.mtc.result <- function(x, use.description=FALSE, ...) {
 
   data <- data.frame(
     id=if (use.description) treatment.id.to.description(network, comps[,2]) else comps[,2],
-    pe=stats[,3], ci.l=stats[,1], ci.u=stats[,5],
+    pe=stats[,2], ci.l=stats[,1], ci.u=stats[,3],
     group=groups, style="normal")
 
   blobbogram(data,
