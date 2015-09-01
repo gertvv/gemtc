@@ -72,10 +72,15 @@ devfit.re <- function(model, mfit) {
 
 computeDeviance <- function(model, stats) {
   shape.ab <- function(x) {
-    x <- unname(x)
-    y <- t(model[['data']][['t']])
-    y[!is.na(y)] <- x
-    t(y)
+    if (length(x) > 0) {
+      tpl <- model[['data']][['t']][1:model[['data']][['ns.a']],]
+      x <- unname(x)
+      y <- t(tpl)
+      y[!is.na(y)] <- x
+      t(y)
+    } else {
+      c()
+    }
   }
 
   dev.ab <- stats[deviance.monitors.residuals.ab(model)]
