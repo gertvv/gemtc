@@ -73,7 +73,7 @@ devfit.re <- function(model, mfit) {
 computeDeviance <- function(model, stats) {
   shape.ab <- function(x) {
     if (length(x) > 0) {
-      tpl <- model[['data']][['t']][1:model[['data']][['ns.a']],]
+      tpl <- arm.index.matrix(model[['network']])[1:model[['data']][['ns.a']],]
       x <- unname(x)
       y <- t(tpl)
       y[!is.na(y)] <- x

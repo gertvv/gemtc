@@ -86,7 +86,7 @@ print(result$deviance)
 
 ## residual deviance plot
 if (model$data$ns.r2 + model$data$ns.rm == 0) {
-  tpl <- model$data$t
+  tpl <- gemtc:::arm.index.matrix(model[['network']])
   study <- matrix(rep(1:nrow(tpl), times=ncol(tpl)), nrow=nrow(tpl), ncol=ncol(tpl))
   study <- t(study)[t(!is.na(tpl))]
   devbar <- t(result$deviance$dev.ab)[t(!is.na(tpl))]

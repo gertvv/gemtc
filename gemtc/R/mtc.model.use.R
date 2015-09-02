@@ -3,6 +3,8 @@ mtc.model.use <- function(model) {
   model[['linearModel']] <- 'random'
 
   model[['data']] <- mtc.model.data(model)
+  model[['data']][['nt']] <- NULL
+  model[['data']][['t']] <- NULL
   model[['inits']] <- lapply(mtc.init(model), function(inits) {
     inits[-which(names(inits) == "sd.d")]
   })
