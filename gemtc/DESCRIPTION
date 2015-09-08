@@ -26,6 +26,7 @@ Suggests:
     Matrix
 URL: http://github.com/gertvv/gemtc
 License: GPL-3
+LazyData: true
 Collate:
     'anohe.R'
     'blobbogram.R'
