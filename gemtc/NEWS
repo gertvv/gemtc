@@ -1,28 +1,37 @@
 gemtc 0.7
 =========
 
-Released ????
+Released 2015-09-09
 
 Removed features:
 
- * Support for WinBUGS and OpenBUGS was removed due to their various problems
-   (lack of portability, lack of support for selecting blocks  from arrays,
-   bugs in setting monitors, and the constant need to track minor differences
-   in syntax between JAGS and BUGS).
+ * Support for WinBUGS and OpenBUGS was removed due to their various
+   problems (lack of portability, lack of support for selecting blocks
+   from arrays, bugs in setting monitors, and the constant need to track
+   minor differences in syntax between JAGS and BUGS).
 
 New features:
 
  * Added binom/log (risk ratio) support.
-
- * Ability to generate n * n relative effects table, and to generate plots
-   directly from the table, bypassing the time-consuming computation of the
-   quantiles.
+ * Ability to generate n * n relative effects table, and to generate
+   plots directly from the table, bypassing the time-consuming
+   computation of the quantiles.
+ * Added residual deviance statistics (replaces and improves upon the
+   DIC previously computed by JAGS).
+ * Example datasets are now standard R data, and can be accessed using
+   the variables `depression', `parkinson', `thrombolytic', and
+   `smoking'.
 
 Enhancements:
 
- * Forest plots: allow treatment descriptions to be displayed instead of IDs.
-
+ * Forest plots: allow treatment descriptions to be displayed instead of
+   IDs.
  * Network plot: make proportional line width optional.
+ * Additional validations to catch obvious data entry mistakes.
+ * Better safeguards for starting values, and alternative approach to
+   baseline priors for scales without infinite support.
+ * The XML package is no longer required to install gemtc, and will be
+   loaded only if needed to read/write legacy .gemtc XML files.
 
 gemtc 0.6-2
 ===========
