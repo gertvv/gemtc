@@ -5,6 +5,7 @@ ll.call <- function(fnName, model, ...) {
 
 ll.defined <- function(model) {
   fns <- c('mtc.arm.mle', 'mtc.rel.mle', 'mtc.code.likelihood',
+    'fitted.values.parameter', 'deviance',
     'scale.log', 'scale.name', 'inits.info',
     'required.columns.ab', 'validate.data',
     'study.baseline.priors')
