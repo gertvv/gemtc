@@ -21,7 +21,9 @@ For \code{write.mtc.network}, if \code{file=""}, the output is printed to standa
 \code{read.mtc.network} and \code{write.mtc.network} deal with the older GeMTC XML format.
 This format supports dichotomous data as responders/sampleSize and continuous data as mean/std.dev/sampleSize only.
 Relative effect data, or other forms of arm-based data, are not supported.
-In general, it may be more convenient to use \code{dput} and \code{dget} to read and write networks.
+In general, it may be more convenient to use native R methods to read and write networks (e.g. dput/dget or save/load).
+
+These functions need the \code{XML} package to be installed.
 }
 \author{Gert van Valkenhoef}
 \seealso{

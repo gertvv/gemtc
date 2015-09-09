@@ -10,9 +10,8 @@ Description: Network meta-analyses (mixed treatment comparisons) in the Bayesian
 Depends:
     coda (>= 0.13)
 Imports:
-    igraph (>= 0.6.4),
+    igraph (>= 1.0),
     meta (>= 2.1),
-    XML (>= 3.6),
     plyr (>= 1.8),
     graphics,
     grDevices,
@@ -23,7 +22,8 @@ Imports:
     truncnorm
 Suggests:
     testthat (>= 0.8),
-    Matrix
+    Matrix,
+    XML (>= 3.6)
 URL: http://github.com/gertvv/gemtc
 License: GPL-3
 LazyData: true
@@ -50,6 +50,7 @@ Collate:
     'mtc.model.ume.R'
     'mtc.model.use.R'
     'mtc.network.R'
+    'mtc.network.xml.R'
     'mtc.result.R'
     'mtc.run.R'
     'nodesplit.R'
