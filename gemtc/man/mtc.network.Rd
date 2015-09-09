@@ -1,16 +1,12 @@
 \encoding{utf8}
 \name{mtc.network}
 \alias{mtc.network}
-\alias{read.mtc.network}
-\alias{write.mtc.network}
 \alias{plot.mtc.network}
 
 \title{Create an mtc.network}
 \description{Creates an object of class \code{mtc.network}}
 \usage{
 mtc.network(data.ab, treatments, description, data.re, data)
-read.mtc.network(file)
-write.mtc.network(network, file)
 
 \method{plot}{mtc.network}(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, ...)
 }
@@ -33,10 +29,6 @@ A data frame with columns `id' and `description' defining the treatments or a ve
   \item{description}{Optional. Short description of the network.}
   \item{data}{Deprecated. Arm-level data; automatically assigned to data.ab if it is not specified.
 Present for compatibility with older versions.}
-
-  \item{network}{An object of the S3 class \code{mtc.network}.}
-  \item{file}{Path to the file to read (\code{read.mtc.network}) or write (\code{write.mtc.network}).
-For \code{write.mtc.network}, if \code{file=""}, the output is printed to standard output.  If it is \code{file="|cmd"}, the output is piped to the command given by \code{cmd}. See \code{base::cat} for further details.}
   
   \item{x}{An mtc.network object.}
   \item{layout}{An igraph-compatible layout.}
@@ -44,7 +36,7 @@ For \code{write.mtc.network}, if \code{file=""}, the output is printed to standa
   \item{...}{Additional arguments passed to \code{plot.igraph}.}
 }
 \value{
-For \code{mtc.network} and \code{read.mtc.network}, an object of the class \code{mtc.network} which is a list containing:
+For \code{mtc.network}, an object of the class \code{mtc.network} which is a list containing:
   \item{description}{A short description of the network}
   \item{treatments}{A data frame describing the treatments}
   \item{data.ab}{A data frame containing the network data (arm-level)}
@@ -53,11 +45,6 @@ These are cleaned up and standardized versions of the arguments provided, or gen
 }
 \details{
 One-arm trials are automatically removed, which results in a warning.
-
-\code{read.mtc.network} and \code{write.mtc.network} deal with the older GeMTC XML format.
-This format supports dichotomous data as responders/sampleSize and continuous data as mean/std.dev/sampleSize only.
-Relative effect data, or other forms of arm-based data, are not supported.
-In general, it may be more convenient to use \code{dput} and \code{dget} to read and write networks.
 
 Also see \code{\link{mtc.data.studyrow}} for a convenient way to import data from the one-study-per-row format, which is very popular for BUGS code.
 }
@@ -103,25 +90,4 @@ print(network)
 ## 2     1         B -1.55     0.5         16
 ## 3     2         A -0.80     0.7         33
 ## 4     2         B -1.10     0.5         31
-
-# Read an example GeMTC XML file
-file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
-network <- read.mtc.network(file)
-
-# Summarize the network (generate some interesting network properties)
-summary(network)
-## $Description
-## [1] "MTC dataset: Smoking cessation rates"
-## 
-## $`Studies per treatment`
-##  A  B  C  D 
-## 19  6 19  6 
-## 
-## $`Number of n-arm studies`
-## 2-arm 3-arm 
-##    22     2 
-
-# Write the network to a temporary file in the GeMTC XML format
-tmp <- tempfile()
-write.mtc.network(network, file=tmp)
 }
