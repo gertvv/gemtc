@@ -48,7 +48,7 @@ test_that("mtc.model.ume warns about mutli-arm trials", {
 })
 
 test_that("Vertices agree between mtc.network.graph and ume model$graph", {
-    network <- read.mtc.network(system.file("extdata/luades-thrombolytic.gemtc", package='gemtc'))
+    network <- thrombolytic
     suppressWarnings(model <- mtc.model(network, type='ume'))
     graph <- mtc.network.graph(network)
     expect_that(V(model$graph)$name, equals(V(graph)$name))

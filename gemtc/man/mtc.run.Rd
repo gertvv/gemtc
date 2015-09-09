@@ -69,9 +69,7 @@ The \code{\link{rank.probability}} function calculates rank probabilities for co
 }
 
 \examples{
-file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
-network <- read.mtc.network(file)
-model <- mtc.model(network)
+model <- mtc.model(smoking)
 
 \dontrun{results <- mtc.run(model, thin=10)}
 results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))

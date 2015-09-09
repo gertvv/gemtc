@@ -8,7 +8,7 @@ test_that("anohe-breaking.gemtc does not break summary.mtc.anohe", {
 })
 
 test_that("Mixing up the order of treatments does not break summary.mtc.anohe", {
-  network <- read.mtc.network(system.file("extdata/luades-thrombolytic.gemtc", package="gemtc"))
+  network <- thrombolytic
   treatments <- network$treatments
   treatments$id <- factor(rev(as.character(treatments$id)), levels=rev(as.character(treatments$id)))
   network <- mtc.network(data=network$data.ab, treatments=treatments)

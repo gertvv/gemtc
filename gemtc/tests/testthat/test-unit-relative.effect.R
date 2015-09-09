@@ -54,7 +54,7 @@ test_that("tree.relative.effect handles a simple tree", {
 })
 
 test_that("tree.relative.effect handles a more complex tree", {
-  network <- read.mtc.network(system.file("extdata/luades-thrombolytic.gemtc", package="gemtc"))
+  network <- thrombolytic
   tree <- minimum.diameter.spanning.tree(mtc.network.graph(network))
 
   expected <- do.call(cbind, list(

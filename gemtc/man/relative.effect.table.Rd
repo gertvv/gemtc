@@ -33,9 +33,7 @@ relative.effect.table(result)
   \code{\link{relative.effect}}
 }
 \examples{
-file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
-network <- read.mtc.network(file)
-model <- mtc.model(network)
+model <- mtc.model(smoking)
 # To save computation time we load the samples instead of running the model
 \dontrun{results <- mtc.run(model)}
 results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))

@@ -72,9 +72,7 @@ Statistics in Medicine 21(11):1601-1623.
 
 \examples{
 # Load the example network and generate a consistency model:
-file <- system.file("extdata/luades-smoking.gemtc", package="gemtc")
-network <- read.mtc.network(file) 
-model <- mtc.model(network, type="consistency")
+model <- mtc.model(smoking, type="consistency")
 
 # Load pre-generated samples instead of runing the model:
 \dontrun{results <- mtc.run(model, thin=10)}

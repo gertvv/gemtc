@@ -51,12 +51,8 @@ an object of class \code{mtc.nodesplit.summary}. This is a list with the followi
 \code{\link{mtc.run}}
 }
 \examples{
-# Read the network
-fileName <- system.file('extdata/parkinson.gemtc', package='gemtc')
-network <- read.mtc.network(fileName)
-
 # Run all relevant node-splitting models
-\dontrun{ result.ns <- mtc.nodesplit(network, thin=50) }
+\dontrun{ result.ns <- mtc.nodesplit(parkinson, thin=50) }
 # (read results from file instead of running:)
 result.ns <- readRDS(system.file('extdata/parkinson.ns.rds', package='gemtc'))
 

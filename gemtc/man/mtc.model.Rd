@@ -120,9 +120,7 @@ The default up-to version 0.1-2 was \code{igraph::layout.kamada.kawai} but could
 \code{\link{mtc.network}}, \code{\link{mtc.run}}
 }
 \examples{
-file <- system.file("extdata/parkinson.gemtc", package="gemtc")
-network <- read.mtc.network(file)
-model <- mtc.model(network)
+model <- mtc.model(parkinson)
 plot(model)
 summary(model)
 }

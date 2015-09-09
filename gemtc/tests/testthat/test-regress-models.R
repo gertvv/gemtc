@@ -1,7 +1,7 @@
 context("Run models for all data sets and call the appropriate summaries / plots")
 
 test_that("cipriani-efficacy", {
-  network <- read.mtc.network(system.file('extdata/cipriani-efficacy.gemtc', package='gemtc'))
+  network <- depression
 
   # TODO: test node-splitting comparisons
 
@@ -9,7 +9,7 @@ test_that("cipriani-efficacy", {
 })
 
 test_that("luades-smoking", {
-  network <- read.mtc.network(system.file('extdata/luades-smoking.gemtc', package='gemtc'))
+  network <- smoking
 
   # node-splitting comparisons
   expect_that(mtc.nodesplit.comparisons(network), equals(
@@ -19,7 +19,7 @@ test_that("luades-smoking", {
 })
 
 test_that("luades-thrombolytic", {
-  network <- read.mtc.network(system.file('extdata/luades-thrombolytic.gemtc', package='gemtc'))
+  network <- thrombolytic
 
   # node-splitting comparisons
   expect_that(mtc.nodesplit.comparisons(network), equals(
@@ -62,7 +62,7 @@ test_that("tsd2-3 (diabetes, rate data)", {
 })
 
 test_that("parkinson example", {
-  network <- read.mtc.network(system.file('extdata/parkinson.gemtc', package='gemtc'))
+  network <- parkinson
 
   expect_that(mtc.nodesplit.comparisons(network), equals(
     data.frame(t1=c("A", "A", "B", "C"),
