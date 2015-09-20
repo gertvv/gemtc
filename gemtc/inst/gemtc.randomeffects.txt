@@ -8,7 +8,7 @@ for (i in 1:ns) {
 		md[i, k] <- d[t[i, 1], t[i, k]] + sw[i, k]
 		taud[i, k] <- tau.d * 2 * (k - 1) / k
 		w[i, k] <- delta[i, k] - (d[t[i, 1], t[i, k]])
-		sw[i, k] <- sum(w[i, 1:k-1]) / (k - 1)
+		sw[i, k] <- sum(w[i, 1:(k-1)]) / (k - 1)
 	}
 }
 
