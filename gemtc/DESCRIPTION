@@ -47,6 +47,7 @@ Collate:
     'mtc.model.R'
     'mtc.model.consistency.R'
     'mtc.model.nodesplit.R'
+    'mtc.model.regression.R'
     'mtc.model.ume.R'
     'mtc.model.use.R'
     'mtc.network.R'

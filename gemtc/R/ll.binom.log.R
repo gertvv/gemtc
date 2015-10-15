@@ -20,7 +20,7 @@ mtc.rel.mle.binom.log <- function(data, correction.force=TRUE, correction.type="
 
 mtc.code.likelihood.binom.log <- function() {
 paste("r[i, k] ~ dbin(p[i, k], n[i, k])
-log(p[i, k]) <- min(mu[i] + delta[i, k], -1E-16)", deviance.code.binom, sep="\n")
+log(p[i, k]) <- min($armLinearModel$, -1E-16)", deviance.code.binom, sep="\n")
 }
 
 fitted.values.parameter.binom.log <- fitted.values.parameter.binom

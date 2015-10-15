@@ -14,7 +14,7 @@ mtc.rel.mle.normal.identity <- function(data, correction.force=TRUE, correction.
 
 mtc.code.likelihood.normal.identity <- function() {
 paste("m[i, k] ~ dnorm(theta[i, k], prec[i, k])
-theta[i, k] <- mu[i] + delta[i, k]
+theta[i, k] <- $armLinearModel$
 prec[i, k] <- pow(e[i, k], -2)", deviance.code.normal, sep="\n")
 }
 

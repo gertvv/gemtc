@@ -1,4 +1,5 @@
-mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model.template.txt') {
+mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model.template.txt',
+                           linearModel='delta[i, k]', regressionPriors='') {
   template <- read.template(template)
 
   if (model[['data']][['ns.a']] > 0) {
@@ -24,16 +25,18 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
     template <- template.block.sub(template, 'releffect.rm', '## OMITTED')
   }
 
-  mod.code <- if (model[['linearModel']] == "fixed") {
+  template <- template.block.sub(template, 'armLinearModel', paste0('mu[i] + ', linearModel))
+  template <- template.block.sub(template, 'relLinearModel', linearModel)
+
+  hyModel <- if (model[['linearModel']] == "fixed") {
     read.template('gemtc.fixedeffect.txt')
   } else {
     read.template('gemtc.randomeffects.txt')
   }
-  template <- template.block.sub(template, 'linearModel', mod.code)
+  template <- template.block.sub(template, 'heterogeneityModel', hyModel)
 
   # substitute in heterogeneity prior
   template <- template.block.sub(template, 'hy.prior', as.character(model[['hy.prior']]))
-
 
   template <- template.block.sub(template, 'relativeEffectMatrix', relEffectMatrix)
 
@@ -47,6 +50,8 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
   # Generate parameter priors
   priors <- paste(params, "~", "dnorm(0, prior.prec)", collapse="\n")
   template <- template.block.sub(template, 'relativeEffectPriors', priors)
+
+  template <- template.block.sub(template, 'regressionPriors', regressionPriors)
 
   template
 }

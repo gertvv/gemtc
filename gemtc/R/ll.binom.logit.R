@@ -21,7 +21,7 @@ mtc.rel.mle.binom.logit <- function(data, correction.force=TRUE, correction.type
 
 mtc.code.likelihood.binom.logit <- function() {
 paste("r[i, k] ~ dbin(p[i, k], n[i, k])
-logit(p[i, k]) <- mu[i] + delta[i, k]", deviance.code.binom, sep="\n")
+logit(p[i, k]) <- $armLinearModel$", deviance.code.binom, sep="\n")
 }
 
 fitted.values.parameter.binom.logit <- fitted.values.parameter.binom
