@@ -40,12 +40,12 @@ The following elements are descriptive:
   \item{likelihood}{The likelihood used}
   \item{link}{The link function used}
   \item{om.scale}{The scale for the variance parameters}
-These elements determine the model run by JAGS/BUGS:
+These elements determine the model run by JAGS:
   \item{n.chain}{The number of chains}
-  \item{code}{Model code in JAGS/BUGS syntax. Use \code{cat()} for proper formatting.}
-  \item{data}{Data in JAGS/BUGS compatible format}
-  \item{inits}{Initial values in JAGS/BUGS compatible format}
-  \item{monitors}{The nodes of the JAGS/BUGS model to monitor}
+  \item{code}{Model code in JAGS syntax. Use \code{cat()} for proper formatting.}
+  \item{data}{Data in JAGS compatible format}
+  \item{inits}{Initial values in JAGS compatible format}
+  \item{monitors}{The nodes of the JAGS model to monitor}
   \item{dic}{Whether to compute the DIC (necessary nodes will be monitored automatically)}
 These latter fields can be modified to alter the statistical model, but such changes may break the model or assumptions made elsewhere in the package.
 }

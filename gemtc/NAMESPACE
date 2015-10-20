@@ -25,6 +25,8 @@ S3method(plot, mtc.result)
 S3method(as.mcmc.list, mtc.result)
 S3method(forest, mtc.result)
 
+S3method(print, summary.mtc.result)
+
 S3method(print, mtc.anohe)
 S3method(plot, mtc.anohe)
 S3method(summary, mtc.anohe)
