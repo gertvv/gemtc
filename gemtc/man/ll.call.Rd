@@ -27,7 +27,7 @@ The following methods currently need to be implemented to implement a likelihood
   effect. Used to generate starting values.}
   \item{\code{mtc.rel.mle}: calculates a (corrected) maximum likelihood estimate for a relative
   effect. Used to generate starting values.}
-  \item{\code{mtc.code.likelihood}: generates JAGS/BUGS code implementing the likelihood.}
+  \item{\code{mtc.code.likelihood}: generates JAGS code implementing the likelihood.}
   \item{\code{scale.log}: returns TRUE if plots should use the log scale.}
   \item{\code{scale.name}: returns the user-facing name of the outcome metric.}
   \item{\code{scale.limit.inits}: returns an upper and lower bound for the initial values, because

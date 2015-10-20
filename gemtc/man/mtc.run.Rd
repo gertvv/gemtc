@@ -23,11 +23,7 @@ mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
 }
 \arguments{
   \item{model}{An object of S3 class \code{mtc.model} describing a network meta-analysis model.}
-  \item{sampler}{
-A string literal indicating which sampler to use.
-Allowed values are \code{'JAGS'} or \code{'BUGS'}.
-Alternatively, the specific package to be used can be specified: \code{'rjags'}, \code{'BRugs'} or \code{'R2WinBUGS'}.
-When unspecified it will try \code{'rjags'}, \code{'BRugs'}, and \code{'R2WinBUGS'}, in that order.}
+  \item{sampler}{Deprecated: gemtc now only supports the JAGS sampler. Specifying a sampler will result in a warning or error. This argument will be removed in future versions.}
   \item{n.adapt}{Amount of adaptation (or tuning) iterations.}
   \item{n.iter}{Amount of simulation iterations.}
   \item{thin}{Thinning factor.}
