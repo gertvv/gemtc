@@ -41,7 +41,7 @@ When unspecified it will try \code{'rjags'}, \code{'BRugs'}, and \code{'R2WinBUG
 An object of class \code{mtc.result}. This is a list with the following elements: 
 \item{samples}{The samples resulting from running the MCMC model, in \code{mcmc.list} format.}
 \item{model}{The \code{mtc.model} used to produce the samples.}
-\item{sampler}{The sampler (R package) used to produce the samples.}
+\item{deviance}{Residual deviance statistics, a list with the following elements. \code{DIC}: deviance information criterion at residual (Dbar + pD). \code{Dbar}: mean sum of residual deviance. \code{pD}: sum of leverage, also known as the effective number of parameters. \code{dev.ab}: mean posterior residual deviance of each arm (for arm-based data). \code{fit.ab}: deviance at the posterior mean of te fitted values (for arm-based data). \code{dev.re}: mean posterior residual deviance of each study (for relative-effect data). \code{fit.re}: deviance at the posterior mean of the fitted values (for relative-effect data).}
 
 The object can be coerced to an \code{mcmc.list} from the \code{coda} package by the generic S3 method \code{as.mcmc.list}.
 }
