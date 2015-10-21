@@ -9,7 +9,8 @@ summary.mtc.result <- function(object, ...) {
   scale.name <- ll.call('scale.name', object[['model']])
   rval <- list('measure'=paste0(scale.log, scale.name),
        'summaries'=summary(object[['samples']]),
-       'DIC'=unlist(object[['deviance']][c('Dbar', 'pD', 'DIC')]))
+       'DIC'=unlist(object[['deviance']][c('Dbar', 'pD', 'DIC')]),
+       'regressor'=object[['model']][['regressor']])
   class(rval) <- 'summary.mtc.result'
   rval
 }
@@ -19,7 +20,13 @@ print.summary.mtc.result <- function(x, ...) {
   print(x[['summaries']])
   cat("3. Model fit (residual deviance):\n\n")
   print(x[['DIC']])
-  cat("\n")
+  if (!is.null(x[['regressor']])) {
+    cat("\n4. Regression settings:\n\n")
+    r <- x[['regressor']]
+    cat(paste0("Regression on \"", r[['variable']], "\", ", r[['coefficient']], " coefficients, \"", r[['control']], "\" as control\n"))
+    cat(paste0("Centered and standardized: mean = ", format(r[['mu']]), "; sd = ", format(r[['sd']])))
+  }
+  cat("\n\n")
 }
 
 plot.mtc.result <- function(x, ...) {
