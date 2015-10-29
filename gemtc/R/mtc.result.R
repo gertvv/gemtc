@@ -10,7 +10,8 @@ summary.mtc.result <- function(object, ...) {
   rval <- list('measure'=paste0(scale.log, scale.name),
        'summaries'=summary(object[['samples']]),
        'DIC'=unlist(object[['deviance']][c('Dbar', 'pD', 'DIC')]),
-       'regressor'=object[['model']][['regressor']])
+       'regressor'=object[['model']][['regressor']],
+       'covariate'=object[['covariate']])
   class(rval) <- 'summary.mtc.result'
   rval
 }
@@ -18,15 +19,21 @@ summary.mtc.result <- function(object, ...) {
 print.summary.mtc.result <- function(x, ...) {
   cat(paste("\nResults on the", x[['measure']], "scale\n"))
   print(x[['summaries']])
-  cat("3. Model fit (residual deviance):\n\n")
-  print(x[['DIC']])
+  if (!is.null(x[['DIC']])) {
+    cat("-- Model fit (residual deviance):\n\n")
+    print(x[['DIC']])
+  }
   if (!is.null(x[['regressor']])) {
-    cat("\n4. Regression settings:\n\n")
+    cat("\n-- Regression settings:\n\n")
     r <- x[['regressor']]
     cat(paste0("Regression on \"", r[['variable']], "\", ", r[['coefficient']], " coefficients, \"", r[['control']], "\" as control\n"))
-    cat(paste0("Centered and standardized: mean = ", format(r[['mu']]), "; sd = ", format(r[['sd']])))
+    if (!is.null(x[['covariate']])) {
+      cat(paste0("Values at ", r[['variable']], " = ", x[['covariate']], "\n"))
+    } else {
+      cat(paste0("Centered and standardized: mean = ", format(r[['mu']]), "; sd = ", format(r[['sd']]), "\n"))
+    }
   }
-  cat("\n\n")
+  cat("\n")
 }
 
 plot.mtc.result <- function(x, ...) {

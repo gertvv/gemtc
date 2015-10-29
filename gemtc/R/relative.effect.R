@@ -117,11 +117,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate
       v
     })
     transform <- transform * (covariate - regressor[['mu']]) / regressor[['sd']] 
-    print(effects)
-    print(transform)
     effects <- rbind(effects, transform)
-    print(dim(effects))
-    print(length(parameters))
   }
 
   # Apply tranformation to each chain
