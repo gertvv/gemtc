@@ -26,11 +26,7 @@ mtc.model.regression <- function(model, regressor) {
     'exchangeable'='\n# Regression priors\nfor (k in 1:(reg.control-1)) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nbeta[reg.control] <- 0\nfor (k in (reg.control+1):nt) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nB ~ dnorm(0, prior.prec)\nreg.sd ~ dunif(0, om.scale)\nreg.tau <- pow(reg.sd, -2)')
 
   nt <- model[['data']][['nt']]
-  betas <- paste0('beta[', (1:nt)[-as.numeric(control)], ']')
-  reg.monitors <- list(
-    'shared'='B',
-    'unrelated'=betas,
-    'exchangeable'=c('B', betas, 'reg.sd'))
+  reg.monitors <- regressionParams(regressor, nt)
 
   model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model),
                                     linearModel='delta[i, k] + (beta[t[i, k]] - beta[t[i, 1]]) * x[i]',
@@ -38,8 +34,8 @@ mtc.model.regression <- function(model, regressor) {
 
   monitors <- inits.to.monitors(model[['inits']][[1]])
   model[['monitors']] <- list(
-    available=monitors,
-    enabled=c(monitors[grep('^d\\.', monitors)], monitors[grep('^sd.d$', monitors)], reg.monitors[[regressor[['coefficient']]]])
+    available=c(monitors, reg.monitors),
+    enabled=c(monitors[grep('^d\\.', monitors)], monitors[grep('^sd.d$', monitors)], reg.monitors)
   )
 
   class(model) <- "mtc.model"

@@ -85,7 +85,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate
     regression.parameters <- sapply(regressionParams(regressor, nt), function(p) { which(parnames == p) })
     parameters <- c(parameters, regression.parameters)
 
-    transform <- regressionAdjustMatrix(regressor, nt)
+    transform <- regressionAdjustMatrix(t1, t2, regressor, nt)
     transform <- transform * (covariate - regressor[['mu']]) / regressor[['sd']] 
     effects <- rbind(effects, transform)
   }
