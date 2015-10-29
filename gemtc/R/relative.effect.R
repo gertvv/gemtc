@@ -1,10 +1,14 @@
-tree.relative.effect <- function(g, t1, t2) {
+treatment.pairs <- function(t1, t2, ts) {
   if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
-    t2 <- V(g)[V(g) != as.numeric(t1)]
+    t2 <- ts[ts != as.numeric(t1)]
   }
   if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
   if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
-  pairs <- matrix(c(t1, t2), ncol=2)
+  matrix(c(t1, t2), ncol=2)
+}
+
+tree.relative.effect <- function(g, t1, t2) {
+  pairs <- treatment.pairs(t1, t2, V(g))
   paths <- apply(pairs, 1, function(rel) {
     p <- suppressWarnings(get.shortest.paths(g, rel[1], rel[2], mode='all'))
     if (is.list(p) && "vpath" %in% names(p)) { p <- p$vpath }
@@ -27,7 +31,7 @@ tree.relative.effect <- function(g, t1, t2) {
 
   # Ensure paths is a matrix, since apply() will simplify to a vector if
   # either ncol==1 or nrow==1
-  paths <- matrix(as.numeric(paths), ncol=length(t1), nrow=length(E(g)))
+  paths <- matrix(as.numeric(paths), nrow=length(E(g)))
 
   colnames(paths) <-  apply(pairs, 1, function(pair) {
     pair <- V(g)[pair]$name
@@ -54,8 +58,9 @@ spanning.tree.mtc.result <- function(result) {
   graph.create(network[['treatments']][['id']], parameters, arrow.mode=2, color="black", lty=1)
 }
 
-relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
-  if (tolower(result[['model']][['type']]) != 'consistency') stop("Can only apply relative.effect to consistency models")
+relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate=NA) {
+  allowedTypes <- c('consistency', 'regression')
+  if (!(tolower(result[['model']][['type']]) %in% allowedTypes)) stop(paste("Can only apply relative.effect to models of the following types:", paste(allowedTypes, collapse=", ")))
 
   # Build relative effect transformation matrix
   network <- result[['model']][['network']]
@@ -68,7 +73,56 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
   }
   effects <- tree.relative.effect(g, t1, t2)
 
-  parameters <- grep("^d\\.", colnames(result[['samples']][[1]]))
+  parnames <- colnames(result[['samples']][[1]])
+  parameters <- grep("^d\\.", parnames)
+
+  if (result[['model']][['type']] == 'regression' && !is.na(covariate)) {
+    regressor <- result[['model']][['regressor']]
+    nt <- nrow(result[['model']][['network']][['treatments']])
+    control <- as.numeric(regressor[['control']])
+    betas <- paste0('beta[', (1:nt)[-control], ']')
+    regression.parameters <- list(
+      'shared'='B',
+      'unrelated'=betas,
+      'exchangeable'=c(betas, 'B'))
+    regression.parameters <- regression.parameters[[regressor[['coefficient']]]]
+    regression.parameters <- sapply(regression.parameters, function(p) { which(parnames == p) })
+    parameters <- c(parameters, regression.parameters)
+    # TODO: factor out the code that calculates the treatment pairs from tree.relative.effect
+    # then compute the appropriate transformation matrix
+    pairs <- treatment.pairs(t1, t2, 1:nt)
+    betaIndex <- function(i) {
+      if (i > control) i - 1 else i
+    }
+    transform <- apply(pairs, 1, function(pair) {
+      v <- rep(0, length(regression.parameters))
+      t1 <- pair[1]
+      t2 <- pair[2]
+      if (regressor[['coefficient']] == 'shared') {
+        if (t1 == control && t2 != control) {
+          v[1] <- 1
+        } else if (t1 != control && t2 == control) {
+          v[1] <- -1
+        }
+      } else {
+        if (t1 == control && t2 != control) {
+          v[betaIndex(t2)] <- 1
+        } else if (t1 != control && t2 == control) {
+          v[betaIndex(t1)] <- -1
+        } else if (t1 != control && t2 != control) {
+          v[betaIndex(t1)] <- -1
+          v[betaIndex(t2)] <- 1
+        }
+      }
+      v
+    })
+    transform <- transform * (covariate - regressor[['mu']]) / regressor[['sd']] 
+    print(effects)
+    print(transform)
+    effects <- rbind(effects, transform)
+    print(dim(effects))
+    print(length(parameters))
+  }
 
   # Apply tranformation to each chain
   samples <- as.mcmc.list(lapply(result[['samples']], function(chain) {
@@ -81,7 +135,8 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE) {
   effects <- list(
     samples=samples,
     model=result[['model']],
-    sampler=result[['sampler']])
+    sampler=result[['sampler']],
+    covariate=covariate)
 
   class(effects) <- "mtc.result"
   effects

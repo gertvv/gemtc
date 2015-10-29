@@ -10,7 +10,8 @@ mtc.model.regression <- function(model, regressor) {
   model[['tree']] <-
     style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model[['network']])))
 
-  control <- which(model[['network']][['treatments']][['id']] == regressor[['control']])
+  regressor[['control']] <- as.treatment.factor(regressor[['control']], model[['network']])
+  control <- regressor[['control']]
   x <- regressorData(model[['network']], regressor)
   model[['regressor']] <- c(regressor, mu=mean(x), sd=sd(x))
   x <- (x - mean(x)) / sd(x)
@@ -25,9 +26,7 @@ mtc.model.regression <- function(model, regressor) {
     'exchangeable'='\n# Regression priors\nfor (k in 1:(reg.control-1)) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nbeta[reg.control] <- 0\nfor (k in (reg.control+1):nt) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nB ~ dnorm(0, prior.prec)\nreg.sd ~ dunif(0, om.scale)\nreg.tau <- pow(reg.sd, -2)')
 
   nt <- model[['data']][['nt']]
-  betas <- 1:nt
-  betas <- betas[betas != control]
-  betas <- paste0('beta[', betas, ']')
+  betas <- paste0('beta[', (1:nt)[-as.numeric(control)], ']')
   reg.monitors <- list(
     'shared'='B',
     'unrelated'=betas,
