@@ -1,3 +1,5 @@
+#' @include regression.R
+
 treatment.pairs <- function(t1, t2, ts) {
   if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
     t2 <- ts[ts != as.numeric(t1)]
@@ -77,45 +79,13 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate
   parameters <- grep("^d\\.", parnames)
 
   if (result[['model']][['type']] == 'regression' && !is.na(covariate)) {
-    regressor <- result[['model']][['regressor']]
-    nt <- nrow(result[['model']][['network']][['treatments']])
-    control <- as.numeric(regressor[['control']])
-    betas <- paste0('beta[', (1:nt)[-control], ']')
-    regression.parameters <- list(
-      'shared'='B',
-      'unrelated'=betas,
-      'exchangeable'=c(betas, 'B'))
-    regression.parameters <- regression.parameters[[regressor[['coefficient']]]]
-    regression.parameters <- sapply(regression.parameters, function(p) { which(parnames == p) })
+    model <- result[['model']]
+    regressor <- model[['regressor']]
+    nt <- nrow(model[['network']][['treatments']])
+    regression.parameters <- sapply(regressionParams(regressor, nt), function(p) { which(parnames == p) })
     parameters <- c(parameters, regression.parameters)
-    # TODO: factor out the code that calculates the treatment pairs from tree.relative.effect
-    # then compute the appropriate transformation matrix
-    pairs <- treatment.pairs(t1, t2, 1:nt)
-    betaIndex <- function(i) {
-      if (i > control) i - 1 else i
-    }
-    transform <- apply(pairs, 1, function(pair) {
-      v <- rep(0, length(regression.parameters))
-      t1 <- pair[1]
-      t2 <- pair[2]
-      if (regressor[['coefficient']] == 'shared') {
-        if (t1 == control && t2 != control) {
-          v[1] <- 1
-        } else if (t1 != control && t2 == control) {
-          v[1] <- -1
-        }
-      } else {
-        if (t1 == control && t2 != control) {
-          v[betaIndex(t2)] <- 1
-        } else if (t1 != control && t2 == control) {
-          v[betaIndex(t1)] <- -1
-        } else if (t1 != control && t2 != control) {
-          v[betaIndex(t1)] <- -1
-          v[betaIndex(t2)] <- 1
-        }
-      }
-      v
-    })
+
+    transform <- regressionAdjustMatrix(regressor, nt)
     transform <- transform * (covariate - regressor[['mu']]) / regressor[['sd']] 
     effects <- rbind(effects, transform)
   }

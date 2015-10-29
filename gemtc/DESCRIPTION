@@ -57,6 +57,7 @@ Collate:
     'nodesplit.R'
     'priors.R'
     'rank.probability.R'
+    'regression.R'
     'relative.effect.R'
     'relative.effect.table.R'
     'template.R'
