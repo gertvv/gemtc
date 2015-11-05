@@ -7,7 +7,7 @@
 \title{Calculating relative effects}
 \description{Calculates the relative effects of pairs of treatments.}
 \usage{
-relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
+relative.effect(result, t1, t2 = c(), preserve.extra = TRUE, covariate = NA)
 }
 \arguments{
   \item{result}{An object of S3 class \code{mtc.result} to derive the relative effects from.}
@@ -15,6 +15,7 @@ relative.effect(result, t1, t2 = c(), preserve.extra = TRUE)
   \item{t2}{A list of treatments to calculate the relative effects for. Will be extended to match the length of t1.
 If left empty and t1 is a single treatment, relative effects of all treatments except t1 will be calculated.}
   \item{preserve.extra}{Indicates whether to preserve extra parameters such as the sd.w and sd.d.}
+  \item{covariate}{(Regression analyses only) Value of the covariate at which to compute relative effects.}
 }
 \value{
   Returns an \code{mtc.results} object containing the calculated relative effects.
