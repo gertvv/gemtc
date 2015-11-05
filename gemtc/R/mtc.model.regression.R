@@ -10,10 +10,24 @@ mtc.model.regression <- function(model, regressor) {
   model[['tree']] <-
     style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model[['network']])))
 
-  regressor[['control']] <- as.treatment.factor(regressor[['control']], model[['network']])
-  control <- regressor[['control']]
+  if(is.null(regressor[['control']]) || is.null(regressor[['variable']]) || is.null(regressor[['coefficient']])) {
+    stop("Regressor specification incomplete")
+  }
+
+  control <- as.treatment.factor(regressor[['control']], model[['network']])
+  if (is.na(control)) {
+    stop(paste0("Control treatment \"", regressor[['control']], "\" not found"))
+  }
+  regressor[['control']] <- control
+
+  if (!(regressor[['coefficient']] %in% c('shared', 'unrelated', 'exchangeable'))) {
+    stop(paste0("Coefficient type \"", regressor[['coefficient']], "\" not supported"))
+  }
+
   x <- regressorData(model[['network']], regressor)
-  if (all(x %in% 0:1)) { # binary covariate
+  if (any(is.na(x))) {
+    stop("NA values for regressor variable not supported")
+  } else if (all(x %in% 0:1)) { # binary covariate
     model[['regressor']] <- c(regressor, type='binary')
   } else if (is.numeric(x)) { # continuous covariate
     model[['regressor']] <- c(regressor, type='continuous', mu=mean(x), sd=sd(x))
@@ -51,6 +65,13 @@ mtc.model.regression <- function(model, regressor) {
 
 regressorData <- function(network, regressor) {
   var <- regressor[['variable']]
+
+  for (d in c("data.ab", "data.re")) {
+    if (!is.null(network[[d]]) && is.null(network[[d]][[var]])) {
+      stop(paste0("Regressor variable \"", var, "\" not found in ", d))
+    }
+  }
+
   data <- mtc.merge.data(network)
   studies <- unique(data[['study']])
   unname(sapply(studies, function(study) {
