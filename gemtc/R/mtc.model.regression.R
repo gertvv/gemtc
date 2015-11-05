@@ -13,8 +13,14 @@ mtc.model.regression <- function(model, regressor) {
   regressor[['control']] <- as.treatment.factor(regressor[['control']], model[['network']])
   control <- regressor[['control']]
   x <- regressorData(model[['network']], regressor)
-  model[['regressor']] <- c(regressor, mu=mean(x), sd=sd(x))
-  x <- (x - mean(x)) / sd(x)
+  if (all(x %in% 0:1)) { # binary covariate
+    model[['regressor']] <- c(regressor, type='binary')
+  } else if (is.numeric(x)) { # continuous covariate
+    model[['regressor']] <- c(regressor, type='continuous', mu=mean(x), sd=sd(x))
+    x <- (x - mean(x)) / sd(x)
+  } else { # unsupported covariate
+    stop("The covariate must be either binary (0/1) or numeric")
+  }
   model[['data']] <- mtc.model.data(model)
   model[['data']][['x']] <- x
   model[['data']][['reg.control']] <- control

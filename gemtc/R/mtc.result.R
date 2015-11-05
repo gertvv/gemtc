@@ -29,8 +29,10 @@ print.summary.mtc.result <- function(x, ...) {
     cat(paste0("Regression on \"", r[['variable']], "\", ", r[['coefficient']], " coefficients, \"", r[['control']], "\" as control\n"))
     if (!is.null(x[['covariate']])) {
       cat(paste0("Values at ", r[['variable']], " = ", x[['covariate']], "\n"))
-    } else {
+    } else if (r[['type']] == 'continuous') {
       cat(paste0("Centered and standardized: mean = ", format(r[['mu']]), "; sd = ", format(r[['sd']]), "\n"))
+    } else if (r[['type']] == 'binary') {
+      cat(paste0("Binary covariate; values at ", r[['variable']], " = 0\n"))
     }
   }
   cat("\n")

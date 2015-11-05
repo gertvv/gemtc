@@ -81,12 +81,21 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate
   if (result[['model']][['type']] == 'regression' && !is.na(covariate)) {
     model <- result[['model']]
     regressor <- model[['regressor']]
+
+    if (regressor[['type']] == 'binary' && !(covariate %in% 0:1)) {
+      stop("Invalid value for binary covariate")
+    }
+
     nt <- nrow(model[['network']][['treatments']])
     regression.parameters <- sapply(regressionParams(regressor, nt), function(p) { which(parnames == p) })
     parameters <- c(parameters, regression.parameters)
 
     transform <- regressionAdjustMatrix(t1, t2, regressor, nt)
-    transform <- transform * (covariate - regressor[['mu']]) / regressor[['sd']] 
+    if (regressor[['type']] == 'continuous') {
+      transform <- transform * (covariate - regressor[['mu']]) / regressor[['sd']] 
+    } else {
+      transform <- transform * covariate
+    }
     effects <- rbind(effects, transform)
   }
 
