@@ -87,7 +87,8 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate
     }
 
     nt <- nrow(model[['network']][['treatments']])
-    regression.parameters <- sapply(regressionParams(regressor, nt), function(p) { which(parnames == p) })
+    nc <- length(model[['regressor']][['classes']])
+    regression.parameters <- sapply(regressionParams(regressor, nt, nc), function(p) { which(parnames == p) })
     parameters <- c(parameters, regression.parameters)
 
     transform <- regressionAdjustMatrix(t1, t2, regressor, nt)

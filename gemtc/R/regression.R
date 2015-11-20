@@ -11,10 +11,25 @@ regressionParams <- function(regressor, nt, nc=0) {
   }
 }
 
+regressionClassMap <- function(classes) {
+  trt.to.class <- rep(NA, sum(sapply(classes, length)))
+  for (i in 1:length(classes)) {
+    trt.to.class[as.numeric(classes[[i]])] <- i
+  }
+  trt.to.class
+}
+
 regressionAdjustMatrix <- function(t1, t2, regressor, nt) {
   nparams <- length(regressionParams(regressor, nt))
   pairs <- treatment.pairs(t1, t2, 1:nt)
-  control <- as.numeric(regressor[['control']])
+
+  if (!is.null(regressor[['classes']])) {
+    pairs <- matrix(regressionClassMap(regressor[['classes']])[pairs], nrow=nrow(pairs))
+    control <- 1
+  } else {
+    control <- as.numeric(regressor[['control']])
+  }
+
   betaIndex <- function(i) {
     if (i > control) i - 1 else i
   }

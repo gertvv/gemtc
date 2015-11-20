@@ -49,10 +49,7 @@ mtc.model.regression <- function(model, regressor) {
     class.trts <- do.call(c, regressor[['classes']])
     all.trts <- model[['network']][['treatments']][['id']]
     stopifnot(!anyDuplicated(class.trts), setequal(class.trts, all.trts))
-    trt.to.class <- rep(NA, length(all.trts))
-    for (i in 1:length(classes)) {
-      trt.to.class[as.numeric(classes[[i]])] <- i
-    }
+    trt.to.class <- regressionClassMap(classes)
   }
 
   x <- regressorData(model[['network']], regressor)

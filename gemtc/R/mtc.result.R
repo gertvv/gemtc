@@ -26,7 +26,11 @@ print.summary.mtc.result <- function(x, ...) {
   if (!is.null(x[['regressor']])) {
     cat("\n-- Regression settings:\n\n")
     r <- x[['regressor']]
-    cat(paste0("Regression on \"", r[['variable']], "\", ", r[['coefficient']], " coefficients, \"", r[['control']], "\" as control\n"))
+    if (!is.null(x[['regressor']][['classes']])) {
+      cat(paste0("Regression on \"", r[['variable']], "\", ", r[['coefficient']], " coefficients, by class\n"))
+    } else {
+      cat(paste0("Regression on \"", r[['variable']], "\", ", r[['coefficient']], " coefficients, \"", r[['control']], "\" as control\n"))
+    }
     if (!is.null(x[['covariate']])) {
       cat(paste0("Values at ", r[['variable']], " = ", x[['covariate']], "\n"))
     } else if (r[['type']] == 'continuous') {
