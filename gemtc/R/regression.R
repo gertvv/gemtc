@@ -1,10 +1,14 @@
-regressionParams <- function(regressor, nt) {
-  control <- as.numeric(regressor[['control']])
-  betas <- paste0('beta[', (1:nt)[-control], ']')
-  regression.parameters <- list('shared'='B',
-                                'unrelated'=betas,
-                                'exchangeable'=c(betas, 'B', 'reg.sd'))
-  regression.parameters[[regressor[['coefficient']]]]
+regressionParams <- function(regressor, nt, nc=0) {
+  if (!is.null(regressor[['control']])) {
+    control <- as.numeric(regressor[['control']])
+    betas <- paste0('beta[', (1:nt)[-control], ']')
+    regression.parameters <- list('shared'='B',
+                                  'unrelated'=betas,
+                                  'exchangeable'=c(betas, 'B', 'reg.sd'))
+    regression.parameters[[regressor[['coefficient']]]]
+  } else { # by class
+    paste0('B[', 2:nc, ']')
+  }
 }
 
 regressionAdjustMatrix <- function(t1, t2, regressor, nt) {

@@ -10,18 +10,49 @@ mtc.model.regression <- function(model, regressor) {
   model[['tree']] <-
     style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model[['network']])))
 
-  if(is.null(regressor[['control']]) || is.null(regressor[['variable']]) || is.null(regressor[['coefficient']])) {
+  if (is.null(regressor[['variable']]) || is.null(regressor[['coefficient']]) ||
+      (is.null(regressor[['control']]) && is.null(regressor[['classes']]))) {
     stop("Regressor specification incomplete")
   }
 
-  control <- as.treatment.factor(regressor[['control']], model[['network']])
-  if (is.na(control)) {
-    stop(paste0("Control treatment \"", regressor[['control']], "\" not found"))
+  if (!is.null(regressor[['control']]) && !is.null(regressor[['classes']])) {
+    stop("Can not specify both 'control' and 'classes'")
   }
-  regressor[['control']] <- control
+
+  by.class <- !is.null(regressor[['classes']])
+
+  if (!by.class) {
+    control <- as.treatment.factor(regressor[['control']], model[['network']])
+    if (is.na(control)) {
+      stop(paste0("Control treatment \"", regressor[['control']], "\" not found"))
+    }
+    regressor[['control']] <- control
+  }
 
   if (!(regressor[['coefficient']] %in% c('shared', 'unrelated', 'exchangeable'))) {
     stop(paste0("Coefficient type \"", regressor[['coefficient']], "\" not supported"))
+  }
+  if (by.class && regressor[['coefficient']] == 'unrelated') {
+    stop("Unrelated coefficients not supported for regression by class")
+  }
+  if (by.class && regressor[['coefficient']] == 'exchangeable') {
+    stop("Exchangeable coefficients not yet implemented for regression by class")
+  }
+
+  if (by.class) {
+    classes <- regressor[['classes']]
+    stopifnot(is.list(classes))
+    if (is.null(names(classes)) || anyDuplicated(names(classes))) {
+      names(classes) <- 1:length(classes)
+    }
+    classes <- lapply(classes, as.treatment.factor, model[['network']])
+    class.trts <- do.call(c, regressor[['classes']])
+    all.trts <- model[['network']][['treatments']][['id']]
+    stopifnot(!anyDuplicated(class.trts), setequal(class.trts, all.trts))
+    trt.to.class <- rep(NA, length(all.trts))
+    for (i in 1:length(classes)) {
+      trt.to.class[as.numeric(classes[[i]])] <- i
+    }
   }
 
   x <- regressorData(model[['network']], regressor)
@@ -37,7 +68,12 @@ mtc.model.regression <- function(model, regressor) {
   }
   model[['data']] <- mtc.model.data(model)
   model[['data']][['x']] <- x
-  model[['data']][['reg.control']] <- control
+  if (!by.class) {
+    model[['data']][['reg.control']] <- control
+  } else {
+    model[['data']][['reg.classes']] <- trt.to.class
+    model[['data']][['reg.nclasses']] <- length(classes)
+  }
   model[['inits']] <- mtc.init(model)
 
   priors <- list(
@@ -45,12 +81,15 @@ mtc.model.regression <- function(model, regressor) {
     'unrelated'='\n# Regression priors\nfor (k in 1:(reg.control-1)) {\n  beta[k] ~ dnorm(0, prior.prec)\n}\nbeta[reg.control] <- 0\nfor (k in (reg.control+1):nt) {\n  beta[k] ~ dnorm(0, prior.prec)\n}\n',
     'exchangeable'='\n# Regression priors\nfor (k in 1:(reg.control-1)) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nbeta[reg.control] <- 0\nfor (k in (reg.control+1):nt) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nB ~ dnorm(0, prior.prec)\nreg.sd ~ dunif(0, om.scale)\nreg.tau <- pow(reg.sd, -2)')
 
+  priors.classes <- list(
+    'shared'='\n# Regression priors\nfor (k in 1:nt) {\n  beta[k] <- B[reg.classes[k]]\n}\nB[1] <- 0\nfor (k in 2:reg.nclasses) {\n  B[k] ~ dnorm(0, prior.prec)\n}')
+
   nt <- model[['data']][['nt']]
-  reg.monitors <- regressionParams(regressor, nt)
+  reg.monitors <- regressionParams(regressor, nt, length(classes))
 
   model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model),
                                     linearModel='delta[i, k] + (beta[t[i, k]] - beta[t[i, 1]]) * x[i]',
-                                    regressionPriors=priors[[regressor[['coefficient']]]])
+                                    regressionPriors=if (by.class) priors.classes[[regressor[['coefficient']]]] else priors[[regressor[['coefficient']]]])
 
   monitors <- inits.to.monitors(model[['inits']][[1]])
   model[['monitors']] <- list(

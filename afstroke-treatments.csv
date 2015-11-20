@@ -1,0 +1,18 @@
+id,description
+1,Placebo/Standard care
+2,Low adjusted dose anti-coagulant
+3,Standard adjusted dose anti-coagulant
+4,Fixed dose warfarin
+5,Low dose aspirin
+6,Medium dose aspirin
+7,High dose aspirin
+8,Alternate day aspirin
+9,Ximelagatran
+10,Triflusal
+11,Indobufen
+12,Dipyridamole
+13,Fixed dose warfarin + low dose aspirin
+14,Fixed dose warfarin + medium dose aspirin
+15,Acenocoumarol
+16,Low dose aspirin + copidogrel
+17,Low dose aspirin + dipyridamole
