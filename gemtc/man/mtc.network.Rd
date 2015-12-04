@@ -26,6 +26,8 @@ For trials with more than two arms, specify the standard error of the mean of th
 `std.err', as this determines the covariance of the differences.}
   \item{treatments}{Optional.
 A data frame with columns `id' and `description' defining the treatments or a vector giving the treatment IDs.}
+  \item{studies}{Optional.
+  A data frame with a `study' column naming the studies and additional columns containing covariate values.}
   \item{description}{Optional. Short description of the network.}
   \item{data}{Deprecated. Arm-level data; automatically assigned to data.ab if it is not specified.
 Present for compatibility with older versions.}
@@ -41,6 +43,7 @@ For \code{mtc.network}, an object of the class \code{mtc.network} which is a lis
   \item{treatments}{A data frame describing the treatments}
   \item{data.ab}{A data frame containing the network data (arm-level)}
   \item{data.re}{A data frame containing the network data (relative effects)}
+  \item{studies}{A data frame containing study-level information (covariates)}
 These are cleaned up and standardized versions of the arguments provided, or generated defaults for `treatments' if the argument was omitted.
 }
 \details{

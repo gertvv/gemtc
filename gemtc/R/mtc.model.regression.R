@@ -52,7 +52,12 @@ mtc.model.regression <- function(model, regressor) {
     trt.to.class <- regressionClassMap(classes)
   }
 
-  x <- regressorData(model[['network']], regressor)
+  studyData <- model[['network']][['studies']]
+  if (is.null(studyData) || is.null(studyData[[regressor[['variable']]]])) {
+    stop(paste0("Regressor variable \"", regressor[['variable']], "\" not found"))
+  }
+  x <- studyData[[regressor[['variable']]]] 
+
   if (any(is.na(x))) {
     stop("NA values for regressor variable not supported")
   } else if (all(x %in% 0:1)) { # binary covariate
@@ -97,28 +102,6 @@ mtc.model.regression <- function(model, regressor) {
   class(model) <- "mtc.model"
 
   model
-}
-
-regressorData <- function(network, regressor) {
-  var <- regressor[['variable']]
-
-  for (d in c("data.ab", "data.re")) {
-    if (!is.null(network[[d]]) && is.null(network[[d]][[var]])) {
-      stop(paste0("Regressor variable \"", var, "\" not found in ", d))
-    }
-  }
-
-  data <- mtc.merge.data(network)
-  studies <- unique(data[['study']])
-  unname(sapply(studies, function(study) {
-    sel <- network[['data.ab']][['study']] == study
-    if (any(sel)) {
-      network[['data.ab']][[var]][sel][1]
-    } else {
-      sel <- network[['data.re']][['study']] == study
-      network[['data.re']][[var]][sel][1]
-    }
-  }))
 }
 
 mtc.model.name.regression <- function(model) {
