@@ -56,6 +56,7 @@ export(
 	mtc.run,
 	relative.effect, rank.probability, relative.effect.table,
 	blobbogram, forest,
+  plotCovariateEffect,
 	mtc.anohe,
 	mtc.nodesplit, mtc.nodesplit.comparisons,
 	ll.call)

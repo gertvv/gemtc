@@ -59,6 +59,8 @@ Collate:
     'priors.R'
     'rank.probability.R'
     'regression.R'
+    'regressionPlot.R'
     'relative.effect.R'
     'relative.effect.table.R'
     'template.R'
+RoxygenNote: 5.0.1
