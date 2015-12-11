@@ -1,5 +1,221 @@
 context("mtc.model.inits")
 
+test_that("arrayize preserves scalar values", {
+  expect_equal(arrayize(c("a"=3)), list("a"=3))
+  expect_equal(arrayize(c("a"=3, "b"=2)), list("a"=3, "b"=2))
+})
+
+test_that("arrayize parses vectors", {
+  expect_equal(arrayize(c("a[1]"=3)), list("a"=3))
+  expect_equal(arrayize(c("a[1]"=3, "a[2]"=4)), list("a"=c(3,4)))
+  expect_equal(arrayize(c("a[2]"=4)), list("a"=c(NA,4)))
+})
+
+test_that("arrayize parses matrices", {
+  expect_equal(arrayize(c("m[1,2]"=8,"m[2,1]"=4)), list("m"=rbind(c(NA,8),c(4,NA))))
+})
+
+test_that("arrayize handles multiple variables", {
+  result <- arrayize(c("m[1,2]"=8,"a"=1,"beta[2]"=3,"m[2,1]"=4))
+  expect_equal(result, list("a"=1, "beta"=c(NA,3), "m"=rbind(c(NA,8),c(4,NA))))
+})
+
+test_that("mtc.init.mle.baseline", {
+  data.ab <- read.table(textConnection('
+study treatment mean std.err
+1     A         10.5 0.18
+1     B         15.3 0.17
+2     B         15.7 0.12
+2     C         18.3 0.15
+3     B         13.1 0.19
+3     C         14.2 0.20'), header=T)
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+4     A         NA   0.15
+4     B         3.1  0.22
+4     C         4.2  0.24'), header=T)
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+  model <- list(network=network,
+                type='consistency',
+                likelihood='normal',
+                link='identity',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
+  expected <- read.table(textConnection('
+parameter type     mean std.err
+mu[1]     baseline 10.5 0.18
+mu[2]     baseline 15.7 0.12
+mu[3]     baseline 13.1 0.19'), header=TRUE, stringsAsFactors=FALSE)
+
+  expect_equal(mtc.init.mle.baseline(model), expected)
+})
+
+test_that("mtc.init.mle.relative", {
+  data.ab <- read.table(textConnection('
+study treatment mean std.err
+1     A         10.5 0.18
+1     B         15.3 0.17
+2     B         15.7 0.12
+2     C         18.3 0.15
+3     B         13.1 0.19
+3     C         14.2 0.20'), header=T)
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+4     A         NA   0.15
+4     B         3.1  0.22
+4     C         4.2  0.24'), header=T)
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+  model <- list(network=network,
+                type='consistency',
+                likelihood='normal',
+                link='identity',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
+  expected <- read.table(textConnection('
+parameter  type     mean std.err
+delta[1,2] relative  4.8 0.2475884
+delta[2,2] relative  2.6 0.1920937
+delta[3,2] relative  1.1 0.2758623
+delta[4,2] relative  3.1 0.22
+delta[4,3] relative  4.2 0.24'), header=TRUE, stringsAsFactors=FALSE)
+
+  expect_equal(mtc.init.mle.relative(model), expected, tolerance=1E-5)
+})
+
+test_that("mtc.init.mle.basic", {
+  data.ab <- read.table(textConnection('
+study treatment mean std.err
+1     A         10.5 0.18
+1     B         15.3 0.17
+2     B         15.7 0.12
+2     C         18.3 0.15
+3     B         13.1 0.19
+3     C         14.2 0.20'), header=T)
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+4     A         NA   0.15
+4     B         3.1  0.22
+4     C         4.2  0.24'), header=T)
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+  model <- list(network=network,
+                type='consistency',
+                likelihood='normal',
+                link='identity',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
+  expected <- read.table(textConnection('
+parameter  type  mean     std.err
+d.A.B      basic 3.946206 0.8499915
+d.A.C      basic 4.200000 0.2400000'), header=TRUE, stringsAsFactors=FALSE)
+
+  expect_equal(mtc.init.mle.basic(model), expected, tolerance=1E-5)
+})
+
+test_that("mtc.linearModel.matrix works correctly", {
+  data.ab <- read.table(textConnection('
+study treatment mean std.err
+1     A         10.5 0.18
+1     B         15.3 0.17
+2     B         15.7 0.12
+2     C         18.3 0.15
+3     B         13.1 0.19
+3     C         14.2 0.20'), header=T)
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+4     A         NA   0.15
+4     B         3.1  0.22
+4     C         4.2  0.24'), header=T)
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+  model <- list(network=network,
+                type='consistency',
+                likelihood='normal',
+                link='identity',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
+
+
+  params.re <- c("mu[1]", "mu[2]", "mu[3]", "delta[1,2]", "delta[2,2]", "delta[3,2]", "delta[4,2]", "delta[4,3]", "d.A.B", "d.A.C")
+  expected.re <- rbind(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                       c(1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+                       c(0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+                       c(0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
+                       c(0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+                       c(0, 0, 1, 0, 0, 1, 0, 0, 0, 0),
+                       c(0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+                       c(0, 0, 0, 0, 0, 0, 0, 1, 0, 0))
+  expect_equal(mtc.linearModel.matrix(model, params.re), expected.re)
+
+  params.fe <- c("mu[1]", "mu[2]", "mu[3]", "d.A.B", "d.A.C")
+  expected.fe <- rbind(c(1, 0, 0,  0, 0),
+                       c(1, 0, 0,  1, 0),
+                       c(0, 1, 0,  0, 0),
+                       c(0, 1, 0, -1, 1),
+                       c(0, 0, 1,  0, 0),
+                       c(0, 0, 1, -1, 1),
+                       c(0, 0, 0,  1, 0),
+                       c(0, 0, 0,  0, 1))
+  model[['linearModel']] <- 'fixed'
+  expect_equal(mtc.linearModel.matrix(model, params.fe), expected.fe)
+})
+
+
+test_that("likelihood.arm.list returns the correct arms", {
+  data.ab <- read.table(textConnection('
+study treatment mean std.err
+s1    A         10.5 0.18
+s1    B         15.3 0.17
+s2    B         15.7 0.12
+s2    C         18.3 0.15
+s2    D         18.3 0.15
+s3    B         13.1 0.19
+s3    C         14.2 0.20'), header=T)
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+s4    A         NA   0.15
+s4    B         3.1  0.22
+s4    C         4.2  0.24'), header=T)
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+
+  expected1 <- read.table(textConnection('
+study studyIndex armIndex t1 t2
+s1    1          2        A  B
+s2    2          2        B  C
+s2    2          3        B  D
+s3    3          2        B  C
+s4    4          2        A  B
+s4    4          3        A  C'), header=TRUE, stringsAsFactors=FALSE)
+  expect_equal(likelihood.arm.list(network, baseline=FALSE), expected1)
+
+  expected2 <- read.table(textConnection('
+study studyIndex armIndex t1 t2
+s1    1          1        NA NA
+s1    1          2        A  B
+s2    2          1        NA NA
+s2    2          2        B  C
+s2    2          3        B  D
+s3    3          1        NA NA
+s3    3          2        B  C
+s4    4          2        A  B
+s4    4          3        A  C'), header=TRUE, stringsAsFactors=FALSE)
+  expect_equal(likelihood.arm.list(network, baseline=TRUE), expected2)
+})
+
 test_that("mtc.model.inits has correct shape", {
   data.ab <- read.table(textConnection('
 study treatment mean std.err
@@ -45,10 +261,10 @@ study treatment diff std.err
     c(NA, 1, 1),  # 4
     c(NA, 1, 1))  # 6
 
-  expect_that(is.na(inits[[1]]$delta), equals(is.na(whereNA)))
-  expect_that(is.na(inits[[2]]$delta), equals(is.na(whereNA)))
-  expect_that(is.na(inits[[3]]$delta), equals(is.na(whereNA)))
-  expect_that(is.na(inits[[4]]$delta), equals(is.na(whereNA)))
+  expect_equal(is.na(whereNA), is.na(inits[[1]]$delta))
+  expect_equal(is.na(whereNA), is.na(inits[[2]]$delta))
+  expect_equal(is.na(whereNA), is.na(inits[[3]]$delta))
+  expect_equal(is.na(whereNA), is.na(inits[[4]]$delta))
   expect_equal(3, length(inits[[1]]$mu))
   expect_equal(3, length(inits[[2]]$mu))
   expect_equal(3, length(inits[[3]]$mu))

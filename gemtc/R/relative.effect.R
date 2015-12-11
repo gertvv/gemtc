@@ -9,6 +9,7 @@ treatment.pairs <- function(t1, t2, ts) {
   matrix(c(t1, t2), ncol=2)
 }
 
+# basic parameters are rows, derived parameters (i.e. the relative effects) are columns
 tree.relative.effect <- function(g, t1, t2) {
   pairs <- treatment.pairs(t1, t2, V(g))
   paths <- apply(pairs, 1, function(rel) {
@@ -35,7 +36,7 @@ tree.relative.effect <- function(g, t1, t2) {
   # either ncol==1 or nrow==1
   paths <- matrix(as.numeric(paths), nrow=length(E(g)))
 
-  colnames(paths) <-  apply(pairs, 1, function(pair) {
+  colnames(paths) <- apply(pairs, 1, function(pair) {
     pair <- V(g)[pair]$name
     paste('d', pair[1], pair[2], sep='.')
   })

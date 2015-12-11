@@ -183,8 +183,12 @@ non.edges <- function(g, comparisons) {
 
 mtc.basic.parameters <- function(model) {
   graph <- if (!is.null(model[['tree']])) model[['tree']] else model[['graph']]
-  sapply(E(graph), function(e) {
-    v <- ends(graph, e, names=FALSE)
-    paste("d", V(graph)[v[1]]$name, V(graph)[v[2]]$name, sep=".")
-  })
+  if (!is.null(graph)) {
+    sapply(E(graph), function(e) {
+      v <- ends(graph, e, names=FALSE)
+      paste("d", V(graph)[v[1]]$name, V(graph)[v[2]]$name, sep=".")
+    })
+  } else {
+    NULL
+  }
 }
