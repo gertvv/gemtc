@@ -1,13 +1,18 @@
 plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.interactive(orNone=TRUE)) {
   regressor <- result[['model']][['regressor']]
   if (is.null(xlim)) {
-    mu <- regressor[['mu']]
-    sd <- regressor[['sd']]
-    xlim <- c(mu - 3*sd, mu + 3*sd)
+    if (regressor[['type']] == 'continuous') {
+      mu <- regressor[['mu']]
+      sd <- regressor[['sd']]
+      xlim <- c(mu - 3*sd, mu + 3*sd)
+      xvals <- seq(xlim[1], xlim[2], length.out=7)
+    } else {
+      xlim <- c(0, 1)
+      xvals <- xlim
+    }
   }
 
   pairs <- treatment.pairs(t1, t2, result[['model']][['network']][['treatments']][['id']])
-  xvals <- seq(xlim[1], xlim[2], length.out=7)
   res <- lapply(xvals, function(xval) {
     re <- relative.effect(result, t1, t2, preserve.extra=FALSE, covariate=xval)
     samples <- as.matrix(re[['samples']])
