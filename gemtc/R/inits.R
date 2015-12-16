@@ -221,6 +221,42 @@ mtc.init.hy <- function(hy.prior, om.scale, n.chain) {
   }
 }
 
+#' @param obj Numeric vector of objective coefficients
+#' @param mat Numeric matrix of constraint coefficients
+#' @param rhs Numeric vector of constraint right-hand sides
+#' @param eq Logical vector; TRUE for equality, FALSE for <=
+#' @param max Logical scalar; TRUE for maximize, FALSE for minimize
+solveLP <- function(obj, mat, rhs, eq, max=FALSE) {
+  # Solution using RCDD (results in memory corruption...)
+  # constraints <- cbind(eq, rhs, -mat)
+  # sol <- rcdd::lpcdd(constraints, obj, minimize=!max)
+  # if (sol$solution.type == "Optimal") {
+  #   sol$optimal.value
+  # } else if (sol$solution.type == "DualInconsistent" || sol$solution.type == "StrucDualInconsistent") {
+  #   if (max) { +Inf } else { -Inf }
+  # } else {
+  #   stop(paste("LP solver:", sol$solution.type))
+  # }
+
+  # solution status (from glpkAPI docs)
+  GLP_OPT <- 5    # solution is optimal
+  GLP_UNBND <- 6  # solution is unbounded
+  status <- c("solution is undefined", "solution is feasible", "solution is infeasible", "no feasible solution exists", "solution is optimal", "solution is unbounded")
+
+  dir <- c("<=", "==")[eq + 1]
+  m <- ncol(mat)
+  bounds <- list(lower=list(ind=1:m, val=rep(-Inf, m)),
+                 upper=list(ind=1:m, val=rep(+Inf, m)))
+  sol <- Rglpk::Rglpk_solve_LP(obj, mat, dir, rhs, max=max, bounds=bounds, control = list(canonicalize_status=FALSE))
+  if (sol$status == GLP_OPT) {
+    sol$optimum
+  } else if (sol$status == GLP_UNBND) {
+    if (max) { +Inf } else { -Inf }
+  } else {
+    stop(paste("LP solver:", status[sol$status]))
+  }
+}
+
 # Generate initial values for all relevant parameters
 mtc.init <- function(model) {
   hy <- if (model[['linearModel']] == 'random') {
@@ -240,10 +276,14 @@ mtc.init <- function(model) {
   params <- mle[['parameter']]
   linearModel <- mtc.linearModel.matrix(model, params)
   limits <- ll.call("inits.info", model)[['limits']]
-  constraints <- NULL
+  constr.eq <- NULL
+  constr.rhs <- NULL
+  constr.mat <- NULL
   if (all(is.finite(limits))) {
-    constraints <- rbind(cbind(0, -limits[1], linearModel), # Ax >= L
-                         cbind(0, limits[2], -linearModel)) # Ax <= U
+    # Ax >= L (-Ax <= -L); Ax <= U
+    constr.mat <- rbind(-linearModel, linearModel)
+    constr.rhs <- c(rep(-limits[1], nrow(linearModel)), rep(limits[2], nrow(linearModel)))
+    constr.eq <- rep(0, 2*nrow(linearModel))
   } else if (any(is.finite(limits))) {
     stop("Likelihood/link constrained on one side not (yet) supported")
   }
@@ -256,26 +296,18 @@ mtc.init <- function(model) {
   }
 
   # Find min/max value for the given parameter under the constraints
-  findLimit <- function(constraints, idx, minimize) {
-    if (is.null(constraints)) {
-      if (minimize) { -Inf } else { +Inf }
+  findLimit <- function(mat, rhs, eq, idx, max) {
+    if (is.null(mat)) {
+      if (max) { +Inf } else { -Inf }
     } else {
-      n <- ncol(constraints) - 2
-      obj <- rep(0, n)
+      obj <- rep(0, ncol(mat))
       obj[idx] <- 1
-      sol <- rcdd::lpcdd(constraints, obj, minimize=minimize)
-      if (sol$solution.type == "Optimal") {
-        sol$optimal.value
-      } else if (sol$solution.type == "DualInconsistent" || sol$solution.type == "StrucDualInconsistent") {
-        if (minimize) { -Inf } else { +Inf }
-      } else {
-        stop(paste("LP solver:", sol$solution.type))
-      }
+      solveLP(obj, mat, rhs, eq, max=max)
     }
   }
 
   # Generate initial values for each chain in turn
-  lapply(1:model[['n.chain']], function(chain) {
+  inits <- lapply(1:model[['n.chain']], function(chain) {
     param.order <- randomParameterOrder()
     stopifnot(length(param.order) == length(params)) # sanity check
 
@@ -284,8 +316,8 @@ mtc.init <- function(model) {
     names(x) <- params
     for (param in param.order) {
       param.mle <- mle[params == param, ]
-      param.limits <- c(findLimit(constraints, params == param, TRUE),
-                        findLimit(constraints, params == param, FALSE))
+      param.limits <- c(findLimit(constr.mat, constr.rhs, constr.eq, params == param, FALSE),
+                        findLimit(constr.mat, constr.rhs, constr.eq, params == param, TRUE))
 
       x[param] <- truncnorm::rtruncnorm(n=1,
                                         mean=param.mle[['mean']],
@@ -293,9 +325,11 @@ mtc.init <- function(model) {
                                         a=param.limits[1], b=param.limits[2])
 
       where <- rep(0, length(params))
-      where[params == param] <- -1
-      if (param.mle[['type']] != 'baseline') {
-        constraints <- rbind(constraints, c(1, unname(x[param]), where))
+      where[params == param] <- 1
+      if (!is.null(constr.mat) && param.mle[['type']] != 'baseline') {
+        constr.mat <- rbind(constr.mat, where)
+        constr.rhs <- c(constr.rhs, unname(x[param]))
+        constr.eq <- c(constr.eq, TRUE)
       }
     }
 
@@ -326,6 +360,8 @@ mtc.init <- function(model) {
 
     x
   })
+  
+  inits
 }
 
 # All non-NA initial values correspond to a variable that can be monitored
