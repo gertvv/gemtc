@@ -1,3 +1,4 @@
+#' @include stopIfNotConsistent.R
 #' @include regression.R
 
 treatment.pairs <- function(t1, t2, ts) {
@@ -62,8 +63,7 @@ spanning.tree.mtc.result <- function(result) {
 }
 
 relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate=NA) {
-  allowedTypes <- c('consistency', 'regression')
-  if (!(tolower(result[['model']][['type']]) %in% allowedTypes)) stop(paste("Can only apply relative.effect to models of the following types:", paste(allowedTypes, collapse=", ")))
+  stopIfNotConsistent(result, 'relative.effect')
 
   # Build relative effect transformation matrix
   network <- result[['model']][['network']]

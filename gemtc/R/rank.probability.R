@@ -1,6 +1,7 @@
+#' @include stopIfNotConsistent.R
+
 rank.probability <- function(result, preferredDirection=1) {
-  allowedTypes <- c('consistency', 'regression')
-  if (!(tolower(result[['model']][['type']]) %in% allowedTypes)) stop("Can only apply rank.probability to consistency models")
+  stopIfNotConsistent(result, 'rank.probability')
 
   stopifnot(preferredDirection %in% c(1, -1))
 

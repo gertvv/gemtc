@@ -1,3 +1,5 @@
+#' @include stopIfNotConsistent.R
+
 ## mtc.result class methods
 print.mtc.result <- function(x, ...) {
   cat("MTC ", x[['model']][['type']], " results: ", x[['model']][['description']], sep="")
@@ -47,7 +49,7 @@ plot.mtc.result <- function(x, ...) {
 }
 
 forest.mtc.result <- function(x, use.description=FALSE, ...) {
-  if (tolower(x[['model']][['type']]) != 'consistency') stop("Can only apply forest.mtc.result to consistency models")
+  stopIfNotConsistent(x, "forest.mtc.result")
 
   varnames <- colnames(x[['samples']][[1]])
   samples <- as.matrix(x[['samples']][, grep("^d\\.", varnames)])

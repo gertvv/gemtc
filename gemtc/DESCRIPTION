@@ -53,6 +53,7 @@ Collate:
     'mtc.model.use.R'
     'mtc.network.R'
     'mtc.network.xml.R'
+    'stopIfNotConsistent.R'
     'mtc.result.R'
     'mtc.run.R'
     'nodesplit.R'
