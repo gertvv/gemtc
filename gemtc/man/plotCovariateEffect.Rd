@@ -11,8 +11,6 @@ plotCovariateEffect(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.interactive(or
 }
 \arguments{
   \item{result}{Results object - created by \code{mtc.result}}
-  \item{t1}{}
-  \item{t2}{}
   \item{t1}{A list of baseline treatments to calculate treatment effects against. Will be extended to match the length of t2.}
   \item{t2}{A list of treatments to calculate the effects for. Will be extended to match the length of t1.
 If left empty and t1 is a single treatment, effects of all treatments except t1 will be calculated.}

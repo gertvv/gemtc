@@ -6,7 +6,7 @@
 \title{Create an mtc.network}
 \description{Creates an object of class \code{mtc.network}}
 \usage{
-mtc.network(data.ab, treatments, description, data.re, data)
+mtc.network(data.ab=data, treatments=NULL, description="Network", data.re=NULL, studies=NULL, data=NULL)
 
 \method{plot}{mtc.network}(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, ...)
 }
