@@ -1,58 +1,5 @@
-#'From a named vector with "BUGS format" names (v[1], m[2,3]), create a list of vectors and matrices
-arrayize <- function(x) {
-  # parse expressions into array indexes
-  exprs <- parse(text=names(x))
-  assgn <- lapply(exprs, function(expr) {
-    if (class(expr) == "name") {
-      list(name=as.character(expr), index=c())
-    } else if (expr[[1]] == "[") {
-      list(name=as.character(expr[[2]]), index=sapply(3:length(expr), function(i) { expr[[i]] }))
-    } else {
-      stop("Unrecognized expression")
-    }
-  })
-
-  # find the unique variables and their dimension
-  vars <- list()
-  for (a in assgn) {
-    name <- a[['name']]
-    index <- a[['index']]
-    if (!is.null(vars[[name]])) {
-      stopifnot(length(index) == length(vars[[name]]))
-      vars[[name]] <- pmax(vars[[name]], index)
-    } else {
-      vars[[name]] <- index
-    }
-  }
-
-  # allocate the variables
-  vars <- lapply(vars, function(dim) {
-    if (length(dim) == 0) {
-      NA
-    } else if (length(dim) == 1) {
-      rep(NA, dim[1])
-    } else if (length(dim) == 2) {
-      matrix(NA, nrow=dim[1], ncol=dim[2])
-    } else {
-      stop("higher dimensional objects not supported")
-    }
-  })
-
-  # assign values
-  for (i in 1:length(x)) {
-    name <- assgn[[i]][['name']]
-    index <- assgn[[i]][['index']]
-    if (length(index) == 0) {
-      vars[[name]] <- unname(x[i])
-    } else if (length(index) == 1) {
-      vars[[name]][index[1]] <- unname(x[i])
-    } else if (length(index) == 2) {
-      vars[[name]][index[1], index[2]] <- unname(x[i])
-    }
-  }
-
-  vars[order(names(vars))]
-}
+#' @include solveLP.R
+#' @include arrayize.R
 
 #'Generate a list of arms with a likelihood contribution
 #'@param baseline Include study baseline arms
@@ -218,42 +165,6 @@ mtc.init.hy <- function(hy.prior, om.scale, n.chain) {
     pmax(values, 1E-232) # prevent underflow in JAGS/BUGS (precision 0 is variance \infty)
   } else {
     values
-  }
-}
-
-#' @param obj Numeric vector of objective coefficients
-#' @param mat Numeric matrix of constraint coefficients
-#' @param rhs Numeric vector of constraint right-hand sides
-#' @param eq Logical vector; TRUE for equality, FALSE for <=
-#' @param max Logical scalar; TRUE for maximize, FALSE for minimize
-solveLP <- function(obj, mat, rhs, eq, max=FALSE) {
-  # Solution using RCDD (results in memory corruption...)
-  # constraints <- cbind(eq, rhs, -mat)
-  # sol <- rcdd::lpcdd(constraints, obj, minimize=!max)
-  # if (sol$solution.type == "Optimal") {
-  #   sol$optimal.value
-  # } else if (sol$solution.type == "DualInconsistent" || sol$solution.type == "StrucDualInconsistent") {
-  #   if (max) { +Inf } else { -Inf }
-  # } else {
-  #   stop(paste("LP solver:", sol$solution.type))
-  # }
-
-  # solution status (from glpkAPI docs)
-  GLP_OPT <- 5    # solution is optimal
-  GLP_UNBND <- 6  # solution is unbounded
-  status <- c("solution is undefined", "solution is feasible", "solution is infeasible", "no feasible solution exists", "solution is optimal", "solution is unbounded")
-
-  dir <- c("<=", "==")[eq + 1]
-  m <- ncol(mat)
-  bounds <- list(lower=list(ind=1:m, val=rep(-Inf, m)),
-                 upper=list(ind=1:m, val=rep(+Inf, m)))
-  sol <- Rglpk::Rglpk_solve_LP(obj, mat, dir, rhs, max=max, bounds=bounds, control = list(canonicalize_status=FALSE))
-  if (sol$status == GLP_OPT) {
-    sol$optimum
-  } else if (sol$status == GLP_UNBND) {
-    if (max) { +Inf } else { -Inf }
-  } else {
-    stop(paste("LP solver:", status[sol$status]))
   }
 }
 
