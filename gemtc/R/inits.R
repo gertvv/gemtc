@@ -130,6 +130,13 @@ mtc.init.mle.basic <- function(model) {
   }
 }
 
+mtc.init.mle.regression <- function(model, basicParameters) {
+  # data <- data.frame(y=c(0.4183063,-0.09706012,-0.06517845,0.7833548), e=c(1.649091,0.9139404,0.2214446,0.5825906), x=c(1,1,0,0))
+  # res <- lm(y ~ 0 + x, data, weights=1/(data$e^2))
+  # mu <- as.vector(res[['coefficients']])
+  # se <- sqrt(as.vector(vcov(res)))
+}
+
 # Matrix representing the linear model level of the BHM
 mtc.linearModel.matrix <- function(model, parameters) {
   basic <- mtc.basic.parameters(model)

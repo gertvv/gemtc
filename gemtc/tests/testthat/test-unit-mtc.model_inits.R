@@ -1,25 +1,5 @@
 context("mtc.model.inits")
 
-test_that("arrayize preserves scalar values", {
-  expect_equal(arrayize(c("a"=3)), list("a"=3))
-  expect_equal(arrayize(c("a"=3, "b"=2)), list("a"=3, "b"=2))
-})
-
-test_that("arrayize parses vectors", {
-  expect_equal(arrayize(c("a[1]"=3)), list("a"=3))
-  expect_equal(arrayize(c("a[1]"=3, "a[2]"=4)), list("a"=c(3,4)))
-  expect_equal(arrayize(c("a[2]"=4)), list("a"=c(NA,4)))
-})
-
-test_that("arrayize parses matrices", {
-  expect_equal(arrayize(c("m[1,2]"=8,"m[2,1]"=4)), list("m"=rbind(c(NA,8),c(4,NA))))
-})
-
-test_that("arrayize handles multiple variables", {
-  result <- arrayize(c("m[1,2]"=8,"a"=1,"beta[2]"=3,"m[2,1]"=4))
-  expect_equal(result, list("a"=1, "beta"=c(NA,3), "m"=rbind(c(NA,8),c(4,NA))))
-})
-
 test_that("mtc.init.mle.baseline", {
   data.ab <- read.table(textConnection('
 study treatment mean std.err
@@ -121,6 +101,39 @@ d.A.B      basic 3.946206 0.8499915
 d.A.C      basic 4.200000 0.2400000'), header=TRUE, stringsAsFactors=FALSE)
 
   expect_equal(mtc.init.mle.basic(model), expected, tolerance=1E-5)
+})
+
+test_that("mtc.init.mle.regression works for a pair-wise dataset", {
+  data.ab <- read.table(textConnection('
+study treatment responders sampleSize
+Brown control 0 52
+Brown statin 1 94
+CCAIT control 2 166
+CCAIT statin 2 165
+Downs control 77 3301
+Downs statin 80 3304
+EXCEL control 3 1663
+EXCEL statin 33 6582'), header=TRUE, stringsAsFactors=FALSE)
+  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
+
+  network <- mtc.network(data.ab=data.ab, studies=studies)
+  model <- list(network=network,
+                type='regression',
+                likelihood='binom',
+                link='logit',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
+
+  basic <- mtc.init.mle.basic(model)
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+B         coefficient 0.02403821 0.6476681'), header=TRUE, stringsAsFactors=FALSE)
+
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
 })
 
 test_that("mtc.linearModel.matrix works correctly", {
@@ -261,14 +274,14 @@ study treatment diff std.err
     c(NA, 1, 1),  # 4
     c(NA, 1, 1))  # 6
 
-  expect_equal(is.na(whereNA), is.na(inits[[1]]$delta))
-  expect_equal(is.na(whereNA), is.na(inits[[2]]$delta))
-  expect_equal(is.na(whereNA), is.na(inits[[3]]$delta))
-  expect_equal(is.na(whereNA), is.na(inits[[4]]$delta))
-  expect_equal(3, length(inits[[1]]$mu))
-  expect_equal(3, length(inits[[2]]$mu))
-  expect_equal(3, length(inits[[3]]$mu))
-  expect_equal(3, length(inits[[4]]$mu))
+  expect_equal(is.na(inits[[1]]$delta), is.na(whereNA))
+  expect_equal(is.na(inits[[2]]$delta), is.na(whereNA))
+  expect_equal(is.na(inits[[3]]$delta), is.na(whereNA))
+  expect_equal(is.na(inits[[4]]$delta), is.na(whereNA))
+  expect_equal(length(inits[[1]]$mu), 3)
+  expect_equal(length(inits[[2]]$mu), 3)
+  expect_equal(length(inits[[3]]$mu), 3)
+  expect_equal(length(inits[[4]]$mu), 3)
 })
 
 test_that("mtc.model.inits has correct heterogeneity parameter", {
