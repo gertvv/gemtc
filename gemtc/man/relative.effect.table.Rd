@@ -8,7 +8,7 @@
 \title{Table of relative effects}
 \description{Generates a table of the relative effects of all pairs of treatments. Unlike \code{\link{relative.effect}}, this method stores summaries only, not raw samples.}
 \usage{
-relative.effect.table(result)
+relative.effect.table(result, covariate=NA)
 
 \method{print}{mtc.relative.effect.table}(x, ...)
 \method{forest}{mtc.relative.effect.table}(x, t1, use.description=FALSE, ...)
@@ -16,6 +16,7 @@ relative.effect.table(result)
 }
 \arguments{
   \item{result}{An object of S3 class \code{mtc.result} to derive the relative effects from.}
+  \item{covariate}{(Regression analyses only) Value of the covariate at which to compute relative effects.}
   \item{x}{An object of S3 class \code{mtc.relative.effect.table}.}
   \item{t1}{Baseline treatment for the Forest plot.}
   \item{use.description}{Display treatment descriptions instead of treatment IDs.}
