@@ -1,11 +1,11 @@
-relative.effect.table <- function(result) {
+relative.effect.table <- function(result, covariate=NA) {
   ts <- as.character(result[['model']][['network']][['treatments']][['id']])
   tbl <- array(NA, dim=c(length(ts), length(ts), 3), dimnames=list(ts, ts, c("2.5%", "50%", "97.5%")))
   comps <- combn(ts, 2)
 
   for (i in 1:ncol(comps)) {
     comp <- comps[,i]
-    samples <- as.matrix(relative.effect(result, comp[1], comp[2], preserve.extra=FALSE)$samples)
+    samples <- as.matrix(relative.effect(result, comp[1], comp[2], preserve.extra=FALSE, covariate=covariate)$samples)
     q <- quantile(samples, prob=c(0.025, 0.5, 0.975))
     tbl[comp[1], comp[2],] <- unname(q)
     q.inv <- c(-q[3], -q[2], -q[1])
@@ -13,6 +13,7 @@ relative.effect.table <- function(result) {
   }
 
   attr(tbl, "model") <- result[['model']]
+  attr(tbl, "covariate") <- covariate
   class(tbl) <- "mtc.relative.effect.table"
 
   tbl
