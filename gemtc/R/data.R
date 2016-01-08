@@ -71,5 +71,18 @@ mtc.model.data <- function(model) {
     nt = nrow(model[['network']][['treatments']]),
     om.scale = model[['om.scale']]))
 
+  powerAdjust <- model[['powerAdjust']]
+  if (!is.null(powerAdjust) && !is.na(powerAdjust)) {
+    studyData <- model[['network']][['studies']]
+    alpha <- studyData[[powerAdjust]]
+    names(alpha) <- studyData[['study']]
+    alpha <- alpha[as.character(studies)]
+    model.data <- c(model.data, list(alpha=alpha))
+
+    if (model[['likelihood']] != 'normal') {
+      model.data <- c(model.data, list(zero=matrix(0, ncol=na, nrow=length(studies.ab))))
+    }
+  }
+
   model.data
 }

@@ -64,6 +64,7 @@ mtc.model <- function(network, type="consistency",
     om.scale=NULL,
     hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
     dic=TRUE,
+    powerAdjust=NA,
     ...) {
   if (!inherits(network, "mtc.network")) {
     stop('Given network is not an mtc.network')
@@ -95,13 +96,23 @@ mtc.model <- function(network, type="consistency",
     network[['data.re']] <- add.std.err(network[['data.re']])
   }
 
+  if (!is.na(powerAdjust)) {
+    if (!(powerAdjust %in% names(network[['studies']]))) {
+      stop("The value of powerAdjust must be a column in the studies data frame")
+    }
+    if (any(network[['studies']][[powerAdjust]] > 1) || any(network[['studies']][[powerAdjust]] < 0)) {
+      stop("All power adjustment values must in [0, 1]")
+    }
+  }
+
   model <- list(
     type = type,
     linearModel = linearModel,
     network = network,
     n.chain = n.chain,
     var.scale = factor,
-    dic = dic)
+    dic = dic,
+    powerAdjust = powerAdjust)
 
   if (!mtc.model.defined(model)) {
     stop(paste(type, 'is not an MTC model type.'))

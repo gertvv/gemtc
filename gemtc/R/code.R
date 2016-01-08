@@ -1,7 +1,9 @@
 #' @include template.R
 
 mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model.template.txt',
-                           linearModel='delta[i, k]', regressionPriors='', powerAdjust=FALSE) {
+                           linearModel='delta[i, k]', regressionPriors='') {
+  powerAdjust <- !is.null(model[['powerAdjust']]) && !is.na(model[['powerAdjust']])
+
   template <- read.template(template)
 
   if (model[['data']][['ns.a']] > 0) {
