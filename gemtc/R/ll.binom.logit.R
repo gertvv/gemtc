@@ -19,9 +19,8 @@ mtc.rel.mle.binom.logit <- function(data, correction.force=TRUE, correction.type
   c(e2['mean'] - e1['mean'], sqrt(e1['sd']^2 + e2['sd']^2))
 }
 
-mtc.code.likelihood.binom.logit <- function() {
-paste("r[i, k] ~ dbin(p[i, k], n[i, k])
-logit(p[i, k]) <- $armLinearModel$", deviance.code.binom, sep="\n")
+mtc.code.likelihood.binom.logit <- function(powerAdjust) {
+  paste("logit(p[i, k]) <- $armLinearModel$", likelihood.code.binom[powerAdjust + 1], sep="\n")
 }
 
 fitted.values.parameter.binom.logit <- fitted.values.parameter.binom

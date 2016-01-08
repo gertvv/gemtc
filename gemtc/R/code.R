@@ -1,25 +1,31 @@
+#' @include template.R
+
 mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model.template.txt',
-                           linearModel='delta[i, k]', regressionPriors='') {
+                           linearModel='delta[i, k]', regressionPriors='', powerAdjust=FALSE) {
   template <- read.template(template)
 
   if (model[['data']][['ns.a']] > 0) {
     arm.code <- read.template('gemtc.armeffect.likelihood.txt')
     template <- template.block.sub(template, 'armeffect', arm.code)
-    lik.code <- do.call(paste("mtc.code.likelihood", model[['likelihood']], model[['link']], sep="."), list())
+    lik.code <- do.call(paste("mtc.code.likelihood", model[['likelihood']], model[['link']], sep="."), list(powerAdjust=powerAdjust))
     template <- template.block.sub(template, 'likelihood', lik.code)
   } else {
     template <- template.block.sub(template, 'armeffect', '## OMITTED')
   }
 
   if (model[['data']][['ns.r2']] > 0) {
-    rel.code <- read.template('gemtc.releffect.likelihood.r2.txt')
+    rel.code <-
+      if (powerAdjust) read.template('gemtc.releffect.likelihood.power.r2.txt')
+      else read.template('gemtc.releffect.likelihood.r2.txt')
     template <- template.block.sub(template, 'releffect.r2', rel.code)
   } else {
     template <- template.block.sub(template, 'releffect.r2', '## OMITTED')
   }
 
   if (model[['data']][['ns.rm']] > 0) {
-    rel.code <- read.template('gemtc.releffect.likelihood.rm.txt')
+    rel.code <-
+      if (powerAdjust) read.template('gemtc.releffect.likelihood.power.rm.txt')
+      else read.template('gemtc.releffect.likelihood.rm.txt')
     template <- template.block.sub(template, 'releffect.rm', rel.code)
   } else {
     template <- template.block.sub(template, 'releffect.rm', '## OMITTED')

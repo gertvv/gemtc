@@ -1,0 +1,3 @@
+r[i, k] ~ dpois(theta[i, k])
+
+dev[i, k] <- 2 * ((theta[i, k] - r[i, k]) + r[i, k] * log(r[i, k]/theta[i, k]))

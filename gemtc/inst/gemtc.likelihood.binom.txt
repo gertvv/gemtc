@@ -1,0 +1,6 @@
+r[i, k] ~ dbin(p[i, k], n[i, k])
+
+rhat[i, k] <- p[i, k] * n[i, k]
+dev[i, k] <- 2 *
+  (r[i, k] * (log(r[i, k]) - log(rhat[i, k])) +
+   (n[i, k]-r[i, k]) * (log(n[i, k] - r[i, k]) - log(n[i, k] - rhat[i, k])))

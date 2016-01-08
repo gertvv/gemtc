@@ -4,12 +4,12 @@ for(i in (ns.a + ns.r2 + 1):(ns.a + ns.r2 + ns.rm)) {
 	}
 	for (k in 1:(na[i]-1)) {
 		for (j in 1:(na[i]-1)) {
-			Sigma[i,j,k] <- ifelse(equals(j, k), pow(e[i,k+1], 2), pow(e[i,1], 2))
+			Sigma[i,j,k] <- ifelse(equals(j, k), pow(e[i,k+1], 2), pow(e[i,1], 2)) * 1 / alpha[i]
 		}
 	}
 	Omega[i,1:(na[i]-1),1:(na[i]-1)] <- inverse(Sigma[i,1:(na[i]-1),1:(na[i]-1)])
 	m[i,2:na[i]] ~ dmnorm(mest[i,2:na[i]], Omega[i,1:(na[i]-1),1:(na[i]-1)])
 
 	mdiff[i, 2:na[i]] <- m[i, 2:na[i]] - mest[i, 2:na[i]]
-	dev[i, 1] <- t(mdiff[i, 2:na[i]]) %*% Omega[i, 1:(na[i]-1),1:(na[i]-1)] %*% mdiff[i, 2:na[i]]
+	dev[i, 1] <- alpha[i] * t(mdiff[i, 2:na[i]]) %*% Omega[i, 1:(na[i]-1),1:(na[i]-1)] %*% mdiff[i, 2:na[i]]
 }

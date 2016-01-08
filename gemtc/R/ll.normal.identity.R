@@ -12,10 +12,8 @@ mtc.rel.mle.normal.identity <- function(data, correction.force=TRUE, correction.
   c(e2['mean'] - e1['mean'], sqrt(e1['sd']^2 + e2['sd']^2))
 }
 
-mtc.code.likelihood.normal.identity <- function() {
-paste("m[i, k] ~ dnorm(theta[i, k], prec[i, k])
-theta[i, k] <- $armLinearModel$
-prec[i, k] <- pow(e[i, k], -2)", deviance.code.normal, sep="\n")
+mtc.code.likelihood.normal.identity <- function(powerAdjust) {
+  paste("theta[i, k] <- $armLinearModel$", likelihood.code.normal[powerAdjust + 1], sep="\n")
 }
 
 fitted.values.parameter.normal.identity <- fitted.values.parameter.normal

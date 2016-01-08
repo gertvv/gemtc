@@ -32,6 +32,7 @@ Collate:
     'anohe.R'
     'arrayize.R'
     'blobbogram.R'
+    'template.R'
     'code.R'
     'data.R'
     'deviance.R'
@@ -65,5 +66,4 @@ Collate:
     'regression.R'
     'relative.effect.R'
     'relative.effect.table.R'
-    'template.R'
 RoxygenNote: 5.0.1

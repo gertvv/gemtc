@@ -31,10 +31,10 @@ mtc.rel.mle.poisson.log <- function(data, correction.force=TRUE, correction.type
   c(e2['mean'] - e1['mean'], sqrt(e1['sd']^2 + e2['sd']^2))
 }
 
-mtc.code.likelihood.poisson.log <- function() {
-paste("r[i, k] ~ dpois(theta[i, k])
-theta[i, k] <- E[i, k] * lambda[i, k]
-log(lambda[i, k]) <- $armLinearModel$", deviance.code.poisson, sep="\n")
+mtc.code.likelihood.poisson.log <- function(powerAdjust) {
+  paste("log(lambda[i, k]) <- $armLinearModel$",
+        "theta[i, k] <- E[i, k] * lambda[i, k]",
+        likelihood.code.poisson[powerAdjust + 1], sep="\n")
 }
 
 fitted.values.parameter.poisson.log <- fitted.values.parameter.poisson

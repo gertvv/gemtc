@@ -1,0 +1,8 @@
+zero[i, k] <- 0
+zero[i, k] ~ dpois(phi[i, k])
+phi[i, k] <- 1E6 - alpha[i] * (r[i, k] * log(p[i, k]) + (n[i, k] - r[i, k]) * log(1 - p[i, k]))
+
+rhat[i, k] <- p[i, k] * n[i, k]
+dev[i, k] <- alpha[i] * 2 *
+  (r[i, k] * (log(r[i, k]) - log(rhat[i, k])) +
+   (n[i, k]-r[i, k]) * (log(n[i, k] - r[i, k]) - log(n[i, k] - rhat[i, k])))

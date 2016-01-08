@@ -20,9 +20,8 @@ mtc.rel.mle.binom.cloglog <- function(data, correction.force=TRUE, correction.ty
   c(e2['mean'] - e1['mean'], sqrt(e1['sd']^2 + e2['sd']^2))
 }
 
-mtc.code.likelihood.binom.cloglog <- function() {
-paste("r[i, k] ~ dbin(p[i, k], n[i, k])
-cloglog(p[i, k]) <- $armLinearModel$", deviance.code.binom, sep="\n")
+mtc.code.likelihood.binom.cloglog <- function(powerAdjust) {
+  paste("cloglog(p[i, k]) <- $armLinearModel$", likelihood.code.binom[powerAdjust + 1], sep="\n")
 }
 
 fitted.values.parameter.binom.cloglog <- fitted.values.parameter.binom
