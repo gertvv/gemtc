@@ -10,11 +10,12 @@ For each MCMC iteration, the treatments are ranked by their effect relative to a
 A frequency table is constructed from these rankings and normalized by the number of iterations to give the rank probabilities.
 }
 \usage{
-rank.probability(result, preferredDirection=1)
+rank.probability(result, preferredDirection=1, covariate=NA)
 }
 \arguments{
   \item{result}{Object of S3 class \code{mtc.result} to be used in creation of the rank probability table}
   \item{preferredDirection}{Preferential direction of the outcome. Set 1 if higher values are preferred, -1 if lower values are preferred.}
+  \item{covariate}{(Regression analyses only) Value of the covariate at which to compute rank probabilities.}
 }
 \value{A matrix with the treatments as rows and the ranks as columns.
 The matrix is given class \code{mtc.rank.probability}, for which \code{print} and \code{plot} are overriden. }

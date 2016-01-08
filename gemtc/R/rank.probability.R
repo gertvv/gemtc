@@ -1,6 +1,6 @@
 #' @include stopIfNotConsistent.R
 
-rank.probability <- function(result, preferredDirection=1) {
+rank.probability <- function(result, preferredDirection=1, covariate=NA) {
   stopIfNotConsistent(result, 'rank.probability')
 
   stopifnot(preferredDirection %in% c(1, -1))
@@ -14,7 +14,7 @@ rank.probability <- function(result, preferredDirection=1) {
     .Call("gemtc_rank_count", d)
   }
 
-  d <- relative.effect(result, treatments[1], treatments, preserve.extra=FALSE)[['samples']]
+  d <- relative.effect(result, treatments[1], treatments, covariate=covariate, preserve.extra=FALSE)[['samples']]
   counts <- lapply(d, function(chain) { rank.count(t(chain)) })
   ranks <- Reduce(function(a, b) { a + b }, counts)
   colnames(ranks) <- treatments
