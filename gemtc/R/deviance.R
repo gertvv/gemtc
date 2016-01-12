@@ -19,6 +19,10 @@ deviance.monitors.fitted.ab <- function(model) {
   do.call(c, lapply(study.seq.ab(model[['data']]), function(i) { paste0(fpname, "[", i, ",", 1:model[['data']][['na']][i], "]") }))
 }
 
+alpha.ab <- function(model) {
+  do.call(c, lapply(study.seq.ab(model[['data']]), function(i) { rep(model[['data']][['alpha']][i], model[['data']][['na']][i]) }))
+}
+
 deviance.monitors.fitted.re <- function(model) {
   do.call(c, lapply(study.seq.re(model[['data']]), function(i) { paste0("delta[", i, ",", 2:model[['data']][['na']][i], "]") }))
 }
@@ -39,7 +43,7 @@ devfit.ab <- function(model, fit.ab) {
       x <- as.vector(t(el[1:n, , drop=FALSE]))
       x[!is.na(x)]
     })
-    ll.call("deviance", model, data, fit.ab)
+    ll.call("deviance", model, data, fit.ab, alpha=alpha.ab(model))
   } else {
     c()
   }
@@ -63,7 +67,7 @@ devfit.re <- function(model, mfit) {
 
       mdiff <- m - ifit
 
-      t(mdiff) %*% Omega %*% mdiff
+      data[['alpha']][i] * t(mdiff) %*% Omega %*% mdiff
     })
   } else {
     c()
