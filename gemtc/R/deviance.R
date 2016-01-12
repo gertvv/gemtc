@@ -20,7 +20,11 @@ deviance.monitors.fitted.ab <- function(model) {
 }
 
 alpha.ab <- function(model) {
-  do.call(c, lapply(study.seq.ab(model[['data']]), function(i) { rep(model[['data']][['alpha']][i], model[['data']][['na']][i]) }))
+  if (!is.na(model[['powerAdjust']]) && !is.null(model[['powerAdjust']])) {
+    do.call(c, lapply(study.seq.ab(model[['data']]), function(i) { rep(model[['data']][['alpha']][i], model[['data']][['na']][i]) }))
+  } else {
+    1
+  }
 }
 
 deviance.monitors.fitted.re <- function(model) {
@@ -67,7 +71,11 @@ devfit.re <- function(model, mfit) {
 
       mdiff <- m - ifit
 
-      data[['alpha']][i] * t(mdiff) %*% Omega %*% mdiff
+      alpha <-
+        if (!is.na(model[['powerAdjust']]) && !is.null(model[['powerAdjust']])) data[['alpha']][i]
+        else 1
+
+      alpha * t(mdiff) %*% Omega %*% mdiff
     })
   } else {
     c()
