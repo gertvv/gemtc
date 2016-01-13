@@ -95,10 +95,19 @@ replicate.example <- function(name, network, type="consistency", linearModel="ra
   n.adapt <- s1$summary$start - thin
   n.iter <- s1$summary$end - n.adapt
 
-  model <- mtc.model(network, type=type,
-    likelihood=likelihood, link=link,
-    linearModel=linearModel,
-    n.chain=4)
+  model <- if (exists("powerAdjustMode")) {
+    network$studies <- data.frame(study=mtc.studies.list(network)[['values']], x=1)
+    mtc.model(network, type=type,
+      likelihood=likelihood, link=link,
+      linearModel=linearModel,
+      n.chain=4,
+      powerAdjust='x')
+  } else {
+    mtc.model(network, type=type,
+      likelihood=likelihood, link=link,
+      linearModel=linearModel,
+      n.chain=4)
+  }
   capture.output(
     result <- mtc.run(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin)
   )

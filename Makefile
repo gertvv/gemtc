@@ -32,5 +32,8 @@ test: $(PACKAGE)
 validate: $(PACKAGE)
 	./run-tests.sh $(PACKAGE) validate
 
+validate-power: $(PACKAGE)
+	./run-tests.sh $(PACKAGE) validate powerAdjust
+
 regress: $(PACKAGE)
 	./run-tests.sh $(PACKAGE) regress

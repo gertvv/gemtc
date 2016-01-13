@@ -80,7 +80,7 @@ mtc.model.data <- function(model) {
     model.data <- c(model.data, list(alpha=alpha))
 
     if (model[['likelihood']] != 'normal') {
-      model.data <- c(model.data, list(zero=matrix(0, ncol=na, nrow=length(studies.ab))))
+      model.data <- c(model.data, list(zero=matrix(0, ncol=max(na), nrow=length(studies.ab))))
     }
   }
 
