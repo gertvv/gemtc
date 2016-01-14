@@ -103,7 +103,7 @@ d.A.C      basic 4.200000 0.2400000'), header=TRUE, stringsAsFactors=FALSE)
   expect_equal(mtc.init.mle.basic(model), expected, tolerance=1E-5)
 })
 
-test_that("mtc.init.mle.regression works for a pair-wise dataset", {
+test_that("mtc.init.mle.regression works for a pair-wise arm-based dataset", {
   data.ab <- read.table(textConnection('
 study treatment responders sampleSize
 Brown control 0 52
@@ -126,12 +126,115 @@ EXCEL statin 33 6582'), header=TRUE, stringsAsFactors=FALSE)
                 var.scale=2.5,
                 linearModel='random',
                 tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
-                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
 
   basic <- mtc.init.mle.basic(model)
   expected <- read.table(textConnection('
 parameter type        mean       std.err
 B         coefficient 0.02403821 0.6476681'), header=TRUE, stringsAsFactors=FALSE)
+
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+})
+
+test_that("mtc.init.mle.regression works for a pair-wise contrast-based dataset", {
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+Brown control NA NA
+Brown statin 0.521464 1.642075
+CCAIT control NA NA
+CCAIT statin 0.00609758 0.90121875
+Downs control NA NA
+Downs statin 0.03797925 0.16107712
+EXCEL control NA NA
+EXCEL statin 0.8865125 0.5624233'), header=TRUE, stringsAsFactors=FALSE)
+  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
+
+  network <- mtc.network(data.re=data.re, studies=studies)
+  model <- list(network=network,
+                type='regression',
+                likelihood='binom',
+                link='logit',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
+
+  basic <- mtc.init.mle.basic(model)
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+B         coefficient 0.02403821 0.6476681'), header=TRUE, stringsAsFactors=FALSE)
+
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+})
+
+test_that("mtc.init.mle.regression works for a pair-wise contrast-based dataset that requires re-basing", {
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+Brown statin NA NA
+Brown control -0.521464 1.642075
+CCAIT statin NA NA
+CCAIT control -0.00609758 0.90121875
+Downs statin NA NA
+Downs control -0.03797925 0.16107712
+EXCEL statin NA NA
+EXCEL control -0.8865125 0.5624233'), header=TRUE, stringsAsFactors=FALSE)
+  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
+
+  network <- mtc.network(data.re=data.re, studies=studies)
+  model <- list(network=network,
+                type='regression',
+                likelihood='binom',
+                link='logit',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
+
+  basic <- mtc.init.mle.basic(model)
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+B         coefficient 0.02403821 0.6476681'), header=TRUE, stringsAsFactors=FALSE)
+
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+})
+
+test_that("mtc.init.mle.regression works for a three-treatment arm-based dataset", {
+  data.ab <- read.table(textConnection('
+study treatment responders sampleSize
+Brown control 0 52
+Brown statinA 1 94
+CCAIT control 2 166
+CCAIT statinA 2 165
+Downs control 77 3301
+Downs statinB 80 3304
+EXCEL control 3 1663
+EXCEL statinB 33 6582'), header=TRUE, stringsAsFactors=FALSE)
+  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
+
+  network <- mtc.network(data.ab=data.ab, studies=studies)
+  model <- list(network=network,
+                type='regression',
+                likelihood='binom',
+                link='logit',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
+
+  basic <- mtc.init.mle.basic(model)
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+B         coefficient 0.03631562 0.6273469'), header=TRUE, stringsAsFactors=FALSE)
 
   expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
 })
@@ -183,6 +286,59 @@ study treatment diff std.err
                        c(0, 0, 1, -1, 1),
                        c(0, 0, 0,  1, 0),
                        c(0, 0, 0,  0, 1))
+  model[['linearModel']] <- 'fixed'
+  expect_equal(mtc.linearModel.matrix(model, params.fe), expected.fe)
+})
+
+test_that("mtc.linearModel.matrix works correctly for regression", {
+  data.ab <- read.table(textConnection('
+study treatment mean std.err
+1     A         10.5 0.18
+1     B         15.3 0.17
+2     B         15.7 0.12
+2     C         18.3 0.15
+3     B         13.1 0.19
+3     C         14.2 0.20'), header=T)
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+4     A         NA   0.15
+4     B         3.1  0.22
+4     C         4.2  0.24'), header=T)
+  studies <- data.frame(study=c('1','2','3','4'), x=c(1,0,1,0), stringsAsFactors=FALSE)
+
+  network <- mtc.network(data.ab=data.ab, data.re=data.re, studies=studies)
+  model <- list(network=network,
+                type='consistency',
+                likelihood='normal',
+                link='identity',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'='A'),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
+
+  params.re <- c("mu[1]", "mu[2]", "mu[3]", "delta[1,2]", "delta[2,2]", "delta[3,2]", "delta[4,2]", "delta[4,3]", "d.A.B", "d.A.C", "B")
+  expected.re <- rbind(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                       c(1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1),
+                       c(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                       c(0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+                       c(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+                       c(0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
+                       c(0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1),
+                       c(0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1))
+  expect_equal(mtc.linearModel.matrix(model, params.re), expected.re)
+
+  params.fe <- c("mu[1]", "mu[2]", "mu[3]", "d.A.B", "d.A.C", "B")
+  expected.fe <- rbind(c(1, 0, 0,  0, 0, 0),
+                       c(1, 0, 0,  1, 0, 1),
+                       c(0, 1, 0,  0, 0, 0),
+                       c(0, 1, 0, -1, 1, 0),
+                       c(0, 0, 1,  0, 0, 0),
+                       c(0, 0, 1, -1, 1, 0),
+                       c(0, 0, 0,  1, 0, 1),
+                       c(0, 0, 0,  0, 1, 1))
   model[['linearModel']] <- 'fixed'
   expect_equal(mtc.linearModel.matrix(model, params.fe), expected.fe)
 })

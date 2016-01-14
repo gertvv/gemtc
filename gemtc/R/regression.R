@@ -19,6 +19,18 @@ regressionClassMap <- function(classes) {
   trt.to.class
 }
 
+#' @return true if t is a control treatment for the regression model
+isRegressionControl <- function(model, t) {
+  regressor <- model[['regressor']]
+
+  t <- as.numeric(t)
+  if (!is.null(regressor[['classes']])) {
+    regressionClassMap(regressor[['classes']])[t] == 1
+  } else {
+    t == as.numeric(regressor[['control']])
+  }
+}
+
 regressionAdjustMatrix <- function(t1, t2, regressor, nt) {
   nparams <- length(regressionParams(regressor, nt))
   pairs <- treatment.pairs(t1, t2, 1:nt)
