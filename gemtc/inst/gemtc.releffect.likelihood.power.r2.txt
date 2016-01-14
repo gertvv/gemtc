@@ -5,5 +5,5 @@ for(i in (ns.a + 1):(ns.a + ns.r2)) {
 	m[i, 2] ~ dnorm(mest[i, 2], prec[i, 2])
 	prec[i, 2] <- alpha[i] / (e[i, 2] * e[i, 2])
 
-	dev[i, 1] <- alpha[i] * pow(m[i, 2] - mest[i, 2], 2) * prec[i, 2]
+	dev[i, 1] <- pow(m[i, 2] - mest[i, 2], 2) * prec[i, 2]
 }

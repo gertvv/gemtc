@@ -1,4 +1,4 @@
 zero[i, k] ~ dpois(phi[i, k])
 phi[i, k] <- 1E6 - alpha[i] * (r[i, k] * log(theta[i, k]) - theta[i, k])
 
-dev[i, k] <- 2 * ((theta[i, k] - r[i, k]) + r[i, k] * log(r[i, k]/theta[i, k]))
+dev[i, k] <- alpha[i] * 2 * ((theta[i, k] - r[i, k]) + r[i, k] * log(r[i, k]/theta[i, k]))

@@ -11,5 +11,5 @@ for(i in (ns.a + ns.r2 + 1):(ns.a + ns.r2 + ns.rm)) {
 	m[i,2:na[i]] ~ dmnorm(mest[i,2:na[i]], Omega[i,1:(na[i]-1),1:(na[i]-1)])
 
 	mdiff[i, 2:na[i]] <- m[i, 2:na[i]] - mest[i, 2:na[i]]
-	dev[i, 1] <- alpha[i] * t(mdiff[i, 2:na[i]]) %*% Omega[i, 1:(na[i]-1),1:(na[i]-1)] %*% mdiff[i, 2:na[i]]
+	dev[i, 1] <- t(mdiff[i, 2:na[i]]) %*% Omega[i, 1:(na[i]-1),1:(na[i]-1)] %*% mdiff[i, 2:na[i]]
 }
