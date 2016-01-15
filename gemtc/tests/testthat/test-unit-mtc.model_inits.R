@@ -114,9 +114,8 @@ Downs control 77 3301
 Downs statin 80 3304
 EXCEL control 3 1663
 EXCEL statin 33 6582'), header=TRUE, stringsAsFactors=FALSE)
-  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
 
-  network <- mtc.network(data.ab=data.ab, studies=studies)
+  network <- mtc.network(data.ab=data.ab)
   model <- list(network=network,
                 type='regression',
                 likelihood='binom',
@@ -127,6 +126,7 @@ EXCEL statin 33 6582'), header=TRUE, stringsAsFactors=FALSE)
                 linearModel='random',
                 tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
                 hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                data=list(x=c(1,1,0,0), nt=2),
                 regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
 
   basic <- mtc.init.mle.basic(model)
@@ -148,9 +148,8 @@ Downs control NA NA
 Downs statin 0.03797925 0.16107712
 EXCEL control NA NA
 EXCEL statin 0.8865125 0.5624233'), header=TRUE, stringsAsFactors=FALSE)
-  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
 
-  network <- mtc.network(data.re=data.re, studies=studies)
+  network <- mtc.network(data.re=data.re)
   model <- list(network=network,
                 type='regression',
                 likelihood='binom',
@@ -161,6 +160,7 @@ EXCEL statin 0.8865125 0.5624233'), header=TRUE, stringsAsFactors=FALSE)
                 linearModel='random',
                 tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
                 hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                data=list(x=c(1,1,0,0),nt=2),
                 regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
 
   basic <- mtc.init.mle.basic(model)
@@ -182,9 +182,8 @@ Downs statin NA NA
 Downs control -0.03797925 0.16107712
 EXCEL statin NA NA
 EXCEL control -0.8865125 0.5624233'), header=TRUE, stringsAsFactors=FALSE)
-  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
 
-  network <- mtc.network(data.re=data.re, studies=studies)
+  network <- mtc.network(data.re=data.re)
   model <- list(network=network,
                 type='regression',
                 likelihood='binom',
@@ -195,6 +194,7 @@ EXCEL control -0.8865125 0.5624233'), header=TRUE, stringsAsFactors=FALSE)
                 linearModel='random',
                 tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
                 hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                data=list(x=c(1,1,0,0),nt=2),
                 regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
 
   basic <- mtc.init.mle.basic(model)
@@ -216,9 +216,8 @@ Downs control 77 3301
 Downs statinB 80 3304
 EXCEL control 3 1663
 EXCEL statinB 33 6582'), header=TRUE, stringsAsFactors=FALSE)
-  studies <- data.frame(study=c('Brown', 'CCAIT', 'Downs', 'EXCEL'), x=c(1,1,0,0))
 
-  network <- mtc.network(data.ab=data.ab, studies=studies)
+  network <- mtc.network(data.ab=data.ab)
   model <- list(network=network,
                 type='regression',
                 likelihood='binom',
@@ -229,13 +228,107 @@ EXCEL statinB 33 6582'), header=TRUE, stringsAsFactors=FALSE)
                 linearModel='random',
                 tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
                 hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
-                regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
+                data=list(x=c(1,1,0,0),nt=3),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=as.treatment.factor('control', network)))
+
+  basic <- mtc.init.mle.basic(model)
+
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+B         coefficient 0.03631562 0.6273469'), header=TRUE, stringsAsFactors=FALSE)
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+beta[2]   coefficient 0.03631562 0.6273469
+beta[3]   coefficient 0.03631562 0.6273469'), header=TRUE, stringsAsFactors=FALSE)
+  model[['regressor']][['coefficient']] <- 'unrelated'
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+beta[2]   coefficient 0.03631562 0.6273469
+beta[3]   coefficient 0.03631562 0.6273469
+B         coefficient 0.03631562 0.6273469'), header=TRUE, stringsAsFactors=FALSE)
+  model[['regressor']][['coefficient']] <- 'exchangeable'
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+B[2]      coefficient 0.03631562 0.6273469'), header=TRUE, stringsAsFactors=FALSE)
+  model[['regressor']][['coefficient']] <- 'unrelated'
+  model[['regressor']][['classes']] <- list('control'=as.treatment.factor('control', network), 'statin'=as.treatment.factor(c('statinA', 'statinB'), network))
+  model[['regressor']][['control']] <- NULL
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+})
+
+test_that("mtc.init.mle.regression can re-base contrast-based three-arm trials", {
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+Brown control NA NA
+Brown statinA 2 0.8
+CCAIT control NA NA
+CCAIT statinB 2 0.8
+Downs statinA NA 0.5656854
+Downs control -2 0.8
+Downs statinB 0 0.8'), header=TRUE, stringsAsFactors=FALSE)
+
+  network <- mtc.network(data.re=data.re)
+  model <- list(network=network,
+                type='regression',
+                likelihood='binom',
+                link='logit',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                data=list(x=c(1,1,0,0),nt=2),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=as.treatment.factor('control', network)))
 
   basic <- mtc.init.mle.basic(model)
   expected <- read.table(textConnection('
 parameter type        mean       std.err
-B         coefficient 0.03631562 0.6273469'), header=TRUE, stringsAsFactors=FALSE)
+B         coefficient 0.02403821 0.6476681'), header=TRUE, stringsAsFactors=FALSE)
 
+  expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
+})
+
+test_that("mtc.init.mle.regression works when some studies do not include a control", {
+  data.ab <- read.table(textConnection('
+study treatment responders sampleSize
+Brown control 0 52
+Brown statinA 1 94
+CCAIT control 2 166
+CCAIT statinA 2 165
+Downs control 77 3301
+Downs statinB 80 3304
+EXCEL control 3 1663
+EXCEL statinB 33 6582
+FAKE statinA 5 2000
+FAKE statinB 6 2000
+'), header=TRUE, stringsAsFactors=FALSE)
+
+  network <- mtc.network(data.ab=data.ab)
+  model <- list(network=network,
+                type='regression',
+                likelihood='binom',
+                link='logit',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='random',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                data=list(x=c(1,1,0,0,1),nt=3),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=factor('control', levels=c('control', 'statin'))))
+
+  basic <- mtc.init.mle.basic(model)
+
+  expected <- read.table(textConnection('
+parameter type        mean       std.err
+B         coefficient 0.03631562 0.6273469'), header=TRUE, stringsAsFactors=FALSE)
   expect_equal(mtc.init.mle.regression(model, basic), expected, tolerance=1E-5)
 })
 
@@ -304,19 +397,19 @@ study treatment diff std.err
 4     A         NA   0.15
 4     B         3.1  0.22
 4     C         4.2  0.24'), header=T)
-  studies <- data.frame(study=c('1','2','3','4'), x=c(1,0,1,0), stringsAsFactors=FALSE)
 
-  network <- mtc.network(data.ab=data.ab, data.re=data.re, studies=studies)
+  network <- mtc.network(data.ab=data.ab, data.re=data.re)
   model <- list(network=network,
-                type='consistency',
+                type='regression',
                 likelihood='normal',
                 link='identity',
                 om.scale=2.5,
                 n.chain=4,
                 var.scale=2.5,
                 linearModel='random',
+                data=list(x=c(1,0,0.5,0.3), nt=3),
                 tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
-                regressor=list('variable'='x', 'coefficient'='shared', 'control'='A'),
+                regressor=list('variable'='x', 'coefficient'='shared', 'control'=as.treatment.factor('A', network)),
                 hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
 
   params.re <- c("mu[1]", "mu[2]", "mu[3]", "delta[1,2]", "delta[2,2]", "delta[3,2]", "delta[4,2]", "delta[4,3]", "d.A.B", "d.A.C", "B")
@@ -326,8 +419,8 @@ study treatment diff std.err
                        c(0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
                        c(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
                        c(0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
-                       c(0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1),
-                       c(0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1))
+                       c(0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0.3),
+                       c(0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0.3))
   expect_equal(mtc.linearModel.matrix(model, params.re), expected.re)
 
   params.fe <- c("mu[1]", "mu[2]", "mu[3]", "d.A.B", "d.A.C", "B")
@@ -337,8 +430,8 @@ study treatment diff std.err
                        c(0, 1, 0, -1, 1, 0),
                        c(0, 0, 1,  0, 0, 0),
                        c(0, 0, 1, -1, 1, 0),
-                       c(0, 0, 0,  1, 0, 1),
-                       c(0, 0, 0,  0, 1, 1))
+                       c(0, 0, 0,  1, 0, 0.3),
+                       c(0, 0, 0,  0, 1, 0.3))
   model[['linearModel']] <- 'fixed'
   expect_equal(mtc.linearModel.matrix(model, params.fe), expected.fe)
 })

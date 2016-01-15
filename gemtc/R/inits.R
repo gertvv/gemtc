@@ -136,9 +136,9 @@ mtc.init.mle.regression <- function(model, basicParameters) {
   data.ab <- network[['data.ab']]
   data.re <- network[['data.re']]
   regressor <- model[['regressor']]
-  covar <- network[['studies']][[regressor[['variable']]]]
-  names(covar) <- network[['studies']][['study']]
-  x <- sapply(names(covar), function(study) {
+  covar <- model[['data']][['x']]
+  names(covar) <- mtc.studies.list(network)[['values']]
+  x <- lapply(names(covar), function(study) {
     design <- mtc.study.design(network, study)
     is.control <- isRegressionControl(model, design)
     is.ab <- study %in% data.ab[['study']]
@@ -166,13 +166,19 @@ mtc.init.mle.regression <- function(model, basicParameters) {
         m <- tree.relative.effect(model[['tree']], t1, t2)
         fMean <- as.vector(m) %*% as.vector(basicParameters[,'mean'])
         fVar <- abs(as.vector(m)) %*% as.vector(basicParameters[,'std.err']^2)
-        c(mean=mle['mean'] - fMean, sd=sqrt(mle['sd']^2 + fVar), x=covar[study])
+        c(mean=mle['mean'] - fMean, sd=sqrt(mle['sd']^2 + fVar), x=unname(covar[study]))
       }, pairs[['t1']], pairs[['t2']])
+    } else {
+      matrix(NA, ncol=0, nrow=3, dimnames=list(c("mean", "sd", "x"), NULL))
     }
   })
+  x <- do.call(cbind, x)
   data <- data.frame(y=x[1,], e=x[2,], x=x[3,])
   res <- lm(y ~ 0 + x, data, weights=1/(data$e^2))
-  data.frame(parameter='B', type='coefficient',
+  nc <- length(model[['regressor']][['classes']])
+  params <- regressionParams(model[['regressor']], model[['data']][['nt']], nc)
+  params <- params[params != "reg.sd"]
+  data.frame(parameter=params, type='coefficient',
              mean=as.vector(res[['coefficients']]), std.err=sqrt(as.vector(vcov(res))),
              stringsAsFactors=FALSE)
 }
@@ -180,6 +186,9 @@ mtc.init.mle.regression <- function(model, basicParameters) {
 # Matrix representing the linear model level of the BHM
 mtc.linearModel.matrix <- function(model, parameters) {
   basic <- mtc.basic.parameters(model)
+  if (model[['type']] == 'regression') {
+    regr <- regressionParams(model[['regressor']], model[['data']][['nt']], length(model[['regressor']][['classes']]))
+  }
   processArm <- function(study, studyIndex, armIndex, t1, t2) {
     x <- rep(0, length(parameters))
     names(x) <- parameters
@@ -189,6 +198,11 @@ mtc.linearModel.matrix <- function(model, parameters) {
         x[parameters == paste0("delta[", studyIndex, ",", armIndex, "]")] <- 1
       } else {
         x[basic] <- as.vector(mtc.model.call('func.param.matrix', model, t1=t1, t2=t2))
+      }
+      if (model[['type']] == 'regression') {
+        t1 <- as.treatment.factor(t1, model[['network']])
+        t2 <- as.treatment.factor(t2, model[['network']])
+        x[regr] <- regressionAdjustMatrix(t1, t2, model[['regressor']], model[['data']][['nt']]) * model[['data']][['x']][studyIndex]
       }
     }
     x
@@ -228,7 +242,12 @@ mtc.init <- function(model) {
   if (model[['linearModel']] == 'random') {
     mle <- rbind(mle, mtc.init.mle.relative(model))
   }
-  mle <- rbind(mle, mtc.init.mle.basic(model))
+  basic <- mtc.init.mle.basic(model)
+  mle <- rbind(mle, basic)
+
+  if (model[['type']] == 'regression') {
+    mle <- rbind(mle, mtc.init.mle.regression(model, basic))
+  }
 
   # Define parameter value constraints
   params <- mle[['parameter']]
@@ -248,7 +267,8 @@ mtc.init <- function(model) {
 
   # Generate a random permutation of the parameters
   randomParameterOrder <- function() {
-    c(sample(params[mle[['type']] == 'basic']),
+    c(sample(params[mle[['type']] == 'coefficient']),
+      sample(params[mle[['type']] == 'basic']),
       sample(params[mle[['type']] == 'relative']),
       sample(params[mle[['type']] == 'baseline']))
   }
