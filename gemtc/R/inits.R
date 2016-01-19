@@ -130,56 +130,12 @@ mtc.init.mle.basic <- function(model) {
   }
 }
 
-mtc.init.mle.regression <- function(model, basicParameters) {
-  columns <- ll.call("required.columns.ab", model)
-  network <- model[['network']]
-  data.ab <- network[['data.ab']]
-  data.re <- network[['data.re']]
-  regressor <- model[['regressor']]
-  covar <- model[['data']][['x']]
-  names(covar) <- mtc.studies.list(network)[['values']]
-  x <- lapply(names(covar), function(study) {
-    design <- mtc.study.design(network, study)
-    is.control <- isRegressionControl(model, design)
-    is.ab <- study %in% data.ab[['study']]
-    if (!is.ab) {
-      controlArm <- data.re[['treatment']][is.na(data.re[['diff']]) & data.re[['study']] == study]
-    }
-    if (any(is.control) && any(!is.control)) {
-      pairs <- expand.grid(t1=design[is.control], t2=design[!is.control])
-      mapply(function(t1, t2) {
-        mle <- if (is.ab) {
-          data <- data.ab[data.ab[['study']] == study & (data.ab[['treatment']] == t1 | data.ab[['treatment']] == t2), columns, drop=FALSE]
-          ll.call("mtc.rel.mle", model, as.matrix(data))
-        } else {
-          if (t1 == controlArm) {
-            data <- data.re[data.re[['study']] == study & data.re[['treatment']] == t2, , drop=TRUE]
-            c('mean'=data[['diff']], 'sd'=data[['std.err']])
-          } else if (t2 == controlArm) {
-            data <- data.re[data.re[['study']] == study & data.re[['treatment']] == t1, , drop=TRUE]
-            c('mean'=-data[['diff']], 'sd'=data[['std.err']])
-          } else { # multi-arm trial where t1 & t2 differ from the base treatment
-            stop("FIXME: Case not implemented yet")
-          }
-        }
-        # Compute functional parameter values
-        m <- tree.relative.effect(model[['tree']], t1, t2)
-        fMean <- as.vector(m) %*% as.vector(basicParameters[,'mean'])
-        fVar <- abs(as.vector(m)) %*% as.vector(basicParameters[,'std.err']^2)
-        c(mean=mle['mean'] - fMean, sd=sqrt(mle['sd']^2 + fVar), x=unname(covar[study]))
-      }, pairs[['t1']], pairs[['t2']])
-    } else {
-      matrix(NA, ncol=0, nrow=3, dimnames=list(c("mean", "sd", "x"), NULL))
-    }
-  })
-  x <- do.call(cbind, x)
-  data <- data.frame(y=x[1,], e=x[2,], x=x[3,])
-  res <- lm(y ~ 0 + x, data, weights=1/(data$e^2))
+mtc.init.mle.regression <- function(model) {
   nc <- length(model[['regressor']][['classes']])
   params <- regressionParams(model[['regressor']], model[['data']][['nt']], nc)
   params <- params[params != "reg.sd"]
   data.frame(parameter=params, type='coefficient',
-             mean=as.vector(res[['coefficients']]), std.err=sqrt(as.vector(vcov(res))),
+             mean=0.0, std.err=model[['om.scale']],
              stringsAsFactors=FALSE)
 }
 
@@ -242,11 +198,10 @@ mtc.init <- function(model) {
   if (model[['linearModel']] == 'random') {
     mle <- rbind(mle, mtc.init.mle.relative(model))
   }
-  basic <- mtc.init.mle.basic(model)
-  mle <- rbind(mle, basic)
+  mle <- rbind(mle, mtc.init.mle.basic(model))
 
   if (model[['type']] == 'regression') {
-    mle <- rbind(mle, mtc.init.mle.regression(model, basic))
+    mle <- rbind(mle, mtc.init.mle.regression(model))
   }
 
   # Define parameter value constraints
