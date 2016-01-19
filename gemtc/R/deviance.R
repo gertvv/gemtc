@@ -59,7 +59,8 @@ devfit.re <- function(model, mfit) {
   if (length(s) > 0) {
     sapply(s, function(i) {
       na <- data[['na']][i]
-      start <- sum(data[['na']][s[1]:i] - 1) - na + 2
+      prev <- s[1:which(s == i)]
+      start <- sum(data[['na']][prev] - 1) - na + 2
       ifit <- mfit[start:(start + na - 2)]
 
       cov <- if (!is.na(data[['e']][i, 1])) data[['e']][i, 1]^2 else 0

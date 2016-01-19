@@ -3,11 +3,16 @@
 
 #'Generate a list of arms with a likelihood contribution
 #'@param baseline Include study baseline arms
-likelihood.arm.list <- function(network, baseline=TRUE) {
+likelihood.arm.list <- function(network, baseline=TRUE, includedStudies=NULL) {
   data <- mtc.merge.data(network)
   all.studies <- as.character(data[['study']])
   studies <- rle(all.studies)[['values']]
-  do.call(rbind, lapply(1:length(studies), function(i) {
+  studyIndices <- if (!is.null(includedStudies)) {
+    which(includedStudies[studies])
+  } else {
+    1:length(studies)
+  }
+  arms <- do.call(rbind, lapply(studyIndices, function(i) {
     study <- studies[i]
     sel <- which(all.studies == study)
     ts <- as.character(data[['treatment']][sel])
@@ -22,6 +27,21 @@ likelihood.arm.list <- function(network, baseline=TRUE) {
     }
     data.frame(study=study, studyIndex=i, armIndex=idx, t1=t1, t2=t2, stringsAsFactors=FALSE)
   }))
+  rownames(arms) <- NULL
+  arms
+}
+
+powerAdjustIncludedStudies <- function(model) {
+  data <- mtc.merge.data(model[['network']])
+  all.studies <- as.character(data[['study']])
+  studies <- rle(all.studies)[['values']]
+  if (!is.null(model[['powerAdjust']]) && !is.na(model[['powerAdjust']])) {
+    model[['data']][['alpha']] > 0
+  } else {
+    x <- c()
+    x[studies] <- TRUE
+    x
+  }
 }
 
 # MLE estimates for the study baselines
@@ -29,8 +49,9 @@ mtc.init.mle.baseline <- function(model) {
   s.mat <- arm.index.matrix(model[['network']])
   data.ab <- model[['network']][['data.ab']]
   studies.ab <- rle(as.character(data.ab[['study']]))[['values']]
+  studyIndices <- which(powerAdjustIncludedStudies(model)[studies.ab])
   rval <- if (length(studies.ab) > 0) {
-    do.call(rbind, lapply(1:length(studies.ab), function(i) {
+    do.call(rbind, lapply(studyIndices, function(i) {
       study <- studies.ab[i]
       data.ab <- model[['network']][['data.ab']]
       treatment <- data.ab[['treatment']][s.mat[study, 1, drop=TRUE]]
@@ -63,7 +84,7 @@ mtc.init.mle.relative <- function(model) {
     data.frame(parameter=paste0("delta[", studyIndex, ",", armIndex, "]"), type="relative", mean=mle['mean'], 'std.err'=mle['sd'], stringsAsFactors=FALSE)
   }
 
-  arms <- likelihood.arm.list(model[['network']], baseline=FALSE)
+  arms <- likelihood.arm.list(model[['network']], baseline=FALSE, includedStudies=powerAdjustIncludedStudies(model))
   rval <- do.call(rbind, mapply(processArm, arms$study, arms$studyIndex, arms$armIndex, arms$t1, arms$t2, SIMPLIFY=FALSE))
   rownames(rval) <- NULL
   rval
@@ -140,7 +161,7 @@ mtc.init.mle.regression <- function(model) {
 }
 
 # Matrix representing the linear model level of the BHM
-mtc.linearModel.matrix <- function(model, parameters) {
+mtc.linearModel.matrix <- function(model, parameters, includedStudies=NULL) {
   basic <- mtc.basic.parameters(model)
   if (model[['type']] == 'regression') {
     regr <- regressionParams(model[['regressor']], model[['data']][['nt']], length(model[['regressor']][['classes']]))
@@ -165,7 +186,7 @@ mtc.linearModel.matrix <- function(model, parameters) {
   }
 
   # loop over arms that have a likelihood contribution, generate a row (column?) for each
-  arms <- likelihood.arm.list(model[['network']], baseline=TRUE)
+  arms <- likelihood.arm.list(model[['network']], baseline=TRUE, includedStudies=includedStudies)
   rval <- t(mapply(processArm, arms$study, arms$studyIndex, arms$armIndex, arms$t1, arms$t2, USE.NAMES=FALSE))
   dimnames(rval) <- NULL
   rval

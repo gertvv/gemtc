@@ -81,7 +81,6 @@ study treatment diff std.err
                 tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
                 hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"))
 
-
   params.re <- c("mu[1]", "mu[2]", "mu[3]", "delta[1,2]", "delta[2,2]", "delta[3,2]", "delta[4,2]", "delta[4,3]", "d.A.B", "d.A.C")
   expected.re <- rbind(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                        c(1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
@@ -104,6 +103,15 @@ study treatment diff std.err
                        c(0, 0, 0,  0, 1))
   model[['linearModel']] <- 'fixed'
   expect_equal(mtc.linearModel.matrix(model, params.fe), expected.fe)
+
+  studies <- c("1"=TRUE, "2"=TRUE, "3"=FALSE, "4"=FALSE)
+  params.omit <- c("mu[1]", "mu[2]", "delta[1,2]", "delta[2,2]", "d.A.B", "d.A.C")
+  expected.omit <- rbind(c(1, 0, 0, 0, 0, 0),
+                         c(1, 0, 1, 0, 0, 0),
+                         c(0, 1, 0, 0, 0, 0),
+                         c(0, 1, 0, 1, 0, 0))
+  model[['linearModel']] <- 'random'
+  expect_equal(mtc.linearModel.matrix(model, params.omit, includedStudies=studies), expected.omit)
 })
 
 test_that("mtc.linearModel.matrix works correctly for regression", {
@@ -159,7 +167,6 @@ study treatment diff std.err
   expect_equal(mtc.linearModel.matrix(model, params.fe), expected.fe)
 })
 
-
 test_that("likelihood.arm.list returns the correct arms", {
   data.ab <- read.table(textConnection('
 study treatment mean std.err
@@ -199,6 +206,16 @@ s3    3          2        B  C
 s4    4          2        A  B
 s4    4          3        A  C'), header=TRUE, stringsAsFactors=FALSE)
   expect_equal(likelihood.arm.list(network, baseline=TRUE), expected2)
+
+  expected3 <- read.table(textConnection('
+study studyIndex armIndex t1 t2
+s1    1          1        NA NA
+s1    1          2        A  B
+s3    3          1        NA NA
+s3    3          2        B  C
+s4    4          2        A  B
+s4    4          3        A  C'), header=TRUE, stringsAsFactors=FALSE)
+  expect_equal(likelihood.arm.list(network, baseline=TRUE, includedStudies=c("s1"=TRUE, "s2"=FALSE, "s3"=TRUE, "s4"=TRUE)), expected3)
 })
 
 test_that("mtc.model.inits has correct shape", {

@@ -137,6 +137,29 @@ study treatment diff std.err
   ))
 })
 
+test_that("mtc.model.data omits studies with alpha=0 (powerAdjust)", {
+  data.ab <- read.table(textConnection('
+study treatment responders sampleSize
+1     A         3          10
+1     B         4          12
+1     C         8          20
+1     D         7          21
+2     B         3          11
+2     C         5          13'), header=T)
+  data.re <- read.table(textConnection('
+study treatment diff std.err
+3     A         NA   0.21
+3     B         4.0  0.19'), header=T)
+  studies <- data.frame('study'=c('1','2','3'), 'x'=c(1,0,0), stringsAsFactors=FALSE)
+  network <- mtc.network(data.ab, data.re=data.re, studies=studies)
+  model <- list(network=network, likelihood='binom', link='logit', om.scale=2.5, powerAdjust='x')
+  data <- mtc.model.data(model)
+  expect_equal(data[['studies.a']], 1)
+  expect_equal(data[['studies.r2']], NULL)
+  expect_equal(data[['studies.rm']], NULL)
+  expect_equal(data[['studies']], 1)
+})
+
 test_that("mtc.model.data has correct values (1)", {
   data.ab <- read.table(textConnection('
 study treatment responders sampleSize
