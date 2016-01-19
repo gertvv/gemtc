@@ -6,7 +6,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
 
   template <- read.template(template)
 
-  if (model[['data']][['ns.a']] > 0) {
+  if (length(model[['data']][['studies.a']]) > 0) {
     arm.code <- read.template('gemtc.armeffect.likelihood.txt')
     template <- template.block.sub(template, 'armeffect', arm.code)
     lik.code <- do.call(paste("mtc.code.likelihood", model[['likelihood']], model[['link']], sep="."), list(powerAdjust=powerAdjust))
@@ -15,7 +15,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
     template <- template.block.sub(template, 'armeffect', '## OMITTED')
   }
 
-  if (model[['data']][['ns.r2']] > 0) {
+  if (length(model[['data']][['studies.r2']]) > 0) {
     rel.code <-
       if (powerAdjust) read.template('gemtc.releffect.likelihood.power.r2.txt')
       else read.template('gemtc.releffect.likelihood.r2.txt')
@@ -24,7 +24,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
     template <- template.block.sub(template, 'releffect.r2', '## OMITTED')
   }
 
-  if (model[['data']][['ns.rm']] > 0) {
+  if (length(model[['data']][['studies.rm']]) > 0) {
     rel.code <-
       if (powerAdjust) read.template('gemtc.releffect.likelihood.power.rm.txt')
       else read.template('gemtc.releffect.likelihood.rm.txt')
@@ -48,7 +48,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
 
   template <- template.block.sub(template, 'relativeEffectMatrix', relEffectMatrix)
 
-  if (model[['data']][['ns.a']] > 0) {
+  if (length(model[['data']][['studies.a']]) > 0) {
     sbPriors <- ll.call('study.baseline.priors', model)
     template <- template.block.sub(template, 'studyBaselinePriors', sbPriors)
   } else {

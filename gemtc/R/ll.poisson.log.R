@@ -63,7 +63,7 @@ validate.data.poisson.log <- function(data.ab) {
 }
 
 study.baseline.priors.poisson.log <- function() {
-"for (i in 1:ns.a) {
+"for (i in studies.a) {
   mu[i] <- log(lambda.base[i])
   lambda.base[i] ~ dgamma(0.001, 0.001)
 }

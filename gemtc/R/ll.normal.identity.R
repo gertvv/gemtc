@@ -38,7 +38,7 @@ validate.data.normal.identity <- function(data.ab) {
 }
 
 study.baseline.priors.normal.identity <- function() {
-"for (i in 1:ns.a) {
+"for (i in studies.a) {
   mu[i] ~ dnorm(0, prior.prec)
 }
 "

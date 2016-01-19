@@ -1,5 +1,5 @@
 # Random effects model
-for (i in 1:ns) {
+for (i in studies) {
 	# Study-level relative effects
 	w[i, 1] <- 0
 	delta[i, 1] <- 0

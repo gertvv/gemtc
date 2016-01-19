@@ -40,9 +40,7 @@ study treatment responders sampleSize exposure
   model <- list(network=network, likelihood='binom', link='logit', om.scale=2.5)
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
-    sort(c(
-      'ns.a', 'ns.r2', 'ns.rm', 'ns', 'nt', 'om.scale',
-      'na', 't', 'r', 'n'))
+    sort(c('studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'n'))
   ))
 })
 
@@ -56,8 +54,7 @@ study treatment responders sampleSize exposure
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'ns.a', 'ns.r2', 'ns.rm', 'ns', 'nt', 'om.scale',
-      'na', 't', 'r', 'n'))
+      'studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'n'))
   ))
 })
 
@@ -71,8 +68,7 @@ study treatment responders sampleSize exposure
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'ns.a', 'ns.r2', 'ns.rm', 'ns', 'nt', 'om.scale',
-      'na', 't', 'r', 'E'))
+      'studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'E'))
   ))
 })
 
@@ -86,8 +82,7 @@ study treatment mean std.err
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'ns.a', 'ns.r2', 'ns.rm', 'ns', 'nt', 'om.scale',
-      'na', 't', 'm', 'e'))
+      'studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'm', 'e'))
   ))
 })
 
@@ -101,8 +96,7 @@ study treatment diff std.err
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'ns.a', 'ns.r2', 'ns.rm', 'ns', 'nt', 'om.scale',
-      'na', 't', 'm', 'e'))
+      'studies.r2', 'studies', 'nt', 'om.scale', 'na', 't', 'm', 'e'))
   ))
 })
 
@@ -120,8 +114,7 @@ study treatment diff std.err
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'ns.a', 'ns.r2', 'ns.rm', 'ns', 'nt', 'om.scale',
-      'na', 't', 'm', 'e'))
+      'studies.a', 'studies.r2', 'studies', 'nt', 'om.scale', 'na', 't', 'm', 'e'))
   ))
 })
 
@@ -132,15 +125,15 @@ study treatment responders sampleSize
 1     B         4          12'), header=T)
   data.re <- read.table(textConnection('
 study treatment diff std.err
-2     A         NA   0.21
-2     B         4.0  0.19'), header=T)
+2     A         NA   0.19
+2     B         4.0  0.21
+2     C         2.5  0.22'), header=T)
   network <- mtc.network(data.ab, data.re=data.re)
   model <- list(network=network, likelihood='binom', link='logit', om.scale=2.5)
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'ns.a', 'ns.r2', 'ns.rm', 'ns', 'nt', 'om.scale',
-      'na', 't', 'r', 'n', 'm', 'e'))
+      'studies.a', 'studies.rm', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'n', 'm', 'e'))
   ))
 })
 
@@ -160,13 +153,13 @@ study treatment diff std.err
   network <- mtc.network(data.ab, data.re=data.re)
   model <- list(network=network, likelihood='binom', link='logit', om.scale=2.5)
   data <- mtc.model.data(model)
-  expect_that(data[['om.scale']], equals(model$om.scale))
-  expect_that(data[['ns.a']], equals(2))
-  expect_that(data[['ns.r2']], equals(1))
-  expect_that(data[['ns.rm']], equals(0))
-  expect_that(data[['ns']], equals(3))
-  expect_that(data[['nt']], equals(4))
-  expect_that(data[['na']], equals(c(4,2,2)))
+  expect_equal(data[['om.scale']], model$om.scale)
+  expect_equal(data[['studies.a']], 1:2)
+  expect_equal(data[['studies.r2']], 3:3)
+  expect_equal(data[['studies.rm']], NULL)
+  expect_equal(data[['studies']], 1:3)
+  expect_equal(data[['nt']], 4)
+  expect_equal(data[['na']], c(4,2,2))
   expect_that(data[['t']], equals(rbind(
     c(  1,  2,  3,  4),
     c(  2,  3, NA, NA),
@@ -220,13 +213,13 @@ study treatment diff std.err
   network <- mtc.network(data.ab, data.re=data.re)
   model <- list(network=network, likelihood='normal', link='identity', om.scale=2.5)
   data <- mtc.model.data(model)
-  expect_that(data[['om.scale']], equals(model$om.scale))
-  expect_that(data[['ns.a']], equals(3))
-  expect_that(data[['ns.r2']], equals(3))
-  expect_that(data[['ns.rm']], equals(2))
-  expect_that(data[['ns']], equals(8))
-  expect_that(data[['nt']], equals(3))
-  expect_that(data[['na']], equals(c(2,2,2,2,2,2,3,3)))
+  expect_equal(data[['om.scale']], model$om.scale)
+  expect_equal(data[['studies.a']], 1:3)
+  expect_equal(data[['studies.r2']], 4:6)
+  expect_equal(data[['studies.rm']], 7:8)
+  expect_equal(data[['studies']], 1:8)
+  expect_equal(data[['nt']], 3)
+  expect_equal(data[['na']], c(2,2,2,2,2,2,3,3))
   expect_that(data[['t']], equals(rbind(
     c(  1,  2, NA), # 1
     c(  2,  3, NA), # 2
@@ -257,4 +250,33 @@ study treatment diff std.err
     c( 0.15, 0.22, 0.24), # 4
     c( 0.16, 0.23, 0.27)  # 6
   )))
+})
+
+test_that("not specifying likelihood / link generates warnings", {
+  data.re <- read.table(textConnection("
+  study  treatment  diff  std.err
+  s01    A          NA    NA
+  s01    C          -0.31 0.67
+  s02    A          NA    NA
+  s02    B          -1.7  0.38
+  s03    C          NA    NA
+  s03    D          -0.35 0.44
+  s04    C          NA    NA
+  s04    D          0.55  0.55
+  s05    D          NA    NA
+  s05    E          -0.3  0.27
+  s06    D          NA    NA
+  s06    E          -0.3  0.32
+  s07    A          NA    0.50
+  s07    B          -2.3  0.72
+  s07    D          -0.9  0.69"), header=T)
+
+  network <- mtc.network(data.re=data.re)
+
+  expect_warning(model <- mtc.model(network, likelihood='normal'), 'Link can not be inferred. Defaulting to identity.')
+  expect_that(model$link, equals('identity'))
+  expect_warning(model <- mtc.model(network, link='identity'), 'Likelihood can not be inferred. Defaulting to normal.')
+  expect_that(model$likelihood, equals('normal'))
+
+  expect_error(mtc.model(network, link='logit', likelihood='normal'))
 })

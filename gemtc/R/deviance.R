@@ -1,9 +1,9 @@
 study.seq.ab <- function(data) {
-  if (data[['ns.a']] > 0) 1:data[['ns.a']] else c()
+  data[['studies.a']]
 }
 
 study.seq.re <- function(data) {
-  if (data[['ns.r2']] > 0 || data[['ns.rm']] > 0) (1:(data[['ns.r2']] + data[['ns.rm']])) + data[['ns.a']] else c()
+  c(data[['studies.r2']], data[['studies.rm']])
 }
 
 deviance.monitors.residuals.ab <- function(model) {
@@ -39,12 +39,12 @@ deviance.monitors <- function(model) {
 }
 
 devfit.ab <- function(model, fit.ab) {
-  n <- model[['data']][['ns.a']]
-  if (n > 0) {
+  studies <- study.seq.ab(model[['data']])
+  if (length(studies) > 0) {
     cols <- names(ll.call("required.columns.ab", model))
     data <- model[['data']][cols]
     data <- lapply(data, function(el) {
-      x <- as.vector(t(el[1:n, , drop=FALSE]))
+      x <- as.vector(t(el[studies, , drop=FALSE]))
       x[!is.na(x)]
     })
     ll.call("deviance", model, data, fit.ab, alpha=alpha.ab(model))
@@ -55,12 +55,11 @@ devfit.ab <- function(model, fit.ab) {
 
 devfit.re <- function(model, mfit) {
   data <- model[['data']]
-  ns.a <- data[['ns.a']]
   s <- study.seq.re(data)
   if (length(s) > 0) {
     sapply(s, function(i) {
       na <- data[['na']][i]
-      start <- sum(data$na[(ns.a + 1):i] - 1) - na + 2
+      start <- sum(data[['na']][s[1]:i] - 1) - na + 2
       ifit <- mfit[start:(start + na - 2)]
 
       cov <- if (!is.na(data[['e']][i, 1])) data[['e']][i, 1]^2 else 0
@@ -85,7 +84,7 @@ devfit.re <- function(model, mfit) {
 computeDeviance <- function(model, stats) {
   shape.ab <- function(x) {
     if (length(x) > 0) {
-      tpl <- arm.index.matrix(model[['network']])[1:model[['data']][['ns.a']],]
+      tpl <- arm.index.matrix(model[['network']])[study.seq.ab(model[['data']]),]
       x <- unname(x)
       y <- t(tpl)
       y[!is.na(y)] <- x

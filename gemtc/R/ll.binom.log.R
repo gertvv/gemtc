@@ -41,7 +41,7 @@ required.columns.ab.binom.log <- required.columns.counts
 validate.data.binom.log <- validate.data.counts
 
 study.baseline.priors.binom.log <- function() {
-"for (i in 1:ns.a) {
+"for (i in studies.a) {
   mu[i] <- log(p.base[i])
   p.base[i] ~ dunif(0, 1)
 }

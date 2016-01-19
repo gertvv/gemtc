@@ -62,14 +62,28 @@ mtc.model.data <- function(model) {
   model.data <- lapply(data, function(column) { matrix(column[s.mat], nrow=nrow(s.mat)) })
   names(model.data) <- colnames(data)
 
+  ns.a <- length(studies.ab)
+  ns.r2 <- sum(na.re == 2)
+  ns.rm <- sum(na.re > 2)
   model.data <- c(model.data, list(
-    ns.a = length(studies.ab),
-    ns.r2 = sum(na.re == 2),
-    ns.rm = sum(na.re > 2),
-    ns = length(studies),
     na = unname(na),
     nt = nrow(model[['network']][['treatments']]),
     om.scale = model[['om.scale']]))
+
+  studies.a <- if (ns.a > 0) 1:ns.a else numeric()
+  studies.r2 <- if (ns.r2 > 0) ns.a + (1:ns.r2) else numeric()
+  studies.rm <- if (ns.rm > 0) ns.a + ns.r2 + (1:ns.rm) else numeric()
+  # conditional assigns necessary until JAGS accepts zero-length vectors
+  if (length(studies.a) > 0) {
+    model.data[['studies.a']] <- studies.a
+  }
+  if (length(studies.r2) > 0) {
+    model.data[['studies.r2']] <- studies.r2
+  }
+  if (length(studies.rm) > 0) {
+    model.data[['studies.rm']] <- studies.rm
+  }
+  model.data[['studies']] <- c(studies.a, studies.r2, studies.rm)
 
   powerAdjust <- model[['powerAdjust']]
   if (!is.null(powerAdjust) && !is.na(powerAdjust)) {

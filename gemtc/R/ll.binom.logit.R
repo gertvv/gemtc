@@ -42,7 +42,7 @@ required.columns.ab.binom.logit <- required.columns.counts
 validate.data.binom.logit <- validate.data.counts
 
 study.baseline.priors.binom.logit <- function() {
-"for (i in 1:ns.a) {
+"for (i in studies.a) {
   mu[i] ~ dnorm(0, prior.prec)
 }
 "

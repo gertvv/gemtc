@@ -1,4 +1,4 @@
-for(i in (ns.a + ns.r2 + 1):(ns.a + ns.r2 + ns.rm)) {
+for(i in studies.rm) {
 	for (k in 2:na[i]) {
 		mest[i, k] <- $relLinearModel$
 	}

@@ -19,6 +19,4 @@ model {
 	# Effect parameter priors
 	$relativeEffectPriors$
 	$regressionPriors$
-
-	foo <- ns.a + ns.r2 + ns.rm # prevent warnings about unused variables
 }

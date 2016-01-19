@@ -1,4 +1,4 @@
-for (i in 1:ns.a) {
+for (i in studies.a) {
 	for (k in 1:na[i]) {
 		$likelihood$
 	}
