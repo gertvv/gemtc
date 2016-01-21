@@ -229,16 +229,24 @@ mtc.init <- function(model) {
   params <- mle[['parameter']]
   linearModel <- mtc.linearModel.matrix(model, params)
   limits <- ll.call("inits.info", model)[['limits']]
-  constr.eq <- NULL
-  constr.rhs <- NULL
-  constr.mat <- NULL
-  if (all(is.finite(limits))) {
-    # Ax >= L (-Ax <= -L); Ax <= U
-    constr.mat <- rbind(-linearModel, linearModel)
-    constr.rhs <- c(rep(-limits[1], nrow(linearModel)), rep(limits[2], nrow(linearModel)))
-    constr.eq <- rep(0, 2*nrow(linearModel))
-  } else if (any(is.finite(limits))) {
-    stop("Likelihood/link constrained on one side not (yet) supported")
+
+  constr.l <- list( # Ax >= L (-Ax <= -L)
+    mat=-linearModel,
+    rhs=rep(-limits[1], nrow(linearModel)),
+    eq=rep(0, nrow(linearModel)))
+  constr.u <- list( # Ax <= U
+    mat=linearModel,
+    rhs=rep(limits[2], nrow(linearModel)),
+    eq=rep(0, nrow(linearModel)))
+
+  constr <- if (all(is.finite(limits))) {
+    list(mat=rbind(constr.l[['mat']], constr.u[['mat']]),
+         rhs=c(constr.l[['rhs']], constr.u[['rhs']]),
+         eq=c(constr.l[['eq']], constr.u[['eq']]))
+  } else if (is.finite(limits[1])) {
+    constr.l
+  } else if (is.finite(limits[2])) {
+    constr.u
   }
 
   # Generate a random permutation of the parameters
@@ -270,8 +278,8 @@ mtc.init <- function(model) {
     names(x) <- params
     for (param in param.order) {
       param.mle <- mle[params == param, ]
-      param.limits <- c(findLimit(constr.mat, constr.rhs, constr.eq, params == param, FALSE),
-                        findLimit(constr.mat, constr.rhs, constr.eq, params == param, TRUE))
+      param.limits <- c(findLimit(constr[['mat']], constr[['rhs']], constr[['eq']], params == param, FALSE),
+                        findLimit(constr[['mat']], constr[['rhs']], constr[['eq']], params == param, TRUE))
 
       x[param] <- truncnorm::rtruncnorm(n=1,
                                         mean=param.mle[['mean']],
@@ -280,10 +288,10 @@ mtc.init <- function(model) {
 
       where <- rep(0, length(params))
       where[params == param] <- 1
-      if (!is.null(constr.mat) && param.mle[['type']] != 'baseline') {
-        constr.mat <- rbind(constr.mat, where)
-        constr.rhs <- c(constr.rhs, unname(x[param]))
-        constr.eq <- c(constr.eq, TRUE)
+      if (!is.null(constr[['mat']]) && param.mle[['type']] != 'baseline') {
+        constr[['mat']] <- rbind(constr[['mat']], where)
+        constr[['rhs']] <- c(constr[['rhs']], unname(x[param]))
+        constr[['eq']] <- c(constr[['eq']], TRUE)
       }
     }
 
