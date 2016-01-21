@@ -11,7 +11,7 @@ summary.mtc.result <- function(object, ...) {
   scale.name <- ll.call('scale.name', object[['model']])
   rval <- list('measure'=paste0(scale.log, scale.name),
        'summaries'=summary(object[['samples']]),
-       'DIC'=unlist(object[['deviance']][c('Dbar', 'pD', 'DIC')]),
+       'DIC'=unlist(object[['deviance']][c('Dbar', 'pD', 'DIC', 'data points')]),
        'regressor'=object[['model']][['regressor']],
        'covariate'=object[['covariate']])
   class(rval) <- 'summary.mtc.result'
@@ -23,7 +23,12 @@ print.summary.mtc.result <- function(x, ...) {
   print(x[['summaries']])
   if (!is.null(x[['DIC']])) {
     cat("-- Model fit (residual deviance):\n\n")
-    print(x[['DIC']])
+    dic <- x[['DIC']]
+    print(dic[c('Dbar', 'pD', 'DIC')])
+    cat(paste0("\n", dic['data points'], " data points, ratio ",
+               format(dic['Dbar'] / dic['data points'], digits=4),
+               ", I^2 = ", format(100 * max(0, min(1, (dic['Dbar'] - dic['data points'] + 1)/dic['Dbar'])), digits=1),
+               "%\n"))
   }
   if (!is.null(x[['regressor']])) {
     cat("\n-- Regression settings:\n\n")

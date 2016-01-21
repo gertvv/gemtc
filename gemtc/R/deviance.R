@@ -83,9 +83,15 @@ devfit.re <- function(model, mfit) {
 }
 
 computeDeviance <- function(model, stats) {
+  arms <- arm.index.matrix(model[['network']])
+  studies.ab <- study.seq.ab(model[['data']])
+  studies.re <- study.seq.re(model[['data']])
+
+  dp <- sum(!is.na(arms)) - length(studies.re)
+
   shape.ab <- function(x) {
     if (length(x) > 0) {
-      tpl <- arm.index.matrix(model[['network']])[study.seq.ab(model[['data']]),]
+      tpl <- arms[studies.ab,]
       x <- unname(x)
       y <- t(tpl)
       y[!is.na(y)] <- x
@@ -105,9 +111,7 @@ computeDeviance <- function(model, stats) {
 
   pD <- Dbar - sum(c(fit.ab, fit.re))
 
-  DIC <- Dbar + pD
-
-  list(Dbar=Dbar, pD=pD, DIC=DIC,
+  list(Dbar=Dbar, pD=pD, DIC=Dbar+pD, "data points"=dp,
        dev.ab=shape.ab(dev.ab), dev.re=unname(dev.re),
        fit.ab=shape.ab(fit.ab), fit.re=unname(fit.re))
 }
