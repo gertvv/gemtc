@@ -1,9 +1,5 @@
 generate.summaries <- function(result) {
-  sel <- colnames(result$samples[[1]]) != 'deviance'
-  samples <- as.mcmc.list(lapply(result$samples, function(chain) {
-    chain[ , sel]
-  }))
-
+  samples <- result$samples
   data <- as.matrix(samples)
   data <- data[, grep("^d\\.", colnames(data))]
   if (result$model$type == "consistency") {

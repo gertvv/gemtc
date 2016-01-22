@@ -1,13 +1,13 @@
-structure(list(effectiveSize = structure(16405.5789179202, .Names = "var1"), 
-    summary = structure(list(statistics = structure(c(-0.00774870607588956, 
-    0.0535728681792668, 0.000189408691885863, 0.000418341592826115
+structure(list(effectiveSize = structure(16420.2471645375, .Names = "d.control.diet"), 
+    summary = structure(list(statistics = structure(c(-0.00841815519536666, 
+    0.0537444762237103, 0.000190015417945524, 0.00041951277211585
     ), .Names = c("Mean", "SD", "Naive SE", "Time-series SE")), 
-        quantiles = structure(c(-0.113217294958584, -0.0438274345954349, 
-        -0.00774701091662025, 0.02825152145179, 0.097422805395549
+        quantiles = structure(c(-0.114973123710406, -0.0442989394875353, 
+        -0.0084440758597345, 0.0277108035761689, 0.0974642810472857
         ), .Names = c("2.5%", "25%", "50%", "75%", "97.5%")), 
         start = 5001, end = 25000, thin = 1, nchain = 4L), .Names = c("statistics", 
     "quantiles", "start", "end", "thin", "nchain"), class = "summary.mcmc"), 
-    cov = structure(numeric(0), .Dim = c(0L, 0L)), ranks = structure(c(0.556275, 
-    0.443725, 0.443725, 0.556275), .Dim = c(2L, 2L), .Dimnames = list(
+    cov = structure(0.00288846872456096, .Dim = c(1L, 1L)), ranks = structure(c(0.5634, 
+    0.4366, 0.4366, 0.5634), .Dim = c(2L, 2L), .Dimnames = list(
         c("control", "diet"), NULL), class = "mtc.rank.probability", direction = 1)), .Names = c("effectiveSize", 
 "summary", "cov", "ranks"))
