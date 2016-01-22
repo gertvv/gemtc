@@ -7,13 +7,15 @@ generate.summaries <- function(result) {
       effectiveSize = effectiveSize(samples),
       summary       = summary(samples),
       cov           = cov(as.matrix(data)),
-      ranks         = rank.probability(result)
+      ranks         = rank.probability(result),
+      dic           = result$deviance[c('Dbar', 'pD', 'DIC', 'data points')]
     )
   } else {
     list(
       effectiveSize = effectiveSize(samples),
       summary       = summary(samples),
-      cov           = cov(as.matrix(data))
+      cov           = cov(as.matrix(data)),
+      dic           = result$deviance[c('Dbar', 'pD', 'DIC', 'data points')]
     )
   }
 }
@@ -75,11 +77,24 @@ compare.summaries <- function(s1, s2) {
       x <- x + 1
       p <- (p + 1/n.sample) / (1 + nrow(s2$ranks)/n.sample)
 
-      test <- chisq.test(x, p=p, rescale.p=TRUE, simulate.p.value=TRUE)
+      test <- chisq.test(x, p=p, rescale.p=TRUE) #, simulate.p.value=TRUE)
       c('statistic'=unname(test$statistic), 'p.value'=test$p.value)
     })
     get_reporter()$add_result(
       expectation(all(test['p.value',] > 0.025), formatError("Rank probabilities were not equal", s1$ranks, s2$ranks, test)))
+  }
+
+  # Test equality of deviance statistics
+  if (!is.null(s1$dic)) {
+    n <- min(s1$effectiveSize, s2$effectiveSize)
+    expect_equal(s1$dic[['data points']], s2$dic[['data points']])
+    # deviance should follow an approximate Chi-squared distribution with variance 2*df
+    se <- sqrt(2 * s1$dic[['data points']] / n)
+    v1 <- unlist(s1$dic[c('Dbar', 'pD')])
+    v2 <- unlist(s2$dic[c('Dbar', 'pD')])
+    test <- pnorm(v1 - v2, 0, se)
+    get_reporter()$add_result(
+      expectation(all(test > 0.025), formatError("Model fit statistics were not equal", v1, v2, test)))
   }
 }
 

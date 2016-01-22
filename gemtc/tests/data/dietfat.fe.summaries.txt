@@ -1,13 +1,16 @@
-structure(list(effectiveSize = structure(16420.2471645375, .Names = "d.control.diet"), 
-    summary = structure(list(statistics = structure(c(-0.00841815519536666, 
-    0.0537444762237103, 0.000190015417945524, 0.00041951277211585
+structure(list(effectiveSize = structure(16781.0195714451, .Names = "d.control.diet"), 
+    summary = structure(list(statistics = structure(c(-0.00770627169745623, 
+    0.0534341165393374, 0.000188918130758389, 0.000412525487172919
     ), .Names = c("Mean", "SD", "Naive SE", "Time-series SE")), 
-        quantiles = structure(c(-0.114973123710406, -0.0442989394875353, 
-        -0.0084440758597345, 0.0277108035761689, 0.0974642810472857
+        quantiles = structure(c(-0.112410489145885, -0.0437610487614927, 
+        -0.00783282534735827, 0.0284324055826491, 0.0971751154902131
         ), .Names = c("2.5%", "25%", "50%", "75%", "97.5%")), 
         start = 5001, end = 25000, thin = 1, nchain = 4L), .Names = c("statistics", 
     "quantiles", "start", "end", "thin", "nchain"), class = "summary.mcmc"), 
-    cov = structure(0.00288846872456096, .Dim = c(1L, 1L)), ranks = structure(c(0.5634, 
-    0.4366, 0.4366, 0.5634), .Dim = c(2L, 2L), .Dimnames = list(
-        c("control", "diet"), NULL), class = "mtc.rank.probability", direction = 1)), .Names = c("effectiveSize", 
-"summary", "cov", "ranks"))
+    cov = structure(0.00285520481033949, .Dim = c(1L, 1L)), ranks = structure(c(0.5584875, 
+    0.4415125, 0.4415125, 0.5584875), .Dim = c(2L, 2L), .Dimnames = list(
+        c("control", "diet"), NULL), class = "mtc.rank.probability", direction = 1), 
+    dic = structure(list(Dbar = 21.9634749556293, pD = 11.080658995388, 
+        DIC = 33.0441339510173, `data points` = 20L), .Names = c("Dbar", 
+    "pD", "DIC", "data points"))), .Names = c("effectiveSize", 
+"summary", "cov", "ranks", "dic"))
