@@ -77,7 +77,7 @@ compare.summaries <- function(s1, s2) {
       x <- x + 1
       p <- (p + 1/n.sample) / (1 + nrow(s2$ranks)/n.sample)
 
-      test <- chisq.test(x, p=p, rescale.p=TRUE) #, simulate.p.value=TRUE)
+      test <- chisq.test(x, p=p, rescale.p=TRUE, simulate.p.value=TRUE)
       c('statistic'=unname(test$statistic), 'p.value'=test$p.value)
     })
     get_reporter()$add_result(
