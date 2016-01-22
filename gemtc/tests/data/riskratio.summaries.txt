@@ -1,4 +1,4 @@
-structure(list(effectiveSize = structure(17353.7151177326, .Names = "var1"), 
+structure(list(effectiveSize = structure(17353.7151177326, .Names = "d.A.B"), 
     summary = structure(list(statistics = structure(c(-0.0905785901265748, 
     0.0275019781587034, 9.72341762603175e-05, 0.000208889376331796
     ), .Names = c("Mean", "SD", "Naive SE", "Time-series SE")), 
