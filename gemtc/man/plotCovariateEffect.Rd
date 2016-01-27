@@ -7,7 +7,8 @@ The plot will show the median treatment effect and the 95\% credible interval on
 One plot page will be generated per pair of treatments.
 }
 \usage{
-plotCovariateEffect(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.interactive(orNone=TRUE))
+plotCovariateEffect(result, t1, t2, xlim=NULL, ylim=NULL,
+                    ask=dev.interactive(orNone=TRUE))
 }
 \arguments{
   \item{result}{Results object - created by \code{mtc.result}}

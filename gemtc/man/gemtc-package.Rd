@@ -52,8 +52,9 @@ Research Synthesis Methods 3(4):285-299.
 G. van Valkenhoef, S. Dias, A.E. Ades, and N.J. Welton (2015),
 \emph{Automated generation of node-splitting models for assessment of inconsistency in network meta-analysis},
 Research Synthesis Methods, accepted manuscript.
+[\href{http://dx.doi.org/10.1002/jrsm.1167}{doi:10.1002/jrsm.1167}]
 
-G. van Valkenhoef et al. (2014b),
+G. van Valkenhoef et al. (draft),
 \emph{Modeling inconsistency as heterogeneity in network meta-analysis},
 draft manuscript.
 

@@ -1,6 +1,8 @@
 \encoding{utf8}
 \name{rank.probability}
 \alias{rank.probability}
+\alias{print.mtc.rank.probability}
+\alias{plot.mtc.rank.probability}
 \title{Calculating rank-probabilities}
 \description{
 Rank probabilities indicate the probability for each treatment to be best, second best, etc.
@@ -11,14 +13,18 @@ A frequency table is constructed from these rankings and normalized by the numbe
 }
 \usage{
 rank.probability(result, preferredDirection=1, covariate=NA)
+
+\method{print}{mtc.rank.probability}(x, ...)
+\method{plot}{mtc.rank.probability}(x, ...)
 }
 \arguments{
   \item{result}{Object of S3 class \code{mtc.result} to be used in creation of the rank probability table}
   \item{preferredDirection}{Preferential direction of the outcome. Set 1 if higher values are preferred, -1 if lower values are preferred.}
   \item{covariate}{(Regression analyses only) Value of the covariate at which to compute rank probabilities.}
+  \item{x}{An object of S3 class \code{rank.probability}.}
+  \item{...}{Additional arguments.}
 }
-\value{A matrix with the treatments as rows and the ranks as columns.
-The matrix is given class \code{mtc.rank.probability}, for which \code{print} and \code{plot} are overriden. }
+\value{A matrix (with class \code{mtc.rank.probability}) with the treatments as rows and the ranks as columns.}
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 
