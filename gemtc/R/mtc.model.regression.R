@@ -10,6 +10,10 @@ mtc.model.regression <- function(model, regressor) {
   model[['tree']] <-
     style.tree(minimum.diameter.spanning.tree(mtc.network.graph(model[['network']])))
 
+  if (is.vector(regressor)) {
+    regressor <- as.list(regressor)
+  }
+
   if (is.null(regressor[['variable']]) || is.null(regressor[['coefficient']]) ||
       (is.null(regressor[['control']]) && is.null(regressor[['classes']]))) {
     stop("Regressor specification incomplete")
@@ -56,7 +60,12 @@ mtc.model.regression <- function(model, regressor) {
   if (is.null(studyData) || is.null(studyData[[regressor[['variable']]]])) {
     stop(paste0("Regressor variable \"", regressor[['variable']], "\" not found"))
   }
+
+  # make sure the sort order of x is correct
   x <- studyData[[regressor[['variable']]]] 
+  names(x) <- studyData[['study']]
+  studies <- mtc.studies.list(model[['network']])[['values']]
+  x <- x[studies]
 
   if (any(is.na(x))) {
     stop("NA values for regressor variable not supported")
