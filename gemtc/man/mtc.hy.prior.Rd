@@ -16,7 +16,7 @@ mtc.hy.empirical.lor(outcome.type, comparison.type)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{type}{Type of heterogeneity prior: 'std.dev', 'var', or 'prec' for standard deviation, variance, or precision respectively.}
-  \item{distr}{Prior distribution name (JAGS syntax). Typical ones would be 'dunif' (uniform), 'dgamma' (Gamma), or 'dlnorm' (log-normal).}
+  \item{distr}{Prior distribution name (JAGS syntax). Typical ones would be 'dunif' (uniform), 'dgamma' (Gamma), or 'dlnorm' (log-normal). Use 'dhnorm' for the half-normal. Note that, as in JAGS, the precision (and not the variance or standard deviation) is used for the normal distribution and its derivatives.}
   \item{...}{Arguments to the \code{distr}. Can be numerical values or "om.scale" for the estimated outcome measure scale (see \code{\link{mtc.model}})}
   \item{outcome.type}{The type of outcome to get an empirical prior for. Can be one of 'mortality' (all-cause mortality), 'semi-objective' (e.g. cause-specific mortality, major morbidity event, drop-outs), or 'subjective' (e.g. pain, mental health, dichotomous biomarkers).}
   \item{comparison.type}{The type of comparison to get an empirical prior for. Can be one of 'pharma-control' (pharmacological interventions versus control), 'pharma-pharma' (pharmacological versus pharmacological interventions) and 'non-pharma' (any other comparisons).}

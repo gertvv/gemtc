@@ -198,7 +198,14 @@ mtc.init.hy <- function(hy.prior, om.scale, n.chain) {
   substr(fn, 1, 1) <- "r"
   args <- c(n.chain, hy.prior[['args']])
   args[args == 'om.scale'] <- om.scale
-  values <- do.call(fn, args)
+  if (grepl("norm$", fn)) { # for *norm, convert precision (JAGS) to sd (R)
+    args[[3]] = sqrt(1/args[[3]])
+  }
+  values <- if (hy.prior[['distr']] == "dhnorm") { # special case dhnorm
+    truncnorm::rtruncnorm(args[[1]], a=0, mean = args[[2]], sd = args[[3]])
+  } else {
+    values <- do.call(fn, args)
+  }
   if (hy.prior$type == "prec") {
     pmax(values, 1E-232) # prevent underflow in JAGS/BUGS (precision 0 is variance \infty)
   } else {
