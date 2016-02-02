@@ -48,6 +48,7 @@ Collate:
     'll.poisson.log.R'
     'minimum.diameter.spanning.tree.R'
     'mtc.data.studyrow.R'
+    'mtc.hy.prior.R'
     'mtc.model.R'
     'mtc.model.consistency.R'
     'mtc.model.nodesplit.R'
