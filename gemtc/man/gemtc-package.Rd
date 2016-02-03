@@ -36,7 +36,7 @@ Medical Decision Making 33(5):607-617.
 
 S. Dias, A.J. Sutton, N.J. Welton, and A.E. Ades (2013b),
 \emph{Heterogeneity - Subgroups, Meta-Regression, Bias, and Bias-Adjustment},
-Medical Decision Making 33(5):618-640.
+Medical Decision Making 33(5):618-640. \cr
 [\href{http://dx.doi.org/10.1177/0272989X13485157}{doi:10.1177/0272989X13485157}]
 
 S. Dias, N.J. Welton, A.J. Sutton, D.M. Caldwell, G. Lu, and A.E. Ades (2013c),

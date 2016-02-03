@@ -136,7 +136,18 @@ The \code{igraph::layout.fruchterman.reingold} algorithm also seems to produce n
 \code{\link{mtc.network}}, \code{\link{mtc.run}}
 }
 \examples{
+# Random effects consistency model for Parkinson network
 model <- mtc.model(parkinson)
 plot(model)
 summary(model)
+
+# Fixed effect meta-regression for heart failure prevention
+regressor <- list(coefficient='shared',
+                  variable='secondary',
+                  control='control')
+
+model <- mtc.model(hfPrevention,
+                   type="regression",
+                   regressor=regressor,
+                   linearModel="fixed")
 }
