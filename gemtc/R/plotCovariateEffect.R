@@ -10,6 +10,8 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
       xlim <- c(0, 1)
       xvals <- xlim
     }
+  } else {
+    xvals <- seq(xlim[1], xlim[2], length.out=7)
   }
 
   pairs <- treatment.pairs(t1, t2, result[['model']][['network']][['treatments']][['id']])
