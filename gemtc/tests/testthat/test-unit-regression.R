@@ -28,4 +28,7 @@ test_that("regressionAdjustMatrix is correct", {
 
   expect_equal(regressionAdjustMatrix(c(1,1,2), c(1,2,3), list('coefficient'='exchangeable', 'control'=1), 4),
                cbind(c(0,0,0,0,0), c(1,0,0,0,0), c(-1,1,0,0,0)))
+
+  expect_equal(regressionAdjustMatrix(c(1,1,2,2), c(1,2,3,4), list('coefficient'='shared', 'classes'=list('C'=1, 'X'=c(2,3), 'Y'=4)), 4),
+               cbind(c(0, 0), c(1,0), c(0, 0), c(-1, 1)))
 })

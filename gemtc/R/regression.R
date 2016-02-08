@@ -32,10 +32,11 @@ isRegressionControl <- function(model, t) {
 }
 
 regressionAdjustMatrix <- function(t1, t2, regressor, nt) {
-  nparams <- length(regressionParams(regressor, nt))
+  nc <- length(regressor[['classes']])
+  nparams <- length(regressionParams(regressor, nt, nc))
   pairs <- treatment.pairs(t1, t2, 1:nt)
 
-  if (!is.null(regressor[['classes']])) {
+  if (nc > 0) {
     pairs <- matrix(regressionClassMap(regressor[['classes']])[pairs], nrow=nrow(pairs))
     control <- 1
   } else {
@@ -49,7 +50,7 @@ regressionAdjustMatrix <- function(t1, t2, regressor, nt) {
     v <- rep(0, nparams)
     t1 <- pair[1]
     t2 <- pair[2]
-    if (regressor[['coefficient']] == 'shared') {
+    if (regressor[['coefficient']] == 'shared' && nc == 0) {
       if (t1 == control && t2 != control) {
         v[1] <- 1
       } else if (t1 != control && t2 == control) {
