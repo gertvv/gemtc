@@ -160,6 +160,16 @@ mtc.init.mle.regression <- function(model) {
              stringsAsFactors=FALSE)
 }
 
+# for regression, last element of array can be missing
+# this leads to a JAGS error about dimension mismatch
+mtc.init.fixRegressionDimensions <- function(model, x) {
+  regressor <- model[['regressor']]
+  if (!is.null(regressor[['control']]) && regressor[['coefficient']] %in% c('unrelated', 'exchangeable')) {
+    length(x[['beta']]) <- nrow(model[['network']][['treatments']])
+  }
+  x
+}
+
 # Matrix representing the linear model level of the BHM
 mtc.linearModel.matrix <- function(model, parameters, includedStudies=NULL) {
   basic <- mtc.basic.parameters(model)
@@ -318,6 +328,12 @@ mtc.init <- function(model) {
 
     # convert flat representation to structured one
     x <- arrayize(x)
+
+    # for regression, make sure the dimensions are correct
+    # (if control is the last parameter in the array)
+    if (model[['type']] == 'regression') {
+      x <- mtc.init.fixRegressionDimensions(model, x)
+    }
 
     # replace mu to whatever the study baseline prior is on
     if (!is.null(x[['mu']])) {

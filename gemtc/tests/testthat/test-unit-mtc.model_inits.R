@@ -273,6 +273,52 @@ study treatment diff std.err
   expect_equal(length(inits[[4]]$mu), 3)
 })
 
+test_that("mtc.model.inits - regression parameters have the correct shape", {
+  data.ab <- read.table(textConnection('
+study treatment mean std.err
+1     A         10.5 0.18
+1     B         15.3 0.17
+2     B         15.7 0.12
+2     C         18.3 0.15
+3     B         13.1 0.19
+3     C         14.2 0.20'), header=T)
+  studies <- read.table(textConnection('
+study x 
+1     0
+2     1
+3     1'), header=T)
+  network <- mtc.network(data.ab=data.ab, studies=studies)
+  ts <- as.treatment.factor(c('A','B','C'), network)
+  model <- list(network=network,
+                type='regression',
+                likelihood='normal',
+                link='identity',
+                om.scale=2.5,
+                n.chain=4,
+                var.scale=2.5,
+                linearModel='fixed',
+                tree=minimum.diameter.spanning.tree(mtc.network.graph(network)),
+                hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+                data=list(x=c(0,1,1),nt=3),
+                regressor=list('variable'='x', 'coefficient'='unrelated', 'control'=ts[1]))
+
+  inits <- mtc.init(model)
+  expect_equal(is.na(inits[[1]]$beta), c(TRUE, FALSE, FALSE))
+
+  model$regressor$control <- ts[2]
+  inits <- mtc.init(model)
+  expect_equal(is.na(inits[[1]]$beta), c(FALSE, TRUE, FALSE))
+
+  model$regressor$control <- ts[3]
+  inits <- mtc.init(model)
+  expect_equal(is.na(inits[[1]]$beta), c(FALSE, FALSE, TRUE))
+
+  model$regressor$control <- NULL
+  model$regressor$classes <- list('control'=ts[1], 'other'=ts[2:3])
+  inits <- mtc.init(model)
+  expect_equal(is.na(inits[[1]]$B), c(TRUE, FALSE))
+})
+
 test_that("mtc.model.inits has correct heterogeneity parameter", {
   data.ab <- read.table(textConnection('
 study treatment mean std.err
