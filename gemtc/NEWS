@@ -1,3 +1,26 @@
+gemtc 0.8
+=========
+
+Release 2016-XX-YY
+
+New features:
+
+ * Network meta-regression using study-level covariates. Shared,
+   per-class, exchangeable, or unrelated coefficients.
+ * Allow adjusting relative effects and rank probabilities to a specific
+   covariate level. Plot treatment effects versus covariate levels.
+ * Down-weighting (variance inflation or likelihood adjustment) of
+   studies (e.g. for inclusion of lower quality evidence).
+ * Add example datasets for new regression features, as well as examples
+   for contrast-based data and rate data.
+ * Improved model fit diagnostics including per-arm or per-study
+   deviance.
+
+Removed featurs:
+
+ * Removed "write.mtc.network" function to write the deprecated GeMTC
+   XML format, as most networks can't be saved in that format anyway.
+
 gemtc 0.7-1
 ===========
 

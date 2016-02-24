@@ -55,7 +55,7 @@ Also see \code{\link{mtc.data.studyrow}} for a convenient way to import data fro
 \author{Gert van Valkenhoef, Joël Kuiper}
 
 \seealso{
-\code{\link{mtc.data.studyrow}}
+\code{\link{mtc.data.studyrow}},
 \code{\link{mtc.model}}
 }
 \examples{

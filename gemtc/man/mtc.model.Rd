@@ -18,13 +18,12 @@ mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{network}{An object of S3 class \code{mtc.network}}
-  \item{type}{A string literal indicating the type of model (either "consistency", "nodesplit", "ume", or "use").}
+  \item{type}{A string literal indicating the type of model (allowed values are "consistency", "regression", "nodesplit", "ume", or "use").}
   \item{factor}{Variance scaling factor for the starting values}
   \item{n.chain}{Number of chains in the model}
   \item{likelihood}{The likelihood to be used. If unspecified, a suitable likelihood will be inferred for the given data.}
   \item{link}{The link function to be used. If unspecified, a suitable link function will be inferred for the given data.}
-  \item{linearModel}{The type of linear model to be generated. Can be "random" for a random effects
-model, or "fixed" for a fixed effect model.}
+  \item{linearModel}{The type of linear model to be generated. Can be "random" for a random effects model, or "fixed" for a fixed effect model.}
   \item{om.scale}{Outcome measure scale. Represents a "very large" difference on the analysis' outcome scale. This is used to set vague priors. For the log odds-ratio, values between 2 and 5 are considered reasonable. For continuous outcomes, this depends heavily on the specific outcome. If left unspecified, it is determined from the data.}
   \item{hy.prior}{Heterogeneity prior. See \code{\link{mtc.hy.prior}}.}
   \item{dic}{When set to TRUE, deviance and fitted values will be monitored to allow computation of the Deviance Information Criterion (DIC) at residual.}
@@ -41,13 +40,14 @@ The following elements are descriptive:
   \item{likelihood}{The likelihood used}
   \item{link}{The link function used}
   \item{om.scale}{The scale for the variance parameters}
+  \item{regressor}{Regressor specification (regression models only)}
 These elements determine the model run by JAGS:
   \item{n.chain}{The number of chains}
   \item{code}{Model code in JAGS syntax. Use \code{cat()} for proper formatting.}
   \item{data}{Data in JAGS compatible format}
   \item{inits}{Initial values in JAGS compatible format}
   \item{monitors}{The nodes of the JAGS model to monitor}
-  \item{dic}{Whether to compute the DIC (necessary nodes will be monitored automatically)}
+  \item{dic}{Whether to compute the DIC}
 These latter fields can be modified to alter the statistical model, but such changes may break the model or assumptions made elsewhere in the package.
 }
 \details{
@@ -93,7 +93,7 @@ The following model types are supported:
   \item{\code{ume}: unrelated mean effects. Models the effects within each comparison as if they are independent. Does not properly handle multi-arm trials, and warns when they are present in the network. No additional parameters. \link[=gemtc-package]{[Dias et al. 2013b, van Valkenhoef et al. (draft)]}}
 }
 
-Regressor specification: a list with elements, \code{variable}, \code{coefficient}, and either \code{control} or \code{classes}.
+Regressor specification: a list with elements: \code{variable}, \code{coefficient}, and either \code{control} or \code{classes}.
 The \code{variable} is the name of the covariate to include in the regression analysis, and must be a column of the studies data frame in the network.
 The \code{coefficient} indicates the type of treatment-interaction model: "shared", "unrelated", or "exchangeable".
 \code{control}, if specified, must be the ID of a treatment in the network.
@@ -101,12 +101,13 @@ All other treatments have a coefficient relative to the control, which can be th
 \code{classes} is a named list of treatment classes, the first of which will act as the control class.
 Each class is a vector of treatment IDs from the network.
 Only "shared" coefficients can currently be used, meaning a single coefficient per class (except the control class).
+See also \code{\link{atrialFibrillation}}, \code{\link{certolizumab}}, and \code{\link{hfPrevention}} for examples of meta-regression analyses.
 
 Studies can be downweighted by using the \code{powerAdjust} argument, which applies a variance inflation (also known as "power prior") to the likelihood.
 This allows a weight \eqn{\alpha_i \in [0, 1]}{a[i] in [0, 1])} to be specified for each study \eqn{i}{i}.
 The log-likelihood will be multiplied by a factor \eqn{\alpha_i}{a[i]}, or equivalently for normal distributions the variance will be multiplied by \eqn{1/\alpha_i}{1/a[i]}.
 Setting \eqn{\alpha_i = 0}{a[i] = 0} will completely exclude that study, whereas setting \eqn{\alpha_i = 1}{a[i] = 1} will weight it fully.
-This essentially means that the data are being modified, and hence model fit statistics such as DIC can not be compared between models with different weightings.
+Essentially, down-weighted models modify the data and hence model fit statistics such as DIC can not be compared between models with different weightings.
 }
 
 \section{Visualization}{Calling the generic plot method on an S3 \code{mtc.model} object
