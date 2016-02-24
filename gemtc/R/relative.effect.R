@@ -93,11 +93,7 @@ relative.effect <- function(result, t1, t2 = c(), preserve.extra=TRUE, covariate
     parameters <- c(parameters, regression.parameters)
 
     transform <- regressionAdjustMatrix(t1, t2, regressor, nt)
-    if (regressor[['type']] == 'continuous') {
-      transform <- transform * (covariate - regressor[['mu']]) / regressor[['sd']] 
-    } else {
-      transform <- transform * covariate
-    }
+    transform <- transform * (covariate - regressor[['center']]) / regressor[['scale']]
     effects <- rbind(effects, transform)
   }
 

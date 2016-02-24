@@ -40,10 +40,9 @@ print.summary.mtc.result <- function(x, ...) {
     }
     if (!is.null(x[['covariate']])) {
       cat(paste0("Values at ", r[['variable']], " = ", x[['covariate']], "\n"))
-    } else if (r[['type']] == 'continuous') {
-      cat(paste0("Centered and standardized: mean = ", format(r[['mu']]), "; sd = ", format(r[['sd']]), "\n"))
-    } else if (r[['type']] == 'binary') {
-      cat(paste0("Binary covariate; values at ", r[['variable']], " = 0\n"))
+    } else {
+      cat(paste0("Input standardized: x' = (", r[['variable']], " - ", format(r[['center']], digits=getOption("digits")), ") / ", format(r[['scale']], digits=getOption("digits")), "\n"))
+      cat(paste0("Estimates at the centering value: ", r[['variable']], " = ", format(r[['center']], digits=getOption("digits")), "\n"))
     }
   }
   cat("\n")

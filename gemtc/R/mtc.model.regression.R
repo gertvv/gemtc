@@ -70,13 +70,13 @@ mtc.model.regression <- function(model, regressor) {
   if (any(is.na(x))) {
     stop("NA values for regressor variable not supported")
   } else if (all(x %in% 0:1)) { # binary covariate
-    model[['regressor']] <- c(regressor, type='binary')
+    model[['regressor']] <- c(regressor, type='binary', center=mean(x), scale=1)
   } else if (is.numeric(x)) { # continuous covariate
-    model[['regressor']] <- c(regressor, type='continuous', mu=mean(x), sd=sd(x))
-    x <- (x - mean(x)) / sd(x)
+    model[['regressor']] <- c(regressor, type='continuous', center=mean(x), scale=2*sd(x))
   } else { # unsupported covariate
     stop("The covariate must be either binary (0/1) or numeric")
   }
+  x <- (x - model[['regressor']][['center']]) / model[['regressor']][['scale']]
   model[['data']] <- mtc.model.data(model)
   model[['data']][['x']] <- x
   if (!by.class) {
