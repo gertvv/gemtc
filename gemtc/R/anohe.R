@@ -266,7 +266,7 @@ summary.mtc.anohe <- function(object, ...) {
     se.ind <- unname(ind['se'])
     pe.ind <- unname(ind['pe'])
     if (!is.na(se.ind)) {
-      i.squared(unlist(c(data2[['pe']], pe.ind)), unlist(c(data2[['se']], se.ind)), c(data2[['c']], data2[['c']][1]), df.adj=0)
+      i.squared(unlist(c(data2[['pe']], pe.ind)), unlist(c(data2[['se']], se.ind)), c(data2[['c']], data2[['c']][1]))
     } else if (nrow(data2) > 1) {
       i.squared(data2[['pe']], data2[['se']], data2[['c']])
     } else {
@@ -295,7 +295,7 @@ summary.mtc.anohe <- function(object, ...) {
   })
 
   i.sq <- data.frame(t1=pairEffects[['t1']], t2=pairEffects[['t2']], i2.pair=i2.pair, i2.cons=i2.cons, incons.p=incons, stringsAsFactors=FALSE)
-  total <- list(i2.pair=i.squared(data[['pe']], data[['se']], data[['p']]), i2.cons=i.squared(data[['pe']], data[['se']], data[['c']]))
+  total <- list(i2.pair=i.squared(data[['pe']], data[['se']], data[['p']], df.adj=-nrow(pairEffects)), i2.cons=i.squared(data[['pe']], data[['se']], data[['c']], df.adj=-nrow(network[['treatments']])+1))
   result <- list(studyEffects=studyEffects, pairEffects=pairEffects, consEffects=consEffects, indEffects=indEffects,
     isquared.comp=i.sq, isquared.glob=total, cons.model=result.cons[['model']])
   class(result) <- 'mtc.anohe.summary'
