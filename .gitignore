@@ -1,3 +1,6 @@
 tmp.Rlib.loc
 gemtc.Rcheck
 *.swp
+gemtc_*.tar.gz
+*.so
+*.o
