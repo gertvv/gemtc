@@ -329,6 +329,10 @@ print.mtc.network <- function(x, ...) {
     cat('Relative effect data: \n')
     print(x[['data.re']])
   }
+  if (!is.null(x[['studies']])) {
+    cat('Study-level data: \n')
+    print(x[['studies']])
+  }
 }
 
 mtc.study.treatment.matrix <- function(network) {
