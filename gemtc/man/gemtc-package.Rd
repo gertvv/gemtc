@@ -42,6 +42,11 @@ S. Dias, N.J. Welton, A.J. Sutton, D.M. Caldwell, G. Lu, and A.E. Ades (2013c),
 Medical Decision Making 33(5):641-656.
 [\href{http://dx.doi.org/10.1177/0272989X12455847}{doi:10.1177/0272989X12455847}]
 
+A. Gelman, A. Jakulin, M. Grazia Pittau, Y.-S. Su (2008),
+\emph{A weakly informative default prior distribution for logistic and other regression models},
+The Annals of Applied Statistics 2(4):1360-1383.
+[\href{http://dx.doi.org/10.1214/08-AOAS191}{doi:10.1214/08-AOAS191}]
+
 R.M. Turner, J. Davey, M.J. Clarke, S.G. Thompson, J.P.T. Higgins (2012),
 \emph{Predicting the extent of heterogeneity in meta-analysis, using empirical data from the Cochrane Database of Systematic Reviews},
 International Journal of Epidemiology 41(3):818-827.

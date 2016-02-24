@@ -40,7 +40,7 @@ The following elements are descriptive:
   \item{likelihood}{The likelihood used}
   \item{link}{The link function used}
   \item{om.scale}{The scale for the variance parameters}
-  \item{regressor}{Regressor specification (regression models only)}
+  \item{regressor}{Regressor specification (regression models only): includes additional elements "center" and "scale" describing how the regressor input was standardized}
 These elements determine the model run by JAGS:
   \item{n.chain}{The number of chains}
   \item{code}{Model code in JAGS syntax. Use \code{cat()} for proper formatting.}
@@ -95,6 +95,7 @@ The following model types are supported:
 
 Regressor specification: a list with elements: \code{variable}, \code{coefficient}, and either \code{control} or \code{classes}.
 The \code{variable} is the name of the covariate to include in the regression analysis, and must be a column of the studies data frame in the network.
+The regressor variable is automatically centered and standardized using the method recommended by \link[=gemtc-package]{Gelman et al. (2008)}.
 The \code{coefficient} indicates the type of treatment-interaction model: "shared", "unrelated", or "exchangeable".
 \code{control}, if specified, must be the ID of a treatment in the network.
 All other treatments have a coefficient relative to the control, which can be the same for all treatments ("shared"), different for all treatments ("unrelated") or exchangeable between treatments ("exchangeable").
