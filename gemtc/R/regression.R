@@ -4,7 +4,7 @@ regressionParams <- function(regressor, nt, nc=0) {
     betas <- paste0('beta[', (1:nt)[-control], ']')
     regression.parameters <- list('shared'='B',
                                   'unrelated'=betas,
-                                  'exchangeable'=c(betas, 'B', 'reg.sd'))
+                                  'exchangeable'=c(betas, 'B')) #, 'reg.sd'
     regression.parameters[[regressor[['coefficient']]]]
   } else { # by class
     paste0('B[', 2:nc, ']')

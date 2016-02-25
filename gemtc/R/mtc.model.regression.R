@@ -1,4 +1,5 @@
 #' @include mtc.model.consistency.R
+#' @include template.R
 
 mtc.model.regression <- function(model, regressor) {
   style.tree <- function(tree) {
@@ -87,16 +88,17 @@ mtc.model.regression <- function(model, regressor) {
   }
   model[['inits']] <- mtc.init(model)
 
+  reg.prior.tpl <- '\n# Regression priors\nreg.prior.prec <- pow(om.scale, -2)\nfor (k in c(1:(reg.control-1), (reg.control+1):nt)) {\n  $regPrior$\n}\nbeta[reg.control] <- 0\n'
   priors <- list(
-    'shared'='\n# Regression priors\nfor (k in 1:(reg.control-1)) {\n  beta[k] <- B\n}\nbeta[reg.control] <- 0\nfor (k in (reg.control+1):nt) {\n  beta[k] <- B\n}\nB ~ dnorm(0, prior.prec)\n',
-    'unrelated'='\n# Regression priors\nfor (k in 1:(reg.control-1)) {\n  beta[k] ~ dnorm(0, prior.prec)\n}\nbeta[reg.control] <- 0\nfor (k in (reg.control+1):nt) {\n  beta[k] ~ dnorm(0, prior.prec)\n}\n',
-    'exchangeable'='\n# Regression priors\nfor (k in 1:(reg.control-1)) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nbeta[reg.control] <- 0\nfor (k in (reg.control+1):nt) {\n  beta[k] ~ dnorm(B, reg.tau)\n}\nB ~ dnorm(0, prior.prec)\nreg.sd ~ dunif(0, om.scale)\nreg.tau <- pow(reg.sd, -2)')
+    'shared'=paste0(template.block.sub(reg.prior.tpl, 'regPrior', 'beta[k] <- B'), 'B ~ dt(0, reg.prior.prec, 1)\n'),
+    'unrelated'=template.block.sub(reg.prior.tpl, 'regPrior', 'beta[k] ~ dt(0, reg.prior.prec, 1)'),
+    'exchangeable'=paste0(template.block.sub(reg.prior.tpl, 'regPrior', 'beta[k] ~ dnorm(B, reg.tau)'), 'B ~ dt(0, reg.prior.prec, 1)\nreg.sd ~ dunif(0, om.scale)\nreg.tau <- pow(reg.sd, -2)'))
 
   priors.classes <- list(
-    'shared'='\n# Regression priors\nfor (k in 1:nt) {\n  beta[k] <- B[reg.classes[k]]\n}\nB[1] <- 0\nfor (k in 2:reg.nclasses) {\n  B[k] ~ dnorm(0, prior.prec)\n}')
+    'shared'='\n# Regression priors\nreg.prior.prec <- pow(om.scale, -2)\nfor (k in 1:nt) {\n  beta[k] <- B[reg.classes[k]]\n}\nB[1] <- 0\nfor (k in 2:reg.nclasses) {\n  B[k] ~ dt(0, reg.prior.prec, 1)\n}')
 
   nt <- model[['data']][['nt']]
-  reg.monitors <- regressionParams(regressor, nt, length(classes))
+  reg.monitors <- c(regressionParams(regressor, nt, length(classes)), if(regressor[['coefficient']] == 'exchangeable') 'reg.sd')
 
   model[['code']] <- mtc.model.code(model, mtc.basic.parameters(model), consistency.relative.effect.matrix(model),
                                     linearModel='delta[i, k] + (beta[t[i, k]] - beta[t[i, 1]]) * x[i]',

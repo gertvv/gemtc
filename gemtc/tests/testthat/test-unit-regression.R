@@ -8,7 +8,7 @@ test_that("regressionParams is correct", {
   expect_equal(regressionParams(list('coefficient'='unrelated', 'control'=3), 5), c('beta[1]', 'beta[2]', 'beta[4]', 'beta[5]'))
   expect_equal(regressionParams(list('coefficient'='unrelated', 'control'=4), 4), c('beta[1]', 'beta[2]', 'beta[3]'))
 
-  expect_equal(regressionParams(list('coefficient'='exchangeable', 'control'=3), 4), c('beta[1]', 'beta[2]', 'beta[4]', 'B', 'reg.sd'))
+  expect_equal(regressionParams(list('coefficient'='exchangeable', 'control'=3), 4), c('beta[1]', 'beta[2]', 'beta[4]', 'B'))
 
   expect_equal(regressionParams(list('coefficient'='unrelated'), 8, nc=3), c('B[2]', 'B[3]'))
 })
@@ -27,7 +27,7 @@ test_that("regressionAdjustMatrix is correct", {
                cbind(c(-1,0,0)))
 
   expect_equal(regressionAdjustMatrix(c(1,1,2), c(1,2,3), list('coefficient'='exchangeable', 'control'=1), 4),
-               cbind(c(0,0,0,0,0), c(1,0,0,0,0), c(-1,1,0,0,0)))
+               cbind(c(0,0,0,0), c(1,0,0,0), c(-1,1,0,0)))
 
   expect_equal(regressionAdjustMatrix(c(1,1,2,2), c(1,2,3,4), list('coefficient'='shared', 'classes'=list('C'=1, 'X'=c(2,3), 'Y'=4)), 4),
                cbind(c(0, 0), c(1,0), c(0, 0), c(-1, 1)))

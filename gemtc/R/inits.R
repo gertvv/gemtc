@@ -154,7 +154,6 @@ mtc.init.mle.basic <- function(model) {
 mtc.init.mle.regression <- function(model) {
   nc <- length(model[['regressor']][['classes']])
   params <- regressionParams(model[['regressor']], model[['data']][['nt']], nc)
-  params <- params[params != "reg.sd"]
   data.frame(parameter=params, type='coefficient',
              mean=0.0, std.err=model[['om.scale']],
              stringsAsFactors=FALSE)
@@ -189,13 +188,14 @@ mtc.linearModel.matrix <- function(model, parameters, includedStudies=NULL) {
       if (model[['type']] == 'regression') {
         t1 <- as.treatment.factor(t1, model[['network']])
         t2 <- as.treatment.factor(t2, model[['network']])
-        x[regr] <- regressionAdjustMatrix(t1, t2, model[['regressor']], model[['data']][['nt']]) * model[['data']][['x']][studyIndex]
+        m <- regressionAdjustMatrix(t1, t2, model[['regressor']], model[['data']][['nt']])
+        x[regr] <- m * model[['data']][['x']][studyIndex]
       }
     }
     x
   }
 
-  # loop over arms that have a likelihood contribution, generate a row (column?) for each
+  # loop over arms that have a likelihood contribution, generate a row for each
   arms <- likelihood.arm.list(model[['network']], baseline=TRUE, includedStudies=includedStudies)
   rval <- t(mapply(processArm, arms$study, arms$studyIndex, arms$armIndex, arms$t1, arms$t2, USE.NAMES=FALSE))
   dimnames(rval) <- NULL
@@ -324,6 +324,10 @@ mtc.init <- function(model) {
       } else {
         stop("Invalid heterogeneity prior type")
       }
+    }
+
+    if (model[['type']] == 'regression' && model[['regressor']][['coefficient']] == 'exchangeable') {
+      x['reg.sd'] <- runif(1, 0, model[['om.scale']])
     }
 
     # convert flat representation to structured one

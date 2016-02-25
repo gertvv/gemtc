@@ -313,6 +313,18 @@ study x
   inits <- mtc.init(model)
   expect_equal(is.na(inits[[1]]$beta), c(FALSE, FALSE, TRUE))
 
+  model$regressor$coefficient <- 'shared'
+  inits <- mtc.init(model)
+  expect_equal(inits[[1]]$beta, NULL)
+  expect_equal(is.na(inits[[1]]$B), FALSE)
+
+  model$regressor$coefficient <- 'exchangeable'
+  inits <- mtc.init(model)
+  expect_equal(is.na(inits[[1]]$beta), c(FALSE, FALSE, TRUE))
+  expect_equal(is.na(inits[[1]]$B), FALSE)
+  expect_equal(is.na(inits[[1]]$reg.sd), FALSE)
+
+  model$regressor$coefficient <- 'shared'
   model$regressor$control <- NULL
   model$regressor$classes <- list('control'=ts[1], 'other'=ts[2:3])
   inits <- mtc.init(model)
