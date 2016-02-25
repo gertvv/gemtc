@@ -16,10 +16,14 @@ New features:
  * Improved model fit diagnostics including per-arm or per-study
    deviance.
 
-Removed featurs:
+Removed features:
 
  * Removed "write.mtc.network" function to write the deprecated GeMTC
    XML format, as most networks can't be saved in that format anyway.
+
+Bugfixes:
+
+ * Fixed degrees of freedom in ANOHE I^2 computations.
 
 gemtc 0.7-1
 ===========
