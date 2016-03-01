@@ -15,4 +15,3 @@ Hooper et al. (2000),
 Cochrane Database of Systematic Reviews 2:CD002137.
 [\href{http://dx.doi.org/10.1002/14651858.CD002137}{doi:10.1002/14651858.CD002137}]
 }
-
