@@ -101,3 +101,70 @@ test_that("ns-complex (named studies)", {
 
   test.regress(network, likelihood="normal", link="identity", t1="H", t2="D")
 })
+
+test_that("certolizumab regression (binomial data, continuous covariate)", {
+  model <- mtc.model(certolizumab, type="regression", linearModel="fixed", 
+                     regressor=list(control="Placebo", coefficient="unrelated", variable="diseaseDuration"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(certolizumab, type="regression", linearModel="fixed", 
+                     regressor=list(control="Placebo", coefficient="shared", variable="diseaseDuration"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(certolizumab, type="regression", linearModel="fixed", 
+                     regressor=list(control="Placebo", coefficient="exchangeable", variable="diseaseDuration"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(certolizumab, type="regression", linearModel="random", 
+                     regressor=list(control="Placebo", coefficient="unrelated", variable="diseaseDuration"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(certolizumab, type="regression", linearModel="random", 
+                     regressor=list(control="Placebo", coefficient="shared", variable="diseaseDuration"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(certolizumab, type="regression", linearModel="random", 
+                     regressor=list(control="Placebo", coefficient="exchangeable", variable="diseaseDuration"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+})
+
+test_that("atrial fibrillation regression (classes, binomial data, continuous covariate)", {
+  classes <- list("control"=c(1),
+                  "anti-coagulant"=c(2,3,4,9),
+                  "anti-platelet"=c(5,6,7,8,10,11,12,16,17),
+                  "mixed"=c(13,14,15))
+
+  model <- mtc.model(atrialFibrillation, type="regression", linearModel="fixed", 
+                     regressor=list(classes=classes, coefficient="shared", variable="stroke"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(atrialFibrillation, type="regression", linearModel="random", 
+                     regressor=list(classes=classes, coefficient="shared", variable="stroke"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+})
+
+test_that("heart failure prevention (binomial data, binary covariate)", {
+  model <- mtc.model(hfPrevention, type="regression", linearModel="fixed", 
+                     regressor=list(control="control", coefficient="unrelated", variable="secondary"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(hfPrevention, type="regression", linearModel="fixed", 
+                     regressor=list(control="control", coefficient="shared", variable="secondary"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(hfPrevention, type="regression", linearModel="fixed", 
+                     regressor=list(control="control", coefficient="exchangeable", variable="secondary"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(hfPrevention, type="regression", linearModel="random", 
+                     regressor=list(control="control", coefficient="unrelated", variable="secondary"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(hfPrevention, type="regression", linearModel="random", 
+                     regressor=list(control="control", coefficient="shared", variable="secondary"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  model <- mtc.model(hfPrevention, type="regression", linearModel="random", 
+                     regressor=list(control="control", coefficient="exchangeable", variable="secondary"))
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+})
