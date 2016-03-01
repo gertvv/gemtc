@@ -1,52 +1,37 @@
 context("Run models for all data sets and call the appropriate summaries / plots")
 
 test_that("cipriani-efficacy", {
-  network <- depression
-
   # TODO: test node-splitting comparisons
 
-  test.regress(network, likelihood="binom", link="logit", t1="escitalopram", t2="sertraline")
+  test.regress(depression, likelihood="binom", link="logit", t1="escitalopram", t2="sertraline")
 })
 
 test_that("luades-smoking", {
-  network <- smoking
-
   # node-splitting comparisons
-  expect_that(mtc.nodesplit.comparisons(network), equals(
+  expect_that(mtc.nodesplit.comparisons(smoking), equals(
     data.frame(t1=c("A", "A", "A", "B", "B", "C"), t2=c("B", "C", "D", "C", "D", "D"), stringsAsFactors=FALSE)))
 
-  test.regress(network, likelihood="binom", link="logit", t1="B", t2="D")
+  test.regress(smoking, likelihood="binom", link="logit", t1="B", t2="D")
 })
 
 test_that("luades-thrombolytic", {
-  network <- thrombolytic
-
   # node-splitting comparisons
-  expect_that(mtc.nodesplit.comparisons(network), equals(
+  expect_that(mtc.nodesplit.comparisons(thrombolytic), equals(
     data.frame(t1=c("ASPAC", "ASPAC", "ASPAC", "AtPA", "AtPA", "AtPA", "AtPA", "Ret", "SK", "SK", "tPA"),
                t2=c("AtPA", "SK", "tPA", "Ret", "SK", "SKtPA", "UK", "SK", "tPA", "UK", "UK"), stringsAsFactors=FALSE)))
 
-  test.regress(network, likelihood="binom", link="logit", t1="SK", t2="UK")
+  test.regress(thrombolytic, likelihood="binom", link="logit", t1="SK", t2="UK")
 })
 
 test_that("tsd2-1 (event data, pair-wise)", {
-  data.ab <- dget("../data/studyrow/tsd2-1.out.txt")
-  network <- mtc.network(data.ab=data.ab)
-
-  expect_that(nrow(mtc.nodesplit.comparisons(network)), equals(0))
-
-  test.regress(network, likelihood="binom", link="logit")
+  expect_that(nrow(mtc.nodesplit.comparisons(blocker)), equals(0))
+  test.regress(blocker, likelihood="binom", link="logit")
 })
 
 
 test_that("tsd2-2 (fat survival, rate data)", {
-  data.ab <- dget("../data/studyrow/tsd2-2.out.txt")
-  data.ab <- data.ab[-5,] # Remove duplicated arm, so the model can be estimated
-  network <- mtc.network(data.ab=data.ab)
-
-  expect_that(nrow(mtc.nodesplit.comparisons(network)), equals(0))
-
-  test.regress(network, likelihood="poisson", link="log")
+  expect_that(nrow(mtc.nodesplit.comparisons(dietfat)), equals(0))
+  test.regress(dietfat, likelihood="poisson", link="log")
 })
 
 test_that("tsd2-3 (diabetes, rate data)", {
@@ -62,13 +47,11 @@ test_that("tsd2-3 (diabetes, rate data)", {
 })
 
 test_that("parkinson example", {
-  network <- parkinson
-
-  expect_that(mtc.nodesplit.comparisons(network), equals(
+  expect_that(mtc.nodesplit.comparisons(parkinson), equals(
     data.frame(t1=c("A", "A", "B", "C"),
                t2=c("C", "D", "D", "D"), stringsAsFactors=FALSE)))
 
-  test.regress(network, likelihood="normal", link="identity", t1="B", t2="D")
+  test.regress(parkinson, likelihood="normal", link="identity", t1="B", t2="D")
 })
 
 test_that("tsd2-5 (parkinson AB data)", {
@@ -83,26 +66,19 @@ test_that("tsd2-5 (parkinson AB data)", {
 })
 
 test_that("tsd2-7 (parkinson RE data)", {
-  data.re <- dget("../data/studyrow/tsd2-7.out.txt")
-  data.re$std.err[is.na(data.re$std.err)] <- sqrt(data.re$var[is.na(data.re$std.err)])
-  network <- mtc.network(data.re=data.re)
+  expect_that(mtc.nodesplit.comparisons(parkinson_diff), equals(
+    data.frame(t1=c("A", "A", "B", "C"),
+               t2=c("C", "D", "D", "D"), stringsAsFactors=FALSE)))
 
-  expect_that(mtc.nodesplit.comparisons(network), equals(
-    data.frame(t1=c("1", "1", "2", "3"),
-               t2=c("3", "4", "4", "4"), stringsAsFactors=FALSE)))
-
-  test.regress(network, likelihood="normal", link="identity", t1="4", t2="1")
+  test.regress(parkinson_diff, likelihood="normal", link="identity", t1="D", t2="A")
 })
 
 test_that("tsd2-8 (parkinson mixed data)", {
-  data.ab <- dget("../data/studyrow/tsd2-8.out1.txt")
-  data.re <- dget("../data/studyrow/tsd2-8.out2.txt")
-  network <- mtc.network(data.ab=data.ab, data.re=data.re)
+  expect_that(mtc.nodesplit.comparisons(parkinson_shared), equals(
+    data.frame(t1=c("A", "A", "B", "C"),
+               t2=c("C", "D", "D", "D"), stringsAsFactors=FALSE)))
   
-  expect_that(mtc.nodesplit.comparisons(network), equals(
-    data.frame(t1=c("1", "1", "2", "3"), t2=c("3", "4", "4", "4"), stringsAsFactors=FALSE)))
-  
-  test.regress(network, likelihood="normal", link="identity", t1="2", t2="4")
+  test.regress(parkinson_shared, likelihood="normal", link="identity", t1="B", t2="D")
 })
 
 test_that("ns-complex (numbered studies)", {
