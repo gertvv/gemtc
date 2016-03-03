@@ -76,10 +76,10 @@ mtc.model.data <- function(model) {
     alpha <- studyData[[powerAdjust]]
     names(alpha) <- studyData[['study']]
     alpha <- alpha[as.character(studies)]
-    model.data <- c(model.data, list(alpha=alpha))
+    model.data[['alpha']] <- alpha
 
     if (model[['likelihood']] != 'normal') {
-      model.data <- c(model.data, list(zero=matrix(0, ncol=max(na), nrow=length(studies.ab))))
+      model.data[['zero']] <- matrix(0, ncol=max(na), nrow=length(studies.ab))
     }
   } else {
     alpha <- rep(1, length(studies))
