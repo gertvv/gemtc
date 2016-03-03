@@ -2,13 +2,14 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
   regressor <- result[['model']][['regressor']]
   if (is.null(xlim)) {
     if (regressor[['type']] == 'continuous') {
+      studies <- result[['model']][['network']][['studies']]
+      observed <- studies[, regressor[['variable']]]
       ctr <- regressor[['center']]
-      scale <- regressor[['scale']]
-      xlim <- c(ctr - 1.5*scale, ctr + 1.5*scale)
+      xlim <- c(min(observed), max(observed))
       xvals <- seq(xlim[1], xlim[2], length.out=7)
     } else {
-      xlim <- c(0, 1)
-      xvals <- xlim
+      xlim <- c(-0.5, 1.5)
+      xvals <- c(0, 1)
     }
   } else {
     xvals <- seq(xlim[1], xlim[2], length.out=7)
@@ -32,9 +33,17 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
   devAskNewPage(FALSE)
   for (pair in split(pairs, seq(nrow(pairs)))) {
     yvals <- sapply(res, function(stats) { stats[stats[['t1']] == pair[1] & stats[['t2']] == pair[2], c('median', 'lower', 'upper')] })
-    plot(xvals, yvals['median', ], type='l', xlim=xlim, ylim=ylim, main="Treatment effect vs. covariate", xlab=regressor[["variable"]], ylab=paste("d", pair[1], pair[2], sep="."))
-    lines(xvals, yvals['lower', ], lty=2)
-    lines(xvals, yvals['upper', ], lty=2)
+    if (regressor[['type']] == 'continuous') {
+      plot(xvals, yvals['median', ], type='l', xlim=xlim, ylim=ylim, main="Treatment effect vs. covariate", xlab=regressor[["variable"]], ylab=paste("d", pair[1], pair[2], sep="."))
+      lines(xvals, yvals['lower', ], lty=2)
+      lines(xvals, yvals['upper', ], lty=2)
+    } else {
+      plot(xvals, yvals['median', ], type='p', xlim=xlim, ylim=ylim, main="Treatment effect vs. covariate", xlab=regressor[["variable"]], ylab=paste("d", pair[1], pair[2], sep="."), xaxp=c(0, 1, 1))
+      segments(xvals, unlist(yvals['lower',]), xvals, unlist(yvals['upper',]))
+      eps <- 0.01
+      segments(xvals-eps, unlist(yvals['lower',]), xvals+eps, unlist(yvals['lower',]))
+      segments(xvals-eps, unlist(yvals['upper',]), xvals+eps, unlist(yvals['upper',]))
+    }
     if (first) devAskNewPage(ask)
     first <- FALSE
   }
