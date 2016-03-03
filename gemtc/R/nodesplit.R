@@ -19,7 +19,7 @@ nodesplit.rewrite.data.ab <- function(data, t1, t2) {
   if (is.null(data)) return(NULL);
   t1 <- as.character(t1)
   t2 <- as.character(t2)
-  studies <- unique(data$study)
+  studies <- unique(data[['study']])
   per.study <- lapply(studies, function(study) {
     study.data <- data[data$study == study, ]
     study.data$study <- as.character(study.data$study)
@@ -36,6 +36,27 @@ nodesplit.rewrite.data.ab <- function(data, t1, t2) {
   data <- do.call(rbind, per.study)
   data$study <- as.factor(data$study)
   data
+}
+
+nodesplit.rewrite.studies <- function(network, t1, t2) {
+  studies <- network$studies
+  data <- mtc.merge.data(network)
+  if (is.null(studies)) return(NULL);
+  t1 <- as.character(t1)
+  t2 <- as.character(t2)
+  per.study <- lapply(studies[['study']], function(study) {
+    study.data <- data[data$study == study, ]
+    has.both <- all(c(t1, t2) %in% study.data[['treatment']])
+    orig <- studies[studies[['study']] == study, ]
+    if (nrow(study.data) > 3 && has.both) {
+      rval <- rbind(orig, orig)
+      rval[['study']] <- paste0(study, "*")
+      rval[['study']] <- paste0(study, "**")
+    } else {
+      orig
+    }
+  })
+  do.call(rbind, per.study)
 }
 
 nodesplit.rewrite.data.re <- function(data, t1, t2) {

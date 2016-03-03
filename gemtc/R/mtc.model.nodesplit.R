@@ -14,9 +14,11 @@ mtc.model.nodesplit <- function(model, t1, t2) {
   # Rewrite the dataset
   data.ab <- nodesplit.rewrite.data.ab(network[['data.ab']], t1, t2)
   data.re <- nodesplit.rewrite.data.re(network[['data.re']], t1, t2)
+  studies <- nodesplit.rewrite.studies(network, t1, t2)
   network <- mtc.network(data.ab=data.ab,
                          data.re=data.re,
-                         treatments=model[['network']][['treatments']])
+                         treatments=model[['network']][['treatments']],
+                         studies=studies)
   model[['network']] <- network
 
   # Construct indirect network
