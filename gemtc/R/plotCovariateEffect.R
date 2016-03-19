@@ -5,7 +5,7 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
       studies <- result[['model']][['network']][['studies']]
       observed <- studies[, regressor[['variable']]]
       ctr <- regressor[['center']]
-      xlim <- c(min(observed), max(observed))
+      xlim <- c(min(observed, na.rm=TRUE), max(observed, na.rm=TRUE))
       xvals <- seq(xlim[1], xlim[2], length.out=7)
     } else {
       xlim <- c(-0.5, 1.5)
