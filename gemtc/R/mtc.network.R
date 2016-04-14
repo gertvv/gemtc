@@ -94,8 +94,14 @@ mtc.network <- function(
   if (is.character(treatments) || is.factor(treatments)) {
     treatments <- data.frame(id=treatments, description=treatments)
   }
-
   treatments <- standardize.treatments(treatments)
+
+  # standardize the study data
+  if (!is.null(studies)) {
+    if (!is.data.frame(studies)) {
+      stop("studies must be a data frame")
+    }
+  }
 
   network <- list(
     description=description,
