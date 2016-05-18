@@ -25,7 +25,8 @@ regressor <- list(coefficient='shared',
 
 model <- mtc.model(atrialFibrillation,
                    type="regression",
-                   regressor=regressor)
+                   regressor=regressor,
+                   om.scale=10)
 
 \dontrun{
 result <- mtc.run(model)}
