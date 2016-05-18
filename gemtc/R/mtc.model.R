@@ -25,6 +25,10 @@ mtc.model <- function(network, type="consistency",
   if (!inherits(network, "mtc.network")) {
     stop('Given network is not an mtc.network')
   }
+  if (!is.null(network[['studies']]) && !is.data.frame(studies)) {
+    stop('studies must be a data frame') # older versions did not enforce this
+  }
+
   if (!(linearModel %in% c("random", "fixed"))) {
     stop('linearModel must be either "random" or "fixed"')
   }

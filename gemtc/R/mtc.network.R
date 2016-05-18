@@ -115,7 +115,7 @@ mtc.network <- function(
   }
 
   if (!is.null(studies) && nrow(studies) > 0) {
-    network <- c(network, list(studies=studies))
+    network <- c(network, list(studies=studies[order(studies[['study']]), ,drop=FALSE]))
   }
 
   mtc.network.validate(network)
@@ -201,6 +201,14 @@ mtc.network.validate <- function(network) {
   # Check data.re is well formed
   if (!is.null(network[['data.re']])) {
     mtc.validate.data.re(network[['data.re']])
+  }
+
+  # If studies are given, they must match the treatments in the data tables
+  if (!is.null(network[['studies']])) {
+    data.studies <- c(as.character(network[['data.ab']][['study']]), as.character(network[['data.re']][['study']]))
+    if (!setequal(data.studies, as.character(network[['studies']][['study']]))) {
+      stop(paste('The studies data frame must match the studies in data.ab and data.re'))
+    }
   }
 
   check.duplicated.treatments(network)
