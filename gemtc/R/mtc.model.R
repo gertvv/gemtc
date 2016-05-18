@@ -25,7 +25,7 @@ mtc.model <- function(network, type="consistency",
   if (!inherits(network, "mtc.network")) {
     stop('Given network is not an mtc.network')
   }
-  if (!is.null(network[['studies']]) && !is.data.frame(studies)) {
+  if (!is.null(network[['studies']]) && !is.data.frame(network[['studies']])) {
     stop('studies must be a data frame') # older versions did not enforce this
   }
 

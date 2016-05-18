@@ -168,3 +168,11 @@ test_that("heart failure prevention (binomial data, binary covariate)", {
                      regressor=list(control="control", coefficient="exchangeable", variable="secondary"))
   capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
 })
+
+test_that("node-splitting with down-weighting", {
+  studies <- unique(smoking$data.ab$study)
+  weight <- (0:(length(studies)-1))/length(studies)
+  network <- mtc.network(smoking$data.ab, studies=data.frame(study=studies, weight=weight, stringsAsFactors=FALSE))
+  model <- mtc.model(network, type="nodesplit", t1="A", t2="B", powerAdjust="weight")
+  capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+})

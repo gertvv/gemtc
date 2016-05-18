@@ -50,13 +50,15 @@ nodesplit.rewrite.studies <- function(network, t1, t2) {
     orig <- studies[studies[['study']] == study, ]
     if (nrow(study.data) > 3 && has.both) {
       rval <- rbind(orig, orig)
-      rval[['study']] <- paste0(study, "*")
-      rval[['study']] <- paste0(study, "**")
+      rval[['study']] <- c(paste0(study, "*"), paste0(study, "**"))
+      rval
     } else {
       orig
     }
   })
-  do.call(rbind, per.study)
+  studies <- as.data.frame(do.call(rbind, per.study))
+  rownames(studies) <- NULL
+  studies
 }
 
 nodesplit.rewrite.data.re <- function(data, t1, t2) {
