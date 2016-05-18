@@ -7,8 +7,8 @@
 \description{A dataset of seven trials investigating four treatments and placebo for Parkinson's disease. The outcome is mean off-time reduction.}
 \format{ \itemize{
 \item{parkinson: }{A network meta-analysis dataset containing fifteen rows of arm-based data (mean, standard deviation, and sample size).}
-\item{parkinson-diff: }{A network meta-analysis dataset containing fifteen rows of contrast-based data.}
-\item{parkinson-shared: }{A network meta-analysis dataset containing mixed arm-based and contrast-based data.}
+\item{parkinson_diff: }{A network meta-analysis dataset containing fifteen rows of contrast-based data.}
+\item{parkinson_shared: }{A network meta-analysis dataset containing mixed arm-based and contrast-based data.}
 } }
 \source{
 Franchini et al. (2012),
