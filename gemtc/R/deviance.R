@@ -113,5 +113,6 @@ computeDeviance <- function(model, stats) {
 
   list(Dbar=Dbar, pD=pD, DIC=Dbar+pD, "data points"=dp,
        dev.ab=shape.ab(dev.ab), dev.re=unname(dev.re),
-       fit.ab=shape.ab(fit.ab), fit.re=unname(fit.re))
+       fit.ab=shape.ab(fit.ab), fit.re=unname(fit.re),
+       fitted=c(stats[deviance.monitors.fitted.ab(model)], stats[deviance.monitors.fitted.re(model)]))
 }
