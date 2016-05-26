@@ -59,16 +59,16 @@ study treatment responders sampleSize
 #model <- mtc.model(network, linearModel='random', likelihood='normal', link='identity')
 
 # Mixed data
-network <- mtc.network(data.ab=read.table('gemtc/tests/data/parkinson-shared.data-ab.txt', header=TRUE),
-                       data.re=read.table('gemtc/tests/data/parkinson-shared.data-re.txt', header=TRUE))
-model <- mtc.model(network, linearModel='fixed', likelihood='normal', link='identity')
-#model <- mtc.model(network, linearModel='random', likelihood='normal', link='identity')
+#model <- mtc.model(parkinson_shared, linearModel='fixed', likelihood='normal', link='identity')
+#model <- mtc.model(parkinson_shared, linearModel='random', likelihood='normal', link='identity')
 
 
 # Poisson/log (dietary fat, 2b)
 #network <- mtc.network(dget('gemtc/tests/data/fat-survival.data.txt'))
 # ... edit
 #model <- mtc.model(network, linearModel='fixed', likelihood='poisson', link='log')
+
+model <- mtc.model(certolizumab, linearModel='fixed', likelihood='binom', link='logit')
 
 result <- mtc.run(model)
 
@@ -85,7 +85,7 @@ print(result$deviance)
 # for (c in 1:4) { lines(x, c - x^2) }
 
 ## residual deviance plot
-if (model$data$ns.r2 + model$data$ns.rm == 0) {
+if (length(model$data$studies.a) == length(model$data$studies)) {
   tpl <- gemtc:::arm.index.matrix(model[['network']])
   study <- matrix(rep(1:nrow(tpl), times=ncol(tpl)), nrow=nrow(tpl), ncol=ncol(tpl))
   study <- t(study)[t(!is.na(tpl))]
@@ -94,7 +94,7 @@ if (model$data$ns.r2 + model$data$ns.rm == 0) {
   xlab <- "Arm"
 } else {
   nd <- model$data$na
-  nd[-(1:model$data$ns.a)] <- nd[-(1:model$data$ns.a)] - 1
+  nd[-model$data$studies.a] <- nd[-model$data$studies.a] - 1
   devbar <- c(apply(result$deviance$dev.ab, 1, sum, na.rm=TRUE), result$deviance$dev.re) / nd
   study <- 1:length(devbar)
   title <- "Per-study mean per-datapoint residual deviance"
@@ -121,7 +121,7 @@ fit.re <- result$deviance$fit.re
 dev.re <- result$deviance$dev.re
 lev.re <- dev.re - fit.re
 nd <- model$data$na
-nd[-(1:model$data$ns.a)] <- nd[-(1:model$data$ns.a)] - 1
+nd[-model$data$studies.a] <- nd[-model$data$studies.a] - 1
 w <- sqrt(c(dev.ab, dev.re) / nd)
 lev <- c(lev.ab, lev.re) / nd
 
@@ -132,3 +132,7 @@ mtext("Per-study mean per-datapoint contribution")
 
 x <- seq(from=0, to=3, by=0.05)
 for (c in 1:4) { lines(x, c - x^2) }
+
+rhat <- gemtc:::arrayize(result$deviance$fitted)
+plot(model$data$r/model$data$n, rhat$rhat/model$data$n, xlab="Observed", ylab="Fitted")
+abline(a=0,b=1,lty=3)
