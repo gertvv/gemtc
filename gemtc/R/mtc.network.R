@@ -125,7 +125,7 @@ mtc.network <- function(
 }
 
 fix.network <- function(network) {
-  # move data into data.ab for legacy networks 
+  # move data into data.ab for legacy networks
   if (is.null(network[['data.ab']]) && !is.null(network[['data']])) {
     network[['data.ab']] <- network[['data']]
     network[['data']] <- NULL
@@ -327,7 +327,7 @@ graph.create <- function(v, e, ...) {
 mtc.network.graph <- function(network, include.nr.comparisons=FALSE) {
     comp <- if (include.nr.comparisons) mtc.nr.comparisons else mtc.comparisons
     comparisons <- comp(network)
-    treatments <- network[['treatments']][['id']]
+    treatments <-   network[['treatments']][['id']]
     graph.create(treatments, comparisons, arrow.mode=0)
 }
 
@@ -375,12 +375,17 @@ summary.mtc.network <- function(object, ...) {
        )
 }
 
-plot.mtc.network <- function(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, ...) {
+plot.mtc.network <- function(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, use.description=FALSE, ...) {
   x <- fix.network(x)
   g <- mtc.network.graph(x, TRUE)
+  labels <- if (use.description)
+                treatment.id.to.description(x, x[['treatments']][['id']])
+            else
+                as.character(x[['treatments']][['id']])
+
   if (dynamic.edge.width) {
-    igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, ...)
+    igraph::plot.igraph(g, layout=layout, edge.width=E(g)$weight, vertex.label=labels, ...)
   } else {
-    igraph::plot.igraph(g, layout=layout, ...)
+    igraph::plot.igraph(g, layout=layout, vertex.label=labels, ...)
   }
 }
