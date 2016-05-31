@@ -9,7 +9,7 @@
 mtc.network(data.ab=data, treatments=NULL, description="Network",
             data.re=NULL, studies=NULL, data=NULL)
 
-\method{plot}{mtc.network}(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, ...)
+\method{plot}{mtc.network}(x, layout=igraph::layout.circle, dynamic.edge.width=TRUE, use.description=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -36,6 +36,7 @@ Present for compatibility with older versions.}
   \item{x}{An mtc.network object.}
   \item{layout}{An igraph-compatible layout.}
   \item{dynamic.edge.width}{If set to TRUE, dynamically set the edge width based on the number of studies.}
+  \item{use.description}{Display treatment descriptions instead of treatment IDs.}
   \item{...}{Additional arguments passed to \code{plot.igraph}.}
 }
 \value{
