@@ -1,3 +1,5 @@
+#'@include arrayize.R
+
 study.seq.ab <- function(data) {
   data[['studies.a']]
 }
@@ -87,7 +89,10 @@ computeDeviance <- function(model, stats) {
   studies.ab <- study.seq.ab(model[['data']])
   studies.re <- study.seq.re(model[['data']])
 
-  dp <- sum(!is.na(arms)) - length(studies.re)
+  nd <- apply(!is.na(arms), 1, sum)
+  nd.ab <- nd[studies.ab]
+  nd.re <- nd[studies.re] - 1
+  dp <- sum(nd.ab) + sum(nd.re)
 
   shape.ab <- function(x) {
     if (length(x) > 0) {
@@ -102,17 +107,98 @@ computeDeviance <- function(model, stats) {
   }
 
   dev.ab <- stats[deviance.monitors.residuals.ab(model)]
+  if (length(dev.ab) == 0) {
+    dev.ab <- NULL
+  }
   dev.re <- stats[deviance.monitors.residuals.re(model)]
+  if (length(dev.re) == 0) {
+    dev.re <- NULL
+  }
 
   Dbar <- sum(c(dev.ab, dev.re))
 
   fit.ab <- devfit.ab(model, stats[deviance.monitors.fitted.ab(model)])
+  if (length(fit.ab) == 0) {
+    fit.ab <- NULL
+  }
   fit.re <- devfit.re(model, stats[deviance.monitors.fitted.re(model)])
+  if (length(fit.re) == 0) {
+    fit.re <- NULL
+  }
+
+  lev.ab <- dev.ab - fit.ab
+  if (length(lev.ab) == 0) {
+    lev.ab <- NULL
+  }
+  lev.re <- dev.re - fit.re
+  if (length(lev.re) == 0) {
+    lev.re <- NULL
+  }
 
   pD <- Dbar - sum(c(fit.ab, fit.re))
 
-  list(Dbar=Dbar, pD=pD, DIC=Dbar+pD, "data points"=dp,
-       dev.ab=shape.ab(dev.ab), dev.re=unname(dev.re),
-       fit.ab=shape.ab(fit.ab), fit.re=unname(fit.re),
-       fitted=c(stats[deviance.monitors.fitted.ab(model)], stats[deviance.monitors.fitted.re(model)]))
+  fitted <- c(stats[deviance.monitors.fitted.ab(model)], stats[deviance.monitors.fitted.re(model)])
+
+  info <- list(Dbar=Dbar, pD=pD, DIC=Dbar+pD, "data points"=dp,
+               dev.ab=shape.ab(dev.ab), dev.re=unname(dev.re),
+               fit.ab=shape.ab(fit.ab), fit.re=unname(fit.re),
+               lev.ab=shape.ab(lev.ab), lev.re=unname(lev.re),
+               nd.ab=unname(nd.ab), nd.re=unname(nd.re),
+               fitted=arrayize(fitted))
+  class(info) <- "mtc.deviance"
+  info
+}
+
+mtc.devplot <- function(x) {
+  stopifnot(class(x) == "mtc.deviance")
+
+  if (is.null(x[['dev.re']])) {
+    tpl <- x[['dev.ab']]
+    study <- matrix(rep(1:nrow(tpl), times=ncol(tpl)), nrow=nrow(tpl), ncol=ncol(tpl))
+    study <- t(study)[t(!is.na(tpl))]
+    devbar <- t(result$deviance$dev.ab)[t(!is.na(tpl))]
+    title <- "Per-arm residual deviance"
+    xlab <- "Arm"
+  } else {
+    nd <- c(x[['nd.ab']], x[['nd.re']])
+    devbar <- c(apply(x[['dev.ab']], 1, sum, na.rm=TRUE), x[['dev.re']]) / nd
+    study <- 1:length(devbar)
+    title <- "Per-study mean per-datapoint residual deviance"
+    xlab <- "Study"
+  }
+
+  plot(devbar, ylim=c(0,max(devbar, na.rm=TRUE)),
+      ylab="Residual deviance", xlab=xlab,
+      main=title, pch=c(1, 22)[(study%%2)+1])
+  for (i in 1:length(devbar)) {
+    lines(c(i, i), c(0, devbar[i]))
+  }
+}
+
+mtc.levplot <- function(x) {
+  stopifnot(class(x) == "mtc.deviance")
+
+  fit.ab <- apply(x[['fit.ab']], 1, sum, na.rm=TRUE)
+  dev.ab <- apply(x[['dev.ab']], 1, sum, na.rm=TRUE)
+  lev.ab <- dev.ab - fit.ab
+  fit.re <- x[['fit.re']]
+  dev.re <- x[['dev.re']]
+  lev.re <- dev.re - fit.re
+  nd <- c(x[['nd.ab']], x[['nd.re']])
+  w <- sqrt(c(dev.ab, dev.re) / nd)
+  lev <- c(lev.ab, lev.re) / nd
+
+  plot(w, lev, xlim=c(0, max(c(w, 2.5))), ylim=c(0, max(c(lev, 4))),
+       xlab="Square root of residual deviance", ylab="Leverage",
+       main="Leverage versus residual deviance")
+  mtext("Per-study mean per-datapoint contribution")
+
+  x <- seq(from=0, to=3, by=0.05)
+  for (c in 1:4) { lines(x, c - x^2) }
+}
+
+plot.mtc.deviance <- function(x, ...) {
+  par(mfrow=c(2,1))
+  mtc.devplot(x)
+  mtc.levplot(x)
 }
