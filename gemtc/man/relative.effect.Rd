@@ -1,8 +1,6 @@
 \encoding{utf8}
 \name{relative.effect}
-\alias{forest.mtc.results}
 \alias{relative.effect}
-\alias{forest}
 
 \title{Calculating relative effects}
 \description{Calculates the relative effects of pairs of treatments.}
