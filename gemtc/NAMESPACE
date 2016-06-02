@@ -56,6 +56,7 @@ export(
 	mtc.network, mtc.data.studyrow, read.mtc.network,
 	mtc.model, mtc.hy.prior, mtc.hy.empirical.lor,
 	mtc.run,
+	mtc.deviance, mtc.devplot, mtc.levplot,
 	relative.effect, rank.probability, relative.effect.table,
 	blobbogram, forest,
 	plotCovariateEffect,

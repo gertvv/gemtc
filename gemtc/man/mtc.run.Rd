@@ -1,6 +1,7 @@
 \encoding{utf8}
 \name{mtc.run}
 \alias{mtc.run}
+\alias{mtc.result}
 \alias{summary.mtc.result}
 \alias{plot.mtc.result}
 \alias{forest.mtc.result}
@@ -10,7 +11,7 @@
 \title{Running an \code{mtc.model} using an MCMC sampler}
 \description{
 The function \code{mtc.run} is used to generate samples from a object of type \code{mtc.model} using a MCMC sampler.
-The resulting \code{mtc.results} object can be coerced to an \code{mcmc.list} for further analysis of the dataset using the \code{coda} package.
+The resulting \code{mtc.result} object can be coerced to an \code{mcmc.list} for further analysis of the dataset using the \code{coda} package.
 }
 \usage{
 mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)

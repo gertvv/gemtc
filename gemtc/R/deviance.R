@@ -149,14 +149,19 @@ computeDeviance <- function(model, stats) {
   info
 }
 
-mtc.devplot <- function(x) {
+mtc.deviance <- function(result) {
+  stopifnot(class(result) == "mtc.result")
+  result[['deviance']]
+}
+
+mtc.devplot <- function(x, ...) {
   stopifnot(class(x) == "mtc.deviance")
 
   if (is.null(x[['dev.re']])) {
     tpl <- x[['dev.ab']]
     study <- matrix(rep(1:nrow(tpl), times=ncol(tpl)), nrow=nrow(tpl), ncol=ncol(tpl))
     study <- t(study)[t(!is.na(tpl))]
-    devbar <- t(result$deviance$dev.ab)[t(!is.na(tpl))]
+    devbar <- t(x[['dev.ab']])[t(!is.na(tpl))]
     title <- "Per-arm residual deviance"
     xlab <- "Arm"
   } else {
@@ -169,13 +174,14 @@ mtc.devplot <- function(x) {
 
   plot(devbar, ylim=c(0,max(devbar, na.rm=TRUE)),
       ylab="Residual deviance", xlab=xlab,
-      main=title, pch=c(1, 22)[(study%%2)+1])
+      main=title, pch=c(1, 22)[(study%%2)+1],
+      ...)
   for (i in 1:length(devbar)) {
     lines(c(i, i), c(0, devbar[i]))
   }
 }
 
-mtc.levplot <- function(x) {
+mtc.levplot <- function(x, ...) {
   stopifnot(class(x) == "mtc.deviance")
 
   fit.ab <- apply(x[['fit.ab']], 1, sum, na.rm=TRUE)
@@ -190,15 +196,18 @@ mtc.levplot <- function(x) {
 
   plot(w, lev, xlim=c(0, max(c(w, 2.5))), ylim=c(0, max(c(lev, 4))),
        xlab="Square root of residual deviance", ylab="Leverage",
-       main="Leverage versus residual deviance")
+       main="Leverage versus residual deviance",
+       ...)
   mtext("Per-study mean per-datapoint contribution")
 
   x <- seq(from=0, to=3, by=0.05)
   for (c in 1:4) { lines(x, c - x^2) }
 }
 
-plot.mtc.deviance <- function(x, ...) {
-  par(mfrow=c(2,1))
-  mtc.devplot(x)
-  mtc.levplot(x)
+plot.mtc.deviance <- function(x, auto.layout=TRUE, ...) {
+  if (auto.layout) {
+    par(mfrow=c(2,1))
+  }
+  mtc.devplot(x, ...)
+  mtc.levplot(x, ...)
 }
