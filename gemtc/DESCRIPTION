@@ -18,7 +18,7 @@ Imports:
     stats,
     utils,
     grid,
-    rjags (>= 3-0),
+    rjags (>= 4-0),
     truncnorm,
     Rglpk
 Suggests:
