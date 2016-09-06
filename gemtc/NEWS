@@ -1,7 +1,25 @@
+gemtc 0.8.1
+===========
+
+Released 2016-09-06
+
+New features:
+
+ * mtc.deviance() for convenient access to deviance statistics and
+   plots. Additional deviance statistics calculated.
+
+Bugfixes and improvements:
+
+ * Depend on rjags >= 4-0, as JAGS 4 features are being used.
+ * Fix node-splitting models with down-weighted studies.
+ * Additional sanity checking of input data.
+ * More appropriate default limits on plotCovariateEffect.
+ * Corrections to atrialFibrillation dataset.
+
 gemtc 0.8
 =========
 
-Release 2016-03-01
+Released 2016-03-01
 
 New features:
 

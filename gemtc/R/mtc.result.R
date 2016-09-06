@@ -1,3 +1,4 @@
+#' @include forest.R
 #' @include stopIfNotConsistent.R
 
 ## mtc.result class methods

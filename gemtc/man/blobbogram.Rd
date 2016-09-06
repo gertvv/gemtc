@@ -1,6 +1,7 @@
 \encoding{utf8}
 \name{blobbogram}
 \alias{blobbogram}
+\alias{forest}
 \title{Plot a blobbogram (AKA forest plot)}
 \description{
 \code{blobbogram} is a flexible function for creating blobbograms (forest plots), making no specific assumptions about the data being plotted. It supports column and row grouping as well as pagination.
@@ -15,6 +16,8 @@ blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
     digits=2,
     ask=dev.interactive(orNone=TRUE),
     draw.no.effect=TRUE)
+
+forest(x, ...)
 }
 \arguments{
   \item{data}{A data frame containing one row for each confidence interval to be visualized.
@@ -37,8 +40,12 @@ blobbogram(data, id.label="Study", ci.label="Mean (95\% CI)",
   \item{ask}{If TRUE, a prompt will be displayed before generating the
     next page of a multi-page plot.}
   \item{draw.no.effect}{If TRUE, draw the no-effect line.}
+  \item{x}{An object to create a forest plot of.}
+  \item{...}{Additional arguments.}
 }
 \details{
+The \code{forest} function is a generic S3 method (definition compatible with the \code{meta} package). This package defines methods for \code{mtc.result} and \code{mtc.relative.effect.table}.
+
 The \code{blobbogram} function creates a blobbogram (forest plot) from the given data (point estimates and confidence intervals) and meta-data (labels, column specifications, column groups, row groups, styles) using the \code{grid} package.
 If the plot would not fit the device's graphics region, the content is broken up into multiple plots generated in sequence (pagination).
 

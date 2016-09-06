@@ -9,7 +9,6 @@ import(grid)
 import(coda)
 importFrom(igraph, E, V, "V<-", edge, edges, vertex, ends, path, set.edge.attribute, are.connected, get.shortest.paths, graph.empty, simplify, clusters, induced.subgraph, get.edges, degree, get.edge.attribute, shortest.paths, as.undirected, graph.edgelist, vertices)
 importFrom(plyr, aaply, laply)
-importFrom(meta, forest)
 
 S3method(print, mtc.network)
 S3method(summary, mtc.network)

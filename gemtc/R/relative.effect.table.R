@@ -1,3 +1,5 @@
+#' @include forest.R
+
 relative.effect.table <- function(result, covariate=NA) {
   ts <- as.character(result[['model']][['network']][['treatments']][['id']])
   tbl <- array(NA, dim=c(length(ts), length(ts), 3), dimnames=list(ts, ts, c("2.5%", "50%", "97.5%")))
