@@ -37,6 +37,14 @@ sucra <- function(ranks) {
   })
 }
 
+rank.quantiles <- function(ranks, probs=c("2.5%"=0.025, "50%"=0.5, "97.5%"=0.975)) {
+  sapply(probs, function(x) {
+    apply(ranks, 1, function(p) {
+      which(cumsum(p) >= x)[1]
+    })
+  })
+}
+
 print.mtc.rank.probability <- function(x, ...) {
   cat(paste("Rank probability; preferred direction = ", attr(x, "direction"), "\n", sep=""))
   attr(x, "direction") <- NULL

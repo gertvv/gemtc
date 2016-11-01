@@ -4,6 +4,7 @@
 \alias{print.mtc.rank.probability}
 \alias{plot.mtc.rank.probability}
 \alias{sucra}
+\alias{rank.quantiles}
 \title{Calculating rank-probabilities}
 \description{
 Rank probabilities indicate the probability for each treatment to be best, second best, etc.
@@ -19,6 +20,7 @@ rank.probability(result, preferredDirection=1, covariate=NA)
 \method{plot}{mtc.rank.probability}(x, ...)
 
 sucra(ranks)
+rank.quantiles(ranks, probs=c("2.5\%"=0.025, "50\%"=0.5, "97.5\%"=0.975))
 }
 \arguments{
   \item{result}{Object of S3 class \code{mtc.result} to be used in creation of the rank probability table}
@@ -27,8 +29,12 @@ sucra(ranks)
   \item{x}{An object of S3 class \code{rank.probability}.}
   \item{...}{Additional arguments.}
   \item{ranks}{A ranking matrix where the treatments are the rows (e.g. the result of rank.probability).}
+  \item{probs}{Probabilities at which to give quantiles.}
 }
-\value{A matrix (with class \code{mtc.rank.probability}) with the treatments as rows and the ranks as columns.}
+\value{\code{rank.probability}: A matrix (with class \code{mtc.rank.probability}) with the treatments as rows and the ranks as columns.
+\code{sucra}: A vector of SUCRA values.
+\code{rank.quantiles}: A matrix with treatments as rows and quantiles as columns, giving the quantile ranks (by default, the median and 2.5\% and 97.5\% ranks).
+}
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 
@@ -53,6 +59,13 @@ print(ranks)
 print(sucra(ranks))
 ##          A          B          C          D
 ## 0.03670833 0.39591667 0.68562500 0.88175000
+
+print(rank.quantiles(ranks))
+##   2.5% 50% 97.5%
+## A    3   4     4
+## B    1   3     4
+## C    1   2     3
+## D    1   1     3
 
 plot(ranks) # plot a cumulative rank plot
 plot(ranks, beside=TRUE) # plot a 'rankogram'
