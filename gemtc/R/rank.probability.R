@@ -15,8 +15,7 @@ rank.probability <- function(result, preferredDirection=1, covariate=NA) {
   }
 
   d <- relative.effect(result, treatments[1], treatments, covariate=covariate, preserve.extra=FALSE)[['samples']]
-  counts <- lapply(d, function(chain) { rank.count(t(chain)) })
-  ranks <- Reduce(function(a, b) { a + b }, counts)
+  ranks <- rank.count(t(as.matrix(d)))
   colnames(ranks) <- treatments
 
   data <- result[['samples']]
@@ -29,6 +28,13 @@ rank.probability <- function(result, preferredDirection=1, covariate=NA) {
   class(result) <- "mtc.rank.probability"
   attr(result, "direction") <- preferredDirection
   result
+}
+
+sucra <- function(ranks) {
+  apply(ranks, 1, function(p) {
+    a <- length(p)
+    sum(cumsum(p[-a]))/(a-1)
+  })
 }
 
 print.mtc.rank.probability <- function(x, ...) {

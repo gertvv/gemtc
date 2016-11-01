@@ -3,6 +3,7 @@
 \alias{rank.probability}
 \alias{print.mtc.rank.probability}
 \alias{plot.mtc.rank.probability}
+\alias{sucra}
 \title{Calculating rank-probabilities}
 \description{
 Rank probabilities indicate the probability for each treatment to be best, second best, etc.
@@ -16,6 +17,8 @@ rank.probability(result, preferredDirection=1, covariate=NA)
 
 \method{print}{mtc.rank.probability}(x, ...)
 \method{plot}{mtc.rank.probability}(x, ...)
+
+sucra(ranks)
 }
 \arguments{
   \item{result}{Object of S3 class \code{mtc.result} to be used in creation of the rank probability table}
@@ -23,6 +26,7 @@ rank.probability(result, preferredDirection=1, covariate=NA)
   \item{covariate}{(Regression analyses only) Value of the covariate at which to compute rank probabilities.}
   \item{x}{An object of S3 class \code{rank.probability}.}
   \item{...}{Additional arguments.}
+  \item{ranks}{A ranking matrix where the treatments are the rows (e.g. the result of rank.probability).}
 }
 \value{A matrix (with class \code{mtc.rank.probability}) with the treatments as rows and the ranks as columns.}
 
@@ -45,6 +49,10 @@ print(ranks)
 ## B 0.057875 0.175875 0.661500 0.104750
 ## C 0.228250 0.600500 0.170875 0.000375
 ## D 0.713875 0.220625 0.062500 0.003000
+
+print(sucra(ranks))
+##          A          B          C          D
+## 0.03670833 0.39591667 0.68562500 0.88175000
 
 plot(ranks) # plot a cumulative rank plot
 plot(ranks, beside=TRUE) # plot a 'rankogram'
