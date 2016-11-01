@@ -2,7 +2,7 @@
 \name{smoking}
 \alias{smoking}
 \title{Psychological treatments to aid smoking cessation}
-\description{A dataset of 24 trials investigating four psychological treatments and no treatment for smoking cessation.}
+\description{A dataset of 24 trials investigating four psychological treatments and no treatment for smoking cessation. The outcome is the number of people who stopped smoking.}
 \format{A network meta-analysis dataset containing 50 rows of arm-based data (responders and sample size).}
 \source{
 Lu and Ades (2006),
