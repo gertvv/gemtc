@@ -28,7 +28,7 @@ Suggests:
 URL: http://github.com/gertvv/gemtc
 License: GPL-3
 LazyData: true
-Collate:
+Collate: 
     'anohe.R'
     'arrayize.R'
     'blobbogram.R'
@@ -46,6 +46,7 @@ Collate:
     'll.binom.logit.R'
     'll.call.R'
     'll.normal.identity.R'
+    'll.normal.smd.R'
     'll.poisson.log.R'
     'minimum.diameter.spanning.tree.R'
     'mtc.data.studyrow.R'
@@ -68,4 +69,4 @@ Collate:
     'regression.R'
     'relative.effect.R'
     'relative.effect.table.R'
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.0

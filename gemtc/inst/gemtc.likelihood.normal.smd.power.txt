@@ -1,0 +1,4 @@
+m[i, k] ~ dnorm(theta[i, k], prec[i, k])
+prec[i, k] <- alpha[i] * pow(s[i, k] / sqrt(n[i, k]), -2)
+
+dev[i, k] <- pow(m[i, k] - theta[i, k], 2) * prec[i, k]

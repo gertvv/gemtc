@@ -5,7 +5,7 @@ mtc.arm.mle.normal.identity <- function(data, k=0.5) {
   c('mean'=as.numeric(data['mean']), 'sd'=as.numeric(data['std.err']))
 }
 
-# Relative effect estimate (given a two-row data frame
+# Relative effect estimate (given a two-row data frame)
 mtc.rel.mle.normal.identity <- function(data, correction.force=TRUE, correction.type="constant", correction.magnitude=1) {
   e1 <- mtc.arm.mle.normal.identity(data[1,])
   e2 <- mtc.arm.mle.normal.identity(data[2,])
