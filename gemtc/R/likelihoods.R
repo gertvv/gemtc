@@ -35,7 +35,10 @@ likelihood.code.normal <- list(
   read.template("gemtc.likelihood.normal.power.txt"))
 
 deviance.normal <- function(data, val, alpha=1) {
-  alpha * (data$m - val)^2 / data$e^2
+  if (is.null(data[['e']])) {
+    data[['e']] <- data[['s']] / sqrt(data[['n']])
+  }
+  alpha * (data[['m']] - val)^2 / data[['e']]^2
 }
 
 fitted.values.parameter.normal <- function() { "theta" }
