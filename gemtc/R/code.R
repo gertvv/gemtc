@@ -56,7 +56,7 @@ mtc.model.code <- function(model, params, relEffectMatrix, template='gemtc.model
   }
 
   # Generate parameter priors
-  priors <- paste(params, "~", "dnorm(0, prior.prec)", collapse="\n")
+  priors <- paste(params, "~", model[['re.prior']], collapse="\n")
   template <- template.block.sub(template, 'relativeEffectPriors', priors)
 
   template <- template.block.sub(template, 'regressionPriors', regressionPriors)

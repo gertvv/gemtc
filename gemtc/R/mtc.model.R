@@ -19,6 +19,7 @@ mtc.model <- function(network, type="consistency",
     linearModel="random",
     om.scale=NULL,
     hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
+    re.prior=NULL,
     dic=TRUE,
     powerAdjust=NA,
     ...) {
@@ -120,6 +121,7 @@ mtc.model <- function(network, type="consistency",
 
   model[['om.scale']] <- if (!is.null(om.scale)) om.scale else guess.scale(model)
   model[['hy.prior']] <- hy.prior
+  model[['re.prior']] <- if (!is.null(re.prior)) re.prior else 'dnorm(0, prior.prec)'
 
   mtc.model.call('mtc.model', model, ...)
 }
