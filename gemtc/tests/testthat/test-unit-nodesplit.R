@@ -143,6 +143,35 @@ s03   3"), header=T, stringsAsFactors=FALSE)
   expect_that(nodesplit.rewrite.studies(network, "A", "B"), equals(studies.rewrite))
 })
 
+test_that("rewrite studies with trivial studies data frame", {
+  data.re <- read.table(textConnection("
+study treatment diff std.err
+s01   B         NA   0.3
+s01   A         0.7  0.6
+s01   C         0.9  0.5
+s01   D         0.5  0.6"), header=T)
+  data.ab <- read.table(textConnection("
+study treatment mean std.err
+s02   B         NA   0.3
+s02   A         0.7  0.6
+s03   A         0.9  0.5
+s03   B         0.9  0.5
+s03   D         0.5  0.6"), header=T)
+  studies <- read.table(textConnection("
+study
+s01
+s02
+s03"), header=T)
+  studies.rewrite <- read.table(textConnection("
+study
+s01*
+s01**
+s02
+s03"), header=T, stringsAsFactors=FALSE)
+  network <- list(data.ab=data.ab, data.re=data.re, studies=studies, treatments=data.frame(id=c("A","B","C","D")))
+  expect_that(nodesplit.rewrite.studies(network, "A", "B"), equals(studies.rewrite))
+})
+
 ## Regression test for issue #10
 test_that("non-lexicographical treatment order works correctly", {
   data.ab <- read.table(textConnection("
