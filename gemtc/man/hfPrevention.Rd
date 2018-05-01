@@ -8,7 +8,7 @@
 S. Dias, A.J. Sutton, N.J. Welton, and A.E. Ades (2013b),
 \emph{Heterogeneity - Subgroups, Meta-Regression, Bias, and Bias-Adjustment},
 Medical Decision Making 33(5):618-640. \cr
-[\href{http://dx.doi.org/10.1177/0272989X13485157}{doi:10.1177/0272989X13485157}]
+[\href{https://doi.org/10.1177/0272989X13485157}{doi:10.1177/0272989X13485157}]
 }
 \examples{
 # Build a model similar to Program 1(a) from Dias et al. (2013b):

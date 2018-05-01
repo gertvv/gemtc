@@ -8,10 +8,10 @@
 Lu and Ades (2006),
 \emph{Assessing Evidence Inconsistency in Mixed Treatment Comparisons},
 Journal of the American Statistical Society, 101(474):447-459.
-[\href{http://dx.doi.org/10.1198/016214505000001302}{10.1198/016214505000001302}]
+[\href{https://doi.org/10.1198/016214505000001302}{10.1198/016214505000001302}]
 
 Boland et al. (2003),
 \emph{Early thrombolysis for the treatment of acute myocardial infarction: a systematic review and economic evaluation},
 Health Technology Assessment 7(15):1-136.
-[\href{http://dx.doi.org/10.3310/hta7150}{doi:10.3310/hta7150}]
+[\href{https://doi.org/10.3310/hta7150}{doi:10.3310/hta7150}]
 }
