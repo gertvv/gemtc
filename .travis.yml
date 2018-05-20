@@ -1,6 +1,8 @@
 language: r
 before_install:
   - cd gemtc
-apt_packages:
-  - libglpk-dev
-  - jags
+addons:
+  apt:
+    packages:
+      - libglpk-dev
+      - jags
