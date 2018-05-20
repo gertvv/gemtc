@@ -25,42 +25,42 @@ The source for GeMTC is available under the GPL-3 on \href{https://github.com/ge
 S. Dias, N.J. Welton, D.M. Caldwell, and A.E. Ades (2010),
 \emph{Checking consistency in mixed treatment comparison meta-analysis},
 Statistics in Medicine 29(7-8, Sp. Iss. SI):932-944.\cr
-[\href{http://dx.doi.org/10.1002/sim.3767}{doi:10.1002/sim.3767}]
+[\href{https://doi.org/10.1002/sim.3767}{doi:10.1002/sim.3767}]
 
 S. Dias, A.J. Sutton, A.E. Ades, and N.J. Welton (2013a),
 \emph{A Generalized Linear Modeling Framework for Pairwise and Network Meta-analysis of Randomized Controlled Trials},
 Medical Decision Making 33(5):607-617.
-[\href{http://dx.doi.org/10.1177/0272989X12458724}{doi:10.1177/0272989X12458724}]
+[\href{https://doi.org/10.1177/0272989X12458724}{doi:10.1177/0272989X12458724}]
 
 S. Dias, A.J. Sutton, N.J. Welton, and A.E. Ades (2013b),
 \emph{Heterogeneity - Subgroups, Meta-Regression, Bias, and Bias-Adjustment},
 Medical Decision Making 33(5):618-640. \cr
-[\href{http://dx.doi.org/10.1177/0272989X13485157}{doi:10.1177/0272989X13485157}]
+[\href{https://doi.org/10.1177/0272989X13485157}{doi:10.1177/0272989X13485157}]
 
 S. Dias, N.J. Welton, A.J. Sutton, D.M. Caldwell, G. Lu, and A.E. Ades (2013c),
 \emph{Inconsistency in Networks of Evidence Based on Randomized Controlled Trials},
 Medical Decision Making 33(5):641-656.
-[\href{http://dx.doi.org/10.1177/0272989X12455847}{doi:10.1177/0272989X12455847}]
+[\href{https://doi.org/10.1177/0272989X12455847}{doi:10.1177/0272989X12455847}]
 
 A. Gelman, A. Jakulin, M. Grazia Pittau, Y.-S. Su (2008),
 \emph{A weakly informative default prior distribution for logistic and other regression models},
 The Annals of Applied Statistics 2(4):1360-1383.
-[\href{http://dx.doi.org/10.1214/08-AOAS191}{doi:10.1214/08-AOAS191}]
+[\href{https://doi.org/10.1214/08-AOAS191}{doi:10.1214/08-AOAS191}]
 
 R.M. Turner, J. Davey, M.J. Clarke, S.G. Thompson, J.P.T. Higgins (2012),
 \emph{Predicting the extent of heterogeneity in meta-analysis, using empirical data from the Cochrane Database of Systematic Reviews},
 International Journal of Epidemiology 41(3):818-827.
-[\href{http://dx.doi.org/10.1093/ije/dys041}{doi:10.1093/ije/dys041}]
+[\href{https://doi.org/10.1093/ije/dys041}{doi:10.1093/ije/dys041}]
 
 G. van Valkenhoef, G. Lu, B. de Brock, H. Hillege, A.E. Ades, and N.J. Welton (2012),
 \emph{Automating network meta-analysis},
 Research Synthesis Methods 3(4):285-299.
-[\href{http://dx.doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
+[\href{https://doi.org/10.1002/jrsm.1054}{doi:10.1002/jrsm.1054}]
 
 G. van Valkenhoef, S. Dias, A.E. Ades, and N.J. Welton (2015),
 \emph{Automated generation of node-splitting models for assessment of inconsistency in network meta-analysis},
 Research Synthesis Methods, accepted manuscript.
-[\href{http://dx.doi.org/10.1002/jrsm.1167}{doi:10.1002/jrsm.1167}]
+[\href{https://doi.org/10.1002/jrsm.1167}{doi:10.1002/jrsm.1167}]
 
 G. van Valkenhoef et al. (draft),
 \emph{Modeling inconsistency as heterogeneity in network meta-analysis},
@@ -69,7 +69,7 @@ draft manuscript.
 D.E. Warn, S.G. Thompson, and D.J. Spiegelhalter (2002),
 \emph{Bayesian random effects meta-analysis of trials with binary outcomes: methods for the absolute risk difference and relative risk scales},
 Statistics in Medicine 21(11):1601-1623.
-[\href{http://dx.doi.org/10.1002/sim.1189}{doi:10.1002/sim.1189}]
+[\href{https://doi.org/10.1002/sim.1189}{doi:10.1002/sim.1189}]
 
 }
 \seealso{
