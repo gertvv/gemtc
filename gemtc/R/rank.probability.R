@@ -11,7 +11,7 @@ rank.probability <- function(result, preferredDirection=1, covariate=NA) {
 
   # count ranks given a matrix d of relative effects (treatments as rows)
   rank.count <- function(d) {
-    .Call("gemtc_rank_count", d)
+    .Call(gemtc_rank_count, d)
   }
 
   d <- relative.effect(result, treatments[1], treatments, covariate=covariate, preserve.extra=FALSE)[['samples']]
