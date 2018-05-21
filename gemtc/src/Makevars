@@ -1,2 +1,2 @@
-#PKG_LIBS=$(BLAS_LIBS) $(FLIBS)
-OBJECTS=rank.o
+PKG_CFLAGS=$(C_VISIBILITY)
+OBJECTS=init.o rank.o

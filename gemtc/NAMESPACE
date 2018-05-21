@@ -1,4 +1,4 @@
-useDynLib(gemtc)
+useDynLib(gemtc, .registration = TRUE)
 
 import(graphics)
 import(grDevices)
