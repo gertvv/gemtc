@@ -1,5 +1,5 @@
 standardize.treatments <- function(treatments) {
-  treatments[['id']] <- as.factor(treatments[['id']])
+  treatments[['id']] <- factor(treatments[['id']], levels=treatments[['id']])
   treatments[['description']] <- as.character(treatments[['description']])
   rownames(treatments) <- as.character(treatments[['id']])
   treatments[order(treatments[['id']]), , drop=FALSE]
@@ -12,7 +12,7 @@ treatment.id.to.description <- function(network, ids) {
 }
 
 standardize.data <- function(data, treatment.levels, re.order=FALSE) {
-  data[['study']] <- factor(as.factor(data[['study']]))
+  data[['study']] <- as.factor(data[['study']])
   data[['treatment']] <- factor(as.character(data[['treatment']]), levels=treatment.levels)
   if (re.order) {
     na <- sapply(data[['study']], function(study) { sum(data[['study']] == study) })
@@ -86,7 +86,7 @@ mtc.network <- function(
     if (!is.null(data.re)) {
       data.treatments <- c(data.treatments, as.character(data.re[['treatment']]))
     }
-    treatments <- unique(data.treatments)
+    treatments <- sort(unique(data.treatments))
   }
   if (is.list(treatments) && !is.data.frame(treatments)) {
     treatments <- as.data.frame(do.call(rbind, treatments))

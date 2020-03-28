@@ -11,7 +11,7 @@ test_that("a single pair returns a one-row matrix", {
 })
 
 test_that("two pairs return a two-row matrix", {
-  data <- data.frame(treatment=c("A", "B", "C"), mean=c(1.0, 2.0, 2.5), std.err=c(0.5/4, 0.5/4, 1.0/4))
+  data <- data.frame(treatment=c("A", "B", "C"), mean=c(1.0, 2.0, 2.5), std.err=c(0.5/4, 0.5/4, 1.0/4), stringsAsFactors=T)
   model <- list("likelihood"="normal", "link"="identity")
   ts <- data$treatment
   pairs <- data.frame(t1=coerce.factor(c(ts[1], ts[1]), ts), t2=coerce.factor(c(ts[2], ts[3]), ts))
@@ -25,7 +25,7 @@ test_that("calculating pairs for relative effect data transforms the mvnorm", {
 study  treatment  diff  std.err
 s07    A          NA    0.50
 s07    B          -2.3  0.72
-s07    D          -0.9  0.69"), header=T)
+s07    D          -0.9  0.69"), header=T, stringsAsFactors=T)
   ts <- data$treatment
   pairs <- data.frame(t1=coerce.factor(c(ts[3], ts[3]), ts), t2=coerce.factor(c(ts[1], ts[2]), ts))
   expected <- matrix(c(0.9, 0.69, -1.4, sqrt(0.72^2+0.69^2-2*0.50^2)), ncol=2, byrow=TRUE)
@@ -38,7 +38,7 @@ test_that("calculating pairs for relative effect data handles 1-pair case", {
 study  treatment  diff  std.err
 s07    A          NA    0.50
 s07    B          -2.3  0.72
-s07    D          -0.9  0.69"), header=T)
+s07    D          -0.9  0.69"), header=T, stringsAsFactors=T)
   ts <- data$treatment
   pairs <- data.frame(t1=coerce.factor(c(ts[3], ts[3]), ts), t2=coerce.factor(c(ts[1], ts[2]), ts))
   expected <- matrix(c(0.9, 0.69, -1.4, sqrt(0.72^2+0.69^2-2*0.50^2)), ncol=2, byrow=TRUE)
@@ -52,7 +52,7 @@ study  treatment  diff  std.err
 s07    A          NA    0.50
 s07    B          -2.3  0.72
 s07    D          -0.9  0.69
-s08    C          NA    0.3"), header=T)
+s08    C          NA    0.3"), header=T, stringsAsFactors=T)
   ts <- data$treatment
   pairs <- data.frame(t1=coerce.factor(c(ts[3]), ts), t2=coerce.factor(c(ts[2]), ts))
   expected <- matrix(c(-1.4, sqrt(0.72^2+0.69^2-2*0.50^2)), ncol=2, byrow=TRUE)
@@ -65,7 +65,7 @@ test_that("guess.scale handles relative effect data", {
 study  treatment  diff  std.err
 s07    A          NA    0.50
 s07    B          -2.3  0.72
-s07    D          -0.9  0.69"), header=T)
+s07    D          -0.9  0.69"), header=T, stringsAsFactors=T)
   network <- mtc.network(data.re=data)
 
     model <- list(
