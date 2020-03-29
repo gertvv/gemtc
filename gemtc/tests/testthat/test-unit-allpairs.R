@@ -75,3 +75,13 @@ s07    D          -0.9  0.69"), header=T, stringsAsFactors=T)
     )
   expect_that(guess.scale(model), equals(2.3))
 })
+
+test_that("guess.scale not confused by unrealized study levels", {
+  network <- list(treatments=data.frame(id=as.factor(c("A", "B"))), data.ab = data.frame(
+    study=factor(c("1", "1"), levels=c("1", "2")), treatment=as.factor(c("A", "B")), responders=c(1, 3), sampleSize=c(10, 10)))
+  expect_that(guess.scale(list(network=network, likelihood='binom', link='logit')), equals(1.083687, tolerance=1e-6))
+
+  network <- list(treatments=data.frame(id=as.factor(c("A", "B"))), data.re = data.frame(
+    study=factor(c("1", "1"), levels=c("1", "2")), treatment=as.factor(c("A", "B")), diff=c(NA, 1), std.err=c(NA, 1)))
+  expect_that(guess.scale(list(network=network, likelihood='binom', link='logit')), equals(1))
+})
