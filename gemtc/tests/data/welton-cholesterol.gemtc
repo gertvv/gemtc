@@ -4,8 +4,8 @@ This is the "single intervention effect" model for total cholesterol with the co
 -->
 <network type="continuous">
 	<treatments>
-		<treatment id="usual" />
 		<treatment id="psych" />
+		<treatment id="usual" />
 	</treatments>
 	<studies>
 		<study id="1">
