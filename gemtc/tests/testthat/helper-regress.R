@@ -1,6 +1,6 @@
 test.regress <- function(network, likelihood, link, t1=NULL, t2=NULL) {
   n.trt <- nrow(network$treatments)
-  devianceNames <- c("Dbar", "pD", "DIC", "data points", "dev.ab", "dev.re", "fit.ab", "fit.re")
+  devianceNames <- c("Dbar", "pD", "DIC", "data points", "dev.ab", "dev.re", "fit.ab", "fit.re", "lev.ab", "lev.re", "nd.ab", "nd.re", "fitted")
 
   # consistency model, random effects
   model <- mtc.model(network, likelihood=likelihood, link=link)

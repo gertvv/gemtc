@@ -126,13 +126,15 @@ test_that("certolizumab regression (binomial data, continuous covariate)", {
   model <- mtc.model(certolizumab, type="regression", linearModel="random", 
                      regressor=list(control="Placebo", coefficient="exchangeable", variable="diseaseDuration"))
   capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  expect_true(TRUE)
 })
 
 test_that("atrial fibrillation regression (classes, binomial data, continuous covariate)", {
-  classes <- list("control"=c(1),
-                  "anti-coagulant"=c(2,3,4,9),
-                  "anti-platelet"=c(5,6,7,8,10,11,12,16,17),
-                  "mixed"=c(13,14,15))
+  classes <- list("control"=c('01'),
+                  "anti-coagulant"=c('02','03','04','09'),
+                  "anti-platelet"=c('05','06','07','08','10','11','12','16','17'),
+                  "mixed"=c('13','14','15'))
 
   model <- mtc.model(atrialFibrillation, type="regression", linearModel="fixed", 
                      regressor=list(classes=classes, coefficient="shared", variable="stroke"))
@@ -141,6 +143,8 @@ test_that("atrial fibrillation regression (classes, binomial data, continuous co
   model <- mtc.model(atrialFibrillation, type="regression", linearModel="random", 
                      regressor=list(classes=classes, coefficient="shared", variable="stroke"))
   capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  expect_true(TRUE)
 })
 
 test_that("heart failure prevention (binomial data, binary covariate)", {
@@ -167,6 +171,8 @@ test_that("heart failure prevention (binomial data, binary covariate)", {
   model <- mtc.model(hfPrevention, type="regression", linearModel="random", 
                      regressor=list(control="control", coefficient="exchangeable", variable="secondary"))
   capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  expect_true(TRUE)
 })
 
 test_that("node-splitting with down-weighting", {
@@ -175,4 +181,6 @@ test_that("node-splitting with down-weighting", {
   network <- mtc.network(smoking$data.ab, studies=data.frame(study=studies, weight=weight, stringsAsFactors=FALSE))
   model <- mtc.model(network, type="nodesplit", t1="A", t2="B", powerAdjust="weight")
   capture.output(result <- mtc.run(model, n.adapt=100, n.iter=500))
+
+  expect_true(TRUE)
 })
