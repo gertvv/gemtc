@@ -46,8 +46,7 @@ compare.summaries <- function(s1, s2) {
   se1 <- s1$summary$statistics[, 'Time-series SE']
   se2 <- s2$summary$statistics[, 'Time-series SE']
   test <- pnorm(mu1 - mu2, 0, sqrt(se1^2 + se2^2))
-  get_reporter()$add_result(
-    expectation(all(test > 0.025), formatError("Means were not equal", mu1, mu2, test)))
+  expect(all(test > 0.025), formatError("Means were not equal", mu1, mu2, test))
 
   # Test equality of variance
   sd1 <- s1$summary$statistics[d.idx, 'SD']
@@ -55,8 +54,7 @@ compare.summaries <- function(s1, s2) {
   en1 <- s1$effectiveSize[d.idx]
   en2 <- s2$effectiveSize[d.idx]
   test <- pf(sd1^2 / sd2^2, en1, en2)
-  get_reporter()$add_result(
-    expectation(all(test > 0.025), formatError("Variances were not equal", sd1^2, sd2^2, test)))
+  expect(all(test > 0.025), formatError("Variances were not equal", sd1^2, sd2^2, test))
 
   # TODO: multivariate test for equality of means
   # TODO: compare covariance matrices
@@ -80,8 +78,7 @@ compare.summaries <- function(s1, s2) {
       test <- chisq.test(x, p=p, rescale.p=TRUE, simulate.p.value=TRUE)
       c('statistic'=unname(test$statistic), 'p.value'=test$p.value)
     })
-    get_reporter()$add_result(
-      expectation(all(test['p.value',] > 0.025), formatError("Rank probabilities were not equal", s1$ranks, s2$ranks, test)))
+    expect(all(test['p.value',] > 0.025), formatError("Rank probabilities were not equal", s1$ranks, s2$ranks, test))
   }
 
   # Test equality of deviance statistics
@@ -93,8 +90,7 @@ compare.summaries <- function(s1, s2) {
     v1 <- unlist(s1$dic[c('Dbar', 'pD')])
     v2 <- unlist(s2$dic[c('Dbar', 'pD')])
     test <- pnorm(v1 - v2, 0, se)
-    get_reporter()$add_result(
-      expectation(all(test > 0.025), formatError("Model fit statistics were not equal", v1, v2, test)))
+    expect(all(test > 0.025), formatError("Model fit statistics were not equal", v1, v2, test))
   }
 }
 
