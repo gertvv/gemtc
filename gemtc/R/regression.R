@@ -32,9 +32,10 @@ isRegressionControl <- function(model, t) {
 }
 
 regressionAdjustMatrix <- function(t1, t2, regressor, nt) {
+  stopifnot(is.factor(t1))
   nc <- length(regressor[['classes']])
   nparams <- length(regressionParams(regressor, nt, nc))
-  pairs <- treatment.pairs(t1, t2, 1:nt)
+  pairs <- treatment.pairs(t1, t2, factor(1:nt, levels=1:nt, labels=levels(t1)))
 
   if (nc > 0) {
     pairs <- matrix(regressionClassMap(regressor[['classes']])[pairs], nrow=nrow(pairs))

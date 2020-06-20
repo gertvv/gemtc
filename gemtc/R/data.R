@@ -27,7 +27,9 @@ mtc.model.data <- function(model) {
    }
 
   data <- data.frame(
-    t=c(data.ab[['treatment']], data.re[['treatment']])
+    t=as.numeric(forcats::fct_c(
+      if (is.null(data.ab)) factor() else data.ab[['treatment']],
+      if (is.null(data.re)) factor() else data.re[['treatment']]))
   )
   nrow.ab <- if (!is.null(data.ab)) nrow(data.ab) else 0
   nrow.re <- if (!is.null(data.re)) nrow(data.re) else 0

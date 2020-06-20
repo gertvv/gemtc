@@ -1,3 +1,26 @@
+gemtc 0.8-5
+===========
+
+Released 2020-06-20
+
+ * Adapt to breaking changes relating to factor/numeric conversions, get
+   package re-instated on CRAN (it was removed 2020-05-29)
+
+gemtc 0.8-4
+===========
+
+Released 2020-03-31
+
+ * Adapt to the new stringsAsFactors=FALSE default
+
+getmc 0.8-3
+===========
+
+Not released (2018-05-21)
+
+ * Update DOIs to https://dois.org/ resolver
+ * Register native code
+
 gemtc 0.8-2
 ===========
 

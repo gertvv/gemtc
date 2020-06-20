@@ -174,8 +174,9 @@ mtc.network.validate <- function(network) {
   stopifnot(nrow(network[['data.ab']]) > 0 || nrow(network[['data.re']]) > 0)
 
   # Check that the treatments are correctly cross-referenced and have valid names
-  all.treatments <- c(network[['data.ab']][['treatment']], network[['data.re']][['treatment']])
-  all.treatments <- factor(all.treatments, levels=1:nlevels(network[['treatments']][['id']]), labels=levels(network[['treatments']][['id']]))
+  all.treatments <- forcats::fct_c(
+    if (is.null(network[['data.ab']])) factor() else network[['data.ab']][['treatment']],
+    if (is.null(network[['data.re']])) factor() else network[['data.re']][['treatment']])
   stopifnot(all(all.treatments %in% network[['treatments']][['id']]))
   # stopifnot(all(network[['treatments']][['id']] %in% all.treatments)) -- disabled for node-splitting
   invalidId <- grep('^[a-zA-Z0-9_]*$', network[['treatments']][['id']], invert=TRUE)
@@ -269,9 +270,9 @@ has.indirect.evidence <- function(network, t1, t2) {
 
 mtc.treatment.pairs <- function(treatments) {
   n <- length(treatments)
-  t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
-  t2 <- do.call(c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
-  data.frame(t1=coerce.factor(t1, treatments), t2=coerce.factor(t2, treatments))
+  t1 <- do.call(forcats::fct_c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
+  t2 <- do.call(forcats::fct_c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
+  data.frame(t1=t1, t2=t2)
 }
 
 ## Get all direct comparisons with the number of studies

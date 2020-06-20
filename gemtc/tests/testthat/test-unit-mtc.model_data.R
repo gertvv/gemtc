@@ -4,7 +4,7 @@ test_that("mtc.model.data runs on simple data", {
   data <- read.table(textConnection('
 study treatment responders sampleSize
 1     A         3          10
-1     B         4          12'), header=T)
+1     B         4          12'), header=T, stringsAsFactors=T)
   network <- mtc.network(data)
   model <- list(network=network, likelihood='binom', link='logit', om.scale=2.5)
   model <- mtc.model.data(model)

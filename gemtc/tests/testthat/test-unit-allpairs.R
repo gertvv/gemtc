@@ -14,7 +14,7 @@ test_that("two pairs return a two-row matrix", {
   data <- data.frame(treatment=c("A", "B", "C"), mean=c(1.0, 2.0, 2.5), std.err=c(0.5/4, 0.5/4, 1.0/4), stringsAsFactors=T)
   model <- list("likelihood"="normal", "link"="identity")
   ts <- data$treatment
-  pairs <- data.frame(t1=coerce.factor(c(ts[1], ts[1]), ts), t2=coerce.factor(c(ts[2], ts[3]), ts))
+  pairs <- data.frame(t1=c(ts[1], ts[1]), t2=c(ts[2], ts[3]))
   expected <- matrix(c(1.0, sqrt(2*0.125^2), 1.5, sqrt(0.125^2 + 0.25^2)), ncol=2, byrow=TRUE)
   colnames(expected) <- c('mean', 'sd')
   expect_that(rel.mle.ab(data, model, pairs), equals(expected))
@@ -27,7 +27,7 @@ s07    A          NA    0.50
 s07    B          -2.3  0.72
 s07    D          -0.9  0.69"), header=T, stringsAsFactors=T)
   ts <- data$treatment
-  pairs <- data.frame(t1=coerce.factor(c(ts[3], ts[3]), ts), t2=coerce.factor(c(ts[1], ts[2]), ts))
+  pairs <- data.frame(t1=c(ts[3], ts[3]), t2=c(ts[1], ts[2]))
   expected <- matrix(c(0.9, 0.69, -1.4, sqrt(0.72^2+0.69^2-2*0.50^2)), ncol=2, byrow=TRUE)
   colnames(expected) <- c('mean', 'sd')
   expect_that(rel.mle.re(data, pairs), equals(expected))
@@ -40,7 +40,7 @@ s07    A          NA    0.50
 s07    B          -2.3  0.72
 s07    D          -0.9  0.69"), header=T, stringsAsFactors=T)
   ts <- data$treatment
-  pairs <- data.frame(t1=coerce.factor(c(ts[3], ts[3]), ts), t2=coerce.factor(c(ts[1], ts[2]), ts))
+  pairs <- data.frame(t1=c(ts[3], ts[3]), t2=c(ts[1], ts[2]))
   expected <- matrix(c(0.9, 0.69, -1.4, sqrt(0.72^2+0.69^2-2*0.50^2)), ncol=2, byrow=TRUE)
   colnames(expected) <- c('mean', 'sd')
   expect_that(rel.mle.re(data, pairs), equals(expected))
@@ -54,7 +54,7 @@ s07    B          -2.3  0.72
 s07    D          -0.9  0.69
 s08    C          NA    0.3"), header=T, stringsAsFactors=T)
   ts <- data$treatment
-  pairs <- data.frame(t1=coerce.factor(c(ts[3]), ts), t2=coerce.factor(c(ts[2]), ts))
+  pairs <- data.frame(t1=ts[3], t2=ts[2])
   expected <- matrix(c(-1.4, sqrt(0.72^2+0.69^2-2*0.50^2)), ncol=2, byrow=TRUE)
   colnames(expected) <- c('mean', 'sd')
   expect_that(rel.mle.re(data[data$study=="s07",], pairs), equals(expected))
@@ -68,11 +68,10 @@ s07    B          -2.3  0.72
 s07    D          -0.9  0.69"), header=T, stringsAsFactors=T)
   network <- mtc.network(data.re=data)
 
-    model <- list(
-        network = network,
+  model <- list(
+    network = network,
     likelihood = 'normal',
-    link = 'identity'
-    )
+    link = 'identity')
   expect_that(guess.scale(model), equals(2.3))
 })
 

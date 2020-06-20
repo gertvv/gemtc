@@ -1,6 +1,6 @@
 Package: gemtc
-Version: 0.8-4
-Date: 2020-03-31
+Version: 0.8-5
+Date: 2020-06-20
 Title: Network Meta-Analysis Using Bayesian Methods
 Author: Gert van Valkenhoef, Joel Kuiper
 Maintainer: Gert van Valkenhoef <gert@gertvv.nl>
@@ -20,7 +20,8 @@ Imports:
     grid,
     rjags (>= 4-0),
     truncnorm,
-    Rglpk
+    Rglpk,
+    forcats (>= 0.5.0)
 Suggests:
     testthat (>= 0.8),
     Matrix,

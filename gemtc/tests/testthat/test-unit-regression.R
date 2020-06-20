@@ -14,21 +14,22 @@ test_that("regressionParams is correct", {
 })
 
 test_that("regressionAdjustMatrix is correct", {
-  expect_equal(regressionAdjustMatrix(c(1,1,2), c(1,2,3), list('coefficient'='shared', 'control'=1), 4),
+  trt <- function(tx) factor(tx, levels=1:4)
+  expect_equal(regressionAdjustMatrix(trt(c(1,1,2)), trt(c(1,2,3)), list('coefficient'='shared', 'control'=1), 4),
                cbind(0,1,0))
-  expect_equal(regressionAdjustMatrix(c(1,1,2), c(1,2,3), list('coefficient'='shared', 'control'=2), 4),
+  expect_equal(regressionAdjustMatrix(trt(c(1,1,2)), trt(c(1,2,3)), list('coefficient'='shared', 'control'=2), 4),
                cbind(0,-1,1))
 
-  expect_equal(regressionAdjustMatrix(c(1,1,2), c(1,2,3), list('coefficient'='unrelated', 'control'=1), 4),
+  expect_equal(regressionAdjustMatrix(trt(c(1,1,2)), trt(c(1,2,3)), list('coefficient'='unrelated', 'control'=1), 4),
                cbind(c(0,0,0), c(1,0,0), c(-1,1,0)))
-  expect_equal(regressionAdjustMatrix(c(1,1,2), c(1,2,3), list('coefficient'='unrelated', 'control'=2), 4),
+  expect_equal(regressionAdjustMatrix(trt(c(1,1,2)), trt(c(1,2,3)), list('coefficient'='unrelated', 'control'=2), 4),
                cbind(c(0,0,0), c(-1,0,0), c(0,1,0)))
-  expect_equal(regressionAdjustMatrix(c(1), c(3), list('coefficient'='unrelated', 'control'=3), 4),
+  expect_equal(regressionAdjustMatrix(trt(1), trt(3), list('coefficient'='unrelated', 'control'=3), 4),
                cbind(c(-1,0,0)))
 
-  expect_equal(regressionAdjustMatrix(c(1,1,2), c(1,2,3), list('coefficient'='exchangeable', 'control'=1), 4),
+  expect_equal(regressionAdjustMatrix(trt(c(1,1,2)), trt(c(1,2,3)), list('coefficient'='exchangeable', 'control'=1), 4),
                cbind(c(0,0,0,0), c(1,0,0,0), c(-1,1,0,0)))
 
-  expect_equal(regressionAdjustMatrix(c(1,1,2,2), c(1,2,3,4), list('coefficient'='shared', 'classes'=list('C'=1, 'X'=c(2,3), 'Y'=4)), 4),
+  expect_equal(regressionAdjustMatrix(trt(c(1,1,2,2)), trt(c(1,2,3,4)), list('coefficient'='shared', 'classes'=list('C'=1, 'X'=c(2,3), 'Y'=4)), 4),
                cbind(c(0, 0), c(1,0), c(0, 0), c(-1, 1)))
 })
