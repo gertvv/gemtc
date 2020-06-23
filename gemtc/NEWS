@@ -1,3 +1,11 @@
+gemtc 0.8-6
+===========
+
+Released 2020-06-23
+
+ * Fix automated tests on previous versions of R
+ * Add journal article citations to the package description
+
 gemtc 0.8-5
 ===========
 
