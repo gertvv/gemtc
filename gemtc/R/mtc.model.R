@@ -39,6 +39,10 @@ mtc.model <- function(network, type="consistency",
     stop("Studies with duplicated treatments are not supported.")
   }
 
+  if (!igraph::is_connected(mtc.network.graph(network))) {
+    stop("Network is disconnected - see plot(network)")
+  }
+
   add.std.err <- function(data) {
     if (!is.null(data[['std.dev']]) &&
         !is.null(data[['sampleSize']]) &&

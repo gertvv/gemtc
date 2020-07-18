@@ -16,3 +16,10 @@ test_that("func.param.matrix was implemented correctly", {
   expect_equal(matrix(c(1,0,1), nrow=3, dimnames=list(NULL, c('d.A.D'))),
                mtc.model.call('func.param.matrix', model, t1='A', t2='D'))
 })
+
+test_that("mtc.model reports disconnected networks", {
+  network <- parkinson
+  network$data.ab <- network$data.ab[1:11,]
+  expect_error(mtc.model(network), "Network is disconnected")
+
+})
