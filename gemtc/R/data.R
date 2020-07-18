@@ -70,7 +70,8 @@ mtc.model.data <- function(model) {
   model.data <- c(model.data, list(
     na = unname(na),
     nt = nrow(model[['network']][['treatments']]),
-    om.scale = model[['om.scale']]))
+    om.scale = model[['om.scale']],
+    re.prior.sd = model[['re.prior.sd']]))
 
   powerAdjust <- model[['powerAdjust']]
   if (!is.null(powerAdjust) && !is.na(powerAdjust)) {

@@ -40,7 +40,7 @@ study treatment responders sampleSize exposure
   model <- list(network=network, likelihood='binom', link='logit', om.scale=2.5)
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
-    sort(c('studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'n'))
+    sort(c('studies.a', 'studies', 'nt', 'om.scale', 're.prior.sd', 'na', 't', 'r', 'n'))
   ))
 })
 
@@ -54,7 +54,7 @@ study treatment responders sampleSize exposure
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'n'))
+      'studies.a', 'studies', 'nt', 'om.scale', 're.prior.sd', 'na', 't', 'r', 'n'))
   ))
 })
 
@@ -68,7 +68,7 @@ study treatment responders sampleSize exposure
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'E'))
+      'studies.a', 'studies', 'nt', 'om.scale', 're.prior.sd', 'na', 't', 'r', 'E'))
   ))
 })
 
@@ -82,7 +82,7 @@ study treatment mean std.err
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'studies.a', 'studies', 'nt', 'om.scale', 'na', 't', 'm', 'e'))
+      'studies.a', 'studies', 'nt', 'om.scale', 're.prior.sd', 'na', 't', 'm', 'e'))
   ))
 })
 
@@ -96,7 +96,7 @@ study treatment diff std.err
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'studies.r2', 'studies', 'nt', 'om.scale', 'na', 't', 'm', 'e'))
+      'studies.r2', 'studies', 'nt', 'om.scale', 're.prior.sd', 'na', 't', 'm', 'e'))
   ))
 })
 
@@ -114,7 +114,7 @@ study treatment diff std.err
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'studies.a', 'studies.r2', 'studies', 'nt', 'om.scale', 'na', 't', 'm', 'e'))
+      'studies.a', 'studies.r2', 'studies', 'nt', 'om.scale', 're.prior.sd', 'na', 't', 'm', 'e'))
   ))
 })
 
@@ -133,7 +133,7 @@ study treatment diff std.err
   data <- mtc.model.data(model)
   expect_that(sort(names(data)), equals(
     sort(c(
-      'studies.a', 'studies.rm', 'studies', 'nt', 'om.scale', 'na', 't', 'r', 'n', 'm', 'e'))
+      'studies.a', 'studies.rm', 'studies', 'nt', 'om.scale', 're.prior.sd', 'na', 't', 'r', 'n', 'm', 'e'))
   ))
 })
 
