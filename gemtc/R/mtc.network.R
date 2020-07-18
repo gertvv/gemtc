@@ -166,6 +166,20 @@ mtc.validate.data.re <- function(data) {
                'Constraint violated by:',
                paste(data[['study']][ma.studies][nobaseline], collapse=", ")))
   }
+
+  se <- data[['std.err']][!is.na(data[['std.err']])]
+  if (!all(se > 0.0)) {
+    stop(paste('In data.re, std.err must be either positive or NA'))
+  }
+
+  if (!all(sapply(ma, function(study) {
+    ref <- data[['study']] == study & is.na(data[['diff']])
+    rel <- data[['study']] == study & !is.na(data[['diff']])
+    all(data[['std.err']][ref] < data[['std.err']][rel])
+  }))) {
+    stop("In data.re, std.err of the reference arm must < std.err of the relative effects")
+  }
+    
 }
 
 mtc.network.validate <- function(network) {
