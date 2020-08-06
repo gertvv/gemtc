@@ -3,8 +3,11 @@ gemtc 0.8-7
 
 Released 2020-08-??
 
+ * Allow setting the standard deviation for the relative effect priors
+   explicitly
+ * Study names on the key outputs of mtc.deviance for contrast-level
+   data (data.re)
  * More user-friendly messages for common errors
- * Allow setting the standard deviation for the relative effect priors explicitly
 
 gemtc 0.8-6
 ===========
