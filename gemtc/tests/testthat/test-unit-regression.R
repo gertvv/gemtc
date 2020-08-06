@@ -33,3 +33,19 @@ test_that("regressionAdjustMatrix is correct", {
   expect_equal(regressionAdjustMatrix(trt(c(1,1,2,2)), trt(c(1,2,3,4)), list('coefficient'='shared', 'classes'=list('C'=1, 'X'=c(2,3), 'Y'=4)), 4),
                cbind(c(0, 0), c(1,0), c(0, 0), c(-1, 1)))
 })
+
+test_that("Degenerate covariate is detected", {
+  network <- mtc.network(
+    data=data.frame(
+      study=c('A', 'A', 'B', 'B'),
+      treatment=c('X', 'Y', 'X', 'Y'),
+      responders=3,
+      sampleSize=10),
+    studies=data.frame(
+      study=c('A', 'B'),
+      covariate=0
+    )
+  )
+  expect_error(mtc.model(network, type='regression', regressor=list(variable='covariate', 'coefficient'='shared', 'control'='X')),
+    "covariate is degenerate");
+})
