@@ -106,6 +106,24 @@ computeDeviance <- function(model, stats) {
     }
   }
 
+  name.ab <- function(x) {
+    if (length(x) > 0) {
+      names(x) <- rownames(arms)[studies.ab]
+      x
+    } else {
+      c()
+    }
+  }
+
+  name.re <- function(x) {
+    if (length(x) > 0) {
+      names(x) <- rownames(arms)[studies.re]
+      x
+    } else {
+      c()
+    }
+  }
+
   dev.ab <- stats[deviance.monitors.residuals.ab(model)]
   if (length(dev.ab) == 0) {
     dev.ab <- NULL
@@ -140,10 +158,10 @@ computeDeviance <- function(model, stats) {
   fitted <- c(stats[deviance.monitors.fitted.ab(model)], stats[deviance.monitors.fitted.re(model)])
 
   info <- list(Dbar=Dbar, pD=pD, DIC=Dbar+pD, "data points"=dp,
-               dev.ab=shape.ab(dev.ab), dev.re=unname(dev.re),
-               fit.ab=shape.ab(fit.ab), fit.re=unname(fit.re),
-               lev.ab=shape.ab(lev.ab), lev.re=unname(lev.re),
-               nd.ab=unname(nd.ab), nd.re=unname(nd.re),
+               dev.ab=shape.ab(dev.ab), dev.re=name.re(dev.re),
+               fit.ab=shape.ab(fit.ab), fit.re=name.re(fit.re),
+               lev.ab=shape.ab(lev.ab), lev.re=name.re(lev.re),
+               nd.ab=name.ab(nd.ab), nd.re=name.re(nd.re),
                fitted=arrayize(fitted))
   class(info) <- "mtc.deviance"
   info
