@@ -15,6 +15,8 @@ Using a Bayesian hierarchical model, all direct and indirect comparisons are tak
 This package allows the automated generation of network meta-analysis models [van Valkenhoef et al. 2012], inclusing both fixed effect and random effects network meta-analysis, node-splitting models to identify inconsistency, and network meta-regression models.
 Models are estimated using JAGS (through the \code{rjags} package).
 
+It is possible to get reproducible results, but as JAGS uses its own pseudo-random number generator, this is somewhat more involved. See \code{\link{mtc.model}} for details.
+
 The package can read GeMTC files that were created by the GeMTC GUI (now obsolete) or exported from ADDIS 1.x, if the optional package \code{XML} is installed.
 The source for GeMTC is available under the GPL-3 on \href{https://github.com/gertvv/gemtc}{Github}.
 }

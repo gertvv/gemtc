@@ -130,6 +130,13 @@ The default layout algorithm is \code{igraph::layout.circle}, other layout algor
 The \code{igraph::layout.fruchterman.reingold} algorithm also seems to produce nice results and may be better for large graphs.
 }
 
+\section{Reproducible results}{
+It is possible to get reproducible results, but as JAGS uses its own pseudo-random number generator, this is somewhat more involved.
+
+\code{mtc.model} generates random numbers using the R functions (for example to generate initial values). Therefore, \code{set.seed} must be called before calling \code{mtc.model}.
+
+Then, before calling \code{mtc.run}, the random number generator type and seed must be set for each of the chains. This can be done as documented in \code{jags.model}, by setting the \code{.RNG.name} and \code{.RNG.seed} for each chain in \code{model$inits}. See below for an example.}
+
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -153,4 +160,17 @@ model <- mtc.model(hfPrevention,
                    type="regression",
                    regressor=regressor,
                    linearModel="fixed")
+
+# Reproducible results
+# Set the R RNG seed
+set.seed(42)
+model <- mtc.model(parkinson, likelihood='normal', link='identity')
+# By default, the model will have 4 chains - generate a seed for each
+seeds <- sample.int(4, n = .Machine$integer.max)
+# Apply JAGS RNG settings to each chain
+model$inits <- mapply(c, model$inits, list(
+  list(.RNG.name="base::Wichmann-Hill", .RNG.seed=seeds[1]),
+  list(.RNG.name="base::Marsaglia-Multicarry", .RNG.seed=seeds[2]),
+  list(.RNG.name="base::Super-Duper", .RNG.seed=seeds[3]),
+  list(.RNG.name="base::Mersenne-Twister", .RNG.seed=seeds[4])), SIMPLIFY=FALSE)
 }
