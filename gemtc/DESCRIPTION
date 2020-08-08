@@ -1,6 +1,6 @@
 Package: gemtc
-Version: 0.8-6
-Date: 2020-06-23
+Version: 0.8-7
+Date: 2020-08-07
 Title: Network Meta-Analysis Using Bayesian Methods
 Author: Gert van Valkenhoef, Joel Kuiper
 Maintainer: Gert van Valkenhoef <gert@gertvv.nl>
@@ -28,7 +28,7 @@ Suggests:
     testthat (>= 0.8),
     Matrix,
     XML (>= 3.6)
-URL: http://github.com/gertvv/gemtc
+URL: https://github.com/gertvv/gemtc
 License: GPL-3
 LazyData: true
 Collate:
