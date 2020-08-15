@@ -29,6 +29,7 @@ standardize.data <- function(data, treatment.levels, re.order=FALSE) {
 
 remove.onearm <- function(data, warn=FALSE) {
   # Remove 1-arm studies
+  data <- as.data.frame(data)
   sel <- as.logical(sapply(data[,'study'], function(study) {
     sum(data[,'study'] == study) > 1
   }))
