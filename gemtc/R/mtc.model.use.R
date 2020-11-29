@@ -25,3 +25,7 @@ mtc.model.use <- function(model) {
 mtc.model.name.use <- function(model) {
   "unrelated study effects"
 }
+
+func.param.matrix.use <- function(model, t1, t2) {
+  stop('func.param.matrix.use not implemented')
+}

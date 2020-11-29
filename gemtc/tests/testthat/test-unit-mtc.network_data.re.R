@@ -43,6 +43,7 @@ test_that("either data.ab or data.re must be specified", {
 
 test_that("data.ab can be unspecified if data.re is given", {
   mtc.network(data.re=data.re)
+  succeed()
 })
 
 test_that("data.re is properly stored", {

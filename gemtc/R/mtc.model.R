@@ -10,7 +10,7 @@ mtc.model.call <- function(fn, model, ...) {
 mtc.model.defined <- function(model) {
   fns <- c('mtc.model', 'mtc.model.name', 'func.param.matrix')
   fns <- paste(fns, model[['type']], sep='.')
-  all(exists(fns, mode='function'))
+  all(sapply(fns, function(fn) { exists(fn, mode='function') }))
 }
 
 mtc.model <- function(network, type="consistency",

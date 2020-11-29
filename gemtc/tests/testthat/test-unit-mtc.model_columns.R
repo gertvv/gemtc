@@ -43,6 +43,7 @@ s01 A 0.0 0.5
 s01 B 1.0 0.7'), header=T)
   network <- mtc.network(data)
   model <- mtc.model(network, likelihood='normal', link='identity')
+  succeed()
 })
 
 test_that("data.re missing diff throws error", {

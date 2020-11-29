@@ -107,6 +107,7 @@ test_that("rank.probability can be applied to a subset of parameters", {
   result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
   result <- relative.effect(result, "A", c("B", "C"))
   rank.probability(result)
+  succeed()
 })
 
 test_that("relative.effect.tree throws an error if requested comparison is not connected", {

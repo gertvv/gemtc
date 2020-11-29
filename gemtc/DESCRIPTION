@@ -1,6 +1,6 @@
 Package: gemtc
-Version: 0.8-7
-Date: 2020-08-07
+Version: 0.8-8
+Date: 2020-11-29
 Title: Network Meta-Analysis Using Bayesian Methods
 Author: Gert van Valkenhoef, Joel Kuiper
 Maintainer: Gert van Valkenhoef <gert@gertvv.nl>
@@ -71,4 +71,4 @@ Collate:
     'regression.R'
     'relative.effect.R'
     'relative.effect.table.R'
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
