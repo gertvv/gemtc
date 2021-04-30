@@ -8,10 +8,10 @@
 Lu and Ades (2006),
 \emph{Assessing Evidence Inconsistency in Mixed Treatment Comparisons},
 Journal of the American Statistical Society, 101(474):447-459.
-[\href{https://doi.org/10.1198/016214505000001302}{doi:10.1198/016214505000001302}]
+[\doi{10.1198/016214505000001302}]
 
 Hasselblad (1998),
 \emph{Meta-analysis of multitreatment studies},
 Medical Decision Making 18(1):37-43.
-[\href{https://doi.org/10.1177/0272989X9801800110}{doi:10.1177/0272989X9801800110}]
+[\doi{10.1177/0272989X9801800110}]
 }

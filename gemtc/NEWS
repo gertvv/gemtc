@@ -1,11 +1,12 @@
-gemtc 1.0
-=========
+gemtc 1.0-0
+===========
 
 Released 2021-04-30
 
  * Removed ability to read legacy ".gemtc" XML files
  * Fixed incompatibility with "tibbles"
  * Fix JAGS warnings that "om.scale" was unused in some models
+ * Fix plotCovariateEffect
 
 gemtc 0.8-8
 ===========
