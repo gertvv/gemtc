@@ -1,0 +1,16 @@
+structure(list(description = NULL, treatments = structure(list(
+    id = structure(1:2, .Label = c("psych", "usual"), class = "factor"), 
+    description = c("", "")), row.names = c("psych", "usual"), class = "data.frame"), 
+    data.ab = structure(list(study = structure(c(1L, 1L, 2L, 
+    2L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L, 8L, 8L, 9L, 9L
+    ), .Label = c("12", "20", "21", "22", "25", "38", "48", "49", 
+    "56"), class = "factor"), treatment = structure(c(1L, 2L, 
+    1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 
+    2L), .Label = c("psych", "usual"), class = "factor"), mean = c(-4.6, 
+    -3.6, 16.15580391, 16.75559608, -7.38, -0.78, 8, 5, -5.3, 
+    -13.9, 2, 6, 2, 3, -4.525, -8.505, 0.1, 4.5), std.dev = c(20.5, 
+    20.3, 12.8199064, 12.98268077, 7.85, 2.24, 17.767, 18.034, 
+    17.66918221, 17.82834821, 18.218, 19.321, 19, 21, 20.567, 
+    23.578, 14.852, 19.035), sampleSize = c(216, 217, 48, 45, 
+    23, 20, 99, 102, 20, 15, 77, 82, 196, 196, 118, 109, 331, 
+    348)), row.names = c(NA, 18L), class = "data.frame")), class = "mtc.network")

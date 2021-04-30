@@ -52,7 +52,7 @@ S3method(forest, mtc.relative.effect.table)
 S3method(plot, mtc.deviance)
 
 export(
-	mtc.network, mtc.data.studyrow, read.mtc.network,
+	mtc.network, mtc.data.studyrow,
 	mtc.model, mtc.hy.prior, mtc.hy.empirical.lor,
 	mtc.run,
 	mtc.deviance, mtc.devplot, mtc.levplot,

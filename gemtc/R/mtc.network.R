@@ -63,17 +63,11 @@ mtc.network <- function(
   }
   # standardize the data
   if (!is.null(data.ab)) {
-    if (!is.data.frame(data.ab)) {
-      data.ab <- do.call(rbind, lapply(data.ab, as.data.frame))
-    }
-    data.ab <- remove.onearm(data.ab, warn=TRUE)
+    data.ab <- remove.onearm(as.data.frame(data.ab), warn=TRUE)
     mtc.validate.data.ab(data.ab)
   }
   if (!is.null(data.re)) {
-    if (!is.data.frame(data.re)) {
-      data.re <- do.call(rbind, lapply(data.re, as.data.frame))
-    }
-    data.re <- remove.onearm(data.re, warn=TRUE)
+    data.re <- remove.onearm(as.data.frame(data.re), warn=TRUE)
     mtc.validate.data.re(data.re)
   }
 

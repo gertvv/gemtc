@@ -127,7 +127,11 @@ mtc.model <- function(network, type="consistency",
   model[['hy.prior']] <- hy.prior
   model[['re.prior.sd']] <- if(length(re.prior.sd) == 1) re.prior.sd else 15 * model[['om.scale']]
 
-  mtc.model.call('mtc.model', model, ...)
+  model <- mtc.model.call('mtc.model', model, ...)
+  if (!grepl('om\\.scale', model[['code']])) {
+    model[['data']][['om.scale']] <- NULL # prevent 'unused data' warning
+  }
+  model
 }
 
 print.mtc.model <- function(x, ...) {
