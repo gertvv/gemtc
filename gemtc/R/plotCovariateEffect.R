@@ -32,6 +32,7 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
   first <- TRUE
   devAskNewPage(FALSE)
   for (pair in split(pairs, seq(nrow(pairs)))) {
+    pair <- as.treatment.factor(pair, result[['model']][['network']])
     yvals <- sapply(res, function(stats) { stats[stats[['t1']] == pair[1] & stats[['t2']] == pair[2], c('median', 'lower', 'upper')] })
     if (regressor[['type']] == 'continuous') {
       plot(xvals, yvals['median', ], type='l', xlim=xlim, ylim=ylim, main="Treatment effect vs. covariate", xlab=regressor[["variable"]], ylab=paste("d", pair[1], pair[2], sep="."))
