@@ -1,3 +1,11 @@
+gemtc 1.0-1
+===========
+
+Released 2021-05-14
+
+ * Changed reference arm prior for relative risk (binom/log) models as
+   the old prior was more informative than intended (issue #64)
+
 gemtc 1.0-0
 ===========
 

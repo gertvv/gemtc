@@ -33,8 +33,8 @@ scale.name.binom.log <- function() { "Risk Ratio" }
 inits.info.binom.log <- function() {
   list(
     limits=c(-745, -1E-7),
-    param='p.base',
-    transform=exp)
+    param='mu',
+    transform=identity)
 }
 
 required.columns.ab.binom.log <- required.columns.counts
@@ -42,8 +42,7 @@ validate.data.binom.log <- validate.data.counts
 
 study.baseline.priors.binom.log <- function() {
 "for (i in studies.a) {
-  mu[i] <- log(p.base[i])
-  p.base[i] ~ dunif(0, 1)
+  mu[i] ~ dnorm(log(0.5), prior.prec) T(,0)
 }
 "
 }
