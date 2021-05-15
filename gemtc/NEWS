@@ -1,3 +1,10 @@
+gemtc 1.0-2
+===========
+
+Released 2021-??-??
+
+ * Fix covariateEffectPlot on older versions of R
+
 gemtc 1.0-1
 ===========
 

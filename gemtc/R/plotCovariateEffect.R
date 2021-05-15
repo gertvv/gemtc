@@ -21,7 +21,7 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
     samples <- as.matrix(re[['samples']])
     stats <- t(apply(samples, 2, quantile, probs=c(0.025, 0.5, 0.975)))
     comps <- extract.comparisons(rownames(stats))
-    data.frame(t1=comps[,1], t2=comps[,2], median=stats[,"50%"], lower=stats[,"2.5%"], upper=stats[,"97.5%"])
+    data.frame(t1=comps[,1], t2=comps[,2], median=stats[,"50%"], lower=stats[,"2.5%"], upper=stats[,"97.5%"], stringsAsFactors=FALSE)
   })
 
   if (is.null(ylim)) {
