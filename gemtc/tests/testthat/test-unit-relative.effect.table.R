@@ -1,7 +1,7 @@
 context("relative.effect.table")
 
 test_that("it works for the smoking example", {
-  smoking_result <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+  smoking_result <- readRDS(system.file("extdata/luades-smoking-samples.rds", package="gemtc"))
   smoking_table <- relative.effect.table(smoking_result)
 
   # Check dimnames

@@ -1,6 +1,6 @@
 read_version = $(shell grep 'Version:' $1/DESCRIPTION | sed 's/Version: //')
 
-R := /home/gert/Downloads/R-devel/bin/R
+R := R #/home/gert/Downloads/R-devel/bin/R
 PKG_NAME := gemtc
 PKG_VERSION := $(call read_version,$(PKG_NAME))
 PACKAGE := $(PKG_NAME)_$(PKG_VERSION).tar.gz

@@ -85,7 +85,7 @@ model <- mtc.model(smoking, type="consistency")
 
 # Load pre-generated samples instead of runing the model:
 \dontrun{results <- mtc.run(model, thin=10)}
-results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+results <- readRDS(system.file("extdata/luades-smoking-samples.rds", package="gemtc"))
 
 # Print a basic statistical summary of the results:
 summary(results)
