@@ -1,4 +1,4 @@
-all.pair.matrix <- function(m) {
+all_pair_matrix <- function(m) {
   do.call(rbind, lapply(1:(m - 1), function(i) {
     do.call(rbind, lapply((i + 1):m, function(j) {
       c(i, j)
@@ -52,7 +52,7 @@ decompose.trials <- function(result) {
       stop(paste(paste0("Decomposed variance ill-defined for ", study, ". Most likely the USE did not converge:"), paste(capture.output(print(var)), collapse="\n"), sep="\n"))
     }
 
-    pairs <- all.pair.matrix(na)
+    pairs <- all_pair_matrix(na)
     list(
       mu = apply(pairs, 1, function(p) { mu[p[1], p[2], drop=TRUE] }),
       se = apply(pairs, 1, function(p) { se[p[1], p[2], drop=TRUE] })
@@ -71,7 +71,7 @@ decompose.trials <- function(result) {
     effects <- if (na > 2) {
       data <- decompose.study(
         study.samples[, colIndexes, drop=FALSE], studies[i])
-      ts <- matrix(study[all.pair.matrix(na)], ncol=2)
+      ts <- matrix(study[all_pair_matrix(na)], ncol=2)
       list(m=data[['mu']], e=data[['se']], t=ts)
     } else {
       samples <- study.samples[ , colIndexes, drop=FALSE]

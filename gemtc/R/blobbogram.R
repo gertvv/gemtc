@@ -80,7 +80,7 @@ grob.ci <- function(pe, ci.l, ci.u, xrange, style) {
   ciGrob
 }
 
-text.style  <- function(styles) {
+text_style  <- function(styles) {
   function(text, style) {
     ff <- styles[as.character(style), ,drop=TRUE][['font.weight']]
     ff <- if (is.na(ff)) "plain" else ff
@@ -220,7 +220,7 @@ blobbogram <- function(data, id.label='Study', ci.label="Mean (95% CI)",
   if (is.null(styles)) {
     styles <- blobbogram.styles.default()
   }
-  text.fn <- text.style(styles)
+  text.fn <- text_style(styles)
 
   # Rewrite input: split into groups
   data <- if (grouped) {
