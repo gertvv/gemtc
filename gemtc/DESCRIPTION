@@ -10,6 +10,7 @@ Description: Network meta-analyses (mixed treatment comparisons) in the Bayesian
     van Valkenhoef et al. (2012) <doi:10.1002/jrsm.1054>;
     van Valkenhoef et al. (2015) <doi:10.1002/jrsm.1167>.
 Depends:
+    R (>= 3.5.0),
     coda (>= 0.13)
 Imports:
     igraph (>= 1.0),

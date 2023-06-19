@@ -69,7 +69,7 @@ The \code{\link{rank.probability}} function calculates rank probabilities for co
 model <- mtc.model(smoking)
 
 \dontrun{results <- mtc.run(model, thin=10)}
-results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+results <- readRDS(system.file("extdata/luades-smoking-samples.rds", package="gemtc"))
 
 # Convergence diagnostics
 gelman.plot(results)

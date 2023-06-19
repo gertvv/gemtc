@@ -29,7 +29,7 @@ If left empty and t1 is a single treatment, relative effects of all treatments e
 model <- mtc.model(smoking)
 # To save computation time we load the samples instead of running the model
 \dontrun{results <- mtc.run(model)}
-results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+results <- readRDS(system.file("extdata/luades-smoking-samples.rds", package="gemtc"))
 
 # Creates a forest plot of the relative effects
 forest(relative.effect(results, "A"))
