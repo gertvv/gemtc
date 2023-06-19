@@ -3,7 +3,7 @@ arrayize <- function(x) {
   # parse expressions into array indexes
   exprs <- parse(text=names(x))
   assgn <- lapply(exprs, function(expr) {
-    if (class(expr) == "name") {
+    if (inherits(expr, "name")) {
       list(name=as.character(expr), index=c())
     } else if (expr[[1]] == "[") {
       list(name=as.character(expr[[2]]), index=sapply(3:length(expr), function(i) { expr[[i]] }))
