@@ -8,15 +8,15 @@ study.seq.re <- function(data) {
   c(data[['studies.r2']], data[['studies.rm']])
 }
 
-deviance.monitors.residuals.ab <- function(model) {
+deviance_monitors_residuals_ab <- function(model) {
   do.call(c, lapply(study.seq.ab(model[['data']]), function(i) { paste0("dev[", i, ",", 1:model[['data']][['na']][i], "]") }))
 }
 
-deviance.monitors.residuals.re <- function(model) {
+deviance_monitors_residuals_re <- function(model) {
   do.call(c, lapply(study.seq.re(model[['data']]), function(i) { paste0("dev[", i, ",", 1, "]") }))
 }
 
-deviance.monitors.fitted.ab <- function(model) {
+deviance_monitors_fitted_ab <- function(model) {
   fpname <- ll.call("fitted.values.parameter", model)
   do.call(c, lapply(study.seq.ab(model[['data']]), function(i) { paste0(fpname, "[", i, ",", 1:model[['data']][['na']][i], "]") }))
 }
@@ -29,15 +29,15 @@ alpha.ab <- function(model) {
   }
 }
 
-deviance.monitors.fitted.re <- function(model) {
+deviance_monitors_fitted_re <- function(model) {
   do.call(c, lapply(study.seq.re(model[['data']]), function(i) { paste0("delta[", i, ",", 2:model[['data']][['na']][i], "]") }))
 }
 
-deviance.monitors <- function(model) {
-  c(deviance.monitors.residuals.ab(model),
-    deviance.monitors.residuals.re(model),
-    deviance.monitors.fitted.ab(model),
-    deviance.monitors.fitted.re(model))
+deviance_monitors <- function(model) {
+  c(deviance_monitors_residuals_ab(model),
+    deviance_monitors_residuals_re(model),
+    deviance_monitors_fitted_ab(model),
+    deviance_monitors_fitted_re(model))
 }
 
 devfit.ab <- function(model, fit.ab) {
@@ -49,7 +49,7 @@ devfit.ab <- function(model, fit.ab) {
       x <- as.vector(t(el[studies, , drop=FALSE]))
       x[!is.na(x)]
     })
-    ll.call("deviance", model, data, fit.ab, alpha=alpha.ab(model))
+    ll.call("deviance_fn", model, data, fit.ab, alpha=alpha.ab(model))
   } else {
     c()
   }
@@ -124,22 +124,22 @@ computeDeviance <- function(model, stats) {
     }
   }
 
-  dev.ab <- stats[deviance.monitors.residuals.ab(model)]
+  dev.ab <- stats[deviance_monitors_residuals_ab(model)]
   if (length(dev.ab) == 0) {
     dev.ab <- NULL
   }
-  dev.re <- stats[deviance.monitors.residuals.re(model)]
+  dev.re <- stats[deviance_monitors_residuals_re(model)]
   if (length(dev.re) == 0) {
     dev.re <- NULL
   }
 
   Dbar <- sum(c(dev.ab, dev.re))
 
-  fit.ab <- devfit.ab(model, stats[deviance.monitors.fitted.ab(model)])
+  fit.ab <- devfit.ab(model, stats[deviance_monitors_fitted_ab(model)])
   if (length(fit.ab) == 0) {
     fit.ab <- NULL
   }
-  fit.re <- devfit.re(model, stats[deviance.monitors.fitted.re(model)])
+  fit.re <- devfit.re(model, stats[deviance_monitors_fitted_re(model)])
   if (length(fit.re) == 0) {
     fit.re <- NULL
   }
@@ -155,7 +155,7 @@ computeDeviance <- function(model, stats) {
 
   pD <- Dbar - sum(c(fit.ab, fit.re))
 
-  fitted <- c(stats[deviance.monitors.fitted.ab(model)], stats[deviance.monitors.fitted.re(model)])
+  fitted <- c(stats[deviance_monitors_fitted_ab(model)], stats[deviance_monitors_fitted_re(model)])
 
   info <- list(Dbar=Dbar, pD=pD, DIC=Dbar+pD, "data points"=dp,
                dev.ab=shape.ab(dev.ab), dev.re=name.re(dev.re),

@@ -23,7 +23,7 @@ mtc.code.likelihood.binom.log <- function(powerAdjust) {
 }
 
 fitted.values.parameter.binom.log <- fitted.values.parameter.binom
-deviance.binom.log <- deviance.binom
+deviance_fn.binom.log <- deviance_fn.binom
 
 scale.log.binom.log <- function() { TRUE }
 scale.name.binom.log <- function() { "Risk Ratio" }

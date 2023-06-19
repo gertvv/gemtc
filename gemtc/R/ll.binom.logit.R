@@ -24,7 +24,7 @@ mtc.code.likelihood.binom.logit <- function(powerAdjust) {
 }
 
 fitted.values.parameter.binom.logit <- fitted.values.parameter.binom
-deviance.binom.logit <- deviance.binom
+deviance_fn.binom.logit <- deviance_fn.binom
 
 scale.log.binom.logit <- function() { TRUE }
 scale.name.binom.logit <- function() { "Odds Ratio" }
