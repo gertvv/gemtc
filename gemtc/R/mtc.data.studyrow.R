@@ -4,6 +4,8 @@ mtc.data.studyrow <- function(data,
     studyNames=1:nrow(data), treatmentNames=NA,
     patterns=c('%s..', '%s..%d.')) {
 
+  studyNames <- as.character(studyNames)
+
   colsOrNA <- function(row, cols) {
     rval <- rep(NA, length(cols))
     sel <- cols %in% colnames(row)
@@ -36,6 +38,9 @@ mtc.data.studyrow <- function(data,
   out[['study']] <- studyNames[out[['study']]]
   if (all(!is.na(treatmentNames))) {
     out[['treatment']] <- treatmentNames[out[['treatment']]]
+  } else {
+    out[['treatment']] <- as.character(out[['treatment']])
   }
+  out[['stringsAsFactors']] <- FALSE
   do.call(data.frame, out)
 }

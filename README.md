@@ -1,6 +1,9 @@
 GeMTC R package
 ===============
 
+[![Build Status](https://travis-ci.com/gertvv/gemtc.svg?branch=master)](https://travis-ci.com/gertvv/gemtc)
+[![Build Status (develop)](https://travis-ci.com/gertvv/gemtc.svg?branch=develop)](https://travis-ci.com/gertvv/gemtc)
+
 [GeMTC](http://drugis.org/gemtc) is an R package for Network
 Meta-Analysis (also know as Mixed Treatment Comparison, MTC) model
 generation.

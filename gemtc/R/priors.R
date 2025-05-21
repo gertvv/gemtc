@@ -44,7 +44,7 @@ guess.scale <- function(model) {
   data.ab <- model[['network']][['data.ab']]
   max.ab <- 0
   if (!is.null(data.ab)) {
-    max.ab <- max(sapply(levels(data.ab[['study']]), function(study) {
+    max.ab <- max(sapply(unique(data.ab[['study']]), function(study) {
       pairs <- mtc.treatment.pairs(mtc.study.design(model[['network']], study))
       max(abs(rel.mle.ab(data.ab[data.ab[['study']] == study, , drop=TRUE], model, pairs)[,'mean']))
     }))
@@ -52,7 +52,7 @@ guess.scale <- function(model) {
   data.re <- model[['network']][['data.re']]
   max.re <- 0
   if (!is.null(data.re)) {
-    max.re <- max(sapply(levels(data.re[['study']]), function(study) {
+    max.re <- max(sapply(unique(data.re[['study']]), function(study) {
       pairs <- mtc.treatment.pairs(mtc.study.design(model[['network']], study))
       max(abs(rel.mle.re(data.re[data.re[['study']] == study, , drop=TRUE], pairs)[,'mean']))
     }))

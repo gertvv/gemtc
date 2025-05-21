@@ -1,5 +1,4 @@
-#include <R.h>
-#include <Rinternals.h>
+#include "gemtc.h"
 
 typedef struct Matrix {
     int * const data;

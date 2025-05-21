@@ -47,7 +47,7 @@ nodesplit.rewrite.studies <- function(network, t1, t2) {
   per.study <- lapply(studies[['study']], function(study) {
     study.data <- data[data$study == study, ]
     has.both <- all(c(t1, t2) %in% study.data[['treatment']])
-    orig <- studies[studies[['study']] == study, ]
+    orig <- studies[studies[['study']] == study, ,drop=FALSE]
     if (nrow(study.data) > 3 && has.both) {
       rval <- rbind(orig, orig)
       rval[['study']] <- c(paste0(study, "*"), paste0(study, "**"))

@@ -29,7 +29,7 @@ s01   B
 s02   A
 s02   C
 s03   B
-s03   C"), header=T)
+s03   C"), header=TRUE, stringsAsFactors=TRUE)
   expect_that(nodesplit.rewrite.data.ab(data.ab, "A", "B"), equals(data.ab))
 })
 
@@ -42,7 +42,7 @@ s02   A
 s02   C
 s03   A
 s03   B
-s03   C"), header=T)
+s03   C"), header=TRUE, stringsAsFactors=TRUE)
   expect_that(nodesplit.rewrite.data.ab(data.ab, "A", "B"), equals(data.ab[1:6,]))
 })
 
@@ -52,13 +52,13 @@ study treatment
 s01   A
 s01   B
 s01   C
-s01   D"), header=T)
+s01   D"), header=TRUE, stringsAsFactors=TRUE)
   data.ab.rewrite <- read.table(textConnection("
 study treatment
 s01*  A
 s01*  B
 s01** C
-s01** D"), header=T)
+s01** D"), header=TRUE, stringsAsFactors=TRUE)
   expect_that(nodesplit.rewrite.data.ab(data.ab, "A", "B"), equals(data.ab.rewrite))
 })
 
@@ -70,7 +70,7 @@ s01   B         1.0  0.4
 s02   A         -1.5 0.3
 s02   C         NA   0.2
 s03   B         NA   NA
-s03   C         0.8  0.4"), header=T)
+s03   C         0.8  0.4"), header=TRUE, stringsAsFactors=TRUE)
   expect_that(nodesplit.rewrite.data.re(data.re, "A", "B"), equals(data.re))
 })
 
@@ -85,7 +85,7 @@ s02   A         -1.2 0.3
 s02   C         0.8  0.4
 s03   C         NA   0.1
 s03   A         -1.2 0.3
-s03   B         0.8  0.4"), header=T)
+s03   B         0.8  0.4"), header=TRUE, stringsAsFactors=TRUE)
   data.re.rewrite <- read.table(textConnection("
 study treatment diff std.err
 s01   A         NA   0.2
@@ -93,7 +93,7 @@ s01   B         1.0  0.4
 s02   A         NA   0.2
 s02   B         1.2  0.3
 s03   A         NA   0.2
-s03   B         2.0  0.5"), header=T)
+s03   B         2.0  0.5"), header=TRUE, stringsAsFactors=TRUE)
   levels(data.re.rewrite$treatment) <- c("A", "B", "C")
   expect_that(nodesplit.rewrite.data.re(data.re, "A", "B"), equals(data.re.rewrite))
 })
@@ -104,13 +104,13 @@ study treatment diff std.err
 s01   B         NA   0.3
 s01   A         0.7  0.6
 s01   C         0.9  0.5
-s01   D         0.5  0.6"), header=T)
+s01   D         0.5  0.6"), header=TRUE, stringsAsFactors=TRUE)
   data.re.rewrite <- read.table(textConnection("
 study treatment diff std.err
 s01*  A         NA   0.3
 s01*  B         -0.7 0.6
 s01** C         NA   0.2
-s01** D         -0.4 0.5"), header=T)
+s01** D         -0.4 0.5"), header=TRUE, stringsAsFactors=TRUE)
   expect_that(nodesplit.rewrite.data.re(data.re, "A", "B"), equals(data.re.rewrite))
 })
 
@@ -120,26 +120,55 @@ study treatment diff std.err
 s01   B         NA   0.3
 s01   A         0.7  0.6
 s01   C         0.9  0.5
-s01   D         0.5  0.6"), header=T)
+s01   D         0.5  0.6"), header=TRUE, stringsAsFactors=TRUE)
   data.ab <- read.table(textConnection("
 study treatment mean std.err
 s02   B         NA   0.3
 s02   A         0.7  0.6
 s03   A         0.9  0.5
 s03   B         0.9  0.5
-s03   D         0.5  0.6"), header=T)
+s03   D         0.5  0.6"), header=TRUE, stringsAsFactors=TRUE)
   studies <- read.table(textConnection("
 study x
 s01   1
 s02   2
-s03   3"), header=T)
+s03   3"), header=TRUE, stringsAsFactors=TRUE)
   studies.rewrite <- read.table(textConnection("
 study x
 s01*  1
 s01** 1
 s02   2
-s03   3"), header=T, stringsAsFactors=FALSE)
-  network <- list(data.ab=data.ab, data.re=data.re, studies=studies, treatments=data.frame(id=c("A","B","C","D")))
+s03   3"), header=TRUE, stringsAsFactors=FALSE)
+  network <- list(data.ab=data.ab, data.re=data.re, studies=studies, treatments=data.frame(id=as.factor(c("A","B","C","D"))))
+  expect_that(nodesplit.rewrite.studies(network, "A", "B"), equals(studies.rewrite))
+})
+
+test_that("rewrite studies with trivial studies data frame", {
+  data.re <- read.table(textConnection("
+study treatment diff std.err
+s01   B         NA   0.3
+s01   A         0.7  0.6
+s01   C         0.9  0.5
+s01   D         0.5  0.6"), header=TRUE, stringsAsFactors=TRUE)
+  data.ab <- read.table(textConnection("
+study treatment mean std.err
+s02   B         NA   0.3
+s02   A         0.7  0.6
+s03   A         0.9  0.5
+s03   B         0.9  0.5
+s03   D         0.5  0.6"), header=TRUE, stringsAsFactors=TRUE)
+  studies <- read.table(textConnection("
+study
+s01
+s02
+s03"), header=TRUE, stringsAsFactors=TRUE)
+  studies.rewrite <- read.table(textConnection("
+study
+s01*
+s01**
+s02
+s03"), header=TRUE, stringsAsFactors=FALSE)
+  network <- list(data.ab=data.ab, data.re=data.re, studies=studies, treatments=data.frame(id=as.factor(c("A","B","C","D"))))
   expect_that(nodesplit.rewrite.studies(network, "A", "B"), equals(studies.rewrite))
 })
 
@@ -155,14 +184,14 @@ study treatment mean std.err
 3     10        1    0.5
 4     10        1    0.5
 4     11        1    0.5
-"), header=T)
+"), header=TRUE, stringsAsFactors=FALSE)
   treatments <- read.table(textConnection("
 id description
 1  A
 2  B
 10 C
 11 D
-"), header=T)
+"), header=TRUE, stringsAsFactors=FALSE)
   network <- mtc.network(data.ab=data.ab, treatments=treatments)
   mtc.model(network, type="nodesplit", t1=10, t2=11)
 })

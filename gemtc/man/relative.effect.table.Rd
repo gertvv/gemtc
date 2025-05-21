@@ -49,6 +49,6 @@ print(tbl)
 forest(tbl, "C")
 
 # Write to CSV (e.g. to import to Excel, then use in a Word table)
-write.csv(tbl, "smoking-effects.csv")
+\dontrun{write.csv(tbl, "smoking-effects.csv")}
 # Note: use write.csv2 for Western European locales
 }

@@ -10,7 +10,7 @@ Data are take from Table 1 of Cooper et al. (2009), with the following correctio
 Cooper et al. (2009),
 \emph{Adressing between-study heterogeneity and inconsistency in mixed treatment comparisons: Application to stroke prevention treatments in individuals with non-rheumatic atrial fibrillation},
 Statistics in Medicine 28:1861-1881.
-[\href{http://dx.doi.org/10.1002/sim.3594}{doi:10.1002/sim.3594}]
+[\href{https://doi.org/10.1002/sim.3594}{doi:10.1002/sim.3594}]
 }
 \examples{
 # Build a model similar to Model 4(b) from Cooper et al. (2009):

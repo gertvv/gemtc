@@ -1,4 +1,4 @@
-useDynLib(gemtc)
+useDynLib(gemtc, .registration = TRUE)
 
 import(graphics)
 import(grDevices)
@@ -56,7 +56,8 @@ export(
 	mtc.model, mtc.hy.prior, mtc.hy.empirical.lor,
 	mtc.run,
 	mtc.deviance, mtc.devplot, mtc.levplot,
-	relative.effect, rank.probability, relative.effect.table,
+	relative.effect, relative.effect.table,
+	rank.probability, sucra, rank.quantiles,
 	blobbogram, forest,
 	plotCovariateEffect,
 	mtc.anohe,

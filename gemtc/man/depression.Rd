@@ -8,5 +8,5 @@
 Cipriani et al. (2009),
 \emph{Comparative efficacy and acceptability of 12 new-generation antidepressants: a multiple-treatments meta-analysis},
 Lancet 373(9665):746-758.
-[\href{http://dx.doi.org/10.1016/S0140-6736(09)60046-5}{doi:10.1016/S0140-6736(09)60046-5}]
+[\href{https://doi.org/10.1016/S0140-6736(09)60046-5}{doi:10.1016/S0140-6736(09)60046-5}]
 }

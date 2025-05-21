@@ -1,0 +1,3 @@
+LIBRARY gemtc.dll
+EXPORTS
+  R_init_gemtc

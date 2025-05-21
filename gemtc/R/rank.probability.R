@@ -11,12 +11,11 @@ rank.probability <- function(result, preferredDirection=1, covariate=NA) {
 
   # count ranks given a matrix d of relative effects (treatments as rows)
   rank.count <- function(d) {
-    .Call("gemtc_rank_count", d)
+    .Call(gemtc_rank_count, d)
   }
 
   d <- relative.effect(result, treatments[1], treatments, covariate=covariate, preserve.extra=FALSE)[['samples']]
-  counts <- lapply(d, function(chain) { rank.count(t(chain)) })
-  ranks <- Reduce(function(a, b) { a + b }, counts)
+  ranks <- rank.count(t(as.matrix(d)))
   colnames(ranks) <- treatments
 
   data <- result[['samples']]
@@ -29,6 +28,21 @@ rank.probability <- function(result, preferredDirection=1, covariate=NA) {
   class(result) <- "mtc.rank.probability"
   attr(result, "direction") <- preferredDirection
   result
+}
+
+sucra <- function(ranks) {
+  apply(ranks, 1, function(p) {
+    a <- length(p)
+    sum(cumsum(p[-a]))/(a-1)
+  })
+}
+
+rank.quantiles <- function(ranks, probs=c("2.5%"=0.025, "50%"=0.5, "97.5%"=0.975)) {
+  sapply(probs, function(x) {
+    apply(ranks, 1, function(p) {
+      which(cumsum(p) >= x)[1]
+    })
+  })
 }
 
 print.mtc.rank.probability <- function(x, ...) {

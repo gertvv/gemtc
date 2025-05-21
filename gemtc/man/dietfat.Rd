@@ -8,10 +8,10 @@
 S. Dias, A.J. Sutton, A.E. Ades, and N.J. Welton (2013a),
 \emph{A Generalized Linear Modeling Framework for Pairwise and Network Meta-analysis of Randomized Controlled Trials},
 Medical Decision Making 33(5):607-617.
-[\href{http://dx.doi.org/10.1177/0272989X12458724}{doi:10.1177/0272989X12458724}]
+[\href{https://doi.org/10.1177/0272989X12458724}{doi:10.1177/0272989X12458724}]
 
 Hooper et al. (2000),
 \emph{Reduced or modified dietary fat for preventing cardiovascular disease},
 Cochrane Database of Systematic Reviews 2:CD002137.
-[\href{http://dx.doi.org/10.1002/14651858.CD002137}{doi:10.1002/14651858.CD002137}]
+[\href{https://doi.org/10.1002/14651858.CD002137}{doi:10.1002/14651858.CD002137}]
 }
