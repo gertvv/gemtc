@@ -1,3 +1,79 @@
+gemtc 1.0-2
+===========
+
+Released 2023-06-21
+
+ * Fix compatibility with latest igraph (1.5.0)
+ * Fix covariateEffectPlot on older versions of R
+
+gemtc 1.0-1
+===========
+
+Released 2021-05-14
+
+ * Changed reference arm prior for relative risk (binom/log) models as
+   the old prior was more informative than intended (issue #64)
+
+gemtc 1.0-0
+===========
+
+Released 2021-04-30
+
+ * Removed ability to read legacy ".gemtc" XML files
+ * Fixed incompatibility with "tibbles"
+ * Fix JAGS warnings that "om.scale" was unused in some models
+ * Fix plotCovariateEffect
+
+gemtc 0.8-8
+===========
+
+Released 2020-11-29
+
+ * Fix compatibility with latest / upcoming R version
+
+gemtc 0.8-7
+===========
+
+Released 2020-08-07
+
+ * Allow setting the standard deviation for the relative effect priors
+   explicitly
+ * Study names on the key outputs of mtc.deviance for contrast-level
+   data (data.re)
+ * Add documentation on how to obtain reproducible results
+ * More user-friendly messages for common errors
+
+gemtc 0.8-6
+===========
+
+Released 2020-06-23
+
+ * Fix automated tests on previous versions of R
+ * Add journal article citations to the package description
+
+gemtc 0.8-5
+===========
+
+Released 2020-06-20
+
+ * Adapt to breaking changes relating to factor/numeric conversions, get
+   package re-instated on CRAN (it was removed 2020-05-29)
+
+gemtc 0.8-4
+===========
+
+Released 2020-03-31
+
+ * Adapt to the new stringsAsFactors=FALSE default
+
+getmc 0.8-3
+===========
+
+Not released (2018-05-21)
+
+ * Update DOIs to https://dois.org/ resolver
+ * Register native code
+
 gemtc 0.8-2
 ===========
 

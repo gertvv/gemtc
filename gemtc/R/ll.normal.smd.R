@@ -21,7 +21,7 @@ mtc.code.likelihood.normal.smd <- function(powerAdjust) {
 }
 
 fitted.values.parameter.normal.smd <- fitted.values.parameter.normal
-deviance.normal.smd <- deviance.normal
+deviance_fn.normal.smd <- deviance_fn.normal
 
 scale.log.normal.smd <- function() { FALSE }
 scale.name.normal.smd <- function() { "Standardized Mean Difference" }

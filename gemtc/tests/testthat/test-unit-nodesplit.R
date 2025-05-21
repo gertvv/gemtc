@@ -194,6 +194,7 @@ id description
 "), header=TRUE, stringsAsFactors=FALSE)
   network <- mtc.network(data.ab=data.ab, treatments=treatments)
   mtc.model(network, type="nodesplit", t1=10, t2=11)
+  succeed()
 })
 
 ## Regression test for issue #22

@@ -23,7 +23,7 @@ mtc.code.likelihood.binom.log <- function(powerAdjust) {
 }
 
 fitted.values.parameter.binom.log <- fitted.values.parameter.binom
-deviance.binom.log <- deviance.binom
+deviance_fn.binom.log <- deviance_fn.binom
 
 scale.log.binom.log <- function() { TRUE }
 scale.name.binom.log <- function() { "Risk Ratio" }
@@ -33,8 +33,8 @@ scale.name.binom.log <- function() { "Risk Ratio" }
 inits.info.binom.log <- function() {
   list(
     limits=c(-745, -1E-7),
-    param='p.base',
-    transform=exp)
+    param='mu',
+    transform=identity)
 }
 
 required.columns.ab.binom.log <- required.columns.counts
@@ -42,8 +42,7 @@ validate.data.binom.log <- validate.data.counts
 
 study.baseline.priors.binom.log <- function() {
 "for (i in studies.a) {
-  mu[i] <- log(p.base[i])
-  p.base[i] ~ dunif(0, 1)
+  mu[i] ~ dnorm(log(0.5), prior.prec) T(,0)
 }
 "
 }

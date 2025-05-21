@@ -2,17 +2,26 @@
 #' @include regression.R
 
 treatment.pairs <- function(t1, t2, ts) {
+  stopifnot(is.factor(ts))
+  std <- function(tx) {
+    if (is.numeric(tx)) factor(tx, levels=1:nlevels(ts), labels=levels(ts))
+    else if (is.character(tx)) factor(tx, levels=levels(ts))
+    else tx
+  }
+  t1 <- std(t1)
+  t2 <- std(t2)
   if((is.null(t2) || length(t2) == 0) && length(t1) == 1) {
-    t2 <- ts[ts != as.numeric(t1)]
+    t2 <- ts[ts != t1]
   }
   if(length(t1) > length(t2)) t2 <- rep(t2, length.out=length(t1))
   if(length(t2) > length(t1)) t1 <- rep(t1, length.out=length(t2))
-  matrix(c(t1, t2), ncol=2)
+  matrix(c(as.numeric(t1), as.numeric(t2)), ncol=2)
 }
 
 # basic parameters are rows, derived parameters (i.e. the relative effects) are columns
 tree.relative.effect <- function(g, t1, t2) {
-  pairs <- treatment.pairs(t1, t2, V(g))
+  ts <- factor(V(g)$name, levels=V(g)$name)
+  pairs <- treatment.pairs(t1, t2, ts)
   paths <- apply(pairs, 1, function(rel) {
     p <- suppressWarnings(get.shortest.paths(g, rel[1], rel[2], mode='all'))
     if (is.list(p) && "vpath" %in% names(p)) { p <- p$vpath }

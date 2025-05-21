@@ -38,7 +38,7 @@ mtc.code.likelihood.poisson.log <- function(powerAdjust) {
 }
 
 fitted.values.parameter.poisson.log <- fitted.values.parameter.poisson
-deviance.poisson.log <- deviance.poisson
+deviance_fn.poisson.log <- deviance_fn.poisson
 
 scale.log.poisson.log <- function() { TRUE }
 scale.name.poisson.log <- function() { "Hazard Ratio" }

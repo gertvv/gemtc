@@ -25,7 +25,7 @@ mtc.code.likelihood.binom.cloglog <- function(powerAdjust) {
 }
 
 fitted.values.parameter.binom.cloglog <- fitted.values.parameter.binom
-deviance.binom.cloglog <- deviance.binom
+deviance_fn.binom.cloglog <- deviance_fn.binom
 
 scale.log.binom.cloglog <- function() { TRUE }
 scale.name.binom.cloglog <- function() { "Hazard Ratio" }

@@ -1,0 +1,16 @@
+structure(list(description = "Diastolic blood pressure", treatments = structure(list(
+    id = structure(1:2, .Label = c("psych", "usual"), class = "factor"), 
+    description = c("", "")), row.names = c("psych", "usual"), class = "data.frame"), 
+    data.ab = structure(list(study = structure(c(1L, 1L, 2L, 
+    2L, 3L, 3L, 4L, 4L, 5L, 5L, 6L, 6L, 7L, 7L, 8L, 8L, 9L, 9L
+    ), .Label = c("12", "20", "21", "22", "25", "38", "48", "49", 
+    "56"), class = "factor"), treatment = structure(c(1L, 2L, 
+    1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 
+    2L), .Label = c("psych", "usual"), class = "factor"), mean = c(1.2, 
+    2.7, -5.4, 2.8, -0.95, 0, 5, 4, -5.07, -6.66, 0, 0, 3, 5, 
+    -3.017, -4, 0.4, 2.8), std.dev = c(13.5, 13.4, 9.787236586, 
+    10.09554357, 4.64, 4.2, 12.691, 12.882, 9.079757706, 12.39808453, 
+    10.6, 9.725, 10.53565375, 10, 6.261, 11.3, 10.211, 11.897
+    ), sampleSize = c(216, 217, 48, 45, 23, 20, 99, 102, 20, 
+    15, 77, 82, 196, 196, 118, 109, 331, 348)), row.names = c(NA, 
+    18L), class = "data.frame")), class = "mtc.network")

@@ -11,7 +11,7 @@ model {
 	# Relative effect matrix
 	$relativeEffectMatrix$
 
-	prior.prec <- pow(15 * om.scale, -2)
+	prior.prec <- pow(re.prior.sd, -2)
 
 	# Study baseline priors
 	$studyBaselinePriors$

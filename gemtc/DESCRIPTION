@@ -1,13 +1,16 @@
 Package: gemtc
-Version: 0.8-4
-Date: 2020-03-31
+Version: 1.0-2
+Date: 2023-06-21
 Title: Network Meta-Analysis Using Bayesian Methods
 Author: Gert van Valkenhoef, Joel Kuiper
 Maintainer: Gert van Valkenhoef <gert@gertvv.nl>
 Description: Network meta-analyses (mixed treatment comparisons) in the Bayesian
     framework using JAGS. Includes methods to assess heterogeneity and
     inconsistency, and a number of standard visualizations.
+    van Valkenhoef et al. (2012) <doi:10.1002/jrsm.1054>;
+    van Valkenhoef et al. (2015) <doi:10.1002/jrsm.1167>.
 Depends:
+    R (>= 3.5.0),
     coda (>= 0.13)
 Imports:
     igraph (>= 1.0),
@@ -20,12 +23,12 @@ Imports:
     grid,
     rjags (>= 4-0),
     truncnorm,
-    Rglpk
+    Rglpk,
+    forcats (>= 0.5.0)
 Suggests:
     testthat (>= 0.8),
-    Matrix,
-    XML (>= 3.6)
-URL: http://github.com/gertvv/gemtc
+    Matrix
+URL: https://github.com/gertvv/gemtc
 License: GPL-3
 LazyData: true
 Collate: 
@@ -58,7 +61,6 @@ Collate:
     'mtc.model.ume.R'
     'mtc.model.use.R'
     'mtc.network.R'
-    'mtc.network.xml.R'
     'stopIfNotConsistent.R'
     'mtc.result.R'
     'mtc.run.R'
@@ -69,4 +71,4 @@ Collate:
     'regression.R'
     'relative.effect.R'
     'relative.effect.table.R'
-RoxygenNote: 7.1.0
+RoxygenNote: 7.2.3

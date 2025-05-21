@@ -43,6 +43,7 @@ test_that("either data.ab or data.re must be specified", {
 
 test_that("data.ab can be unspecified if data.re is given", {
   mtc.network(data.re=data.re)
+  succeed()
 })
 
 test_that("data.re is properly stored", {
@@ -105,6 +106,14 @@ test_that("data.re checks that non-baseline arms have std.err specified", {
 
 test_that("data.re checks that multi-arm trials must have std.err specified for all arms", {
   expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01", "s01"), treatment=c('A', 'B', 'C'), diff=c(NA, 2, 1), std.err=c(NA, 1, 1))))
+})
+
+test_that("data.re checks that std.err is positive", {
+  expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01"), treatment=c('A', 'B'), diff=c(NA, 1), std.err=c(NA, -1))), "std.err must be either positive or NA")
+})
+
+test_that("data.re checks the standard error in the reference arm < the standard error of the relative effects", {
+  expect_error(mtc.network(data.re=data.frame(study=c("s01", "s01", "s01"), treatment=c('A', 'B', 'C'), diff=c(NA, 2, 1), std.err=c(2, 1, 1))), "std.err of the reference arm must < std.err of the relative effects")
 })
 
 test_that("data.re is ordered by number of arms", {

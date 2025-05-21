@@ -45,7 +45,7 @@ rank.quantiles(ranks, probs=c("2.5\%"=0.025, "50\%"=0.5, "97.5\%"=0.975))
 model <- mtc.model(smoking)
 # To save computation time we load the samples instead of running the model
 \dontrun{results <- mtc.run(model)}
-results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+results <- readRDS(system.file("extdata/luades-smoking-samples.rds", package="gemtc"))
 
 ranks <- rank.probability(results)
 print(ranks)

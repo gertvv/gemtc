@@ -17,7 +17,7 @@ mtc.code.likelihood.normal.identity <- function(powerAdjust) {
 }
 
 fitted.values.parameter.normal.identity <- fitted.values.parameter.normal
-deviance.normal.identity <- deviance.normal
+deviance_fn.normal.identity <- deviance_fn.normal
 
 scale.log.normal.identity <- function() { FALSE }
 scale.name.normal.identity <- function() { "Mean Difference" }

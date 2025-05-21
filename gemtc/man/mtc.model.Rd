@@ -13,7 +13,7 @@ The \code{mtc.model} function generates network meta-analysis models from an \co
 mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
   likelihood=NULL, link=NULL, linearModel="random",
   om.scale=NULL, hy.prior=mtc.hy.prior("std.dev", "dunif", 0, "om.scale"),
-  dic=TRUE, powerAdjust=NA, ...)
+  re.prior.sd=15 * om.scale, dic=TRUE, powerAdjust=NA, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +26,7 @@ mtc.model(network, type = "consistency", factor = 2.5, n.chain = 4,
   \item{linearModel}{The type of linear model to be generated. Can be "random" for a random effects model, or "fixed" for a fixed effect model.}
   \item{om.scale}{Outcome measure scale. Represents a "very large" difference on the analysis' outcome scale. This is used to set vague priors. For the log odds-ratio, values between 2 and 5 are considered reasonable. For continuous outcomes, this depends heavily on the specific outcome. If left unspecified, it is determined from the data.}
   \item{hy.prior}{Heterogeneity prior. See \code{\link{mtc.hy.prior}}.}
+  \item{re.prior.sd}{Standard deviation for the relative effects prior (normal distribution).}
   \item{dic}{When set to TRUE, deviance and fitted values will be monitored to allow computation of the Deviance Information Criterion (DIC) at residual.}
   \item{powerAdjust}{Optional: the name of a column in the studies data frame of the \code{mtc.network}. This column must contain values between 0 and 1. The likelihood for each study will be adjusted by inflating the variance, where 0 means the study is excluded and 1 means it receives full weight. See details for more.}
   \item{...}{Additional arguments to be passed to the type-specific model generation function.}
@@ -129,6 +130,13 @@ The default layout algorithm is \code{igraph::layout.circle}, other layout algor
 The \code{igraph::layout.fruchterman.reingold} algorithm also seems to produce nice results and may be better for large graphs.
 }
 
+\section{Reproducible results}{
+It is possible to get reproducible results, but as JAGS uses its own pseudo-random number generator, this is somewhat more involved.
+
+\code{mtc.model} generates random numbers using the R functions (for example to generate initial values). Therefore, \code{set.seed} must be called before calling \code{mtc.model}.
+
+Then, before calling \code{mtc.run}, the random number generator type and seed must be set for each of the chains. This can be done as documented in \code{jags.model}, by setting the \code{.RNG.name} and \code{.RNG.seed} for each chain in \code{model$inits}. See below for an example.}
+
 
 \author{Gert van Valkenhoef, Joël Kuiper}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -152,4 +160,17 @@ model <- mtc.model(hfPrevention,
                    type="regression",
                    regressor=regressor,
                    linearModel="fixed")
+
+# Reproducible results
+# Set the R RNG seed
+set.seed(42)
+model <- mtc.model(parkinson, likelihood='normal', link='identity')
+# By default, the model will have 4 chains - generate a seed for each
+seeds <- sample.int(4, n = .Machine$integer.max)
+# Apply JAGS RNG settings to each chain
+model$inits <- mapply(c, model$inits, list(
+  list(.RNG.name="base::Wichmann-Hill", .RNG.seed=seeds[1]),
+  list(.RNG.name="base::Marsaglia-Multicarry", .RNG.seed=seeds[2]),
+  list(.RNG.name="base::Super-Duper", .RNG.seed=seeds[3]),
+  list(.RNG.name="base::Mersenne-Twister", .RNG.seed=seeds[4])), SIMPLIFY=FALSE)
 }

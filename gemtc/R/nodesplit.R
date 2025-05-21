@@ -119,7 +119,9 @@ mtc.nodesplit.comparisons <- function(network) {
 }
 
 mtc.nodesplit <- function(network, comparisons=mtc.nodesplit.comparisons(network), ...) {
-  stopifnot(nrow(comparisons) > 0)
+  if (nrow(comparisons) == 0) {
+    stop("There are no comparisons to assess for inconsistency. See https://doi.org/10.1002/jrsm.1167 for how this is determined.")
+  }
   results <- apply(comparisons, 1, function(comparison) {
         mtc.model.run(network, type='nodesplit', t1=comparison['t1'], t2=comparison['t2'], ...)
   })

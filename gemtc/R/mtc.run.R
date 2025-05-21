@@ -54,7 +54,7 @@ mtc.sample <- function(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
 
   vars <- syntax[['vars']]
   if (model$dic) {
-    dic.vars <- deviance.monitors(model)
+    dic.vars <- deviance_monitors(model)
     dic.vars <- dic.vars[!(dic.vars %in% vars)] # jags complains about redundant variables
     vars <- c(vars, dic.vars)
   }
@@ -69,7 +69,7 @@ mtc.sample <- function(model, n.adapt=n.adapt, n.iter=n.iter, thin=thin) {
   unlink(file.model)
 
   deviance.stats <- if (model[['dic']]) {
-    apply(as.matrix(samples[, deviance.monitors(model), drop=FALSE]), 2, mean)
+    apply(as.matrix(samples[, deviance_monitors(model), drop=FALSE]), 2, mean)
   }
   samples <- samples[, syntax[['vars']], drop=FALSE]
 

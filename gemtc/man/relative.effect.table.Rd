@@ -37,7 +37,7 @@ relative.effect.table(result, covariate=NA)
 model <- mtc.model(smoking)
 # To save computation time we load the samples instead of running the model
 \dontrun{results <- mtc.run(model)}
-results <- dget(system.file("extdata/luades-smoking.samples.gz", package="gemtc"))
+results <- readRDS(system.file("extdata/luades-smoking-samples.rds", package="gemtc"))
 
 # Creates a forest plot of the relative effects
 tbl <- relative.effect.table(results)

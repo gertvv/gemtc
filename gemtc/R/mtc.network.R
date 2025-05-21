@@ -63,17 +63,11 @@ mtc.network <- function(
   }
   # standardize the data
   if (!is.null(data.ab)) {
-    if (!is.data.frame(data.ab)) {
-      data.ab <- do.call(rbind, lapply(data.ab, as.data.frame))
-    }
-    data.ab <- remove.onearm(data.ab, warn=TRUE)
+    data.ab <- remove.onearm(as.data.frame(data.ab), warn=TRUE)
     mtc.validate.data.ab(data.ab)
   }
   if (!is.null(data.re)) {
-    if (!is.data.frame(data.re)) {
-      data.re <- do.call(rbind, lapply(data.re, as.data.frame))
-    }
-    data.re <- remove.onearm(data.re, warn=TRUE)
+    data.re <- remove.onearm(as.data.frame(data.re), warn=TRUE)
     mtc.validate.data.re(data.re)
   }
 
@@ -166,6 +160,20 @@ mtc.validate.data.re <- function(data) {
                'Constraint violated by:',
                paste(data[['study']][ma.studies][nobaseline], collapse=", ")))
   }
+
+  se <- data[['std.err']][!is.na(data[['std.err']])]
+  if (!all(se > 0.0)) {
+    stop(paste('In data.re, std.err must be either positive or NA'))
+  }
+
+  if (!all(sapply(ma, function(study) {
+    ref <- data[['study']] == study & is.na(data[['diff']])
+    rel <- data[['study']] == study & !is.na(data[['diff']])
+    all(data[['std.err']][ref] < data[['std.err']][rel])
+  }))) {
+    stop("In data.re, std.err of the reference arm must < std.err of the relative effects")
+  }
+    
 }
 
 mtc.network.validate <- function(network) {
@@ -174,8 +182,9 @@ mtc.network.validate <- function(network) {
   stopifnot(nrow(network[['data.ab']]) > 0 || nrow(network[['data.re']]) > 0)
 
   # Check that the treatments are correctly cross-referenced and have valid names
-  all.treatments <- c(network[['data.ab']][['treatment']], network[['data.re']][['treatment']])
-  all.treatments <- factor(all.treatments, levels=1:nlevels(network[['treatments']][['id']]), labels=levels(network[['treatments']][['id']]))
+  all.treatments <- forcats::fct_c(
+    if (is.null(network[['data.ab']])) factor() else network[['data.ab']][['treatment']],
+    if (is.null(network[['data.re']])) factor() else network[['data.re']][['treatment']])
   stopifnot(all(all.treatments %in% network[['treatments']][['id']]))
   # stopifnot(all(network[['treatments']][['id']] %in% all.treatments)) -- disabled for node-splitting
   invalidId <- grep('^[a-zA-Z0-9_]*$', network[['treatments']][['id']], invert=TRUE)
@@ -269,9 +278,9 @@ has.indirect.evidence <- function(network, t1, t2) {
 
 mtc.treatment.pairs <- function(treatments) {
   n <- length(treatments)
-  t1 <- do.call(c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
-  t2 <- do.call(c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
-  data.frame(t1=coerce.factor(t1, treatments), t2=coerce.factor(t2, treatments))
+  t1 <- do.call(forcats::fct_c, lapply(1:(n-1), function(i) { rep(treatments[i], n - i) }))
+  t2 <- do.call(forcats::fct_c, lapply(1:(n-1), function(i) { treatments[(i+1):n] }))
+  data.frame(t1=t1, t2=t2)
 }
 
 ## Get all direct comparisons with the number of studies

@@ -21,7 +21,7 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
     samples <- as.matrix(re[['samples']])
     stats <- t(apply(samples, 2, quantile, probs=c(0.025, 0.5, 0.975)))
     comps <- extract.comparisons(rownames(stats))
-    data.frame(t1=comps[,1], t2=comps[,2], median=stats[,"50%"], lower=stats[,"2.5%"], upper=stats[,"97.5%"])
+    data.frame(t1=comps[,1], t2=comps[,2], median=stats[,"50%"], lower=stats[,"2.5%"], upper=stats[,"97.5%"], stringsAsFactors=FALSE)
   })
 
   if (is.null(ylim)) {
@@ -32,6 +32,7 @@ plotCovariateEffect <- function(result, t1, t2, xlim=NULL, ylim=NULL, ask=dev.in
   first <- TRUE
   devAskNewPage(FALSE)
   for (pair in split(pairs, seq(nrow(pairs)))) {
+    pair <- as.treatment.factor(pair, result[['model']][['network']])
     yvals <- sapply(res, function(stats) { stats[stats[['t1']] == pair[1] & stats[['t2']] == pair[2], c('median', 'lower', 'upper')] })
     if (regressor[['type']] == 'continuous') {
       plot(xvals, yvals['median', ], type='l', xlim=xlim, ylim=ylim, main="Treatment effect vs. covariate", xlab=regressor[["variable"]], ylab=paste("d", pair[1], pair[2], sep="."))

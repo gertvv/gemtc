@@ -69,7 +69,9 @@ mtc.model.regression <- function(model, regressor) {
   x <- x[studies]
 
   if (any(is.na(x))) {
-    stop("NA values for regressor variable not supported")
+    stop("NA values for the covariate are not supported")
+  } else if (length(unique(x)) < 2) {
+    stop("The covariate is degenerate (has < 2 unique values)")
   } else if (all(x %in% 0:1)) { # binary covariate
     model[['regressor']] <- c(regressor, type='binary', center=mean(x), scale=1)
   } else if (is.numeric(x)) { # continuous covariate
