@@ -130,14 +130,13 @@ decompose.network <- function(network, result) {
     }))
   }))
   
-  if(all.multiarm){
+  if (all.multiarm) {
       mtc.network(data.ab = network[['data.ab']], data.re = data.re, treatments = network$treatments)
-  }else{
+  } else {
       ta.network <- filter.network(network, function(row) { !(row['study'] %in% studies) })
       ta.data.re <- ta.network[['data.re']][ , c('study','treatment','diff','std.err')]
       mtc.network(data.ab=ta.network[['data.ab']], data.re=rbind(ta.data.re, data.re), treatments=network$treatments)
   }
-
 }
 
 mtc.anohe <- function(network, ...) {
