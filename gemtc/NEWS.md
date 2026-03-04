@@ -1,3 +1,10 @@
+gemtc 1.1-0
+===========
+
+Released 2025-07-05
+
+ * Add support for Standardized Mean Difference (SMD)
+
 gemtc 1.0-2
 ===========
 
