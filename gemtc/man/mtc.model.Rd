@@ -62,6 +62,11 @@ These likelihood/links are supported:
   Required columns: \code{[mean, std.err]} or \code{[mean, std.dev, sampleSize]}.
 
   Result: relative mean difference.}
+  \item{normal/smd: for continuous (mean difference) data.
+
+  Required columns: \code{[mean, std.dev, sampleSize]}.
+
+  Result: relative standardized mean difference.}
   \item{binom/logit: for dichotomous data.
 
   Required columns \code{[responders, sampleSize]}.
