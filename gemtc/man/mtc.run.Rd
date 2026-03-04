@@ -14,7 +14,7 @@ The function \code{mtc.run} is used to generate samples from a object of type \c
 The resulting \code{mtc.result} object can be coerced to an \code{mcmc.list} for further analysis of the dataset using the \code{coda} package.
 }
 \usage{
-mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
+mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1, n.burnin = 0)
 
 \method{summary}{mtc.result}(object, ...)
 \method{plot}{mtc.result}(x, ...)
@@ -28,6 +28,7 @@ mtc.run(model, sampler = NA, n.adapt = 5000, n.iter = 20000, thin = 1)
   \item{n.adapt}{Amount of adaptation (or tuning) iterations.}
   \item{n.iter}{Amount of simulation iterations.}
   \item{thin}{Thinning factor.}
+  \item{n.burnin}{Amount of burn-in iterations. Has to be positive number.}
 
   \item{object}{Object of S3 class \code{mtc.result}.}
   \item{x}{Object of S3 class \code{mtc.result}.}

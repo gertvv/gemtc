@@ -1,3 +1,11 @@
+gemtc 1.1-1
+===========
+
+Released 2026-XX-XX
+
+ * Add a "n.burnin" argument to mtc.run.
+ * Fix that mtc.anohe would fail if there are no two-arm trials.
+
 gemtc 1.1-0
 ===========
 
