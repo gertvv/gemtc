@@ -5,7 +5,7 @@
 \description{A dataset of 25 trials investigating 17 treatments for stroke prevention in atrial fibrillation patients. The main outcome is the number of patients with a stroke, and a covariate captures the proportion of patients with a prior stroke.
 
 Data are take from Table 1 of Cooper et al. (2009), with the following corrections applied: SPAF 3 and AFASAK 2 do not have a treatment 13 arm, and SPAF 1 does not contain treatment 5, but treatment 6. Thanks to prof. Cooper for providing the original analysis dataset.}
-\format{A network meta-regression dataset containing 60 rows of arm-based data (responders and sample size).}
+\format{A network meta-regression dataset containing 63 rows of arm-based data (responders and sample size).}
 \source{
 Cooper et al. (2009),
 \emph{Adressing between-study heterogeneity and inconsistency in mixed treatment comparisons: Application to stroke prevention treatments in individuals with non-rheumatic atrial fibrillation},
