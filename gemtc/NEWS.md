@@ -1,10 +1,11 @@
 gemtc 1.1-1
 ===========
 
-Released 2026-XX-XX
+Released 2026-03-25
 
  * Add a "n.burnin" argument to mtc.run.
  * Fix that mtc.anohe would fail if there are no two-arm trials.
+ * Fix that starting value generation could fail due to use of a REML estimator.
 
 gemtc 1.1-0
 ===========
