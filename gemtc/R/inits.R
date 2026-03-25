@@ -127,7 +127,7 @@ mle.pooled.effect <- function(model, t1, t2, om.scale) {
   }
   meta <- 
     if (ncol(study.mle) != 0) {
-      meta::metagen(unlist(study.mle['mean', ]), unlist(study.mle['sd', ]))
+      meta::metagen(unlist(study.mle['mean', ]), unlist(study.mle['sd', ]), method.tau="DL")
     } else {
       list('TE.random'=0, seTE.random=om.scale)
     }
