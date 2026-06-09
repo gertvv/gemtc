@@ -3,6 +3,7 @@
 
 static const R_CallMethodDef callMethods[] = {
   { "gemtc_rank_count", (DL_FUNC) &gemtc_rank_count, 1 },
+  { "C_do_rtruncnorm", (DL_FUNC) &C_do_rtruncnorm, 5 },
   { NULL, NULL, 0 }
 };
 

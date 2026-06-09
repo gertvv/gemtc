@@ -29,7 +29,6 @@ Imports:
     utils,
     grid,
     rjags (>= 4-0),
-    truncnorm,
     Rglpk,
     forcats (>= 0.5.0)
 Suggests:
@@ -78,4 +77,5 @@ Collate:
     'regression.R'
     'relative.effect.R'
     'relative.effect.table.R'
+    'truncnorm.R'
 RoxygenNote: 7.2.3

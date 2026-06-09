@@ -1,2 +1,2 @@
 PKG_CFLAGS=$(C_VISIBILITY)
-OBJECTS=init.o rank.o
+OBJECTS=init.o rank.o rtruncnorm.o
