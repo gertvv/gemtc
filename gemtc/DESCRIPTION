@@ -1,6 +1,6 @@
 Package: gemtc
-Version: 1.1-1
-Date: 2026-03-25
+Version: 1.1-2
+Date: 2026-08-01
 Title: Network Meta-Analysis Using Bayesian Methods
 Author: Gert van Valkenhoef [aut, cre], Joel Kuiper [aut]
 Authors@R: c(person(given = "Gert",
@@ -29,7 +29,6 @@ Imports:
     utils,
     grid,
     rjags (>= 4-0),
-    truncnorm,
     Rglpk,
     forcats (>= 0.5.0)
 Suggests:
@@ -47,6 +46,7 @@ Collate:
     'data.R'
     'deviance.R'
     'forest.R'
+    'rtruncnorm.R'
     'solveLP.R'
     'inits.R'
     'likelihoods.R'

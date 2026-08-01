@@ -1,5 +1,6 @@
 #' @include solveLP.R
 #' @include arrayize.R
+#' @include rtruncnorm.R
 
 #'Generate a list of arms with a likelihood contribution
 #'@param baseline Include study baseline arms
@@ -212,7 +213,7 @@ mtc.init.hy <- function(hy.prior, om.scale, n.chain) {
     args[[3]] = sqrt(1/args[[3]])
   }
   values <- if (hy.prior[['distr']] == "dhnorm") { # special case dhnorm
-    truncnorm::rtruncnorm(args[[1]], a=0, mean = args[[2]], sd = args[[3]])
+    abs(rnorm(args[[1]], mean = args[[2]], sd = args[[3]]))
   } else {
     values <- do.call(fn, args)
   }
@@ -298,10 +299,9 @@ mtc.init <- function(model) {
       param.limits <- c(findLimit(constr[['mat']], constr[['rhs']], constr[['eq']], params == param, FALSE),
                         findLimit(constr[['mat']], constr[['rhs']], constr[['eq']], params == param, TRUE))
 
-      x[param] <- truncnorm::rtruncnorm(n=1,
-                                        mean=param.mle[['mean']],
-                                        sd=model[['var.scale']] * param.mle[['std.err']],
-                                        a=param.limits[1], b=param.limits[2])
+      x[param] <- rtruncnorm(mean=param.mle[['mean']],
+                             sd=model[['var.scale']] * param.mle[['std.err']],
+                             a=param.limits[1], b=param.limits[2])
 
       where <- rep(0, length(params))
       where[params == param] <- 1
