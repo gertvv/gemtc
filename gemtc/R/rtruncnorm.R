@@ -7,6 +7,10 @@
 #' For each observation, a uniform random value is drawn between the normal CDF
 #' values at the lower and upper truncation limits, and then transformed back
 #' using the normal quantile function.' 
+#'
+#' NOTE: this method is not numerically stable at the tails of the distribution.
+#' This is not expected to be a problem for how it is used within this package,
+#' but beware of using it in a more general context.
 rtruncnorm <- function(mean, sd, a, b) {
   stopifnot(
     length(a) == 1,
